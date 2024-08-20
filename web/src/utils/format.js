@@ -4,7 +4,7 @@ import {ref} from "vue";
 
 export const formatBoolean = (bool) => {
   if (bool !== null) {
-    return bool ? '是' : '否'
+    return bool ? 'Hoạt động' : 'Không hoạt động'
   } else {
     return ''
   }
@@ -12,7 +12,16 @@ export const formatBoolean = (bool) => {
 export const formatDate = (time) => {
   if (time !== null && time !== '') {
     var date = new Date(time)
-    return formatTimeToStr(date, 'yyyy-MM-dd hh:mm:ss')
+    return formatTimeToStr(date, 'dd/MM/yyyy')
+  } else {
+    return ''
+  }
+}
+
+export const formatDateTime = (time) => {
+  if (time !== null && time !== '') {
+    var date = new Date(time)
+    return formatTimeToStr(date, 'dd/MM/yyyy hh:mm:ss')
   } else {
     return ''
   }

@@ -2,13 +2,13 @@
   <div>
     <div class="gva-table-box">
       <div class="gva-btn-list justify-between">
-        <span class="text font-bold">字典详细内容</span>
+        <span class="text font-bold">Chi tiết từ điển</span>
         <el-button
           type="primary"
           icon="plus"
           @click="openDrawer"
         >
-          新增字典项
+          Thêm mục từ điển
         </el-button>
       </div>
       <el-table
@@ -24,7 +24,7 @@
         />
         <el-table-column
           align="left"
-          label="日期"
+          label="Ngày tạo"
           width="180"
         >
           <template #default="scope">
@@ -34,25 +34,25 @@
 
         <el-table-column
           align="left"
-          label="展示值"
+          label="Giá trị hiển thị"
           prop="label"
         />
 
         <el-table-column
           align="left"
-          label="字典值"
+          label="Giá trị từ điển"
           prop="value"
         />
 
         <el-table-column
           align="left"
-          label="扩展值"
+          label="Giá trị mở rộng"
           prop="extend"
         />
 
         <el-table-column
           align="left"
-          label="启用状态"
+          label="Trạng thái"
           prop="status"
           width="120"
         >
@@ -63,14 +63,14 @@
 
         <el-table-column
           align="left"
-          label="排序标记"
+          label="Đánh dấu sắp xếp"
           prop="sort"
           width="120"
         />
 
         <el-table-column
           align="left"
-          label="操作"
+          label="Hành động"
           width="180"
         >
           <template #default="scope">
@@ -80,7 +80,7 @@
               icon="edit"
               @click="updateSysDictionaryDetailFunc(scope.row)"
             >
-              变更
+              Chỉnh sửa
             </el-button>
             <el-button
               type="primary"
@@ -88,7 +88,7 @@
               icon="delete"
               @click="deleteSysDictionaryDetailFunc(scope.row)"
             >
-              删除
+              Xóa
             </el-button>
           </template>
         </el-table-column>
@@ -115,13 +115,13 @@
     >
       <template #header>
         <div class="flex justify-between items-center">
-          <span class="text-lg">{{ type==='create' ? '添加字典项' : '修改字典项' }}</span>
+          <span class="text-lg">{{ type==='create' ? 'Thêm mục từ điển' : 'Chỉnh sửa mục từ điển' }}</span>
           <div>
             <el-button @click="closeDrawer">
-              取 消
+              Hủy
             </el-button>
             <el-button type="primary" @click="enterDrawer">
-              确 定
+              Xác nhận
             </el-button>
           </div>
         </div>
@@ -133,56 +133,56 @@
         label-width="110px"
       >
         <el-form-item
-          label="展示值"
+          label="Giá trị hiển thị"
           prop="label"
         >
           <el-input
             v-model="formData.label"
-            placeholder="请输入展示值"
+            placeholder="Nhập giá trị hiển thị"
             clearable
             :style="{width: '100%'}"
           />
         </el-form-item>
         <el-form-item
-          label="字典值"
+          label="Giá trị từ điển"
           prop="value"
         >
           <el-input
             v-model="formData.value"
-            placeholder="请输入字典值"
+            placeholder="Nhập giá trị từ điển"
             clearable
             :style="{width: '100%'}"
           />
         </el-form-item>
         <el-form-item
-          label="扩展值"
+          label="Giá trị mở rộng"
           prop="extend"
         >
           <el-input
             v-model="formData.extend"
-            placeholder="请输入扩展值"
+            placeholder="Nhập giá trị mở rộng"
             clearable
             :style="{width: '100%'}"
           />
         </el-form-item>
         <el-form-item
-          label="启用状态"
+          label="Trạng thái"
           prop="status"
           required
         >
           <el-switch
             v-model="formData.status"
-            active-text="开启"
-            inactive-text="停用"
+            active-text="Bật"
+            inactive-text="Tắt"
           />
         </el-form-item>
         <el-form-item
-          label="排序标记"
+          label="Đánh dấu sắp xếp"
           prop="sort"
         >
           <el-input-number
             v-model.number="formData.sort"
-            placeholder="排序标记"
+            placeholder="Đánh dấu sắp xếp"
           />
         </el-form-item>
       </el-form>
@@ -197,7 +197,7 @@ import {
   updateSysDictionaryDetail,
   findSysDictionaryDetail,
   getSysDictionaryDetailList
-} from '@/api/sysDictionaryDetail' // 此处请自行替换地址
+} from '@/api/sysDictionaryDetail' // Replace this with your own address
 import { ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { formatBoolean, formatDate } from '@/utils/format'
@@ -223,21 +223,21 @@ const rules = ref({
   label: [
     {
       required: true,
-      message: '请输入展示值',
+      message: 'Nhập giá trị hiển thị',
       trigger: 'blur'
     }
   ],
   value: [
     {
       required: true,
-      message: '请输入字典值',
+      message: 'Nhập giá trị từ điển',
       trigger: 'blur'
     }
   ],
   sort: [
     {
       required: true,
-      message: '排序标记',
+      message: 'Nhập đánh dấu sắp xếp',
       trigger: 'blur'
     }
   ]
@@ -248,7 +248,7 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 
-// 分页
+// Pagination
 const handleSizeChange = (val) => {
   pageSize.value = val
   getTableData()
@@ -259,7 +259,7 @@ const handleCurrentChange = (val) => {
   getTableData()
 }
 
-// 查询
+// Query
 const getTableData = async() => {
   const table = await getSysDictionaryDetailList({
     page: page.value,
@@ -299,16 +299,16 @@ const closeDrawer = () => {
   }
 }
 const deleteSysDictionaryDetailFunc = async(row) => {
-  ElMessageBox.confirm('确定要删除吗?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm('Bạn có chắc muốn xóa không?', 'Thông báo', {
+    confirmButtonText: 'Đồng ý',
+    cancelButtonText: 'Hủy',
     type: 'warning'
   }).then(async() => {
     const res = await deleteSysDictionaryDetail({ ID: row.ID })
     if (res.code === 0) {
       ElMessage({
         type: 'success',
-        message: '删除成功'
+        message: 'Xóa thành công'
       })
       if (tableData.value.length === 1 && page.value > 1) {
         page.value--
@@ -338,7 +338,7 @@ const enterDrawer = async() => {
     if (res.code === 0) {
       ElMessage({
         type: 'success',
-        message: '创建/更改成功'
+        message: 'Tạo/Chỉnh sửa thành công'
       })
       closeDrawer()
       getTableData()
