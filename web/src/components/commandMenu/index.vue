@@ -9,7 +9,7 @@
       <input
         v-model="searchInput"
         class="quick-input"
-        placeholder="请输入你需要快捷到达的功能"
+        placeholder="Gõ chức năng để tìm kiếm"
       >
     </template>
 
@@ -33,7 +33,7 @@
 
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="close">关闭</el-button>
+        <el-button @click="close">Đóng</el-button>
       </span>
     </template>
   </el-dialog>
@@ -62,7 +62,7 @@ const deepMenus = (menus) => {
     if (menu.children && menu.children.length > 0) {
       arr.push(...deepMenus(menu.children))
     } else {
-      if (menu.meta.title && menu.meta.title.indexOf(searchInput.value) > -1) {
+      if (menu.meta.title.toLowerCase() && menu.meta.title.toLowerCase().indexOf(searchInput.value.toLowerCase()) > -1) {
         arr.push({
           label: menu.meta.title,
           func: () => changeRouter(menu)
@@ -75,7 +75,7 @@ const deepMenus = (menus) => {
 
 const addQuickMenu = () => {
   const option = {
-    label: '跳转',
+    label: 'Chức năng',
     children: []
   }
   const menus = deepMenus(routerStore.asyncRouters[0].children)
@@ -85,18 +85,18 @@ const addQuickMenu = () => {
 
 const addQuickOption = () => {
   const option = {
-    label: '操作',
+    label: 'Hệ thống',
     children: []
   }
   const quickArr = [
     {
-      label: '亮色主题',
+      label: 'Chế độ sáng',
       func: () => changeMode('light')
     }, {
-      label: '暗色主题',
+      label: 'Chế độ tối',
       func: () => changeMode('dark')
     }, {
-      label: '退出登录',
+      label: 'Đăng xuất',
       func: () => userStore.LoginOut()
     }
   ]

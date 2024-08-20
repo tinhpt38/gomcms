@@ -60,7 +60,7 @@
           <el-dropdown-menu>
             <el-dropdown-item>
               <span class="font-bold">
-                当前角色：{{
+                Vai trò hiện tại：{{
                   userStore.userInfo.authority.authorityName
                 }}
               </span>
@@ -76,18 +76,18 @@
                 @click="changeUserAuth(item.authorityId)"
               >
                 <span>
-                  切换为：{{ item.authorityName }}
+                  Chuyển sang：{{ item.authorityName }}
                 </span>
               </el-dropdown-item>
             </template>
             <el-dropdown-item icon="avatar" @click="toPerson">
-              个人信息
+              Trang cá nhân
             </el-dropdown-item>
             <el-dropdown-item
               icon="reading-lamp"
               @click="userStore.LoginOut"
             >
-              登 出
+              Đăng xuất
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>

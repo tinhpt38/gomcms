@@ -41,16 +41,16 @@
       class="contextmenu"
     >
       <li @click="closeAll">
-        关闭所有
+        Đóng tất cả
       </li>
       <li @click="closeLeft">
-        关闭左侧
+        Đóng bên trái
       </li>
       <li @click="closeRight">
-        关闭右侧
+        Đóng bên phải
       </li>
       <li @click="closeOther">
-        关闭其他
+        Đóng các trang khác
       </li>
     </ul>
   </div>
@@ -365,6 +365,7 @@ const middleCloseTab = (e) => {
 
 .contextmenu {
   @apply bg-white dark:bg-slate-900 w-28 m-0 py-2.5 px-0 border border-gray-200 text-sm shadow-md rounded absolute z-50 border-solid dark:border-slate-800;
+  width: 12rem;
 }
 
 .contextmenu li {
