@@ -1,9 +1,9 @@
 <template>
   <div>
-    <warning-bar
+    <!-- <warning-bar
       href="https://www.bilibili.com/video/BV1kv4y1g7nT?p=3"
-      title="此功能为开发环境使用，不建议发布到生产，具体使用效果请看视频https://www.bilibili.com/video/BV1kv4y1g7nT?p=3"
-    />
+      title="This feature is for development environment only and not recommended for production. For specific usage, please refer to the video: https://www.bilibili.com/video/BV1kv4y1g7nT?p=3"
+    /> -->
     <div class="gva-table-box">
       <div class="gva-btn-list gap-3 flex items-center">
         <el-button
@@ -11,7 +11,7 @@
           icon="plus"
           @click="openDialog('addApi')"
         >
-          新增
+          Add
         </el-button>
 
       </div>
@@ -24,32 +24,32 @@
         />
         <el-table-column
           align="left"
-          label="包名"
+          label="Package Name"
           width="150"
           prop="packageName"
         />
         <el-table-column
             align="left"
-            label="模板"
+            label="Template"
             width="150"
             prop="template"
         />
         <el-table-column
           align="left"
-          label="展示名"
+          label="Display Name"
           width="150"
           prop="label"
         />
         <el-table-column
           align="left"
-          label="描述"
+          label="Description"
           min-width="150"
           prop="desc"
         />
 
         <el-table-column
           align="left"
-          label="操作"
+          label="Action"
           width="200"
         >
           <template #default="scope">
@@ -60,7 +60,7 @@
               link
               @click="deleteApiFunc(scope.row)"
             >
-              删除
+              Delete
             </el-button>
           </template>
         </el-table-column>
@@ -72,7 +72,7 @@
       size="40%"
       :show-close="false"
     >
-      <warning-bar title="模板package会创建集成于项目本体中的代码包，模板plugin会创建插件包" />
+      <warning-bar title="Template package will create a code package integrated into the project, while template plugin will create a plugin package" />
       <el-form
         ref="pkgForm"
         :model="form"
@@ -80,7 +80,7 @@
         label-width="80px"
       >
         <el-form-item
-          label="包名"
+          label="Package Name"
           prop="packageName"
         >
           <el-input
@@ -89,7 +89,7 @@
           />
         </el-form-item>
         <el-form-item
-          label="模板"
+          label="Template"
           prop="template"
         >
           <el-select
@@ -100,7 +100,7 @@
         </el-form-item>
 
         <el-form-item
-          label="展示名"
+          label="Display Name"
           prop="label"
         >
           <el-input
@@ -109,7 +109,7 @@
           />
         </el-form-item>
         <el-form-item
-          label="描述"
+          label="Description"
           prop="desc"
         >
           <el-input
@@ -120,16 +120,16 @@
       </el-form>
       <template #header>
         <div class="flex justify-between items-center">
-          <span class="text-lg">创建Package</span>
+          <span class="text-lg">Create Package</span>
           <div>
             <el-button @click="closeDialog">
-              取 消
+              Cancel
             </el-button>
             <el-button
               type="primary"
               @click="enterDialog"
             >
-              确 定
+              Confirm
             </el-button>
           </div>
         </div>

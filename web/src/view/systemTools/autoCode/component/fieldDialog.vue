@@ -1,6 +1,6 @@
 <template>
   <div>
-    <warning-bar title="id , created_at , updated_at , deleted_at 会自动生成请勿重复创建。搜索时如果条件为LIKE只支持字符串" />
+    <warning-bar title="id , created_at , updated_at , deleted_at sẽ tự động tạo, không tạo trùng lặp. Khi tìm kiếm, nếu điều kiện là LIKE chỉ hỗ trợ chuỗi" />
     <el-form
       ref="fieldDialogForm"
       :model="middleDate"
@@ -10,7 +10,7 @@
       class="grid grid-cols-2"
     >
       <el-form-item
-        label="字段名称"
+        label="Tên trường"
         prop="fieldName"
       >
         <el-input
@@ -22,11 +22,11 @@
           style="width:18%;margin-left:2%"
           @click="autoFill"
         >
-          <span style="font-size: 12px">自动填充</span>
+          <span style="font-size: 12px">Tự động điền</span>
         </el-button>
       </el-form-item>
       <el-form-item
-        label="字段中文名"
+        label="Tên tiếng Việt"
         prop="fieldDesc"
       >
         <el-input
@@ -35,7 +35,7 @@
         />
       </el-form-item>
       <el-form-item
-        label="字段JSON"
+        label="Trường JSON"
         prop="fieldJson"
       >
         <el-input
@@ -44,7 +44,7 @@
         />
       </el-form-item>
       <el-form-item
-        label="数据库字段名"
+        label="Tên trường cơ sở dữ liệu"
         prop="columnName"
       >
         <el-input
@@ -53,7 +53,7 @@
         />
       </el-form-item>
       <el-form-item
-        label="数据库字段描述"
+        label="Mô tả trường cơ sở dữ liệu"
         prop="comment"
       >
         <el-input
@@ -62,13 +62,13 @@
         />
       </el-form-item>
       <el-form-item
-        label="字段类型"
+        label="Loại trường"
         prop="fieldType"
       >
         <el-select
           v-model="middleDate.fieldType"
           style="width:100%"
-          placeholder="请选择字段类型"
+          placeholder="Chọn loại trường"
           clearable
           @change="clearOther"
         >
@@ -82,23 +82,23 @@
         </el-select>
       </el-form-item>
       <el-form-item
-        :label="middleDate.fieldType === 'enum' ? '枚举值' : '类型长度'"
+        :label="middleDate.fieldType === 'enum' ? 'Giá trị enum' : 'Độ dài kiểu'"
         prop="dataTypeLong"
       >
         <el-input
           v-model="middleDate.dataTypeLong"
-          :placeholder="middleDate.fieldType === 'enum'?`例:'北京','天津'`:'数据库类型长度'"
+          :placeholder="middleDate.fieldType === 'enum'?`Ví dụ:'Hà Nội','TP.HCM'`:'Độ dài kiểu cơ sở dữ liệu'"
         />
       </el-form-item>
       <el-form-item
-        label="字段查询条件"
+        label="Điều kiện tìm kiếm trường"
         prop="fieldSearchType"
       >
         <el-select
           v-model="middleDate.fieldSearchType"
           :disabled="middleDate.fieldType === 'json'"
           style="width:100%"
-          placeholder="请选择字段查询条件"
+          placeholder="Chọn điều kiện tìm kiếm trường"
           clearable
         >
           <el-option
@@ -111,14 +111,14 @@
         </el-select>
       </el-form-item>
       <el-form-item
-        label="关联字典"
+        label="Liên kết từ điển"
         prop="dictType"
       >
         <el-select
           v-model="middleDate.dictType"
           style="width:100%"
           :disabled="middleDate.fieldType!=='string'"
-          placeholder="请选择字典"
+          placeholder="Chọn từ điển"
           clearable
         >
           <el-option
@@ -129,24 +129,24 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="默认值">
+      <el-form-item label="Giá trị mặc định">
         <el-input
           v-model="middleDate.defaultValue"
-          placeholder="请输入默认值"
+          placeholder="Nhập giá trị mặc định"
         />
       </el-form-item>
-      <el-form-item label="主键">
+      <el-form-item label="Khóa chính">
         <el-checkbox v-model="middleDate.primaryKey" />
       </el-form-item>
       <el-form-item
-        label="索引类型"
+        label="Loại chỉ mục"
         prop="fieldIndexType"
       >
         <el-select
           v-model="middleDate.fieldIndexType"
           :disabled="middleDate.fieldType === 'json'"
           style="width:100%"
-          placeholder="请选择字段索引类型"
+          placeholder="Chọn loại chỉ mục trường"
           clearable
         >
           <el-option
@@ -158,34 +158,34 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="前端新建/编辑">
+      <el-form-item label="Tạo/Chỉnh sửa giao diện trước">
         <el-switch v-model="middleDate.form" />
       </el-form-item>
-      <el-form-item label="前端表格列">
+      <el-form-item label="Cột bảng giao diện trước">
         <el-switch v-model="middleDate.table" />
       </el-form-item>
-      <el-form-item label="前端详情">
+      <el-form-item label="Chi tiết giao diện trước">
         <el-switch v-model="middleDate.desc" />
       </el-form-item>
-      <el-form-item label="是否排序">
+      <el-form-item label="Có sắp xếp">
         <el-switch v-model="middleDate.sort" />
       </el-form-item>
-      <el-form-item label="是否必填">
+      <el-form-item label="Bắt buộc">
         <el-switch v-model="middleDate.require" />
       </el-form-item>
-      <el-form-item label="是否可清空">
+      <el-form-item label="Có thể xóa">
         <el-switch v-model="middleDate.clearable" />
       </el-form-item>
-      <el-form-item label="隐藏查询条件">
+      <el-form-item label="Ẩn điều kiện tìm kiếm">
         <el-switch v-model="middleDate.fieldSearchHide" :disabled="!middleDate.fieldSearchType" />
       </el-form-item>
-      <el-form-item label="校验失败文案">
+      <el-form-item label="Văn bản thông báo lỗi">
         <el-input v-model="middleDate.errorText" />
       </el-form-item>
     </el-form>
     <el-collapse v-model="activeNames">
       <el-collapse-item
-        title="数据源配置（此配置为高级配置，如编程基础不牢，可能导致自动化代码不可用）"
+        title="Cấu hình nguồn dữ liệu (Cấu hình nâng cao, nếu không vững chắc về lập trình có thể dẫn đến mã tự động không sử dụng được)"
         name="1"
       >
         <el-row :gutter="8">
@@ -194,15 +194,15 @@
           >
             <el-select
               v-model="middleDate.dataSource.association"
-              placeholder="关联模式"
+              placeholder="Chế độ liên kết"
               @change="associationChange"
             >
               <el-option
-                label="一对一"
+                label="Một một"
                 :value="1"
               />
               <el-option
-                label="一对多"
+                label="Một nhiều"
                 :value="2"
               />
             </el-select>
@@ -210,7 +210,7 @@
 
           <el-col :span="7">
             <el-select
-              v-model="middleDate.dataSource.table" placeholder="请选择数据源表"
+              v-model="middleDate.dataSource.table" placeholder="Chọn bảng nguồn dữ liệu"
               filterable allow-create @focus="getDBTableList" @change="selectDB"
             >
               <el-option
@@ -218,17 +218,17 @@
                 :value="item.tableName"
               />
             </el-select>
-            <!-- <el-input v-model="middleDate.dataSource.table" placeholder="数据源表" /> -->
+            <!-- <el-input v-model="middleDate.dataSource.table" placeholder="Bảng nguồn dữ liệu" /> -->
           </el-col>
           <el-col :span="7">
-            <el-select v-model="middleDate.dataSource.value" placeholder="请先选择需要存储的数据">
+            <el-select v-model="middleDate.dataSource.value" placeholder="Hãy chọn dữ liệu cần lưu trữ">
               <template #label="{ value }">
-                <span>存储: </span>
+                <span>Lưu trữ: </span>
                 <span style="font-weight: bold">{{ value }}</span>
               </template>
               <el-option v-for="item in dbColumnList" :key="item.columnName" :value="item.columnName">
                 <span style="float: left"> <el-tag :type="item.isPrimary ? 'primary' : 'info'">
-                  {{ item.isPrimary ? "主&emsp;键" : "非主键" }}
+                  {{ item.isPrimary ? "Khóa chính" : "Không phải khóa chính" }}
                 </el-tag> {{ item.columnName }}</span>
                 <span
                   style="
@@ -238,21 +238,21 @@
           font-size: 13px;
         "
                 >
-                  类型：{{ item.type }} <block v-if="item.comment != ''">，字段说明：{{ item.comment }}</block>
+                  Kiểu dữ liệu: {{ item.type }} <block v-if="item.comment != ''">, Mô tả trường: {{ item.comment }}</block>
                 </span>
               </el-option>
             </el-select>
-            <!-- <el-input v-model="middleDate.dataSource.value" placeholder="存储用字段" /> -->
+            <!-- <el-input v-model="middleDate.dataSource.value" placeholder="Trường lưu trữ" /> -->
           </el-col>
           <el-col :span="7">
-            <el-select v-model="middleDate.dataSource.label" placeholder="请先选择需要展示的数据">
+            <el-select v-model="middleDate.dataSource.label" placeholder="Hãy chọn dữ liệu cần hiển thị">
               <template #label="{ value }">
-                <span>展示: </span>
+                <span>Hiển thị: </span>
                 <span style="font-weight: bold">{{ value }}</span>
               </template>
               <el-option v-for="item in dbColumnList" :key="item.columnName" :value="item.columnName">
                 <span style="float: left"> <el-tag :type="item.isPrimary ? 'primary' : 'info'">
-                  {{ item.isPrimary ? "主&emsp;键" : "非主键" }}
+                  {{ item.isPrimary ? "Khóa chính" : "Không phải khóa chính" }}
                 </el-tag> {{ item.columnName }}</span>
                 <span
                     style="
@@ -262,11 +262,11 @@
           font-size: 13px;
         "
                 >
-                  类型：{{ item.type }} <span v-if="item.comment != ''">，字段说明：{{ item.comment }}</span>
+                  Kiểu dữ liệu: {{ item.type }} <span v-if="item.comment != ''">, Mô tả trường: {{ item.comment }}</span>
                 </span>
               </el-option>
             </el-select>
-            <!-- <el-input v-model="middleDate.dataSource.label" placeholder="展示用字段" /> -->
+            <!-- <el-input v-model="middleDate.dataSource.label" placeholder="Trường hiển thị" /> -->
           </el-col>
         </el-row>
       </el-collapse-item>
@@ -321,7 +321,7 @@ const dictOptions = ref([])
 const validateDataTypeLong = (rule, value, callback) => {
   const regex = /^('([^']*)'(?:,'([^']+)'*)*)$/;
   if (middleDate.value.fieldType == "enum" && !regex.test(value)) {
-    callback(new Error("枚举值校验错误"));
+    callback(new Error("Lỗi kiểm tra giá trị enum"));
   } else {
     callback();
   }
@@ -329,19 +329,19 @@ const validateDataTypeLong = (rule, value, callback) => {
 
 const rules = ref({
   fieldName: [
-    { required: true, message: '请输入字段英文名', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập tên trường tiếng Anh', trigger: 'blur' }
   ],
   fieldDesc: [
-    { required: true, message: '请输入字段中文名', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập tên trường tiếng Việt', trigger: 'blur' }
   ],
   fieldJson: [
-    { required: true, message: '请输入字段格式化json', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập định dạng trường json', trigger: 'blur' }
   ],
   columnName: [
-    { required: true, message: '请输入数据库字段', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập trường cơ sở dữ liệu', trigger: 'blur' }
   ],
   fieldType: [
-    { required: true, message: '请选择字段类型', trigger: 'blur' }
+    { required: true, message: 'Vui lòng chọn loại trường', trigger: 'blur' }
   ],
   dataTypeLong: [
     { validator: validateDataTypeLong, trigger: "blur" }
@@ -384,11 +384,11 @@ const clearOther = () => {
 const associationChange = (val) => {
   if (val === 2) {
     ElMessageBox.confirm(
-      '一对多关联模式下，数据类型会改变为数组，后端表现为json，具体表现为数组模式，是否继续？',
-      '提示',
+      'Trong chế độ liên kết một-nhiều, kiểu dữ liệu sẽ thay đổi thành mảng, được biểu diễn bởi json, cụ thể là chế độ mảng, bạn có muốn tiếp tục?',
+      'Cảnh báo',
       {
-        confirmButtonText: '继续',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Tiếp tục',
+        cancelButtonText: 'Hủy',
         type: 'warning'
       }
     ).then(() => {
@@ -406,10 +406,10 @@ const getDBTableList = async () => {
   const res = await getTable()
   console.log(res);
   if (res.code === 0) {
-    let list = res.data.tables; // 确保这里正确获取到 tables 数组
+    let list = res.data.tables; // Đảm bảo đây là mảng tables
     dbTableList.value = list.map(item => ({
       tableName: item.tableName,
-      value: item.tableName // 这里假设 value 也是 tableName，如果不同请调整
+      value: item.tableName // Giả sử value cũng là tableName, nếu khác vui lòng điều chỉnh
     }));
   }
 }
@@ -422,7 +422,7 @@ const selectDB = async (val) => {
   })
   console.log(res)
   if (res.code === 0) {
-    let list = res.data.columns; // 确保这里正确获取到 tables 数组
+    let list = res.data.columns; // Đảm bảo đây là mảng columns
     dbColumnList.value = list.map(item => ({
       columnName: item.columnName,
       value: item.columnName,

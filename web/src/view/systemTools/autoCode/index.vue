@@ -1,74 +1,55 @@
 <template>
   <div>
-    <warning-bar
+    <!-- <warning-bar
       href="https://www.bilibili.com/video/BV1kv4y1g7nT?p=3"
-      title="此功能为开发环境使用，不建议发布到生产，具体使用效果请点我观看。"
-    />
-    <div class="gva-search-box">
-      <div class="text-lg mb-2 text-gray-600">使用AI创建</div>
+      title="Chức năng này chỉ được sử dụng trong môi trường phát triển, không khuyến nghị sử dụng trong môi trường sản xuất. Vui lòng xem video để biết chi tiết về cách sử dụng."
+    /> -->
+    <div class="gva-search-box hidden">
+      <div class="text-lg mb-2 text-gray-600">Tạo bằng trí tuệ nhân tạo (AI)</div>
       <div class="relative">
-        <el-input v-model="prompt" type="textarea" :rows="5" :maxlength="100" :placeholder="`【Beta】试试描述你的表，让AI帮你完成。\n目前正在测试阶段，遇到问题请及时反馈。\n此功能需要到插件市场个人中心获取自己的AI-Path，把AI-Path填入config.yaml下的autocode-->ai-path，重启项目即可使用。`" resize="none" />
+        <el-input v-model="prompt" type="textarea" :rows="5" :maxlength="100"
+          :placeholder="`【Beta】Hãy mô tả bảng của bạn để AI giúp bạn hoàn thành.\nHiện đang trong giai đoạn thử nghiệm, nếu gặp vấn đề vui lòng phản hồi kịp thời.\nChức năng này yêu cầu lấy AI-Path của bạn từ Trung tâm cá nhân của Marketplace Plugin và điền AI-Path vào autocode-->ai-path trong config.yaml, sau đó khởi động lại dự án để sử dụng.`"
+          resize="none" />
         <div class="flex absolute right-2 bottom-2">
           <el-tooltip
-            content="小奇存在失败概率，面向所有用户开放使用（失败了重新生成一下就好）。"
-          >
+            content="Xiaoqi có khả năng thất bại, dành cho tất cả người dùng (nếu thất bại, chỉ cần tạo lại).">
             <el-button type="primary" @click="llmAutoFunc('xiaoqi')">
               <el-icon size="18">
                 <ai-gva />
-              </el-icon> 小奇
+              </el-icon> Xiaoqi
             </el-button>
           </el-tooltip>
           <el-tooltip
-            content="小淼基本啥也能设计出来，但是需要消耗积分，测试阶段授权用户自动获得基础积分，开源用户需要填表申请。"
-          >
+            content="Xiaomiao có thể thiết kế hầu như mọi thứ, nhưng cần tiêu thụ điểm, trong giai đoạn thử nghiệm, người dùng được cấp quyền tự động nhận điểm cơ bản, người dùng mã nguồn mở cần điền biểu mẫu để đăng ký.">
             <el-button type="primary" @click="llmAutoFunc('xiaomiao')">
               <el-icon size="18">
                 <ai-gva />
-              </el-icon> 小淼
+              </el-icon> Xiaomiao
             </el-button>
           </el-tooltip>
         </div>
       </div>
     </div>
-    <!-- 从数据库直接获取字段 -->
+    <!-- Lấy trực tiếp từ cơ sở dữ liệu -->
     <div class="gva-search-box">
-      <div class="text-lg mb-2 text-gray-600">从数据库创建</div>
-      <el-form
-        ref="getTableForm"
-        :inline="true"
-        :model="dbform"
-        label-width="120px"
-      >
+      <div class="text-lg mb-2 text-gray-600">Tạo từ cơ sở dữ liệu</div>
+      <el-form ref="getTableForm" :inline="true" :model="dbform" label-width="120px">
         <el-row class="w-full">
           <el-col :span="6">
-            <el-form-item
-              label="业务库"
-              prop="selectDBtype"
-              class="w-full"
-            >
+            <el-form-item label="Cơ sở dữ liệu" prop="selectDBtype" class="w-full">
               <template #label>
                 <el-tooltip
-                  content="注：需要提前到db-list自行配置多数据库，如未配置需配置后重启服务方可使用。（此处可选择对应库表，可理解为从哪个库选择表）"
-                  placement="bottom"
-                  effect="light"
-                >
-                  <div> 业务库 <el-icon><QuestionFilled /></el-icon> </div>
+                  content="Lưu ý: Cần cấu hình nhiều cơ sở dữ liệu trước đó trong db-list. Nếu chưa cấu hình, cần cấu hình trước và khởi động lại dịch vụ để sử dụng. (Ở đây bạn có thể chọn bảng từ cơ sở dữ liệu nào)"
+                  placement="bottom" effect="light">
+                  <div> Cơ sở dữ liệu <el-icon>
+                      <QuestionFilled />
+                    </el-icon> </div>
                 </el-tooltip>
               </template>
-              <el-select
-                v-model="dbform.businessDB"
-                clearable
-                placeholder="选择业务库"
-                @change="getDbFunc"
-                class="w-full"
-              >
-                <el-option
-                  v-for="item in dbList"
-                  :key="item.aliasName"
-                  :value="item.aliasName"
-                  :label="item.aliasName"
-                  :disabled="item.disable"
-                >
+              <el-select v-model="dbform.businessDB" clearable placeholder="Chọn cơ sở dữ liệu" @change="getDbFunc"
+                class="w-full">
+                <el-option v-for="item in dbList" :key="item.aliasName" :value="item.aliasName" :label="item.aliasName"
+                  :disabled="item.disable">
                   <div>
                     <span>{{ item.aliasName }}</span>
                     <span style="float:right;color:#8492a6;font-size:13px">{{ item.dbName }}</span>
@@ -78,60 +59,28 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item
-              label="数据库名"
-              prop="structName"
-              class="w-full"
-            >
-              <el-select
-                v-model="dbform.dbName"
-                clearable
-                filterable
-                placeholder="请选择数据库"
-                class="w-full"
-                @change="getTableFunc"
-              >
-                <el-option
-                  v-for="item in dbOptions"
-                  :key="item.database"
-                  :label="item.database"
-                  :value="item.database"
-                />
+            <el-form-item label="Tên cơ sở dữ liệu" prop="structName" class="w-full">
+              <el-select v-model="dbform.dbName" clearable filterable placeholder="Chọn cơ sở dữ liệu" class="w-full"
+                @change="getTableFunc">
+                <el-option v-for="item in dbOptions" :key="item.database" :label="item.database"
+                  :value="item.database" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item
-              label="表名"
-              prop="structName"
-              class="w-full"
-            >
-              <el-select
-                v-model="dbform.tableName"
-                :disabled="!dbform.dbName"
-                class="w-full"
-                filterable
-                placeholder="请选择表"
-              >
-                <el-option
-                  v-for="item in tableOptions"
-                  :key="item.tableName"
-                  :label="item.tableName"
-                  :value="item.tableName"
-                />
+            <el-form-item label="Tên bảng" prop="structName" class="w-full">
+              <el-select v-model="dbform.tableName" :disabled="!dbform.dbName" class="w-full" filterable
+                placeholder="Chọn bảng">
+                <el-option v-for="item in tableOptions" :key="item.tableName" :label="item.tableName"
+                  :value="item.tableName" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item
-              class="w-full"
-            >
+            <el-form-item class="w-full">
               <div class="flex justify-end w-full">
-                <el-button
-                    type="primary"
-                    @click="getColumnFunc"
-                >
-                  使用此表
+                <el-button type="primary" @click="getColumnFunc">
+                  Sử dụng bảng này
                 </el-button>
               </div>
             </el-form-item>
@@ -140,155 +89,84 @@
       </el-form>
     </div>
     <div class="gva-search-box">
-      <!-- 初始版本自动化代码工具 -->
-      <div class="text-lg mb-2 text-gray-600">自动化结构</div>
-      <el-form
-        ref="autoCodeForm"
-        :rules="rules"
-        :model="form"
-        label-width="120px"
-        :inline="true"
-      >
+      <!-- Công cụ tạo tự động cấu trúc ban đầu -->
+      <div class="text-lg mb-2 text-gray-600">Tự động tạo cấu trúc</div>
+      <el-form ref="autoCodeForm" :rules="rules" :model="form" label-width="120px" :inline="true">
         <el-row class="w-full">
           <el-col :span="6">
-            <el-form-item
-              label="结构名称"
-              prop="structName"
-              class="w-full"
-            >
-              <el-input
-                v-model="form.structName"
-                placeholder="首字母自动转换大写"
-              />
+            <el-form-item label="Tên cấu trúc" prop="structName" class="w-full">
+              <el-input v-model="form.structName" placeholder="Chuyển đổi chữ cái đầu thành chữ hoa" />
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item
-                label="TableName"
-                class="w-full"
-            >
+            <el-form-item label="TableName" class="w-full">
               <template #label>
-                <el-tooltip
-                    content="简称会作为入参对象名和路由group"
-                    placement="bottom"
-                    effect="light"
-                >
-                  <div> 结构简称 <el-icon><QuestionFilled /></el-icon> </div>
+                <el-tooltip content="Tên viết tắt sẽ được sử dụng làm tên đối tượng đầu vào và nhóm định tuyến"
+                  placement="bottom" effect="light">
+                  <div> Tên viết tắt cấu trúc <el-icon>
+                      <QuestionFilled />
+                    </el-icon> </div>
                 </el-tooltip>
               </template>
-              <el-input
-                  v-model="form.abbreviation"
-                  placeholder="请输入Struct简称"
-              />
+              <el-input v-model="form.abbreviation" placeholder="Nhập tên viết tắt của Struct" />
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item
-                label="中文名称"
-                prop="description"
-                class="w-full"
-            >
-              <el-input
-                  v-model="form.description"
-                  placeholder="中文描述作为自动api描述"
-              />
+            <el-form-item label="Tên tiếng Việt" prop="description" class="w-full">
+              <el-input v-model="form.description" placeholder="Mô tả tiếng Việt cho API tự động" />
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item
-              label="表名"
-              prop="tableName"
-              class="w-full"
-            >
-              <el-input
-                v-model="form.tableName"
-                placeholder="指定表名（非必填）"
-              />
+            <el-form-item label="Tên bảng" prop="tableName" class="w-full">
+              <el-input v-model="form.tableName" placeholder="Chỉ định tên bảng (không bắt buộc)" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row class="w-full">
           <el-col :span="6">
-            <el-form-item
-              prop="packageName"
-              class="w-full"
-            >
+            <el-form-item prop="packageName" class="w-full">
               <template #label>
                 <el-tooltip
-                  content="生成文件的默认名称(建议为驼峰格式,首字母小写,如sysXxxXxxx)"
-                  placement="bottom"
-                  effect="light"
-                >
-                  <div> 文件名称 <el-icon><QuestionFilled /></el-icon> </div>
+                  content="Tên mặc định của tệp được tạo (nên là định dạng chữ cái đầu viết thường, ví dụ: sysXxxXxxx)"
+                  placement="bottom" effect="light">
+                  <div> Tên tệp <el-icon>
+                      <QuestionFilled />
+                    </el-icon> </div>
                 </el-tooltip>
               </template>
-              <el-input
-                v-model="form.packageName"
-                placeholder="请输入文件名称"
-                @blur="toLowerCaseFunc(form,'packageName')"
-              />
+              <el-input v-model="form.packageName" placeholder="Nhập tên tệp"
+                @blur="toLowerCaseFunc(form, 'packageName')" />
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item
-              label="选择模板"
-              prop="package"
-              class="w-full relative"
-            >
-              <el-select
-                v-model="form.package"
-                class="w-full pr-12"
-              >
-                <el-option
-                  v-for="item in pkgs"
-                  :key="item.ID"
-                  :value="item.packageName"
-                  :label="item.packageName"
-                />
+            <el-form-item label="Chọn mẫu" prop="package" class="w-full relative">
+              <el-select v-model="form.package" class="w-full pr-12">
+                <el-option v-for="item in pkgs" :key="item.ID" :value="item.packageName" :label="item.packageName" />
               </el-select>
               <span class="absolute right-0">
-                <el-icon
-                  class="cursor-pointer ml-2 text-gray-600"
-                  @click="getPkgs"
-                >
+                <el-icon class="cursor-pointer ml-2 text-gray-600" @click="getPkgs">
                   <refresh />
                 </el-icon>
-                <el-icon
-                  class="cursor-pointer ml-2 text-gray-600"
-                  @click="goPkgs"
-                >
+                <el-icon class="cursor-pointer ml-2 text-gray-600" @click="goPkgs">
                   <document-add />
                 </el-icon>
               </span>
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item
-              label="业务库"
-              prop="businessDB"
-              class="w-full"
-            >
+            <el-form-item label="Cơ sở dữ liệu" prop="businessDB" class="w-full">
               <template #label>
                 <el-tooltip
-                  content="注：需要提前到db-list自行配置多数据库，此项为空则会使用gva本库创建自动化代码(global.GVA_DB),填写后则会创建指定库的代码(global.MustGetGlobalDBByDBName(dbname))"
-                  placement="bottom"
-                  effect="light"
-                >
-                  <div> 业务库 <el-icon><QuestionFilled /></el-icon> </div>
+                  content="Lưu ý: Cần cấu hình nhiều cơ sở dữ liệu trước đó trong db-list. Nếu không nhập, sẽ tạo mã tự động từ cơ sở dữ liệu gva (global.GVA_DB), nếu nhập, sẽ tạo mã từ cơ sở dữ liệu được chỉ định (global.MustGetGlobalDBByDBName(dbname))"
+                  placement="bottom" effect="light">
+                  <div> Cơ sở dữ liệu <el-icon>
+                      <QuestionFilled />
+                    </el-icon> </div>
                 </el-tooltip>
               </template>
-              <el-select
-                v-model="form.businessDB"
-                placeholder="选择业务库"
-                class="w-full"
-              >
-                <el-option
-                  v-for="item in dbList"
-                  :key="item.aliasName"
-                  :value="item.aliasName"
-                  :label="item.aliasName"
-                  :disabled="item.disable"
-                >
+              <el-select v-model="form.businessDB" placeholder="Chọn cơ sở dữ liệu" class="w-full">
+                <el-option v-for="item in dbList" :key="item.aliasName" :value="item.aliasName" :label="item.aliasName"
+                  :disabled="item.disable">
                   <div>
                     <span>{{ item.aliasName }}</span>
                     <span style="float:right;color:#8492a6;font-size:13px">{{ item.dbName }}</span>
@@ -303,28 +181,24 @@
             <el-form-item>
               <template #label>
                 <el-tooltip
-                  content="注：会自动在结构体global.Model其中包含主键和软删除相关操作配置"
-                  placement="bottom"
-                  effect="light"
-                >
-                  <div> 使用GVA结构 <el-icon><QuestionFilled /></el-icon> </div>
+                  content="Lưu ý: Tự động thêm các cấu hình liên quan đến khóa chính và xóa mềm vào cấu trúc global.Model"
+                  placement="bottom" effect="light">
+                  <div> Sử dụng cấu trúc GVA <el-icon>
+                      <QuestionFilled />
+                    </el-icon> </div>
                 </el-tooltip>
               </template>
-              <el-checkbox
-                v-model="form.gvaModel"
-                @change="useGva"
-              />
+              <el-checkbox v-model="form.gvaModel" @change="useGva" />
             </el-form-item>
           </el-col>
           <el-col :span="3">
             <el-form-item>
               <template #label>
-                <el-tooltip
-                  content="注：把自动生成的API注册进数据库"
-                  placement="bottom"
-                  effect="light"
-                >
-                  <div> 自动创建API <el-icon><QuestionFilled /></el-icon> </div>
+                <el-tooltip content="Lưu ý: Tự động đăng ký API được tạo tự động vào cơ sở dữ liệu" placement="bottom"
+                  effect="light">
+                  <div> Tự động tạo API <el-icon>
+                      <QuestionFilled />
+                    </el-icon> </div>
                 </el-tooltip>
               </template>
               <el-checkbox v-model="form.autoCreateApiToSql" />
@@ -333,12 +207,11 @@
           <el-col :span="3">
             <el-form-item>
               <template #label>
-                <el-tooltip
-                  content="注：把自动生成的菜单注册进数据库"
-                  placement="bottom"
-                  effect="light"
-                >
-                  <div> 自动创建菜单 <el-icon><QuestionFilled /></el-icon></div>
+                <el-tooltip content="Lưu ý: Tự động đăng ký menu được tạo tự động vào cơ sở dữ liệu" placement="bottom"
+                  effect="light">
+                  <div> Tự động tạo menu <el-icon>
+                      <QuestionFilled />
+                    </el-icon></div>
                 </el-tooltip>
               </template>
               <el-checkbox v-model="form.autoCreateMenuToSql" />
@@ -348,11 +221,11 @@
             <el-form-item>
               <template #label>
                 <el-tooltip
-                  content="注：自动同步数据库表结构，如果不需要可以选择关闭。"
-                  placement="bottom"
-                  effect="light"
-                >
-                  <div> 同步表结构 <el-icon><QuestionFilled /></el-icon></div>
+                  content="Lưu ý: Đồng bộ cấu trúc bảng trong cơ sở dữ liệu tự động. Nếu không cần thiết, bạn có thể tắt chức năng này."
+                  placement="bottom" effect="light">
+                  <div> Đồng bộ cấu trúc bảng <el-icon>
+                      <QuestionFilled />
+                    </el-icon></div>
                 </el-tooltip>
               </template>
               <el-checkbox v-model="form.autoMigrate" />
@@ -362,11 +235,11 @@
             <el-form-item>
               <template #label>
                 <el-tooltip
-                    content="注：会自动产生页面内的按钮权限配置，若不在角色管理中进行按钮分配则按钮不可见"
-                    placement="bottom"
-                    effect="light"
-                >
-                  <div> 创建按钮权限 <el-icon><QuestionFilled /></el-icon> </div>
+                  content="Lưu ý: Tự động tạo cấu hình quyền nút trong trang, nếu không phân phối nút trong quản lý vai trò, nút sẽ không hiển thị"
+                  placement="bottom" effect="light">
+                  <div> Tạo quyền nút <el-icon>
+                      <QuestionFilled />
+                    </el-icon> </div>
                 </el-tooltip>
               </template>
               <el-checkbox v-model="form.autoCreateBtnAuth" />
@@ -376,11 +249,11 @@
             <el-form-item>
               <template #label>
                 <el-tooltip
-                  content="注：会自动在结构体添加 created_by updated_by deleted_by，方便用户进行资源权限控制"
-                  placement="bottom"
-                  effect="light"
-                >
-                  <div> 创建资源标识 <el-icon><QuestionFilled /></el-icon> </div>
+                  content="Lưu ý: Tự động thêm created_by, updated_by, deleted_by vào cấu trúc để người dùng dễ dàng kiểm soát quyền tài nguyên"
+                  placement="bottom" effect="light">
+                  <div> Tạo định danh tài nguyên <el-icon>
+                      <QuestionFilled />
+                    </el-icon> </div>
                 </el-tooltip>
               </template>
               <el-checkbox v-model="form.autoCreateResource" />
@@ -389,258 +262,120 @@
         </el-row>
       </el-form>
     </div>
-    <!-- 组件列表 -->
+    <!-- Danh sách thành phần -->
     <div class="gva-table-box">
       <div class="gva-btn-list">
-        <el-button
-          type="primary"
-          @click="editAndAddField()"
-        >
-          新增字段
+        <el-button type="primary" @click="editAndAddField()">
+          Thêm trường
         </el-button>
       </div>
       <div class="draggable">
-        <el-table
-          :data="form.fields"
-          row-key="fieldName"
-        >
-          <el-table-column
-            align="left"
-            type="index"
-            width="60"
-          >
+        <el-table :data="form.fields" row-key="fieldName">
+          <el-table-column align="left" type="index" width="60">
             <template #default>
               <el-icon class="cursor-grab drag-column">
                 <MoreFilled />
               </el-icon>
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            type="index"
-            label="序列"
-            width="60"
-          />
-          <el-table-column
-            align="left"
-            type="index"
-            label="主键"
-            width="60"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" type="index" label="Thứ tự" width="60" />
+          <el-table-column align="left" type="index" label="Khóa chính" width="60">
+            <template #default="{ row }">
               <el-checkbox v-model="row.primaryKey" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="fieldName"
-            label="字段名称"
-            width="160"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="fieldName" label="Tên trường" width="160">
+            <template #default="{ row }">
               <el-input v-model="row.fieldName" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="fieldDesc"
-            label="中文名"
-            width="160"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="fieldDesc" label="Tên tiếng Việt" width="160">
+            <template #default="{ row }">
               <el-input v-model="row.fieldDesc" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="defaultValue"
-            label="默认值"
-            width="160"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="defaultValue" label="Giá trị mặc định" width="160">
+            <template #default="{ row }">
               <el-input v-model="row.defaultValue" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="require"
-            label="必填"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="require" label="Bắt buộc">
+            <template #default="{ row }">
               <el-checkbox v-model="row.require" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="sort"
-            label="排序"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="sort" label="Sắp xếp">
+            <template #default="{ row }">
               <el-checkbox v-model="row.sort" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="form"
-            width="100"
-            label="新建/编辑"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="form" width="100" label="Tạo/Chỉnh sửa">
+            <template #default="{ row }">
               <el-checkbox v-model="row.form" />
             </template>
           </el-table-column>
-          <el-table-column
-              align="left"
-              prop="table"
-              label="表格"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="table" label="Bảng">
+            <template #default="{ row }">
               <el-checkbox v-model="row.table" />
             </template>
           </el-table-column>
-          <el-table-column
-              align="left"
-              prop="desc"
-              label="详情"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="desc" label="Mô tả">
+            <template #default="{ row }">
               <el-checkbox v-model="row.desc" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="fieldJson"
-            width="160px"
-            label="字段Json"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="fieldJson" width="160px" label="Field Json">
+            <template #default="{ row }">
               <el-input v-model="row.fieldJson" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="fieldType"
-            label="字段类型"
-            width="160"
-          >
-            <template #default="{row}">
-              <el-select
-                v-model="row.fieldType"
-                style="width:100%"
-                placeholder="请选择字段类型"
-                clearable
-              >
-                <el-option
-                  v-for="item in typeOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
+          <el-table-column align="left" prop="fieldType" label="Field Type" width="160">
+            <template #default="{ row }">
+              <el-select v-model="row.fieldType" style="width:100%" placeholder="Chọn Field Type" clearable>
+                <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="fieldIndexType"
-            label="索引类型"
-            width="160"
-          >
-            <template #default="{row}">
-              <el-select
-                v-model="row.fieldIndexType"
-                style="width:100%"
-                placeholder="请选择字段索引类型"
-                clearable
-              >
-                <el-option
-                  v-for="item in typeIndexOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
+          <el-table-column align="left" prop="fieldIndexType" label="索引类型" width="160">
+            <template #default="{ row }">
+              <el-select v-model="row.fieldIndexType" style="width:100%" placeholder="请选择字段索引类型" clearable>
+                <el-option v-for="item in typeIndexOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="dataTypeLong"
-            label="数据库字段长度"
-            width="160"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="dataTypeLong" label="数据库字段长度" width="160">
+            <template #default="{ row }">
               <el-input v-model="row.dataTypeLong" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="columnName"
-            label="数据库字段"
-            width="160"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="columnName" label="数据库字段" width="160">
+            <template #default="{ row }">
               <el-input v-model="row.columnName" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="comment"
-            label="数据库字段描述"
-            width="160"
-          >
-            <template #default="{row}">
+          <el-table-column align="left" prop="comment" label="数据库字段描述" width="160">
+            <template #default="{ row }">
               <el-input v-model="row.comment" />
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="fieldSearchType"
-            label="搜索条件"
-            width="130"
-          >
-            <template #default="{row}">
-              <el-select
-                v-model="row.fieldSearchType"
-                style="width:100%"
-                placeholder="请选择字段查询条件"
-                clearable
-                :disabled="row.fieldType!=='json'"
-              >
-                <el-option
-                  v-for="item in typeSearchOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                  :disabled="
-                    (row.fieldType!=='string'&&item.value==='LIKE')||
-                      ((row.fieldType!=='int'&&row.fieldType!=='time.Time'&&row.fieldType!=='float64')&&(item.value==='BETWEEN' || item.value==='NOT BETWEEN'))
-                  "
-                />
+          <el-table-column align="left" prop="fieldSearchType" label="搜索条件" width="130">
+            <template #default="{ row }">
+              <el-select v-model="row.fieldSearchType" style="width:100%" placeholder="请选择字段查询条件" clearable
+                :disabled="row.fieldType !== 'json'">
+                <el-option v-for="item in typeSearchOptions" :key="item.value" :label="item.label" :value="item.value"
+                  :disabled="(row.fieldType !== 'string' && item.value === 'LIKE') ||
+                    ((row.fieldType !== 'int' && row.fieldType !== 'time.Time' && row.fieldType !== 'float64') && (item.value === 'BETWEEN' || item.value === 'NOT BETWEEN'))
+                    " />
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            label="操作"
-            width="300"
-            fixed="right"
-          >
+          <el-table-column align="left" label="Hành động" width="300" fixed="right">
             <template #default="scope">
-              <el-button
-
-                type="primary"
-                link
-                icon="edit"
-                @click="editAndAddField(scope.row)"
-              >
-                高级编辑
+              <el-button type="primary" link icon="edit" @click="editAndAddField(scope.row)">
+                Sửa
               </el-button>
-              <el-button
-                type="primary"
-                link
-                icon="delete"
-                @click="deleteField(scope.$index)"
-              >
-                删除
+              <el-button type="primary" link icon="delete" @click="deleteField(scope.$index)">
+                Xoá
               </el-button>
             </template>
           </el-table-column>
@@ -648,108 +383,61 @@
       </div>
       <!-- 组件列表 -->
       <div class="gva-btn-list justify-end mt-4">
-        <el-button
-            type="primary"
-            @click="exportJson()"
-        >
-          导出json
+        <el-button type="primary" @click="exportJson()">
+          Tải Json
         </el-button>
-        <el-upload
-            class="flex items-center"
-            :before-upload="importJson"
-            show-file-list="false"
-            accept=".json"
-        >
-          <el-button type="primary" class="mx-2">导入json</el-button>
+        <el-upload class="flex items-center" :before-upload="importJson" show-file-list="false" accept=".json">
+          <el-button type="primary" class="mx-2">Nhập Json</el-button>
         </el-upload>
-        <el-button
-          type="primary"
-          @click="clearCatch()"
-        >
-          清除暂存
+        <el-button type="primary" @click="clearCatch()">
+          Xoá Cache
         </el-button>
-        <el-button
-          type="primary"
-          @click="catchData()"
-        >
-          暂存
+        <el-button type="primary" @click="catchData()">
+          Catch Data
         </el-button>
-        <el-button
-          type="primary"
-          @click="enterForm(true)"
-        >
-          预览代码
+        <el-button type="primary" @click="enterForm(true)">
+          Xem Code
         </el-button>
-        <el-button
-          type="primary"
-          @click="enterForm(false)"
-        >
-          生成代码
+        <el-button type="primary" @click="enterForm(false)">
+          Tạo code
         </el-button>
       </div>
     </div>
     <!-- 组件弹窗 -->
-    <el-drawer
-      v-model="dialogFlag"
-      size="70%"
-      :show-close="false"
-    >
+    <el-drawer v-model="dialogFlag" size="70%" :show-close="false">
       <template #header>
         <div class="flex justify-between items-center">
-          <span class="text-lg">组件内容</span>
+          <span class="text-lg">Thông tin</span>
           <div>
             <el-button @click="closeDialog">
-              取 消
+              Huỷ
             </el-button>
-            <el-button
-              type="primary"
-              @click="enterDialog"
-            >
-              确 定
+            <el-button type="primary" @click="enterDialog">
+              Đồng ý
             </el-button>
           </div>
         </div>
       </template>
 
-      <FieldDialog
-        v-if="dialogFlag"
-        ref="fieldDialogNode"
-        :dialog-middle="dialogMiddle"
-        :type-options="typeOptions"
-        :type-search-options="typeSearchOptions"
-        :type-index-options="typeIndexOptions"
-      />
+      <FieldDialog v-if="dialogFlag" ref="fieldDialogNode" :dialog-middle="dialogMiddle" :type-options="typeOptions"
+        :type-search-options="typeSearchOptions" :type-index-options="typeIndexOptions" />
     </el-drawer>
 
-    <el-drawer
-      v-model="previewFlag"
-      size="80%"
-      :show-close="false"
-    >
+    <el-drawer v-model="previewFlag" size="80%" :show-close="false">
       <template #header>
         <div class="flex justify-between items-center">
           <span class="text-lg">操作栏</span>
           <div>
-            <el-button
-              type="primary"
-              @click="selectText"
-            >
+            <el-button type="primary" @click="selectText">
               全选
             </el-button>
-            <el-button
-              type="primary"
-              @click="copy"
-            >
+            <el-button type="primary" @click="copy">
               复制
             </el-button>
           </div>
         </div>
       </template>
-      <PreviewCodeDialog
-        v-if="previewFlag"
-        ref="previewNode"
-        :preview-code="preViewCode"
-      />
+      <PreviewCodeDialog v-if="previewFlag" ref="previewNode" :preview-code="preViewCode" />
     </el-drawer>
   </div>
 </template>
@@ -759,7 +447,7 @@
 import FieldDialog from '@/view/systemTools/autoCode/component/fieldDialog.vue'
 import PreviewCodeDialog from '@/view/systemTools/autoCode/component/previewCodeDialg.vue'
 import { toUpperCase, toHump, toSQLLine, toLowerCase } from '@/utils/stringFun'
-import { createTemp, getDB, getTable, getColumn, preview, getMeta, getPackageApi,llmAuto } from '@/api/autoCode'
+import { createTemp, getDB, getTable, getColumn, preview, getMeta, getPackageApi, llmAuto } from '@/api/autoCode'
 import { getDict } from '@/utils/dictionary'
 import { ref, watch, toRaw, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -776,48 +464,47 @@ const getOnlyNumber = () => {
 }
 
 const prompt = ref("")
-
-const llmAutoFunc = async (mode) =>{
-  const res = await llmAuto({prompt:prompt.value,mode:mode})
+const llmAutoFunc = async (mode) => {
+  const res = await llmAuto({ prompt: prompt.value, mode: mode })
   if (res.code === 0) {
     form.value.fields = []
     const json = JSON.parse(res.data)
-    for (let key in json){
-      if(key === "fields"){
+    for (let key in json) {
+      if (key === "fields") {
         json[key].forEach(item => {
           if (item.primaryKey) {
             form.value.gvaModel = false
           }
           form.value.fields.push({
-              onlyNumber: getOnlyNumber(),
-              fieldName: toUpperCase(item.fieldName),
-              fieldDesc: item.fieldDesc,
-              fieldType: item.fieldType,
-              dataType: "",
-              fieldJson: item.fieldJson||item.columnName,
-              primaryKey: item.primaryKey,
-              dataTypeLong: item.dataTypeLong,
-              columnName: item.columnName,
-              comment: item.comment || item.fieldDesc,
-              require: false,
-              errorText: '',
-              clearable: true,
-              fieldSearchType: '',
-              fieldIndexType: '',
-              dictType: '',
-              form: true,
-              desc: true,
-              table: true,
-              dataSource: {
-                association:1,
-                table: '',
-                label: '',
-                value: ''
-          }
+            onlyNumber: getOnlyNumber(),
+            fieldName: toUpperCase(item.fieldName),
+            fieldDesc: item.fieldDesc,
+            fieldType: item.fieldType,
+            dataType: "",
+            fieldJson: item.fieldJson || item.columnName,
+            primaryKey: item.primaryKey,
+            dataTypeLong: item.dataTypeLong,
+            columnName: item.columnName,
+            comment: item.comment || item.fieldDesc,
+            require: false,
+            errorText: '',
+            clearable: true,
+            fieldSearchType: '',
+            fieldIndexType: '',
+            dictType: '',
+            form: true,
+            desc: true,
+            table: true,
+            dataSource: {
+              association: 1,
+              table: '',
+              label: '',
+              value: ''
+            }
           })
         })
-      }else{
-        if(mode === "xiaomiao"){
+      } else {
+        if (mode === "xiaomiao") {
           form.value[key] = json[key]
         }
       }
@@ -825,15 +512,15 @@ const llmAutoFunc = async (mode) =>{
   }
 }
 
-// 行拖拽
+// Kéo thả hàng
 const rowDrop = () => {
-  // 要拖拽元素的父容器
+  // Đối tượng chứa các phần tử có thể kéo thả
   const tbody = document.querySelector('.draggable .el-table__body-wrapper tbody')
   Sortable.create(tbody, {
-    //  可被拖拽的子元素
+    // Các phần tử con có thể kéo thả
     draggable: '.draggable .el-table__row',
     handle: '.drag-column',
-    onEnd: async({ newIndex, oldIndex }) => {
+    onEnd: async ({ newIndex, oldIndex }) => {
       await nextTick()
       const currRow = form.value.fields.splice(oldIndex, 1)[0]
       form.value.fields.splice(newIndex, 0, currRow)
@@ -854,47 +541,47 @@ const dataModelList = ['created_by', 'updated_by', 'deleted_by']
 
 const typeOptions = ref([
   {
-    label: '字符串',
+    label: 'Chuỗi',
     value: 'string'
   },
   {
-    label: '富文本',
+    label: 'Văn bản phong phú',
     value: 'richtext'
   },
   {
-    label: '整型',
+    label: 'Số nguyên',
     value: 'int'
   },
   {
-    label: '布尔值',
+    label: 'Giá trị boolean',
     value: 'bool'
   },
   {
-    label: '浮点型',
+    label: 'Số thực',
     value: 'float64'
   },
   {
-    label: '时间',
+    label: 'Thời gian',
     value: 'time.Time'
   },
   {
-    label: '枚举',
+    label: 'Enum',
     value: 'enum'
   },
   {
-    label: '单图片（字符串）',
+    label: 'Hình ảnh đơn (chuỗi)',
     value: 'picture',
   },
   {
-    label: '多图片（json字符串）',
+    label: 'Hình ảnh nhiều (chuỗi json)',
     value: 'pictures',
   },
   {
-    label: '视频（字符串）',
+    label: 'Video (chuỗi)',
     value: 'video',
   },
   {
-    label: '文件（json字符串）',
+    label: 'Tệp tin (chuỗi json)',
     value: 'file',
   },
   {
@@ -902,7 +589,7 @@ const typeOptions = ref([
     value: 'json',
   },
   {
-    label: '数组',
+    label: 'Mảng',
     value: 'array',
   }
 ])
@@ -971,7 +658,7 @@ const fieldTemplate = {
   fieldIndexType: '',
   dictType: '',
   dataSource: {
-    association:1,
+    association: 1,
     table: '',
     label: '',
     value: ''
@@ -1006,23 +693,23 @@ const form = ref({
 })
 const rules = ref({
   structName: [
-    { required: true, message: '请输入结构体名称', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập tên cấu trúc', trigger: 'blur' }
   ],
   abbreviation: [
-    { required: true, message: '请输入结构体简称', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập tên viết tắt cấu trúc', trigger: 'blur' }
   ],
   description: [
-    { required: true, message: '请输入结构体描述', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập mô tả cấu trúc', trigger: 'blur' }
   ],
   packageName: [
     {
       required: true,
-      message: '文件名称：sysXxxxXxxx',
+      message: 'Tên tệp tin: sysXxxxXxxx',
       trigger: 'blur'
     }
   ],
   package: [
-    { required: true, message: '请选择package', trigger: 'blur' }
+    { required: true, message: 'Vui lòng chọn package', trigger: 'blur' }
   ]
 })
 const dialogMiddle = ref({})
@@ -1033,11 +720,11 @@ const previewFlag = ref(false)
 const useGva = (e) => {
   if (e && form.value.fields.length) {
     ElMessageBox.confirm(
-      '如果您开启GVA默认结构，会自动添加ID,CreatedAt,UpdatedAt,DeletedAt字段，此行为将自动清除您目前在下方创建的重名字段，是否继续？',
-      '注意',
+      'Nếu bạn bật mô hình GVA mặc định, sẽ tự động thêm các trường ID, CreatedAt, UpdatedAt, DeletedAt, hành động này sẽ xóa các trường trùng tên bạn đã tạo ở dưới, bạn có muốn tiếp tục không?',
+      'Chú ý',
       {
-        confirmButtonText: '继续',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Tiếp tục',
+        cancelButtonText: 'Hủy',
         type: 'warning',
       }
     )
@@ -1064,9 +751,9 @@ const editAndAddField = (item) => {
   dialogFlag.value = true
   if (item) {
     addFlag.value = 'edit'
-    if(!item.dataSource){
+    if (!item.dataSource) {
       item.dataSource = {
-        association:1,
+        association: 1,
         table: '',
         label: '',
         value: ''
@@ -1104,20 +791,20 @@ const closeDialog = () => {
   dialogFlag.value = false
 }
 const deleteField = (index) => {
-  ElMessageBox.confirm('确定要删除吗?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm('Bạn có chắc muốn xóa không?', 'Cảnh báo', {
+    confirmButtonText: 'Xác nhận',
+    cancelButtonText: 'Hủy',
     type: 'warning'
-  }).then(async() => {
+  }).then(async () => {
     form.value.fields.splice(index, 1)
   })
 }
 const autoCodeForm = ref(null)
-const enterForm = async(isPreview) => {
+const enterForm = async (isPreview) => {
   if (form.value.fields.length <= 0) {
     ElMessage({
       type: 'error',
-      message: '请填写至少一个field'
+      message: 'Vui lòng điền ít nhất một trường'
     })
     return false
   }
@@ -1125,7 +812,7 @@ const enterForm = async(isPreview) => {
   if (!form.value.gvaModel && form.value.fields.every(item => !item.primaryKey)) {
     ElMessage({
       type: 'error',
-      message: '您至少需要创建一个主键才能保证自动化代码的可行性'
+      message: 'Bạn cần tạo ít nhất một khóa chính để đảm bảo tính khả thi của mã tự động'
     })
     return false
   }
@@ -1135,7 +822,7 @@ const enterForm = async(isPreview) => {
   ) {
     ElMessage({
       type: 'error',
-      message: '存在与结构体同名的字段'
+      message: 'Có trường trùng tên với cấu trúc'
     })
     return false
   }
@@ -1143,7 +830,7 @@ const enterForm = async(isPreview) => {
   if (form.value.package === form.value.abbreviation) {
     ElMessage({
       type: 'error',
-      message: 'package和结构体简称不可同名'
+      message: 'Package và tên viết tắt cấu trúc không thể giống nhau'
     })
     return false
   }
@@ -1152,7 +839,7 @@ const enterForm = async(isPreview) => {
   if (form.value.fields.some(item => !item.fieldType)) {
     ElMessage({
       type: 'error',
-      message: '请填写所有字段类型后进行提交'
+      message: 'Vui lòng điền đầy đủ loại trường trước khi gửi'
     })
     return false
   }
@@ -1172,7 +859,7 @@ const enterForm = async(isPreview) => {
       if (form.value.structName === form.value.abbreviation) {
         ElMessage({
           type: 'error',
-          message: 'structName和struct简称不能相同'
+          message: 'Tên cấu trúc và tên viết tắt không thể giống nhau'
         })
         return false
       }
@@ -1187,10 +874,10 @@ const enterForm = async(isPreview) => {
         if (res.code !== 0) {
           return
         }
-          ElMessage({
-            type: 'success',
-            message: '自动化代码创建成功，自动移动成功'
-          })
+        ElMessage({
+          type: 'success',
+          message: 'Tạo mã tự động thành công, di chuyển tự động thành công'
+        })
         clearCatch()
       }
     }
@@ -1200,7 +887,7 @@ const enterForm = async(isPreview) => {
 const dbList = ref([])
 const dbOptions = ref([])
 
-const getDbFunc = async() => {
+const getDbFunc = async () => {
   dbform.value.dbName = ''
   dbform.value.tableName = ''
   const res = await getDB({ businessDB: dbform.value.businessDB })
@@ -1209,7 +896,7 @@ const getDbFunc = async() => {
     dbList.value = res.data.dbList
   }
 }
-const getTableFunc = async() => {
+const getTableFunc = async () => {
   const res = await getTable({ businessDB: dbform.value.businessDB, dbName: dbform.value.dbName })
   if (res.code === 0) {
     tableOptions.value = res.data.tables
@@ -1217,7 +904,7 @@ const getTableFunc = async() => {
   dbform.value.tableName = ''
 }
 
-const getColumnFunc = async() => {
+const getColumnFunc = async () => {
   const res = await getColumn(dbform.value)
   if (res.code === 0) {
     let dbtype = ''
@@ -1232,42 +919,42 @@ const getColumnFunc = async() => {
     form.value.tableName = dbform.value.tableName
     form.value.packageName = tbHump
     form.value.abbreviation = tbHump
-    form.value.description = tbHump + '表'
+    form.value.description = tbHump + ' bảng'
     form.value.autoCreateApiToSql = true
     form.value.fields = []
     res.data.columns &&
-          res.data.columns.forEach(item => {
-            if (needAppend(item)) {
-              const fbHump = toHump(item.columnName)
-              form.value.fields.push({
-                onlyNumber: getOnlyNumber(),
-                fieldName: toUpperCase(fbHump),
-                fieldDesc: item.columnComment || fbHump + '字段',
-                fieldType: fdMap.value[item.dataType],
-                dataType: item.dataType,
-                fieldJson: fbHump,
-                primaryKey: item.primaryKey,
-                dataTypeLong: item.dataTypeLong && item.dataTypeLong.split(',')[0],
-                columnName: dbtype === 'oracle' ? item.columnName.toUpperCase() : item.columnName,
-                comment: item.columnComment,
-                require: false,
-                errorText: '',
-                clearable: true,
-                fieldSearchType: '',
-                fieldIndexType: '',
-                dictType: '',
-                form: true,
-                table: true,
-                desc: true,
-                dataSource: {
-                  association:1,
-                  table: '',
-                  label: '',
-                  value: ''
-                }
-              })
+      res.data.columns.forEach(item => {
+        if (needAppend(item)) {
+          const fbHump = toHump(item.columnName)
+          form.value.fields.push({
+            onlyNumber: getOnlyNumber(),
+            fieldName: toUpperCase(fbHump),
+            fieldDesc: item.columnComment || fbHump + ' trường',
+            fieldType: fdMap.value[item.dataType],
+            dataType: item.dataType,
+            fieldJson: fbHump,
+            primaryKey: item.primaryKey,
+            dataTypeLong: item.dataTypeLong && item.dataTypeLong.split(',')[0],
+            columnName: dbtype === 'oracle' ? item.columnName.toUpperCase() : item.columnName,
+            comment: item.columnComment,
+            require: false,
+            errorText: '',
+            clearable: true,
+            fieldSearchType: '',
+            fieldIndexType: '',
+            dictType: '',
+            form: true,
+            table: true,
+            desc: true,
+            dataSource: {
+              association: 1,
+              table: '',
+              label: '',
+              value: ''
             }
           })
+        }
+      })
   }
 }
 
@@ -1282,7 +969,7 @@ const needAppend = (item) => {
   return isAppend
 }
 
-const setFdMap = async() => {
+const setFdMap = async () => {
   const fdTypes = ['string', 'int', 'bool', 'float64', 'time.Time']
   fdTypes.forEach(async fdtype => {
     const res = await getDict(fdtype)
@@ -1291,7 +978,7 @@ const setFdMap = async() => {
     })
   })
 }
-const getAutoCodeJson = async(id) => {
+const getAutoCodeJson = async (id) => {
   const res = await getMeta({ id: Number(id) })
   if (res.code === 0) {
     form.value = JSON.parse(res.data.meta)
@@ -1299,7 +986,7 @@ const getAutoCodeJson = async(id) => {
 }
 
 const pkgs = ref([])
-const getPkgs = async() => {
+const getPkgs = async () => {
   const res = await getPackageApi()
   if (res.code === 0) {
     pkgs.value = res.data.pkgs
@@ -1334,7 +1021,7 @@ const catchData = () => {
 
 const getCatch = () => {
   const data = window.sessionStorage.getItem('autoCode')
-  if(data){
+  if (data) {
     form.value = JSON.parse(data)
   }
 }
@@ -1375,15 +1062,15 @@ const exportJson = () => {
   URL.revokeObjectURL(url)
 }
 
-const importJson = (file) =>{
+const importJson = (file) => {
   const reader = new FileReader()
   reader.onload = (e) => {
     console.log(e)
     try {
       form.value = JSON.parse(e.target.result)
-      ElMessage.success('JSON 文件导入成功')
+      ElMessage.success('Nhập tệp JSON thành công')
     } catch (error) {
-      ElMessage.error('无效的 JSON 文件')
+      ElMessage.error('Tệp JSON không hợp lệ')
     }
   }
   reader.readAsText(file)

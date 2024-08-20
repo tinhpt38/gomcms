@@ -111,10 +111,10 @@
           <span class="text-lg">{{ type==='create'?'添加':'修改' }}</span>
           <div>
             <el-button type="primary" @click="enterDialog">
-              确 定
+              Đồng ý
             </el-button>
             <el-button @click="closeDialog">
-              取 消
+              Huỷ
             </el-button>
           </div>
         </div>

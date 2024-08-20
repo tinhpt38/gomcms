@@ -200,12 +200,12 @@
           <el-button
 
             @click="showPassword = false"
-          >取 消</el-button>
+          >Huỷ</el-button>
           <el-button
 
             type="primary"
             @click="savePassword"
-          >确 定</el-button>
+          >Đồng ý</el-button>
         </div>
       </template>
     </el-dialog>

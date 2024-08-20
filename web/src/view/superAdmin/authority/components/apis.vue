@@ -15,7 +15,7 @@
         class="float-right"
         type="primary"
         @click="authApiEnter"
-      >确 定</el-button>
+      >Đồng ý</el-button>
     </div>
     <div class="tree-content">
       <el-scrollbar>
