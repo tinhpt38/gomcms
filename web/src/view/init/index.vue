@@ -8,34 +8,34 @@
       >
         <div class=" text-lg">
           <div class="font-sans text-4xl font-bold text-center mb-4 dark:text-white">GIN-VUE-ADMIN</div>
-          <p class="text-gray-600 dark:text-gray-300 mb-2">初始化须知</p>
-          <p class="text-gray-600 dark:text-gray-300 mb-2">1.您需有用一定的VUE和GOLANG基础</p>
-          <p class="text-gray-600 dark:text-gray-300 mb-2">2.请您确认是否已经阅读过<a
+          <p class="text-gray-600 dark:text-gray-300 mb-2">Hướng dẫn khởi tạo</p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2">1. Bạn cần có kiến thức cơ bản về VUE và GOLANG</p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2">2. Vui lòng xác nhận đã đọc tài liệu chính thức <a
             class="text-blue-600 font-bold"
             href="https://www.gin-vue-admin.com"
             target="_blank"
-          >官方文档</a> <a
+          >tại đây</a> và xem <a
             class="text-blue-600 font-bold"
             href="https://www.bilibili.com/video/BV1kv4y1g7nT?p=2"
             target="_blank"
-          >初始化视频</a></p>
-          <p class="text-gray-600 dark:text-gray-300 mb-2">3.请您确认是否了解后续的配置流程</p>
-          <p class="text-gray-600 dark:text-gray-300 mb-2">4.如果您使用mysql数据库，请确认数据库引擎为<span class="text-red-600 font-bold text-3xl ml-2 ">innoDB</span></p>
-          <p class="text-gray-600 dark:text-gray-300 mb-2">注：开发组不为文档中书写过的内容提供无偿服务</p>
+          >video hướng dẫn</a></p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2">3. Vui lòng xác nhận đã hiểu quy trình cấu hình tiếp theo</p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2">4. Nếu bạn sử dụng cơ sở dữ liệu mysql, hãy đảm bảo rằng động cơ cơ sở dữ liệu là <span class="text-red-600 font-bold text-3xl ml-2 ">innoDB</span></p>
+          <p class="text-gray-600 dark:text-gray-300 mb-2">Chú ý: Nhóm phát triển không cung cấp dịch vụ miễn phí cho nội dung không được viết trong tài liệu</p>
           <p class="flex items-center justify-between mt-8">
             <el-button
               type="primary"
               size="large"
               @click="goDoc"
             >
-              阅读文档
+              Đọc tài liệu
             </el-button>
             <el-button
               type="primary"
               size="large"
               @click="showNext"
             >
-              我已确认
+              Tôi đã xác nhận
             </el-button>
           </p>
         </div>
@@ -51,13 +51,13 @@
           label-width="100px"
           size="large"
         >
-          <el-form-item label="管理员密码">
-            <el-input v-model="form.adminPassword" placeholder="admin账号的默认密码"></el-input>
+          <el-form-item label="Mật khẩu quản trị viên">
+            <el-input v-model="form.adminPassword" placeholder="Mật khẩu mặc định của tài khoản admin"></el-input>
           </el-form-item>
-          <el-form-item label="数据库类型">
+          <el-form-item label="Loại cơ sở dữ liệu">
             <el-select
               v-model="form.dbType"
-              placeholder="请选择"
+              placeholder="Vui lòng chọn"
               class="w-full"
               @change="changeDB"
             >
@@ -94,7 +94,7 @@
           >
             <el-input
               v-model="form.host"
-              placeholder="请输入数据库链接"
+              placeholder="Nhập đường dẫn cơ sở dữ liệu"
             />
           </el-form-item>
           <el-form-item
@@ -103,7 +103,7 @@
           >
             <el-input
               v-model="form.port"
-              placeholder="请输入数据库端口"
+              placeholder="Nhập cổng cơ sở dữ liệu"
             />
           </el-form-item>
           <el-form-item
@@ -112,7 +112,7 @@
           >
             <el-input
               v-model="form.userName"
-              placeholder="请输入数据库用户名"
+              placeholder="Nhập tên người dùng cơ sở dữ liệu"
             />
           </el-form-item>
           <el-form-item
@@ -121,13 +121,13 @@
           >
             <el-input
               v-model="form.password"
-              placeholder="请输入数据库密码（没有则为空）"
+              placeholder="Nhập mật khẩu cơ sở dữ liệu (nếu không có thì để trống)"
             />
           </el-form-item>
           <el-form-item label="dbName">
             <el-input
               v-model="form.dbName"
-              placeholder="请输入数据库名称"
+              placeholder="Nhập tên cơ sở dữ liệu"
             />
           </el-form-item>
           <el-form-item
@@ -136,7 +136,7 @@
           >
             <el-input
               v-model="form.dbPath"
-              placeholder="请输入sqlite数据库文件存放路径"
+              placeholder="Nhập đường dẫn lưu trữ tệp cơ sở dữ liệu sqlite"
             />
           </el-form-item>
           <el-form-item>
@@ -144,7 +144,7 @@
               <el-button
                 type="primary"
                 @click="onSubmit"
-              >立即初始化</el-button>
+              >Khởi tạo ngay</el-button>
             </div>
           </el-form-item>
         </el-form>
@@ -285,14 +285,14 @@ const onSubmit = async() => {
   if (form.adminPassword.length < 6) {
     ElMessage({
       type: 'error',
-      message: '密码长度不能小于6位',
+      message: 'Độ dài mật khẩu phải lớn hơn 6 ký tự',
     })
     return
   }
 
   const loading = ElLoading.service({
     lock: true,
-    text: '正在初始化数据库，请稍候',
+    text: 'Đang khởi tạo cơ sở dữ liệu, vui lòng đợi',
     spinner: 'loading',
     background: 'rgba(0, 0, 0, 0.7)',
   })

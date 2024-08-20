@@ -93,13 +93,13 @@ service.interceptors.response.use(
 
     if (!error.response) {
       ElMessageBox.confirm(`
-        <p>检测到请求错误</p>
+        <p>Phát hiện lỗi trong yêu cầu</p>
         <p>${error}</p>
-        `, '请求报错', {
+        `, 'Lỗi yêu cầu', {
         dangerouslyUseHTMLString: true,
         distinguishCancelAndClose: true,
-        confirmButtonText: '稍后重试',
-        cancelButtonText: '取消'
+        confirmButtonText: 'Thử lại sau',
+        cancelButtonText: 'Hủy'
       })
       return
     }
@@ -107,13 +107,13 @@ service.interceptors.response.use(
     switch (error.response.status) {
       case 500:
         ElMessageBox.confirm(`
-        <p>检测到接口错误${error}</p>
-        <p>错误码<span style="color:red"> 500 </span>：此类错误内容常见于后台panic，请先查看后台日志，如果影响您正常使用可强制登出清理缓存</p>
-        `, '接口报错', {
+        <p>Phát hiện lỗi giao diện ${error}</p>
+        <p>Mã lỗi<span style="color:red"> 500 </span>：Lỗi này thường xảy ra khi giao diện chưa được đăng ký (hoặc chưa khởi động lại) hoặc đường dẫn yêu cầu (phương thức) không khớp với đường dẫn API (phương thức)--Nếu đây là mã tự động, hãy kiểm tra xem có khoảng trắng không</p>
+        `, 'Lỗi giao diện', {
           dangerouslyUseHTMLString: true,
           distinguishCancelAndClose: true,
-          confirmButtonText: '清理缓存',
-          cancelButtonText: '取消'
+          confirmButtonText: 'Tôi đã hiểu',
+          cancelButtonText: 'Hủy'
         })
           .then(() => {
             const userStore = useUserStore()
@@ -123,24 +123,24 @@ service.interceptors.response.use(
         break
       case 404:
         ElMessageBox.confirm(`
-          <p>检测到接口错误${error}</p>
-          <p>错误码<span style="color:red"> 404 </span>：此类错误多为接口未注册（或未重启）或者请求路径（方法）与api路径（方法）不符--如果为自动化代码请检查是否存在空格</p>
-          `, '接口报错', {
+          <p>Phát hiện lỗi giao diện ${error}</p>
+          <p>Mã lỗi<span style="color:red"> 404 </span>：Lỗi này thường xảy ra khi giao diện chưa được đăng ký (hoặc chưa khởi động lại) hoặc đường dẫn yêu cầu (phương thức) không khớp với đường dẫn API (phương thức)--Nếu đây là mã tự động, hãy kiểm tra xem có khoảng trắng không</p>
+          `, 'Lỗi giao diện', {
           dangerouslyUseHTMLString: true,
           distinguishCancelAndClose: true,
-          confirmButtonText: '我知道了',
-          cancelButtonText: '取消'
+          confirmButtonText: 'Tôi đã hiểu',
+          cancelButtonText: 'Hủy'
         })
         break
       case 401:
         ElMessageBox.confirm(`
-          <p>无效的令牌</p>
-          <p>错误码:<span style="color:red"> 401 </span>错误信息:${error}</p>
-          `, '身份信息', {
+          <p>Token không hợp lệ</p>
+          <p>Mã lỗi:<span style="color:red"> 401 </span>Thông tin lỗi:${error}</p>
+          `, 'Thông tin định danh', {
           dangerouslyUseHTMLString: true,
           distinguishCancelAndClose: true,
-          confirmButtonText: '重新登录',
-          cancelButtonText: '取消'
+          confirmButtonText: 'Đăng nhập lại',
+          cancelButtonText: 'Hủy'
         })
           .then(() => {
             const userStore = useUserStore()
