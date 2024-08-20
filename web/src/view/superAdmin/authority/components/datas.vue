@@ -1,7 +1,7 @@
 <template>
   <div>
     <warning-bar
-      title="此功能仅用于创建角色和角色的many2many关系表，具体使用还须自己结合表实现业务，详情参考示例代码（客户示例）。此功能不建议使用，建议使用插件市场【组织管理功能（点击前往）】来管理资源权限。"
+      title="Chức năng này chỉ dùng để tạo vai trò và bảng quan hệ many2many của vai trò, cần kết hợp với bảng để thực hiện các chức năng kinh doanh, chi tiết xem mã mẫu (ví dụ khách hàng). Không khuyến nghị sử dụng chức năng này, nên sử dụng 'Quản lý tổ chức' từ 'Thị trường Plugin' để quản lý quyền tài nguyên."
       href="https://plugin.gin-vue-admin.com/#/layout/newPluginInfo?id=36"
     />
     <div class="sticky top-0.5 z-10 my-4">
@@ -9,22 +9,22 @@
         class="float-left"
         type="primary"
         @click="all"
-      >全选</el-button>
+      >Chọn tất cả</el-button>
       <el-button
         class="float-left"
         type="primary"
         @click="self"
-      >本角色</el-button>
+      >Vai trò hiện tại</el-button>
       <el-button
         class="float-left"
         type="primary"
         @click="selfAndChildren"
-      >本角色及子角色</el-button>
+      >Vai trò hiện tại và vai trò con</el-button>
       <el-button
         class="float-right"
         type="primary"
         @click="authDataEnter"
-      >确 定</el-button>
+      >Xác nhận</el-button>
     </div>
     <div class="clear-both pt-4">
       <el-checkbox-group
@@ -68,7 +68,7 @@ const props = defineProps({
 
 const authoritys = ref([])
 const needConfirm = ref(false)
-//   平铺角色
+//   Phân tách vai trò
 const roundAuthority = (authoritysData) => {
   authoritysData && authoritysData.forEach(item => {
     const obj = {}
@@ -92,7 +92,7 @@ const init = () => {
 
 init()
 
-// 暴露给外层使用的切换拦截统一方法
+// Phương thức chuyển tiếp chung được tiết lộ cho bên ngoài
 const enterAndNext = () => {
   authDataEnter()
 }
@@ -121,15 +121,15 @@ const getChildrenId = (row, arrBox) => {
     getChildrenId(item, arrBox)
   })
 }
-// 提交
+// Gửi dữ liệu
 const authDataEnter = async() => {
   const res = await setDataAuthority(props.row)
   if (res.code === 0) {
-    ElMessage({ type: 'success', message: '资源设置成功' })
+    ElMessage({ type: 'success', message: 'Cài đặt tài nguyên thành công' })
   }
 }
 
-//   选择
+//   Chọn
 const selectAuthority = () => {
   emit('changeRow', 'dataAuthorityId', dataAuthorityId.value)
   needConfirm.value = true

@@ -1,9 +1,5 @@
 <template>
-  <el-button
-    type="primary"
-    icon="download"
-    @click="exportTemplate"
-  >下载模板</el-button>
+  <el-button type="primary" icon="download" @click="exportTemplate">Tải xuống</el-button>
 </template>
 
 <script setup>
@@ -16,9 +12,9 @@ const props = defineProps({
 
 import { ElMessage } from 'element-plus'
 
-const exportTemplate = async() => {
+const exportTemplate = async () => {
   if (props.templateId === '') {
-    ElMessage.error('组件未设置模板ID')
+    ElMessage.error('Chưa chọn ID')
     return
   }
   const baseUrl = import.meta.env.VITE_BASE_API

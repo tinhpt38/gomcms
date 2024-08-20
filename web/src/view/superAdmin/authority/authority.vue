@@ -1,13 +1,13 @@
 <template>
   <div class="authority">
-    <warning-bar title="注：右上角头像下拉可切换角色" />
+    <warning-bar title="Chú ý: Bạn có thể chuyển đổi vai trò trong menu thả xuống ở góc trên bên phải" />
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button
           type="primary"
           icon="plus"
           @click="addAuthority(0)"
-        >新增角色</el-button>
+        >Thêm vai trò</el-button>
       </div>
       <el-table
         :data="tableData"
@@ -16,62 +16,57 @@
         style="width: 100%"
       >
         <el-table-column
-          label="角色ID"
+          label="ID vai trò"
           min-width="180"
           prop="authorityId"
         />
         <el-table-column
           align="left"
-          label="角色名称"
+          label="Tên vai trò"
           min-width="180"
           prop="authorityName"
         />
         <el-table-column
           align="left"
-          label="操作"
+          label="Hành động"
           width="460"
         >
           <template #default="scope">
             <el-button
               icon="setting"
-
               type="primary"
               link
               @click="openDrawer(scope.row)"
-            >设置权限</el-button>
+            >Cấu hình quyền</el-button>
             <el-button
               icon="plus"
-
               type="primary"
               link
               @click="addAuthority(scope.row.authorityId)"
-            >新增子角色</el-button>
+            >Thêm vai trò con</el-button>
             <el-button
               icon="copy-document"
-
               type="primary"
               link
               @click="copyAuthorityFunc(scope.row)"
-            >拷贝</el-button>
+            >Sao chép</el-button>
             <el-button
               icon="edit"
-
               type="primary"
               link
               @click="editAuthority(scope.row)"
-            >编辑</el-button>
+            >Chỉnh sửa</el-button>
             <el-button
               icon="delete"
-
               type="primary"
               link
               @click="deleteAuth(scope.row)"
-            >删除</el-button>
+            >Xóa</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
-    <!-- 新增角色弹窗 -->
+    <!-- Dialog thêm vai trò -->
     <el-drawer
       v-model="authorityFormVisible"
       :show-close="false"
@@ -80,11 +75,11 @@
         <div class="flex justify-between items-center">
           <span class="text-lg">{{ authorityTitleForm }}</span>
           <div>
-            <el-button @click="closeAuthorityForm">取 消</el-button>
+            <el-button @click="closeAuthorityForm">Hủy</el-button>
             <el-button
               type="primary"
               @click="submitAuthorityForm"
-            >确 定</el-button>
+            >Xác nhận</el-button>
           </div>
         </div>
       </template>
@@ -95,7 +90,7 @@
         label-width="80px"
       >
         <el-form-item
-          label="父级角色"
+          label="Vai trò cha"
           prop="parentId"
         >
           <el-cascader
@@ -109,7 +104,7 @@
           />
         </el-form-item>
         <el-form-item
-          label="角色ID"
+          label="ID vai trò"
           prop="authorityId"
         >
           <el-input
@@ -120,7 +115,7 @@
           />
         </el-form-item>
         <el-form-item
-          label="角色姓名"
+          label="Tên vai trò"
           prop="authorityName"
         >
           <el-input
@@ -136,27 +131,27 @@
       v-model="drawer"
       :with-header="false"
       size="40%"
-      title="角色配置"
+      title="Cấu hình vai trò"
     >
       <el-tabs
         :before-leave="autoEnter"
         type="border-card"
       >
-        <el-tab-pane label="角色菜单">
+        <el-tab-pane label="Menu vai trò">
           <Menus
             ref="menus"
             :row="activeRow"
             @changeRow="changeRow"
           />
         </el-tab-pane>
-        <el-tab-pane label="角色api">
+        <el-tab-pane label="API vai trò">
           <Apis
             ref="apis"
             :row="activeRow"
             @changeRow="changeRow"
           />
         </el-tab-pane>
-        <el-tab-pane label="资源权限">
+        <el-tab-pane label="Quyền tài nguyên">
           <Datas
             ref="datas"
             :authority="tableData"
@@ -193,7 +188,7 @@ defineOptions({
 
 const mustUint = (rule, value, callback) => {
   if (!/^[0-9]*[1-9][0-9]*$/.test(value)) {
-    return callback(new Error('请输入正整数'))
+    return callback(new Error('Vui lòng nhập số nguyên dương'))
   }
   return callback()
 }
@@ -201,14 +196,14 @@ const mustUint = (rule, value, callback) => {
 const AuthorityOption = ref([
   {
     authorityId: 0,
-    authorityName: '根角色'
+    authorityName: 'Vai trò gốc'
   }
 ])
 const drawer = ref(false)
 const dialogType = ref('add')
 const activeRow = ref({})
 
-const authorityTitleForm = ref('新增角色')
+const authorityTitleForm = ref('Thêm vai trò')
 const authorityFormVisible = ref(false)
 const apiDialogFlag = ref(false)
 const copyForm = ref({})
@@ -220,14 +215,14 @@ const form = ref({
 })
 const rules = ref({
   authorityId: [
-    { required: true, message: '请输入角色ID', trigger: 'blur' },
-    { validator: mustUint, trigger: 'blur', message: '必须为正整数' }
+    { required: true, message: 'Vui lòng nhập ID vai trò', trigger: 'blur' },
+    { validator: mustUint, trigger: 'blur', message: 'Phải là số nguyên dương' }
   ],
   authorityName: [
-    { required: true, message: '请输入角色名', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập tên vai trò', trigger: 'blur' }
   ],
   parentId: [
-    { required: true, message: '请选择父角色', trigger: 'blur' },
+    { required: true, message: 'Vui lòng chọn vai trò cha', trigger: 'blur' },
   ]
 })
 
@@ -237,7 +232,7 @@ const pageSize = ref(999)
 const tableData = ref([])
 const searchInfo = ref({})
 
-// 查询
+// Lấy dữ liệu bảng
 const getTableData = async() => {
   const table = await getAuthorityList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
@@ -265,10 +260,10 @@ const autoEnter = (activeName, oldActiveName) => {
     }
   }
 }
-// 拷贝角色
+// Sao chép vai trò
 const copyAuthorityFunc = (row) => {
   setOptions()
-  authorityTitleForm.value = '拷贝角色'
+  authorityTitleForm.value = 'Sao chép vai trò'
   dialogType.value = 'copy'
   for (const k in form.value) {
     form.value[k] = row[k]
@@ -280,11 +275,11 @@ const openDrawer = (row) => {
   drawer.value = true
   activeRow.value = row
 }
-// 删除角色
+// Xóa vai trò
 const deleteAuth = (row) => {
-  ElMessageBox.confirm('此操作将永久删除该角色, 是否继续?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm('Thao tác này sẽ xóa vai trò vĩnh viễn, bạn có muốn tiếp tục?', 'Cảnh báo', {
+    confirmButtonText: 'Đồng ý',
+    cancelButtonText: 'Hủy',
     type: 'warning'
   })
     .then(async() => {
@@ -292,7 +287,7 @@ const deleteAuth = (row) => {
       if (res.code === 0) {
         ElMessage({
           type: 'success',
-          message: '删除成功!'
+          message: 'Xóa thành công!'
         })
         if (tableData.value.length === 1 && page.value > 1) {
           page.value--
@@ -303,11 +298,11 @@ const deleteAuth = (row) => {
     .catch(() => {
       ElMessage({
         type: 'info',
-        message: '已取消删除'
+        message: 'Đã hủy xóa'
       })
     })
 }
-// 初始化表单
+// Khởi tạo form
 const authorityForm = ref(null)
 const initForm = () => {
   if (authorityForm.value) {
@@ -319,14 +314,13 @@ const initForm = () => {
     parentId: 0
   }
 }
-// 关闭窗口
+// Đóng cửa sổ
 const closeAuthorityForm = () => {
   initForm()
   authorityFormVisible.value = false
   apiDialogFlag.value = false
 }
-// 确定弹窗
-
+// Xác nhận form
 const submitAuthorityForm = () => {
   authorityForm.value.validate(async valid => {
     if (valid) {
@@ -338,7 +332,7 @@ const submitAuthorityForm = () => {
             if (res.code === 0) {
               ElMessage({
                 type: 'success',
-                message: '添加成功!'
+                message: 'Thêm thành công!'
               })
               getTableData()
               closeAuthorityForm()
@@ -351,7 +345,7 @@ const submitAuthorityForm = () => {
             if (res.code === 0) {
               ElMessage({
                 type: 'success',
-                message: '添加成功!'
+                message: 'Cập nhật thành công!'
               })
               getTableData()
               closeAuthorityForm()
@@ -377,7 +371,7 @@ const submitAuthorityForm = () => {
           if (res.code === 0) {
             ElMessage({
               type: 'success',
-              message: '复制成功！'
+              message: 'Sao chép thành công!'
             })
             getTableData()
           }
@@ -393,7 +387,7 @@ const setOptions = () => {
   AuthorityOption.value = [
     {
       authorityId: 0,
-      authorityName: '根角色'
+      authorityName: 'Vai trò gốc'
     }
   ]
   setAuthorityOptions(tableData.value, AuthorityOption.value, false)
@@ -424,19 +418,19 @@ const setAuthorityOptions = (AuthorityData, optionsData, disabled) => {
           }
         })
 }
-// 增加角色
+// Thêm vai trò
 const addAuthority = (parentId) => {
   initForm()
-  authorityTitleForm.value = '新增角色'
+  authorityTitleForm.value = 'Thêm vai trò'
   dialogType.value = 'add'
   form.value.parentId = parentId
   setOptions()
   authorityFormVisible.value = true
 }
-// 编辑角色
+// Chỉnh sửa vai trò
 const editAuthority = (row) => {
   setOptions()
-  authorityTitleForm.value = '编辑角色'
+  authorityTitleForm.value = 'Chỉnh sửa vai trò'
   dialogType.value = 'edit'
   for (const key in form.value) {
     form.value[key] = row[key]

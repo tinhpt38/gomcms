@@ -1,16 +1,7 @@
 <template>
-  <el-upload
-    :action="url"
-    :show-file-list="false"
-    :on-success="handleSuccess"
-    :multiple="false"
-  >
-    <el-button
-      type="primary"
-      icon="upload"
-      class="ml-3"
-    >
-      导入
+  <el-upload :action="url" :show-file-list="false" :on-success="handleSuccess" :multiple="false">
+    <el-button type="primary" icon="upload" class="ml-3">
+      Nhập vào
     </el-button>
   </el-upload>
 </template>

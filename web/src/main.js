@@ -15,11 +15,15 @@ import run from '@/core/gin-vue-admin.js'
 import auth from '@/directive/auth'
 import { store } from '@/pinia'
 import App from './App.vue'
+import viVn from 'element-plus/dist/locale/vi.mjs'
 
 const app = createApp(App)
 app.config.productionTip = false
 
 app
+    .use(ElementPlus, {
+        locale: viVn,
+    })
     .use(run)
     .use(store)
     .use(auth)

@@ -189,7 +189,7 @@ const enterDrawer = async () => {
         break
     }
     if (res.code === 0) {
-      ElMessage.success('操作成功')
+      ElMessage.success('Thành công')
       closeDrawer()
       getTableData()
     }

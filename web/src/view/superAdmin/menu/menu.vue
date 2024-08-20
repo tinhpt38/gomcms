@@ -2,47 +2,22 @@
   <div>
     <div class="gva-table-box">
       <div class="gva-btn-list">
-        <el-button
-          type="primary"
-          icon="plus"
-          @click="addMenu(0)"
-        >
-          新增根菜单
+        <el-button type="primary" icon="plus" @click="addMenu(0)">
+          Thêm menu gốc
         </el-button>
       </div>
 
-      <!-- 由于此处菜单跟左侧列表一一对应所以不需要分页 pageSize默认999 -->
-      <el-table
-        :data="tableData"
-        row-key="ID"
-      >
-        <el-table-column
-          align="left"
-          label="ID"
-          min-width="100"
-          prop="ID"
-        />
-        <el-table-column
-          align="left"
-          label="展示名称"
-          min-width="120"
-          prop="authorityName"
-        >
+      <!-- Vì menu ở đây tương ứng với danh sách bên trái nên không cần phân trang, pageSize mặc định là 999 -->
+      <el-table :data="tableData" row-key="ID">
+        <el-table-column align="left" label="ID" min-width="100" prop="ID" />
+        <el-table-column align="left" label="Tên hiển thị" min-width="120" prop="authorityName">
           <template #default="scope">
             <span>{{ scope.row.meta.title }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          align="left"
-          label="图标"
-          min-width="140"
-          prop="authorityName"
-        >
+        <el-table-column align="left" label="Biểu tượng" min-width="140" prop="authorityName">
           <template #default="scope">
-            <div
-              v-if="scope.row.meta.icon"
-              class="icon-column"
-            >
+            <div v-if="scope.row.meta.icon" class="icon-column">
               <el-icon>
                 <component :is="scope.row.meta.icon" />
               </el-icon>
@@ -50,322 +25,152 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column
-          align="left"
-          label="路由Name"
-          show-overflow-tooltip
-          min-width="160"
-          prop="name"
-        />
-        <el-table-column
-          align="left"
-          label="路由Path"
-          show-overflow-tooltip
-          min-width="160"
-          prop="path"
-        />
-        <el-table-column
-          align="left"
-          label="是否隐藏"
-          min-width="100"
-          prop="hidden"
-        >
+        <el-table-column align="left" label="Tên đường dẫn" show-overflow-tooltip min-width="160" prop="name" />
+        <el-table-column align="left" label="Đường dẫn" show-overflow-tooltip min-width="160" prop="path" />
+        <el-table-column align="left" label="Ẩn/Hiện" min-width="100" prop="hidden">
           <template #default="scope">
-            <span>{{ scope.row.hidden ? "隐藏" : "显示" }}</span>
+            <span>{{ scope.row.hidden ? "Ẩn" : "Hiện" }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          align="left"
-          label="父节点"
-          min-width="90"
-          prop="parentId"
-        />
-        <el-table-column
-          align="left"
-          label="排序"
-          min-width="70"
-          prop="sort"
-        />
-        <el-table-column
-          align="left"
-          label="文件路径"
-          min-width="360"
-          prop="component"
-        />
-        <el-table-column
-          align="left"
-          fixed="right"
-          label="操作"
-          width="300"
-        >
+        <el-table-column align="left" label="Nút cha" min-width="90" prop="parentId" />
+        <el-table-column align="left" label="Thứ tự" min-width="70" prop="sort" />
+        <el-table-column align="left" label="Đường dẫn tệp" min-width="360" prop="component" />
+        <el-table-column align="left" fixed="right" label="Thao tác" width="300">
           <template #default="scope">
-            <el-button
-              type="primary"
-              link
-              icon="plus"
-              @click="addMenu(scope.row.ID)"
-            >
-              添加子菜单
+            <el-button type="primary" link icon="plus" @click="addMenu(scope.row.ID)">
+              Thêm menu con
             </el-button>
-            <el-button
-              type="primary"
-              link
-              icon="edit"
-              @click="editMenu(scope.row.ID)"
-            >
-              编辑
+            <el-button type="primary" link icon="edit" @click="editMenu(scope.row.ID)">
+              Chỉnh sửa
             </el-button>
-            <el-button
-              type="primary"
-              link
-              icon="delete"
-              @click="deleteMenu(scope.row.ID)"
-            >
-              删除
+            <el-button type="primary" link icon="delete" @click="deleteMenu(scope.row.ID)">
+              Xóa
             </el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
-    <el-drawer
-      v-model="dialogFormVisible"
-      size="60%"
-      :before-close="handleClose"
-      :show-close="false"
-    >
+    <el-drawer v-model="dialogFormVisible" size="60%" :before-close="handleClose" :show-close="false">
       <template #header>
         <div class="flex justify-between items-center">
           <span class="text-lg">{{ dialogTitle }}</span>
           <div>
             <el-button @click="closeDialog">
-              取 消
+              Hủy bỏ
             </el-button>
-            <el-button
-              type="primary"
-              @click="enterDialog"
-            >
-              确 定
+            <el-button type="primary" @click="enterDialog">
+              Xác nhận
             </el-button>
           </div>
         </div>
       </template>
 
-      <warning-bar title="新增菜单，需要在角色管理内配置权限才可使用" />
-      <el-form
-        v-if="dialogFormVisible"
-        ref="menuForm"
-        :inline="true"
-        :model="form"
-        :rules="rules"
-        label-position="top"
-      >
+      <warning-bar title="Thêm menu, cần cấu hình quyền trong quản lý vai trò để sử dụng" />
+      <el-form v-if="dialogFormVisible" ref="menuForm" :inline="true" :model="form" :rules="rules" label-position="top">
         <el-row class="w-full">
           <el-col :span="16">
-            <el-form-item
-              label="文件路径"
-              prop="component"
-            >
-              <el-select
-                v-model="form.component"
-                filterable
-                allow-create
-                autocomplete="off"
-                style="width: 100%"
-                placeholder="页面:view/xxx/xx.vue 插件:plugin/xx/xx.vue"
-                default-first-option
-                @change="fmtComponent"
-              >
-                <el-option
-                  v-for="(item,path) in pathOptions"
-                  :key="path"
-                  :label="path"
-                  :value="path"
-                />
+            <el-form-item label="Đường dẫn tệp" prop="component">
+              <el-select v-model="form.component" filterable allow-create autocomplete="off" style="width: 100%"
+                placeholder="Trang:view/xxx/xx.vue Plugin:plugin/xx/xx.vue" default-first-option @change="fmtComponent">
+                <el-option v-for="(item, path) in pathOptions" :key="path" :label="path" :value="path" />
               </el-select>
-              <span style="font-size: 12px; margin-right: 12px">如果菜单包含子菜单，请创建router-view二级路由页面或者</span><el-button
-                style="margin-top: 4px"
-                @click="form.component = 'view/routerHolder.vue'"
-              >
-                点我设置
+              <span style="font-size: 12px; margin-right: 12px">Nếu menu có menu con, vui lòng tạo trang router-view cấp
+                hai
+                hoặc</span><el-button style="margin-top: 4px" @click="form.component = 'view/routerHolder.vue'">
+                Nhấn vào đây để cài đặt
               </el-button>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item
-              label="展示名称"
-              prop="meta.title"
-            >
-              <el-input
-                v-model="form.meta.title"
-                autocomplete="off"
-              />
+            <el-form-item label="Tên hiển thị" prop="meta.title">
+              <el-input v-model="form.meta.title" autocomplete="off" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row class="w-full">
           <el-col :span="8">
-            <el-form-item
-              label="路由Name"
-              prop="path"
-            >
-              <el-input
-                v-model="form.name"
-                autocomplete="off"
-                placeholder="唯一英文字符串"
-                @change="changeName"
-              />
+            <el-form-item label="Tên đường dẫn" prop="path">
+              <el-input v-model="form.name" autocomplete="off" placeholder="Chuỗi duy nhất bằng tiếng Anh"
+                @change="changeName" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item
-              prop="path"
-            >
+            <el-form-item prop="path">
               <template #label>
                 <span style="display: inline-flex; align-items: center">
-                  <span>路由Path</span>
-                  <el-checkbox
-                    v-model="checkFlag"
-                    style="margin-left: 12px; height: auto"
-                  >添加参数</el-checkbox>
+                  <span>Đường dẫn</span>
+                  <el-checkbox v-model="checkFlag" style="margin-left: 12px; height: auto">Thêm tham số</el-checkbox>
                 </span>
               </template>
 
-              <el-input
-                v-model="form.path"
-                :disabled="!checkFlag"
-                autocomplete="off"
-                placeholder="建议只在后方拼接参数"
-              />
+              <el-input v-model="form.path" :disabled="!checkFlag" autocomplete="off"
+                placeholder="Nên chỉ thêm tham số ở phía sau" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item
-              label="是否隐藏"
-            >
-              <el-select
-                v-model="form.hidden"
-                style="width: 100%"
-                placeholder="是否在列表隐藏"
-              >
-                <el-option
-                  :value="false"
-                  label="否"
-                />
-                <el-option
-                  :value="true"
-                  label="是"
-                />
+            <el-form-item label="Ẩn/Hiện">
+              <el-select v-model="form.hidden" style="width: 100%" placeholder="Ẩn/Hiện trong danh sách">
+                <el-option :value="false" label="Không" />
+                <el-option :value="true" label="Có" />
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row class="w-full">
           <el-col :span="8">
-            <el-form-item
-              label="父节点ID"
-            >
-              <el-cascader
-                v-model="form.parentId"
-                style="width: 100%"
-                :disabled="!isEdit"
-                :options="menuOption"
-                :props="{
-                  checkStrictly: true,
-                  label: 'title',
-                  value: 'ID',
-                  disabled: 'disabled',
-                  emitPath: false,
-                }"
-                :show-all-levels="false"
-                filterable
-              />
+            <el-form-item label="ID nút cha">
+              <el-cascader v-model="form.parentId" style="width: 100%" :disabled="!isEdit" :options="menuOption" :props="{
+                checkStrictly: true,
+                label: 'title',
+                value: 'ID',
+                disabled: 'disabled',
+                emitPath: false,
+              }" :show-all-levels="false" filterable />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item
-              label="图标"
-              prop="meta.icon"
-            >
-              <icon
-                :meta="form.meta"
-              />
+            <el-form-item label="Biểu tượng" prop="meta.icon">
+              <icon :meta="form.meta" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item
-              label="排序标记"
-              prop="sort"
-            >
-              <el-input
-                v-model.number="form.sort"
-                autocomplete="off"
-              />
+            <el-form-item label="Đánh dấu sắp xếp" prop="sort">
+              <el-input v-model.number="form.sort" autocomplete="off" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row class="w-full">
           <el-col :span="8">
-            <el-form-item
-              prop="meta.activeName"
-            >
+            <el-form-item prop="meta.activeName">
               <template #label>
                 <div>
-                  <span> 高亮菜单 </span>
+                  <span>Menu được tô sáng</span>
                   <el-tooltip
-                    content="注：当到达此路由时候，指定左侧菜单指定name会处于活跃状态（亮起），可为空，为空则为本路由Name。"
-                    placement="top"
-                    effect="light"
-                  >
-                    <el-icon><QuestionFilled /></el-icon>
+                    content="Chú ý: Khi đến đường dẫn này, menu bên trái được chỉ định sẽ ở trạng thái hoạt động (sáng lên), có thể để trống, nếu để trống thì sẽ là tên đường dẫn hiện tại."
+                    placement="top" effect="light">
+                    <el-icon>
+                      <QuestionFilled />
+                    </el-icon>
                   </el-tooltip>
                 </div>
               </template>
-              <el-input
-                v-model="form.meta.activeName"
-                :placeholder="form.name"
-                autocomplete="off"
-              />
+              <el-input v-model="form.meta.activeName" :placeholder="form.name" autocomplete="off" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item
-              label="KeepAlive"
-              prop="meta.keepAlive"
-            >
-              <el-select
-                v-model="form.meta.keepAlive"
-                style="width: 100%"
-                placeholder="是否keepAlive缓存页面"
-              >
-                <el-option
-                  :value="false"
-                  label="否"
-                />
-                <el-option
-                  :value="true"
-                  label="是"
-                />
+            <el-form-item label="KeepAlive" prop="meta.keepAlive">
+              <el-select v-model="form.meta.keepAlive" style="width: 100%"
+                placeholder="Có giữ trạng thái trang hay không">
+                <el-option :value="false" label="Không" />
+                <el-option :value="true" label="Có" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item
-              label="CloseTab"
-              prop="meta.closeTab"
-            >
-              <el-select
-                v-model="form.meta.closeTab"
-                style="width: 100%"
-                placeholder="是否自动关闭tab"
-              >
-                <el-option
-                  :value="false"
-                  label="否"
-                />
-                <el-option
-                  :value="true"
-                  label="是"
-                />
+            <el-form-item label="CloseTab" prop="meta.closeTab">
+              <el-select v-model="form.meta.closeTab" style="width: 100%" placeholder="Tự động đóng tab hay không">
+                <el-option :value="false" label="Không" />
+                <el-option :value="true" label="Có" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -375,30 +180,19 @@
             <el-form-item>
               <template #label>
                 <div>
-                  <span> 是否为基础页面 </span>
-                  <el-tooltip
-                    content="此项选择为是，则不会展示左侧菜单以及顶部信息。"
-                    placement="top"
-                    effect="light"
-                  >
-                    <el-icon><QuestionFilled /></el-icon>
+                  <span>Trang cơ bản</span>
+                  <el-tooltip content="Nếu chọn là có, thì không hiển thị menu bên trái và thông tin phía trên."
+                    placement="top" effect="light">
+                    <el-icon>
+                      <QuestionFilled />
+                    </el-icon>
                   </el-tooltip>
                 </div>
               </template>
 
-              <el-select
-                v-model="form.meta.defaultMenu"
-                style="width: 100%"
-                placeholder="是否为基础页面"
-              >
-                <el-option
-                  :value="false"
-                  label="否"
-                />
-                <el-option
-                  :value="true"
-                  label="是"
-                />
+              <el-select v-model="form.meta.defaultMenu" style="width: 100%" placeholder="Trang cơ bản hay không">
+                <el-option :value="false" label="Không" />
+                <el-option :value="true" label="Có" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -406,59 +200,27 @@
       </el-form>
       <div>
         <div class="flex items-center gap-2">
-          <el-button
-            type="primary"
-            icon="edit"
-            @click="addParameter(form)"
-          >
-            新增菜单参数
+          <el-button type="primary" icon="edit" @click="addParameter(form)">
+            Thêm tham số menu
           </el-button>
         </div>
-        <el-table
-          :data="form.parameters"
-          style="width: 100%; margin-top: 12px"
-        >
-          <el-table-column
-            align="left"
-            prop="type"
-            label="参数类型"
-            width="180"
-          >
+        <el-table :data="form.parameters" style="width: 100%; margin-top: 12px">
+          <el-table-column align="left" prop="type" label="Loại tham số" width="180">
             <template #default="scope">
-              <el-select
-                v-model="scope.row.type"
-                placeholder="请选择"
-              >
-                <el-option
-                  key="query"
-                  value="query"
-                  label="query"
-                />
-                <el-option
-                  key="params"
-                  value="params"
-                  label="params"
-                />
+              <el-select v-model="scope.row.type" placeholder="Vui lòng chọn">
+                <el-option key="query" value="query" label="query" />
+                <el-option key="params" value="params" label="params" />
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="key"
-            label="参数key"
-            width="180"
-          >
+          <el-table-column align="left" prop="key" label="Khóa tham số" width="180">
             <template #default="scope">
               <div>
                 <el-input v-model="scope.row.key" />
               </div>
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="value"
-            label="参数值"
-          >
+          <el-table-column align="left" prop="value" label="Giá trị tham số">
             <template #default="scope">
               <div>
                 <el-input v-model="scope.row.value" />
@@ -468,12 +230,8 @@
           <el-table-column align="left">
             <template #default="scope">
               <div>
-                <el-button
-                  type="danger"
-                  icon="delete"
-                  @click="deleteParameter(form.parameters, scope.$index)"
-                >
-                  删除
+                <el-button type="danger" icon="delete" @click="deleteParameter(form.parameters, scope.$index)">
+                  Xóa
                 </el-button>
               </div>
             </template>
@@ -481,45 +239,25 @@
         </el-table>
 
         <div class="flex items-center gap-2 mt-3">
-          <el-button
-            type="primary"
-            icon="edit"
-            @click="addBtn(form)"
-          >
-            新增可控按钮
+          <el-button type="primary" icon="edit" @click="addBtn(form)">
+            Thêm nút điều khiển
           </el-button>
-          <el-icon
-            class="cursor-pointer"
-            @click="
-              toDoc('https://www.gin-vue-admin.com/guide/web/button-auth.html')
-            "
-          >
+          <el-icon class="cursor-pointer" @click="
+            toDoc('https://www.gin-vue-admin.com/guide/web/button-auth.html')
+            ">
             <QuestionFilled />
           </el-icon>
         </div>
 
-        <el-table
-          :data="form.menuBtn"
-          style="width: 100%; margin-top: 12px"
-        >
-          <el-table-column
-            align="left"
-            prop="name"
-            label="按钮名称"
-            width="180"
-          >
+        <el-table :data="form.menuBtn" style="width: 100%; margin-top: 12px">
+          <el-table-column align="left" prop="name" label="Tên nút" width="180">
             <template #default="scope">
               <div>
                 <el-input v-model="scope.row.name" />
               </div>
             </template>
           </el-table-column>
-          <el-table-column
-            align="left"
-            prop="name"
-            label="备注"
-            width="180"
-          >
+          <el-table-column align="left" prop="name" label="Ghi chú" width="180">
             <template #default="scope">
               <div>
                 <el-input v-model="scope.row.desc" />
@@ -529,12 +267,8 @@
           <el-table-column align="left">
             <template #default="scope">
               <div>
-                <el-button
-                  type="danger"
-                  icon="delete"
-                  @click="deleteBtn(form.menuBtn, scope.$index)"
-                >
-                  删除
+                <el-button type="danger" icon="delete" @click="deleteBtn(form.menuBtn, scope.$index)">
+                  Xóa
                 </el-button>
               </div>
             </template>
@@ -570,18 +304,18 @@ defineOptions({
 
 const pathOptions = reactive({})
 
-onMounted(()=>{
+onMounted(() => {
   for (let pathInfoKey in pathInfo) {
-    // 取消掉最前面的 /src/
+    // Bỏ đi phần đầu tiên /src/
     pathOptions[pathInfoKey.replace(/^\/src\//, '')] = pathInfo[pathInfoKey]
   }
 })
 
 const rules = reactive({
-  path: [{ required: true, message: '请输入菜单name', trigger: 'blur' }],
-  component: [{ required: true, message: '请输入文件路径', trigger: 'blur' }],
+  path: [{ required: true, message: 'Vui lòng nhập tên menu', trigger: 'blur' }],
+  component: [{ required: true, message: 'Vui lòng nhập đường dẫn tệp tin', trigger: 'blur' }],
   'meta.title': [
-    { required: true, message: '请输入菜单展示名称', trigger: 'blur' },
+    { required: true, message: 'Vui lòng nhập tên hiển thị menu', trigger: 'blur' },
   ],
 })
 
@@ -590,8 +324,8 @@ const total = ref(0)
 const pageSize = ref(999)
 const tableData = ref([])
 const searchInfo = ref({})
-// 查询
-const getTableData = async() => {
+// Tìm kiếm
+const getTableData = async () => {
   const table = await getMenuList({
     page: page.value,
     pageSize: pageSize.value,
@@ -607,7 +341,7 @@ const getTableData = async() => {
 
 getTableData()
 
-// 新增参数
+// Thêm tham số
 const addParameter = (form) => {
   if (!form.parameters) {
     form.parameters = []
@@ -625,12 +359,12 @@ const fmtComponent = () => {
   form.value.path = form.value.name
 }
 
-// 删除参数
+// Xóa tham số
 const deleteParameter = (parameters, index) => {
   parameters.splice(index, 1)
 }
 
-// 新增可控按钮
+// Thêm nút điều khiển
 const addBtn = (form) => {
   if (!form.menuBtn) {
     form.menuBtn = []
@@ -640,8 +374,8 @@ const addBtn = (form) => {
     desc: '',
   })
 }
-// 删除可控按钮
-const deleteBtn = async(btns, index) => {
+// Xóa nút điều khiển
+const deleteBtn = async (btns, index) => {
   const btn = btns[index]
   if (btn.ID === 0) {
     btns.splice(index, 1)
@@ -679,19 +413,19 @@ const handleClose = (done) => {
   initForm()
   done()
 }
-// 删除菜单
+// Xóa menu
 const deleteMenu = (ID) => {
-  ElMessageBox.confirm('此操作将永久删除所有角色下该菜单, 是否继续?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm('Thao tác này sẽ xóa vĩnh viễn tất cả các menu dưới vai trò này, bạn có muốn tiếp tục?', 'Cảnh báo', {
+    confirmButtonText: 'Đồng ý',
+    cancelButtonText: 'Hủy',
     type: 'warning',
   })
-    .then(async() => {
+    .then(async () => {
       const res = await deleteBaseMenu({ ID })
       if (res.code === 0) {
         ElMessage({
           type: 'success',
-          message: '删除成功!',
+          message: 'Xóa thành công!',
         })
         if (tableData.value.length === 1 && page.value > 1) {
           page.value--
@@ -702,11 +436,11 @@ const deleteMenu = (ID) => {
     .catch(() => {
       ElMessage({
         type: 'info',
-        message: '已取消删除',
+        message: 'Đã hủy xóa',
       })
     })
 }
-// 初始化弹窗内表格方法
+// Khởi tạo các phương thức bảng trong hộp thoại
 const menuForm = ref(null)
 const checkFlag = ref(false)
 const initForm = () => {
@@ -728,16 +462,16 @@ const initForm = () => {
     },
   }
 }
-// 关闭弹窗
+// Đóng hộp thoại
 
 const dialogFormVisible = ref(false)
 const closeDialog = () => {
   initForm()
   dialogFormVisible.value = false
 }
-// 添加menu
-const enterDialog = async() => {
-  menuForm.value.validate(async(valid) => {
+// Thêm menu
+const enterDialog = async () => {
+  menuForm.value.validate(async (valid) => {
     if (valid) {
       let res
       if (isEdit.value) {
@@ -748,7 +482,7 @@ const enterDialog = async() => {
       if (res.code === 0) {
         ElMessage({
           type: 'success',
-          message: isEdit.value ? '编辑成功' : '添加成功!',
+          message: isEdit.value ? 'Chỉnh sửa thành công' : 'Thêm thành công!',
         })
         getTableData()
       }
@@ -761,14 +495,14 @@ const enterDialog = async() => {
 const menuOption = ref([
   {
     ID: '0',
-    title: '根菜单',
+    title: 'Menu gốc',
   },
 ])
 const setOptions = () => {
   menuOption.value = [
     {
       ID: 0,
-      title: '根目录',
+      title: 'Thư mục gốc',
     },
   ]
   setMenuOptions(tableData.value, menuOption.value, false)
@@ -800,19 +534,19 @@ const setMenuOptions = (menuData, optionsData, disabled) => {
     })
 }
 
-// 添加菜单方法，id为 0则为添加根菜单
+// Phương thức thêm menu, id = 0 là thêm menu gốc
 const isEdit = ref(false)
-const dialogTitle = ref('新增菜单')
+const dialogTitle = ref('Thêm menu')
 const addMenu = (id) => {
-  dialogTitle.value = '新增菜单'
+  dialogTitle.value = 'Thêm menu'
   form.value.parentId = id
   isEdit.value = false
   setOptions()
   dialogFormVisible.value = true
 }
-// 修改菜单方法
-const editMenu = async(id) => {
-  dialogTitle.value = '编辑菜单'
+// Phương thức chỉnh sửa menu
+const editMenu = async (id) => {
+  dialogTitle.value = 'Chỉnh sửa menu'
   const res = await getBaseMenuById({ id })
   form.value = res.data.menu
   isEdit.value = true
@@ -825,9 +559,11 @@ const editMenu = async(id) => {
 .warning {
   color: #dc143c;
 }
+
 .icon-column {
   display: flex;
   align-items: center;
+
   .el-icon {
     margin-right: 8px;
   }

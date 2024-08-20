@@ -6,23 +6,23 @@
         :inline="true"
         :model="searchInfo"
       >
-        <el-form-item label="路径">
+        <el-form-item label="Đường dẫn">
           <el-input
             v-model="searchInfo.path"
-            placeholder="路径"
+            placeholder="Đường dẫn"
           />
         </el-form-item>
-        <el-form-item label="描述">
+        <el-form-item label="Mô tả">
           <el-input
             v-model="searchInfo.description"
-            placeholder="描述"
+            placeholder="Mô tả"
           />
         </el-form-item>
-        <el-form-item label="API分组">
+        <el-form-item label="Nhóm API">
           <el-select
             v-model="searchInfo.apiGroup"
             clearable
-            placeholder="请选择"
+            placeholder="Vui lòng chọn"
           >
             <el-option
               v-for="item in apiGroupOptions"
@@ -32,11 +32,11 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="请求">
+        <el-form-item label="Yêu cầu">
           <el-select
             v-model="searchInfo.method"
             clearable
-            placeholder="请选择"
+            placeholder="Vui lòng chọn"
           >
             <el-option
               v-for="item in methodOptions"
@@ -52,13 +52,13 @@
             icon="search"
             @click="onSubmit"
           >
-            查询
+            Tìm kiếm
           </el-button>
           <el-button
             icon="refresh"
             @click="onReset"
           >
-            重置
+            Đặt lại
           </el-button>
         </el-form-item>
       </el-form>
@@ -70,26 +70,26 @@
           icon="plus"
           @click="openDialog('addApi')"
         >
-          新增
+          Thêm mới
         </el-button>
         <el-button
           icon="delete"
           :disabled="!apis.length"
           @click="onDelete"
         >
-          删除
+          Xóa
         </el-button>
         <el-button
           icon="Refresh"
           @click="onFresh"
         >
-          刷新缓存
+          Làm mới bộ nhớ cache
         </el-button>
         <el-button
           icon="Compass"
           @click="onSync"
         >
-          同步API
+          Đồng bộ API
         </el-button>
         <ExportTemplate
           template-id="api"
@@ -121,28 +121,28 @@
         />
         <el-table-column
           align="left"
-          label="API路径"
+          label="Đường dẫn API"
           min-width="150"
           prop="path"
           sortable="custom"
         />
         <el-table-column
           align="left"
-          label="API分组"
+          label="Nhóm API"
           min-width="150"
           prop="apiGroup"
           sortable="custom"
         />
         <el-table-column
           align="left"
-          label="API简介"
+          label="Giới thiệu API"
           min-width="150"
           prop="description"
           sortable="custom"
         />
         <el-table-column
           align="left"
-          label="请求"
+          label="Yêu cầu"
           min-width="150"
           prop="method"
           sortable="custom"
@@ -157,7 +157,7 @@
         <el-table-column
           align="left"
           fixed="right"
-          label="操作"
+          label="Hành động"
           width="200"
         >
           <template #default="scope">
@@ -168,7 +168,7 @@
               link
               @click="editApiFunc(scope.row)"
             >
-              编辑
+              Chỉnh sửa
             </el-button>
             <el-button
               icon="delete"
@@ -177,7 +177,7 @@
               link
               @click="deleteApiFunc(scope.row)"
             >
-              删除
+              Xóa
             </el-button>
           </template>
         </el-table-column>
@@ -201,45 +201,45 @@
       :before-close="closeSyncDialog"
       :show-close="false"
     >
-      <warning-bar title="同步API，不输入路由分组将不会被自动同步" />
+      <warning-bar title="Đồng bộ API, không nhập nhóm định tuyến sẽ không được đồng bộ tự động" />
       <template #header>
         <div class="flex justify-between items-center">
-          <span class="text-lg">同步路由</span>
+          <span class="text-lg">Đồng bộ định tuyến</span>
           <div>
             <el-button @click="closeSyncDialog">
-              取 消
+              Hủy bỏ
             </el-button>
             <el-button
               type="primary"
               :loading="syncing"
               @click="enterSyncDialog"
             >
-              确 定
+              Xác nhận
             </el-button>
           </div>
         </div>
       </template>
 
-      <h4>新增路由 <span class="text-xs text-gray-500 ml-2 font-normal">存在于当前路由中，但是不存在于api表</span></h4>
+      <h4>Định tuyến mới <span class="text-xs text-gray-500 ml-2 font-normal">Tồn tại trong định tuyến hiện tại nhưng không tồn tại trong bảng api</span></h4>
       <el-table
         :data="syncApiData.newApis"
       >
         <el-table-column
           align="left"
-          label="API路径"
+          label="Đường dẫn API"
           min-width="150"
           prop="path"
         />
         <el-table-column
           align="left"
-          label="API分组"
+          label="Nhóm API"
           min-width="150"
           prop="apiGroup"
         >
           <template #default="{row}">
             <el-select
               v-model="row.apiGroup"
-              placeholder="请选择或新增"
+              placeholder="Vui lòng chọn hoặc thêm mới"
               allow-create filterable default-first-option
             >
               <el-option
@@ -253,7 +253,7 @@
         </el-table-column>
         <el-table-column
           align="left"
-          label="API简介"
+          label="Giới thiệu API"
           min-width="150"
           prop="description"
         >
@@ -266,7 +266,7 @@
         </el-table-column>
         <el-table-column
           align="left"
-          label="请求"
+          label="Yêu cầu"
           min-width="150"
           prop="method"
         >
@@ -277,43 +277,43 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="操作"
+          label="Hành động"
           min-width="150"
           fixed="right"
         >
           <template #default="{row}">
             <el-button type="primary" text @click="ignoreApiFunc(row,true)">
-              忽略
+              Bỏ qua
             </el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <h4>已删除路由 <span class="text-xs text-gray-500 ml-2 font-normal">已经不存在于当前项目的路由中，确定同步后会自动从apis表删除</span></h4>
+      <h4>Định tuyến đã xóa <span class="text-xs text-gray-500 ml-2 font-normal">Không còn tồn tại trong dự án hiện tại, sau khi đồng bộ sẽ tự động xóa khỏi bảng apis</span></h4>
       <el-table
         :data="syncApiData.deleteApis"
       >
         <el-table-column
           align="left"
-          label="API路径"
+          label="Đường dẫn API"
           min-width="150"
           prop="path"
         />
         <el-table-column
           align="left"
-          label="API分组"
+          label="Nhóm API"
           min-width="150"
           prop="apiGroup"
         />
         <el-table-column
           align="left"
-          label="API简介"
+          label="Giới thiệu API"
           min-width="150"
           prop="description"
         />
         <el-table-column
           align="left"
-          label="请求"
+          label="Yêu cầu"
           min-width="150"
           prop="method"
         >
@@ -325,31 +325,31 @@
         </el-table-column>
       </el-table>
 
-      <h4>忽略路由 <span class="text-xs text-gray-500 ml-2 font-normal">忽略路由不参与api同步，常见为不需要进行鉴权行为的路由</span></h4>
+      <h4>Bỏ qua định tuyến <span class="text-xs text-gray-500 ml-2 font-normal">Bỏ qua định tuyến không tham gia đồng bộ api, thường là những định tuyến không cần xác thực</span></h4>
       <el-table
         :data="syncApiData.ignoreApis"
       >
         <el-table-column
           align="left"
-          label="API路径"
+          label="Đường dẫn API"
           min-width="150"
           prop="path"
         />
         <el-table-column
           align="left"
-          label="API分组"
+          label="Nhóm API"
           min-width="150"
           prop="apiGroup"
         />
         <el-table-column
           align="left"
-          label="API简介"
+          label="Giới thiệu API"
           min-width="150"
           prop="description"
         />
         <el-table-column
           align="left"
-          label="请求"
+          label="Yêu cầu"
           min-width="150"
           prop="method"
         >
@@ -360,13 +360,13 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="操作"
+          label="Hành động"
           min-width="150"
           fixed="right"
         >
           <template #default="{row}">
             <el-button type="primary" text @click="ignoreApiFunc(row,false)">
-              取消忽略
+              Hủy bỏ bỏ qua
             </el-button>
           </template>
         </el-table-column>
@@ -384,19 +384,19 @@
           <span class="text-lg">{{ dialogTitle }}</span>
           <div>
             <el-button @click="closeDialog">
-              取 消
+              Hủy bỏ
             </el-button>
             <el-button
               type="primary"
               @click="enterDialog"
             >
-              确 定
+              Xác nhận
             </el-button>
           </div>
         </div>
       </template>
 
-      <warning-bar title="新增API，需要在角色管理内配置权限才可使用" />
+      <warning-bar title="Thêm mới API, cần cấu hình quyền trong quản lý vai trò để sử dụng" />
       <el-form
         ref="apiForm"
         :model="form"
@@ -404,7 +404,7 @@
         label-width="80px"
       >
         <el-form-item
-          label="路径"
+          label="Đường dẫn"
           prop="path"
         >
           <el-input
@@ -413,12 +413,12 @@
           />
         </el-form-item>
         <el-form-item
-          label="请求"
+          label="Yêu cầu"
           prop="method"
         >
           <el-select
             v-model="form.method"
-            placeholder="请选择"
+            placeholder="Vui lòng chọn"
             style="width:100%"
           >
             <el-option
@@ -430,12 +430,12 @@
           </el-select>
         </el-form-item>
         <el-form-item
-          label="api分组"
+          label="Nhóm API"
           prop="apiGroup"
         >
           <el-select
             v-model="form.apiGroup"
-            placeholder="请选择或新增" allow-create filterable default-first-option
+            placeholder="Vui lòng chọn hoặc thêm mới" allow-create filterable default-first-option
           >
             <el-option
               v-for="item in apiGroupOptions"
@@ -446,7 +446,7 @@
           </el-select>
         </el-form-item>
         <el-form-item
-          label="api简介"
+          label="Giới thiệu API"
           prop="description"
         >
           <el-input
@@ -500,37 +500,37 @@ const form = ref({
 const methodOptions = ref([
   {
     value: 'POST',
-    label: '创建',
+    label: 'Tạo mới',
     type: 'success'
   },
   {
     value: 'GET',
-    label: '查看',
+    label: 'Xem',
     type: ''
   },
   {
     value: 'PUT',
-    label: '更新',
+    label: 'Cập nhật',
     type: 'warning'
   },
   {
     value: 'DELETE',
-    label: '删除',
+    label: 'Xóa',
     type: 'danger'
   }
 ])
 
 const type = ref('')
 const rules = ref({
-  path: [{ required: true, message: '请输入api路径', trigger: 'blur' }],
+  path: [{ required: true, message: 'Vui lòng nhập đường dẫn API', trigger: 'blur' }],
   apiGroup: [
-    { required: true, message: '请输入组名称', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập tên nhóm', trigger: 'blur' }
   ],
   method: [
-    { required: true, message: '请选择请求方式', trigger: 'blur' }
+    { required: true, message: 'Vui lòng chọn phương thức', trigger: 'blur' }
   ],
   description: [
-    { required: true, message: '请输入api介绍', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập mô tả API', trigger: 'blur' }
   ]
 })
 
@@ -592,7 +592,7 @@ const enterSyncDialog = async() => {
 const onReset = () => {
   searchInfo.value = {}
 }
-// 搜索
+// Tìm kiếm
 
 const onSubmit = () => {
   page.value = 1
@@ -600,7 +600,7 @@ const onSubmit = () => {
   getTableData()
 }
 
-// 分页
+// Phân trang
 const handleSizeChange = (val) => {
   pageSize.value = val
   getTableData()
@@ -611,7 +611,7 @@ const handleCurrentChange = (val) => {
   getTableData()
 }
 
-// 排序
+// Sắp xếp
 const sortChange = ({ prop, order }) => {
   if (prop) {
     if (prop === 'ID') {
@@ -623,7 +623,7 @@ const sortChange = ({ prop, order }) => {
   getTableData()
 }
 
-// 查询
+// Tìm kiếm
 const getTableData = async() => {
   const table = await getApiList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
@@ -636,15 +636,15 @@ const getTableData = async() => {
 
 getTableData()
 getGroup()
-// 批量操作
+// Thao tác hàng loạt
 const handleSelectionChange = (val) => {
   apis.value = val
 }
 
 const onDelete = async() => {
-  ElMessageBox.confirm('确定要删除吗?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm('Bạn có chắc muốn xóa không?', 'Cảnh báo', {
+    confirmButtonText: 'Đồng ý',
+    cancelButtonText: 'Hủy',
     type: 'warning'
   }).then(async() => {
     const ids = apis.value.map(item => item.ID)
@@ -662,9 +662,9 @@ const onDelete = async() => {
   })
 }
 const onFresh = async() => {
-  ElMessageBox.confirm('确定要刷新缓存吗?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm('Bạn có chắc muốn làm mới cache không?', 'Cảnh báo', {
+    confirmButtonText: 'Đồng ý',
+    cancelButtonText: 'Hủy',
     type: 'warning'
   }).then(async() => {
     const res = await freshCasbin()
@@ -698,7 +698,7 @@ const onSync = async() => {
   }
 }
 
-// 弹窗相关
+// Cửa sổ pop-up liên quan
 const apiForm = ref(null)
 const initForm = () => {
   apiForm.value.resetFields()
@@ -710,15 +710,15 @@ const initForm = () => {
   }
 }
 
-const dialogTitle = ref('新增Api')
+const dialogTitle = ref('Thêm mới API')
 const dialogFormVisible = ref(false)
 const openDialog = (key) => {
   switch (key) {
     case 'addApi':
-      dialogTitle.value = '新增Api'
+      dialogTitle.value = 'Thêm mới API'
       break
     case 'edit':
-      dialogTitle.value = '编辑Api'
+      dialogTitle.value = 'Chỉnh sửa API'
       break
     default:
       break
@@ -747,7 +747,7 @@ const enterDialog = async() => {
             if (res.code === 0) {
               ElMessage({
                 type: 'success',
-                message: '添加成功',
+                message: 'Thêm thành công',
                 showClose: true
               })
             }
@@ -763,7 +763,7 @@ const enterDialog = async() => {
             if (res.code === 0) {
               ElMessage({
                 type: 'success',
-                message: '编辑成功',
+                message: 'Chỉnh sửa thành công',
                 showClose: true
               })
             }
@@ -776,7 +776,7 @@ const enterDialog = async() => {
           {
             ElMessage({
               type: 'error',
-              message: '未知操作',
+              message: 'Thao tác không xác định',
               showClose: true
             })
           }
@@ -787,9 +787,9 @@ const enterDialog = async() => {
 }
 
 const deleteApiFunc = async(row) => {
-  ElMessageBox.confirm('此操作将永久删除所有角色下该api, 是否继续?', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm('Thao tác này sẽ xóa vĩnh viễn tất cả các vai trò chứa API này, bạn có muốn tiếp tục?', 'Cảnh báo', {
+    confirmButtonText: 'Đồng ý',
+    cancelButtonText: 'Hủy',
     type: 'warning'
   })
     .then(async() => {
@@ -797,7 +797,7 @@ const deleteApiFunc = async(row) => {
       if (res.code === 0) {
         ElMessage({
           type: 'success',
-          message: '删除成功!'
+          message: 'Xóa thành công!'
         })
         if (tableData.value.length === 1 && page.value > 1) {
           page.value--

@@ -1,8 +1,8 @@
 <template>
-  <el-drawer v-model="drawer" title="系统配置" direction="rtl" :size="width">
+  <el-drawer v-model="drawer" title="Cấu hình hệ thống" direction="rtl" :size="width">
     <div class="flex flex-col">
       <div class="mb-8">
-        <div class="text-gray-800 dark:text-gray-100">默认主题</div>
+        <div class="text-gray-800 dark:text-gray-100">Chủ đề mặc định</div>
         <div class="mt-2 text-sm p-2 flex items-center gap-2">
           <el-segmented
             v-model="config.darkMode"
@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="mb-8">
-        <div class="text-gray-800 dark:text-gray-100">主题色</div>
+        <div class="text-gray-800 dark:text-gray-100">Màu chủ đề</div>
         <div class="mt-2 text-sm p-2 flex items-center gap-2">
           <div
             v-for="item in colors"
@@ -33,28 +33,28 @@
         </div>
       </div>
       <div class="mb-8">
-        <div class="text-gray-800 dark:text-gray-100">界面显示</div>
+        <div class="text-gray-800 dark:text-gray-100">Giao diện hiển thị</div>
         <div class="mt-2 text-sm p-2">
           <div class="flex items-center justify-between">
-            <div>展示水印</div>
+            <div>Hiển thị watermark</div>
             <el-switch
               v-model="config.show_watermark"
               @change="appStore.toggleConfigWatermark"
             />
           </div>
           <div class="flex items-center justify-between">
-            <div>灰色模式</div>
+            <div>Chế độ xám</div>
             <el-switch v-model="config.grey" @change="appStore.toggleGrey" />
           </div>
           <div class="flex items-center justify-between">
-            <div>色弱模式</div>
+            <div>Chế độ yếu</div>
             <el-switch
               v-model="config.weakness"
               @change="appStore.toggleWeakness"
             />
           </div>
           <div class="flex items-center justify-between">
-            <div>菜单模式</div>
+            <div>Chế độ menu</div>
             <el-segmented
               v-model="config.side_mode"
               :options="sideModes"
@@ -65,14 +65,14 @@
               v-model="config.side_mode"
               @change="handleSideModelChange"
             >
-              <el-option value="normal" label="标准模式" />
-              <el-option value="head" label="顶部导航栏" />
-              <el-option value="multilayer" disabled label="多侧边导航模式" />
+              <el-option value="normal" label="Chế độ tiêu chuẩn" />
+              <el-option value="head" label="Thanh điều hướng trên cùng" />
+              <el-option value="multilayer" disabled label="Chế độ đa cấp" />
             </el-select> -->
           </div>
 
           <div class="flex items-center justify-between">
-            <div>显示标签页</div>
+            <div>Hiển thị tab</div>
             <el-switch
               v-model="config.showTabs"
               @change="appStore.toggleTabs"
@@ -82,10 +82,10 @@
       </div>
 
       <div class="mb-8">
-        <div class="text-gray-800 dark:text-gray-100">layout 大小配置</div>
+        <div class="text-gray-800 dark:text-gray-100">Cấu hình kích thước layout</div>
         <div class="mt-2 text-sm p-2">
           <div class="flex items-center justify-between mb-2">
-            <div>侧边栏展开宽度</div>
+            <div>Chiều rộng mở rộng thanh bên</div>
             <el-input-number
               v-model="config.layout_side_width"
               :min="150"
@@ -94,7 +94,7 @@
             ></el-input-number>
           </div>
           <div class="flex items-center justify-between mb-2">
-            <div>侧边栏收缩宽度</div>
+            <div>Chiều rộng thu gọn thanh bên</div>
             <el-input-number
               v-model="config.layout_side_collapsed_width"
               :min="60"
@@ -102,7 +102,7 @@
             ></el-input-number>
           </div>
           <div class="flex items-center justify-between mb-2">
-            <div>侧边栏子项高度</div>
+            <div>Chiều cao mục con thanh bên</div>
             <el-input-number
               v-model="config.layout_side_item_height"
               :min="30"
@@ -113,12 +113,12 @@
       </div>
 
       <el-alert type="warning" :closable="false">
-        请注意，所有配置请保存到本地文件的
-        <el-tag>config.json</el-tag> 文件中，否则刷新页面后会丢失配置
+        Vui lòng lưu tất cả cấu hình vào tệp
+        <el-tag>config.json</el-tag> trên máy tính của bạn, nếu không cấu hình sẽ bị mất sau khi làm mới trang
       </el-alert>
 
       <el-button type="primary" class="mt-4" @click="copyConfig"
-        >复制配置json</el-button
+        >Sao chép cấu hình json</el-button
       >
     </div>
   </el-drawer>
@@ -153,18 +153,18 @@ const drawer = defineModel("drawer", {
   type: Boolean,
 });
 
-const options = ["dark", "light", "auto"];
+const options = ["tối", "sáng", "tự động"];
 const sideModes = [
   {
-    label : "正常模式",
+    label : "Chế độ tiêu chuẩn",
     value : "normal"
   },
   {
-    label : "顶部菜单栏模式",
+    label : "Thanh điều hướng trên cùng",
     value: "head"
   },
   {
-    label : "组合模式",
+    label : "Chế độ kết hợp",
     value: "combination"
   }
 ];
@@ -172,13 +172,13 @@ const sideModes = [
 const copyConfig = () => {
   const input = document.createElement("textarea");
   input.value = JSON.stringify(config.value);
-  // 添加回车
+  // Thêm dấu xuống dòng
   input.value = input.value.replace(/,/g, ",\n");
   document.body.appendChild(input);
   input.select();
   document.execCommand("copy");
   document.body.removeChild(input);
-  ElMessage.success("复制成功, 请自行保存到本地文件中");
+  ElMessage.success("Sao chép thành công, vui lòng lưu vào tệp tin cục bộ");
 };
 
 const customColor = ref("");

@@ -3,7 +3,7 @@
     type="primary"
     icon="download"
     @click="exportExcelFunc"
-  >导出</el-button>
+  >Tải xuống</el-button>
 </template>
 
 <script setup>
