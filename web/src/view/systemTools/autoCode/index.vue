@@ -92,38 +92,28 @@
       <!-- Công cụ tạo tự động cấu trúc ban đầu -->
       <div class="text-lg mb-2 text-gray-600">Tự động tạo cấu trúc</div>
       <el-form ref="autoCodeForm" :rules="rules" :model="form" label-width="120px" :inline="true">
-        <el-row class="w-full">
-          <el-col :span="6">
+        <el-row :gutter="20">
+          <el-col :span="18">
             <el-form-item label="Tên cấu trúc" prop="structName" class="w-full">
               <el-input v-model="form.structName" placeholder="Chuyển đổi chữ cái đầu thành chữ hoa" />
             </el-form-item>
-          </el-col>
-          <el-col :span="6">
             <el-form-item label="TableName" class="w-full">
               <template #label>
-                <el-tooltip content="Tên viết tắt sẽ được sử dụng làm tên đối tượng đầu vào và nhóm định tuyến"
+                <el-tooltip content="Tên viết tắt sẽ được sử dụng làm tên đối tượng đầu vào và nhóm định tuyến, viết thường chữ cái đầu"
                   placement="bottom" effect="light">
-                  <div> Tên viết tắt cấu trúc <el-icon>
+                  <div> Tên viết tắt của Struct <el-icon>
                       <QuestionFilled />
                     </el-icon> </div>
                 </el-tooltip>
               </template>
               <el-input v-model="form.abbreviation" placeholder="Nhập tên viết tắt của Struct" />
             </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="Tên tiếng Việt" prop="description" class="w-full">
+            <el-form-item label="Mô tả" prop="description" class="w-full">
               <el-input v-model="form.description" placeholder="Mô tả tiếng Việt cho API tự động" />
             </el-form-item>
-          </el-col>
-          <el-col :span="6">
             <el-form-item label="Tên bảng" prop="tableName" class="w-full">
               <el-input v-model="form.tableName" placeholder="Chỉ định tên bảng (không bắt buộc)" />
             </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row class="w-full">
-          <el-col :span="6">
             <el-form-item prop="packageName" class="w-full">
               <template #label>
                 <el-tooltip
@@ -137,8 +127,6 @@
               <el-input v-model="form.packageName" placeholder="Nhập tên tệp"
                 @blur="toLowerCaseFunc(form, 'packageName')" />
             </el-form-item>
-          </el-col>
-          <el-col :span="6">
             <el-form-item label="Chọn mẫu" prop="package" class="w-full relative">
               <el-select v-model="form.package" class="w-full pr-12">
                 <el-option v-for="item in pkgs" :key="item.ID" :value="item.packageName" :label="item.packageName" />
@@ -152,8 +140,6 @@
                 </el-icon>
               </span>
             </el-form-item>
-          </el-col>
-          <el-col :span="6">
             <el-form-item label="Cơ sở dữ liệu" prop="businessDB" class="w-full">
               <template #label>
                 <el-tooltip
@@ -175,9 +161,9 @@
               </el-select>
             </el-form-item>
           </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="3">
+          <el-col :span="6">
+
+
             <el-form-item>
               <template #label>
                 <el-tooltip
@@ -190,8 +176,6 @@
               </template>
               <el-checkbox v-model="form.gvaModel" @change="useGva" />
             </el-form-item>
-          </el-col>
-          <el-col :span="3">
             <el-form-item>
               <template #label>
                 <el-tooltip content="Lưu ý: Tự động đăng ký API được tạo tự động vào cơ sở dữ liệu" placement="bottom"
@@ -203,8 +187,6 @@
               </template>
               <el-checkbox v-model="form.autoCreateApiToSql" />
             </el-form-item>
-          </el-col>
-          <el-col :span="3">
             <el-form-item>
               <template #label>
                 <el-tooltip content="Lưu ý: Tự động đăng ký menu được tạo tự động vào cơ sở dữ liệu" placement="bottom"
@@ -216,8 +198,6 @@
               </template>
               <el-checkbox v-model="form.autoCreateMenuToSql" />
             </el-form-item>
-          </el-col>
-          <el-col :span="3">
             <el-form-item>
               <template #label>
                 <el-tooltip
@@ -230,8 +210,6 @@
               </template>
               <el-checkbox v-model="form.autoMigrate" />
             </el-form-item>
-          </el-col>
-          <el-col :span="3">
             <el-form-item>
               <template #label>
                 <el-tooltip
@@ -244,8 +222,6 @@
               </template>
               <el-checkbox v-model="form.autoCreateBtnAuth" />
             </el-form-item>
-          </el-col>
-          <el-col :span="3">
             <el-form-item>
               <template #label>
                 <el-tooltip
@@ -426,13 +402,13 @@
     <el-drawer v-model="previewFlag" size="80%" :show-close="false">
       <template #header>
         <div class="flex justify-between items-center">
-          <span class="text-lg">操作栏</span>
+          <span class="text-lg">Xem code</span>
           <div>
             <el-button type="primary" @click="selectText">
-              全选
+              Chọn tất cả
             </el-button>
             <el-button type="primary" @click="copy">
-              复制
+              Sao chép
             </el-button>
           </div>
         </div>

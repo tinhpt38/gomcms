@@ -141,6 +141,7 @@ const login = async () => {
   return await userStore.LoginIn(loginFormData)
 }
 const submitForm = () => {
+  
   loginForm.value.validate(async (v) => {
     if (!v) {
       // Không vượt qua kiểm tra tĩnh phía trước

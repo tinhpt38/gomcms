@@ -1,4 +1,3 @@
 package checkins
 
-type ServiceGroup struct {
-}
+type ServiceGroup struct{ AttendanceClassService }

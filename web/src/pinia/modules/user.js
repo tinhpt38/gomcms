@@ -51,7 +51,7 @@ export const useUserStore = defineStore('user', () => {
   const LoginIn = async(loginInfo) => {
     loadingInstance.value = ElLoading.service({
       fullscreen: true,
-      text: '登录中，请稍候...',
+      text: 'Đang đăng nhập...',
     })
 
     const res = await login(loginInfo)
@@ -77,7 +77,7 @@ export const useUserStore = defineStore('user', () => {
     })
 
     if (!router.hasRoute(userInfo.value.authority.defaultRouter)) {
-      ElMessage.error('请联系管理员进行授权')
+      ElMessage.error('Vui lòng liên hệ với quản trị viên để được cấp quyền')
     } else {
       await router.replace({ name: userInfo.value.authority.defaultRouter })
     }
@@ -89,7 +89,6 @@ export const useUserStore = defineStore('user', () => {
       window.localStorage.setItem('osType', 'MAC')
     }
 
-    // 全部操作均结束，关闭loading并返回
     loadingInstance.value.close()
     return true
   }
@@ -122,7 +121,7 @@ export const useUserStore = defineStore('user', () => {
       userInfo.value.sideMode = data
       ElMessage({
         type: 'success',
-        message: '设置成功'
+        message: 'Thiết lập thành công'
       })
     }
   }

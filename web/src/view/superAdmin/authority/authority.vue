@@ -3,161 +3,62 @@
     <warning-bar title="Chú ý: Bạn có thể chuyển đổi vai trò trong menu thả xuống ở góc trên bên phải" />
     <div class="gva-table-box">
       <div class="gva-btn-list">
-        <el-button
-          type="primary"
-          icon="plus"
-          @click="addAuthority(0)"
-        >Thêm vai trò</el-button>
+        <el-button type="primary" icon="plus" @click="addAuthority(0)">Thêm vai trò</el-button>
       </div>
-      <el-table
-        :data="tableData"
-        :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
-        row-key="authorityId"
-        style="width: 100%"
-      >
-        <el-table-column
-          label="ID vai trò"
-          min-width="180"
-          prop="authorityId"
-        />
-        <el-table-column
-          align="left"
-          label="Tên vai trò"
-          min-width="180"
-          prop="authorityName"
-        />
-        <el-table-column
-          align="left"
-          label="Hành động"
-          width="460"
-        >
+      <el-table :data="tableData" :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" row-key="authorityId"
+        style="width: 100%">
+        <el-table-column label="ID vai trò" min-width="180" prop="authorityId" />
+        <el-table-column align="left" label="Tên vai trò" min-width="180" prop="authorityName" />
+        <el-table-column align="left" label="Hành động" width="460">
           <template #default="scope">
-            <el-button
-              icon="setting"
-              type="primary"
-              link
-              @click="openDrawer(scope.row)"
-            >Cấu hình quyền</el-button>
-            <el-button
-              icon="plus"
-              type="primary"
-              link
-              @click="addAuthority(scope.row.authorityId)"
-            >Thêm vai trò con</el-button>
-            <el-button
-              icon="copy-document"
-              type="primary"
-              link
-              @click="copyAuthorityFunc(scope.row)"
-            >Sao chép</el-button>
-            <el-button
-              icon="edit"
-              type="primary"
-              link
-              @click="editAuthority(scope.row)"
-            >Chỉnh sửa</el-button>
-            <el-button
-              icon="delete"
-              type="primary"
-              link
-              @click="deleteAuth(scope.row)"
-            >Xóa</el-button>
+            <el-button icon="setting" type="primary" link @click="openDrawer(scope.row)">Cấu hình quyền</el-button>
+            <el-button icon="plus" type="primary" link @click="addAuthority(scope.row.authorityId)">Thêm vai trò
+              con</el-button>
+            <el-button icon="copy-document" type="primary" link @click="copyAuthorityFunc(scope.row)">Sao
+              chép</el-button>
+            <el-button icon="edit" type="primary" link @click="editAuthority(scope.row)">Chỉnh sửa</el-button>
+            <el-button icon="delete" type="primary" link @click="deleteAuth(scope.row)">Xóa</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
     <!-- Dialog thêm vai trò -->
-    <el-drawer
-      v-model="authorityFormVisible"
-      :show-close="false"
-    >
+    <el-drawer v-model="authorityFormVisible" :show-close="false">
       <template #header>
         <div class="flex justify-between items-center">
           <span class="text-lg">{{ authorityTitleForm }}</span>
           <div>
             <el-button @click="closeAuthorityForm">Hủy</el-button>
-            <el-button
-              type="primary"
-              @click="submitAuthorityForm"
-            >Xác nhận</el-button>
+            <el-button type="primary" @click="submitAuthorityForm">Xác nhận</el-button>
           </div>
         </div>
       </template>
-      <el-form
-        ref="authorityForm"
-        :model="form"
-        :rules="rules"
-        label-width="80px"
-      >
-        <el-form-item
-          label="Vai trò cha"
-          prop="parentId"
-        >
-          <el-cascader
-            v-model="form.parentId"
-            style="width:100%"
-            :disabled="dialogType==='add'"
+      <el-form ref="authorityForm" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="Vai trò cha" prop="parentId">
+          <el-cascader v-model="form.parentId" style="width:100%" :disabled="dialogType === 'add'"
             :options="AuthorityOption"
-            :props="{ checkStrictly: true,label:'authorityName',value:'authorityId',disabled:'disabled',emitPath:false}"
-            :show-all-levels="false"
-            filterable
-          />
+            :props="{ checkStrictly: true, label: 'authorityName', value: 'authorityId', disabled: 'disabled', emitPath: false }"
+            :show-all-levels="false" filterable />
         </el-form-item>
-        <el-form-item
-          label="ID vai trò"
-          prop="authorityId"
-        >
-          <el-input
-            v-model="form.authorityId"
-            :disabled="dialogType==='edit'"
-            autocomplete="off"
-            maxlength="15"
-          />
+        <el-form-item label="ID vai trò" prop="authorityId">
+          <el-input v-model="form.authorityId" :disabled="dialogType === 'edit'" autocomplete="off" maxlength="15" />
         </el-form-item>
-        <el-form-item
-          label="Tên vai trò"
-          prop="authorityName"
-        >
-          <el-input
-            v-model="form.authorityName"
-            autocomplete="off"
-          />
+        <el-form-item label="Tên vai trò" prop="authorityName">
+          <el-input v-model="form.authorityName" autocomplete="off" />
         </el-form-item>
       </el-form>
     </el-drawer>
 
-    <el-drawer
-      v-if="drawer"
-      v-model="drawer"
-      :with-header="false"
-      size="40%"
-      title="Cấu hình vai trò"
-    >
-      <el-tabs
-        :before-leave="autoEnter"
-        type="border-card"
-      >
+    <el-drawer v-if="drawer" v-model="drawer" :with-header="false" size="40%" title="Cấu hình vai trò">
+      <el-tabs :before-leave="autoEnter" type="border-card">
         <el-tab-pane label="Menu vai trò">
-          <Menus
-            ref="menus"
-            :row="activeRow"
-            @changeRow="changeRow"
-          />
+          <Menus ref="menus" :row="activeRow" @changeRow="changeRow" />
         </el-tab-pane>
         <el-tab-pane label="API vai trò">
-          <Apis
-            ref="apis"
-            :row="activeRow"
-            @changeRow="changeRow"
-          />
+          <Apis ref="apis" :row="activeRow" @changeRow="changeRow" />
         </el-tab-pane>
         <el-tab-pane label="Quyền tài nguyên">
-          <Datas
-            ref="datas"
-            :authority="tableData"
-            :row="activeRow"
-            @changeRow="changeRow"
-          />
+          <Datas ref="datas" :authority="tableData" :row="activeRow" @changeRow="changeRow" />
         </el-tab-pane>
       </el-tabs>
     </el-drawer>
@@ -233,7 +134,7 @@ const tableData = ref([])
 const searchInfo = ref({})
 
 // Lấy dữ liệu bảng
-const getTableData = async() => {
+const getTableData = async () => {
   const table = await getAuthorityList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list
@@ -282,7 +183,7 @@ const deleteAuth = (row) => {
     cancelButtonText: 'Hủy',
     type: 'warning'
   })
-    .then(async() => {
+    .then(async () => {
       const res = await deleteAuthority({ authorityId: row.authorityId })
       if (res.code === 0) {
         ElMessage({
@@ -394,29 +295,29 @@ const setOptions = () => {
 }
 const setAuthorityOptions = (AuthorityData, optionsData, disabled) => {
   AuthorityData &&
-        AuthorityData.forEach(item => {
-          if (item.children && item.children.length) {
-            const option = {
-              authorityId: item.authorityId,
-              authorityName: item.authorityName,
-              disabled: disabled || item.authorityId === form.value.authorityId,
-              children: []
-            }
-            setAuthorityOptions(
-              item.children,
-              option.children,
-              disabled || item.authorityId === form.value.authorityId
-            )
-            optionsData.push(option)
-          } else {
-            const option = {
-              authorityId: item.authorityId,
-              authorityName: item.authorityName,
-              disabled: disabled || item.authorityId === form.value.authorityId
-            }
-            optionsData.push(option)
-          }
-        })
+    AuthorityData.forEach(item => {
+      if (item.children && item.children.length) {
+        const option = {
+          authorityId: item.authorityId,
+          authorityName: item.authorityName,
+          disabled: disabled || item.authorityId === form.value.authorityId,
+          children: []
+        }
+        setAuthorityOptions(
+          item.children,
+          option.children,
+          disabled || item.authorityId === form.value.authorityId
+        )
+        optionsData.push(option)
+      } else {
+        const option = {
+          authorityId: item.authorityId,
+          authorityName: item.authorityName,
+          disabled: disabled || item.authorityId === form.value.authorityId
+        }
+        optionsData.push(option)
+      }
+    })
 }
 // Thêm vai trò
 const addAuthority = (parentId) => {
@@ -446,15 +347,16 @@ const editAuthority = (row) => {
 .authority {
   .el-input-number {
     margin-left: 15px;
+
     span {
       display: none;
     }
   }
 }
-.tree-content{
+
+.tree-content {
   margin-top: 10px;
   height: calc(100vh - 158px);
   overflow: auto;
 }
-
 </style>

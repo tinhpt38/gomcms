@@ -125,7 +125,7 @@ const relation = async () => {
   if (res.code === 0) {
     ElMessage({
       type: 'success',
-      message: '菜单设置成功!'
+      message: 'Thiết lập menu thành công!'
     })
   }
 }
