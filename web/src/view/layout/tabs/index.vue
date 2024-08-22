@@ -34,7 +34,6 @@
       </el-tab-pane>
     </el-tabs>
 
-    <!--自定义右键菜单html代码-->
     <ul
       v-show="contextMenuVisible"
       :style="{ left: left + 'px', top: top + 'px' }"
@@ -112,7 +111,7 @@ const closeAll = () => {
     {
       name: defaultRouter.value,
       meta: {
-        title: '首页',
+        title: 'Dashboard',
       },
       query: {},
       params: {},
@@ -319,7 +318,7 @@ const initPage = () => {
     {
       name: defaultRouter.value,
       meta: {
-        title: '首页',
+        title: 'Dashboard',
       },
       query: {},
       params: {},

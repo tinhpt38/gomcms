@@ -238,7 +238,7 @@
           </el-table-column>
         </el-table>
 
-        <div class="flex items-center gap-2 mt-3">
+        <!-- <div class="flex items-center gap-2 mt-3">
           <el-button type="primary" icon="edit" @click="addBtn(form)">
             Thêm nút điều khiển
           </el-button>
@@ -247,7 +247,7 @@
             ">
             <QuestionFilled />
           </el-icon>
-        </div>
+        </div> -->
 
         <el-table :data="form.menuBtn" style="width: 100%; margin-top: 12px">
           <el-table-column align="left" prop="name" label="Tên nút" width="180">

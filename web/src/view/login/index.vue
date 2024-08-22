@@ -18,7 +18,8 @@
             <el-form ref="loginForm" :model="loginFormData" :rules="rules" :validate-on-rule-change="false"
               @keyup.enter="submitForm">
               <el-form-item prop="username" class="mb-6">
-                <el-input v-model="loginFormData.username" size="large" placeholder="Nhập tên người dùng" suffix-icon="user" />
+                <el-input v-model="loginFormData.username" size="large" placeholder="Nhập tên người dùng"
+                  suffix-icon="user" />
               </el-form-item>
               <el-form-item prop="password" class="mb-6">
                 <el-input v-model="loginFormData.password" show-password size="large" type="password"
@@ -26,9 +27,11 @@
               </el-form-item>
               <el-form-item v-if="loginFormData.openCaptcha" prop="captcha" class="mb-6">
                 <div class="flex w-full justify-between">
-                  <el-input v-model="loginFormData.captcha" placeholder="Nhập mã xác nhận" size="large" class="flex-1 mr-5" />
+                  <el-input v-model="loginFormData.captcha" placeholder="Nhập mã xác nhận" size="large"
+                    class="flex-1 mr-5" />
                   <div class="w-1/3 h-11 bg-[#c3d4f2] rounded">
-                    <img v-if="picPath" class="w-full h-full" :src="picPath" alt="Nhập mã xác nhận" @click="loginVerify()">
+                    <img v-if="picPath" class="w-full h-full" :src="picPath" alt="Nhập mã xác nhận"
+                      @click="loginVerify()">
                   </div>
                 </div>
               </el-form-item>
@@ -36,11 +39,10 @@
                 <el-button class="shadow shadow-active h-11 w-full" type="primary" size="large" @click="submitForm">Đăng
                   nhập</el-button>
               </el-form-item>
-              <el-form-item class="mb-6">
-                <el-button class="shadow shadow-active h-11 w-full" type="primary" size="large"
-                  @click="checkInit">Đi tới khởi tạo</el-button>
-
-              </el-form-item>
+              <!-- <el-form-item class="mb-6">
+                <el-button class="shadow shadow-active h-11 w-full" type="primary" size="large" @click="checkInit">Đi
+                  tới khởi tạo</el-button>
+              </el-form-item> -->
             </el-form>
           </div>
         </div>
@@ -49,7 +51,7 @@
           src="@/assets/login_right_banner.jpg" alt="banner"></div>
     </div>
 
-    <BottomInfo class="left-0 right-0 absolute bottom-3 mx-auto  w-full z-20">
+    <!-- <BottomInfo class="left-0 right-0 absolute bottom-3 mx-auto  w-full z-20">
       <div class="links items-center justify-center gap-2 hidden md:flex">
         <a href="https://www.gin-vue-admin.com/" target="_blank">
           <img src="@/assets/docs.png" class="w-8 h-8" alt="Tài liệu">
@@ -64,7 +66,7 @@
           <img src="@/assets/video.png" class="w-8 h-8" alt="Trang video">
         </a>
       </div>
-    </BottomInfo>
+    </BottomInfo> -->
   </div>
 </template>
 
