@@ -138,6 +138,7 @@ const initExampleData = () => {
             group: "Group 1",
             totalCheckin: 10,
             totalPass: 5, // past condition
+            fullname: "Example 1"
         },
         {
             id: 2,
@@ -145,6 +146,7 @@ const initExampleData = () => {
             group: "Group 2",
             totalCheckin: 8,
             totalPass: 3,
+            fullname: "Example 2"
         },
         {
             id: 3,
@@ -152,6 +154,7 @@ const initExampleData = () => {
             group: "Group 3",
             totalCheckin: 12,
             totalPass: 7,
+            fullname: "Example 3"
         },
         {
             id: 4,
@@ -159,6 +162,7 @@ const initExampleData = () => {
             group: "Group 4",
             totalCheckin: 6,
             totalPass: 2,
+            fullname: "Example 4"
         },
         {
             id: 5,
@@ -166,6 +170,7 @@ const initExampleData = () => {
             group: "Group 5",
             totalCheckin: 15,
             totalPass: 10,
+            fullname: "Example 5"
         },
         {
             id: 6,
@@ -173,6 +178,7 @@ const initExampleData = () => {
             group: "Group 6",
             totalCheckin: 9,
             totalPass: 4,
+            fullname: "Example 6"
         },
         {
             id: 7,
@@ -180,6 +186,7 @@ const initExampleData = () => {
             group: "Group 7",
             totalCheckin: 11,
             totalPass: 6,
+            fullname: "Example 7"
         },
         {
             id: 8,
@@ -187,6 +194,7 @@ const initExampleData = () => {
             group: "Group 8",
             totalCheckin: 7,
             totalPass: 3,
+            fullname: "Example 8"
         },
         {
             id: 9,
@@ -194,6 +202,7 @@ const initExampleData = () => {
             group: "Group 9",
             totalCheckin: 13,
             totalPass: 8,
+            fullname: "Example 9"
         },
         {
             id: 10,
@@ -201,6 +210,7 @@ const initExampleData = () => {
             group: "Group 10",
             totalCheckin: 5,
             totalPass: 2,
+            fullname: "Example 10"
         },
         {
             id: 11,
@@ -208,6 +218,7 @@ const initExampleData = () => {
             group: "Group 11",
             totalCheckin: 14,
             totalPass: 9,
+            fullname: "Example 11"
         },
         {
             id: 12,
@@ -215,6 +226,7 @@ const initExampleData = () => {
             group: "Group 12",
             totalCheckin: 7,
             totalPass: 4,
+            fullname: "Example 12"
         },
         {
             id: 13,
@@ -222,6 +234,7 @@ const initExampleData = () => {
             group: "Group 13",
             totalCheckin: 10,
             totalPass: 6,
+            fullname: "Example 13"
         },
         {
             id: 14,
@@ -229,6 +242,7 @@ const initExampleData = () => {
             group: "Group 14",
             totalCheckin: 9,
             totalPass: 5,
+            fullname: "Example 14"
         },
         {
             id: 15,
@@ -236,6 +250,7 @@ const initExampleData = () => {
             group: "Group 15",
             totalCheckin: 12,
             totalPass: 8,
+            fullname: "Example 15"
         },
         {
             id: 16,
@@ -243,6 +258,7 @@ const initExampleData = () => {
             group: "Group 16",
             totalCheckin: 6,
             totalPass: 3,
+            fullname: "Example 16"
         },
         {
             id: 17,
@@ -250,6 +266,7 @@ const initExampleData = () => {
             group: "Group 17",
             totalCheckin: 11,
             totalPass: 7,
+            fullname: "Example 17"
         },
         {
             id: 18,
@@ -257,6 +274,7 @@ const initExampleData = () => {
             group: "Group 18",
             totalCheckin: 8,
             totalPass: 4,
+            fullname: "Example 18"
         },
         {
             id: 19,
@@ -264,6 +282,7 @@ const initExampleData = () => {
             group: "Group 19",
             totalCheckin: 13,
             totalPass: 9,
+            fullname: "Example 19"
         },
         {
             id: 20,
@@ -271,6 +290,7 @@ const initExampleData = () => {
             group: "Group 20",
             totalCheckin: 7,
             totalPass: 5,
+            fullname: "Example 20"
         }
     ]
     groupData.value = [

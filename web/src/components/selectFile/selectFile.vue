@@ -1,17 +1,10 @@
 <template>
   <div>
-    <el-upload
-      multiple
-      :action="`${getBaseUrl()}/fileUploadAndDownload/upload?noSave=1`"
-      :on-error="uploadError"
-      :on-success="uploadSuccess"
-      :show-file-list="true"
-      :file-list="fileList"
-      :limit="limit"
-      :accept="accept"
-      class="upload-btn"
-    >
-      <el-button type="primary">上传文件</el-button>
+    <el-upload multiple :action="`${getBaseUrl()}/fileUploadAndDownload/upload?noSave=1`" :on-error="uploadError"
+      :on-success="uploadSuccess" :show-file-list="true" :file-list="fileList" :limit="limit" :accept="accept"
+      class="upload-btn">
+      <el-button type="primary">Tải tập tin lên
+      </el-button>
     </el-upload>
   </div>
 </template>
@@ -77,10 +70,9 @@ const uploadSuccess = (res) => {
 const uploadError = () => {
   ElMessage({
     type: 'error',
-    message: '上传失败'
+    message: 'Tải lên không thành công'
   })
   fullscreenLoading.value = false
 }
 
 </script>
-
