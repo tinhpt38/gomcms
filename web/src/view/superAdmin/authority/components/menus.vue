@@ -103,7 +103,7 @@ init()
 const setDefault = async (data) => {
   const res = await updateAuthority({ authorityId: props.row.authorityId, AuthorityName: props.row.authorityName, parentId: props.row.parentId, defaultRouter: data.name })
   if (res.code === 0) {
-    ElMessage({ type: 'success', message: '设置成功' })
+    ElMessage({ type: 'success', message: 'Thiết lập thành công' })
     emit('changeRow', 'defaultRouter', res.data.authority.defaultRouter)
   }
 }
@@ -176,7 +176,7 @@ const enterDialog = async () => {
     authorityId: props.row.authorityId
   })
   if (res.code === 0) {
-    ElMessage({ type: 'success', message: '设置成功' })
+    ElMessage({ type: 'success', message: 'Thiết lập thành công' })
     btnVisible.value = false
   }
 }

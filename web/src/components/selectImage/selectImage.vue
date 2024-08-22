@@ -26,11 +26,11 @@
 
     <el-drawer
       v-model="drawer"
-      title="媒体库"
+      title="Thư viện đa phương tiện"
       size="650px"
     >
       <warning-bar
-        title="点击“文件名/备注”可以编辑文件名或者备注内容。"
+        title="Nhấp vào 'Tên tệp/Ghi chú' để chỉnh sửa tên tệp hoặc nội dung ghi chú."
       />
       <div class="gva-btn-list gap-2">
         <upload-common
@@ -46,14 +46,14 @@
         <el-input
           v-model="search.keyword"
           class="keyword"
-          placeholder="请输入文件名或备注"
+          placeholder="Nhập tên tệp hoặc ghi chú"
         />
         <el-button
           type="primary"
           icon="search"
           @click="getImageList"
         >
-          查询
+          Tìm kiếm
         </el-button>
       </div>
       <div class="flex flex-wrap gap-4">
@@ -86,7 +86,7 @@
                   @click="chooseImg(item.url)"
                 >
                   <source :src="getUrl(item.url) + '#t=1'">
-                  您的浏览器不支持视频播放
+                  Trình duyệt của bạn không hỗ trợ phát video
                 </video>
                 <div
                   v-else

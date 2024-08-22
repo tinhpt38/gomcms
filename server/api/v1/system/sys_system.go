@@ -50,7 +50,7 @@ func (s *SystemApi) SetSystemConfig(c *gin.Context) {
 		response.FailWithMessage("设置失败", c)
 		return
 	}
-	response.OkWithMessage("设置成功", c)
+	response.OkWithMessage("Thiết lập thành công", c)
 }
 
 // ReloadSystem

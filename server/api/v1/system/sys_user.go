@@ -375,7 +375,7 @@ func (b *BaseApi) SetUserInfo(c *gin.Context) {
 		response.FailWithMessage("设置失败", c)
 		return
 	}
-	response.OkWithMessage("设置成功", c)
+	response.OkWithMessage("Thiết lập thành công", c)
 }
 
 // SetSelfInfo
@@ -411,7 +411,7 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 		response.FailWithMessage("设置失败", c)
 		return
 	}
-	response.OkWithMessage("设置成功", c)
+	response.OkWithMessage("Thiết lập thành công", c)
 }
 
 // GetUserInfo

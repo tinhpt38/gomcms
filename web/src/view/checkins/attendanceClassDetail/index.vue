@@ -1,5 +1,9 @@
 <template>
     <div class="p-2">
+        <div class="p-1 my-1">
+            <el-button type="primary" icon="upload">Nhập Excel</el-button>
+            <el-button type="success" icon="download">Xuất Excel</el-button>
+        </div>
         <el-tabs v-model="tabsActiveTab" type="border-card">
             <el-tab-pane name="attendanceInfoTab" label="Chi tiết">
                 <div class="card-container">
@@ -54,57 +58,23 @@
             </el-tab-pane>
             <el-tab-pane name="partticipantsTab" label="Thành viên">
                 <div class="table-container">
-                    <el-table :data="partticipantsData" style="width: 100%">
-                        <el-table-column prop="email" label="Email"></el-table-column>
-                        <el-table-column prop="group" label="Nhóm"></el-table-column>
-                        <el-table-column prop="totalCheckin" label="Checkins">
-                            <template #default="scope">
-                                <span>{{ scope.row.totalPass }} / {{ scope.row.totalCheckin }}</span>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                    <div class="flex justify-end">
-                        <el-pagination v-model:current-page="partsPage" v-model:page-size="partsSize"
-                            :page-sizes="[20, 50, 100, 500]" :size="partSize" :background="true"
-                            layout="total, sizes, prev, pager, next, jumper" :total="partticipantsData.length"
-                            @size-change="partsHandleSizeChange" @current-change="partsHandleCurrentChange" />
-                    </div>
+                    <Partticipants :participants="partticipantsData" />
                 </div>
             </el-tab-pane>
-            <el-tab-pane name="groupTan" label="Nhóm">
+            <el-tab-pane name="groupTab" label="Nhóm">
                 <div class="table-container">
-                    <table class="table-layout">
-                        <tbody>
-                            <tr>
-                                <td class="table-cell">
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <Group :groups="groupData" />
                 </div>
             </el-tab-pane>
-            <el-tab-pane name="positionTab" label="Vị trí">
+            <el-tab-pane name="areaTab" label="Khu vực">
                 <div class="table-container">
-                    <table class="table-layout">
-                        <tbody>
-                            <tr>
-                                <td class="table-cell">
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <Area :areas="areaData" />
                 </div>
+
             </el-tab-pane>
             <el-tab-pane name="conditionTab" label="Điều kiện">
                 <div class="table-container">
-                    <table class="table-layout">
-                        <tbody>
-                            <tr>
-                                <td class="table-cell">
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <Condition :conditions="conditionsData" />
                 </div>
             </el-tab-pane>
         </el-tabs>
@@ -123,9 +93,12 @@ import {
 } from '@/api/checkins/attendanceClass'
 import { useRoute } from 'vue-router';
 
-import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElForm, ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
+import Partticipants from '@/view/checkins/components/participant/index.vue'
+import Group from '@/view/checkins/components/group/index.vue'
+import Area from '@/view/checkins/components/area/index.vue'
+import Condition from '@/view/checkins/components/condition/index.vue'
 
 defineOptions({
     name: 'AttendanceClassDetail'
@@ -152,16 +125,12 @@ const saveAttendance = () => {
     console.log("currentId: ", currentId.value)
 }
 
-
-//region Participants
-const partsPage = ref(4)
-const partsSize = ref(20)
-const partSize = ref(20)
-
-
 const partticipantsData = ref([])
+const groupData = ref([])
+const areaData = ref([])
+const conditionsData = ref([])
 
-const initParticipantsData = () => {
+const initExampleData = () => {
     partticipantsData.value = [
         {
             id: 1,
@@ -304,13 +273,184 @@ const initParticipantsData = () => {
             totalPass: 5,
         }
     ]
+    groupData.value = [
+        {
+            id: 1,
+            name: "Group 1",
+            totalParts: 10,
+        },
+        {
+            id: 2,
+            name: "Group 2",
+            totalParts: 8,
+        },
+        {
+            id: 3,
+            name: "Group 3",
+            totalParts: 12,
+        },
+        {
+            id: 4,
+            name: "Group 4",
+            totalParts: 6,
+        },
+        {
+            id: 5,
+            name: "Group 5",
+            totalParts: 15,
+        },
+        {
+            id: 6,
+            name: "Group 6",
+            totalParts: 9,
+        },
+        {
+            id: 7,
+            name: "Group 7",
+            totalParts: 11,
+        },
+        {
+            id: 8,
+            name: "Group 8",
+            totalParts: 7,
+        },
+        {
+            id: 9,
+            name: "Group 9",
+            totalParts: 13,
+        },
+        {
+            id: 10,
+            name: "Group 10",
+            totalParts: 5,
+        },
+        {
+            id: 11,
+            name: "Group 11",
+            totalParts: 14,
+        },
+    ]
+    areaData.value = [
+        {
+            id: 1,
+            name: "Area 1",
+            lat: 10.123456,
+            long: 106.123456,
+            radius: 100,
+        },
+        {
+            id: 2,
+            name: "Area 2",
+            lat: 10.234567,
+            long: 106.234567,
+            radius: 200,
+        },
+        {
+            id: 3,
+            name: "Area 3",
+            lat: 10.345678,
+            long: 106.345678,
+            radius: 300,
+        },
+        {
+            id: 4,
+            name: "Area 4",
+            lat: 10.456789,
+            long: 106.456789,
+            radius: 400,
+        },
+        {
+            id: 5,
+            name: "Area 5",
+            lat: 10.567890,
+            long: 106.567890,
+            radius: 500,
+        },
+        {
+            id: 6,
+            name: "Area 6",
+            lat: 10.678901,
+            long: 106.678901,
+            radius: 600,
+        }
+    ]
+
+    conditionsData.value = [
+        {
+            id: 1,
+            areaId: 1,
+            groupId: 1,
+            startAt: "2021-09-01 00:00:00",
+            endAt: "2021-09-30 23:59:59",
+        },
+        {
+            id: 2,
+            areaId: 2,
+            groupId: 2,
+            startAt: "2021-10-01 00:00:00",
+            endAt: "2021-10-31 23:59:59",
+        },
+        {
+            id: 3,
+            areaId: 3,
+            groupId: 3,
+            startAt: "2021-11-01 00:00:00",
+            endAt: "2021-11-30 23:59:59",
+        },
+        {
+            id: 4,
+            areaId: 4,
+            groupId: 4,
+            startAt: "2021-12-01 00:00:00",
+            endAt: "2021-12-31 23:59:59",
+        },
+        {
+            id: 5,
+            areaId: 5,
+            groupId: 5,
+            startAt: "2022-01-01 00:00:00",
+            endAt: "2022-01-31 23:59:59",
+        },
+        {
+            id: 6,
+            areaId: 6,
+            groupId: 6,
+            startAt: "2022-02-01 00:00:00",
+            endAt: "2022-02-28 23:59:59",
+        }
+
+    ]
+
 }
-initParticipantsData();
-const partsHandleCurrentChange = (val) => {
-    console.log('partsHandleCurrentChange', val)
+initExampleData();
+
+//endregion
+
+//region Group
+const groupPage = ref(4)
+const groupsSize = ref(20)
+const groupSize = ref(20)
+
+
+const groupHandleCurrentChange = (val) => {
+    console.log('groupHandleCurrentChange', val)
 }
-const partsHandleSizeChange = (val) => {
-    console.log('partsHandleSizeChange', val)
+const groupHandleSizeChange = (val) => {
+    console.log('groupHandleSizeChange', val)
+}
+//endregion
+
+//region Area
+const areaPage = ref(4)
+const areasSize = ref(20)
+const areaSize = ref(20)
+
+
+const areaHandleCurrentChange = (val) => {
+    console.log('groupHandleCurrentChange', val)
+}
+const areaHandleSizeChange = (val) => {
+    console.log('groupHandleSizeChange', val)
 }
 //endregion
 </script>
