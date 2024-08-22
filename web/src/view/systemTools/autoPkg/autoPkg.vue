@@ -212,7 +212,7 @@ const enterDialog = async() => {
       if (res.code === 0) {
         ElMessage({
           type: 'success',
-          message: '添加成功',
+          message: 'Thành công',
           showClose: true
         })
       }

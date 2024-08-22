@@ -75,10 +75,10 @@ func (a *AuthorityMenuApi) AddMenuAuthority(c *gin.Context) {
 		return
 	}
 	if err := menuService.AddMenuAuthority(authorityMenu.Menus, authorityMenu.AuthorityId); err != nil {
-		global.GVA_LOG.Error("添加失败!", zap.Error(err))
-		response.FailWithMessage("添加失败", c)
+		global.GVA_LOG.Error("Không thành công!", zap.Error(err))
+		response.FailWithMessage("Không thành công", c)
 	} else {
-		response.OkWithMessage("添加成功", c)
+		response.OkWithMessage("Thành công", c)
 	}
 }
 
@@ -140,11 +140,11 @@ func (a *AuthorityMenuApi) AddBaseMenu(c *gin.Context) {
 	}
 	err = menuService.AddBaseMenu(menu)
 	if err != nil {
-		global.GVA_LOG.Error("添加失败!", zap.Error(err))
-		response.FailWithMessage("添加失败", c)
+		global.GVA_LOG.Error("Không thành công!", zap.Error(err))
+		response.FailWithMessage("Không thành công", c)
 		return
 	}
-	response.OkWithMessage("添加成功", c)
+	response.OkWithMessage("Thành công", c)
 }
 
 // DeleteBaseMenu
