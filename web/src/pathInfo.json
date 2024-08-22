@@ -3,6 +3,8 @@
   "/src/view/checkins/attendanceClass/attendanceClass.vue": "AttendanceClass",
   "/src/view/checkins/attendanceClass/attendanceClassForm.vue": "AttendanceClassForm",
   "/src/view/checkins/attendanceClassDetail/index.vue": "AttendanceClassDetail",
+  "/src/view/checkins/group/group.vue": "Group",
+  "/src/view/checkins/group/groupForm.vue": "GroupForm",
   "/src/view/error/index.vue": "Error",
   "/src/view/error/reload.vue": "Reload",
   "/src/view/example/breakpoint/breakpoint.vue": "BreakPoint",
