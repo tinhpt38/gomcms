@@ -12,14 +12,14 @@ import (
 
 type AttendanceClassApi struct {}
 
-// CreateAttendanceClass 创建AttendanceClass
+// CreateAttendanceClass tạo AttendanceClass
 // @Tags AttendanceClass
-// @Summary 创建AttendanceClass
+// @Summary tạo AttendanceClass
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body checkins.AttendanceClass true "创建AttendanceClass"
-// @Success 200 {object} response.Response{msg=string} "创建成功"
+// @Param data body checkins.AttendanceClass true "tạo AttendanceClass"
+// @Success 200 {object} response.Response{msg=string} "tạo thành công"
 // @Router /attendanceClass/createAttendanceClass [post]
 func (attendanceClassApi *AttendanceClassApi) CreateAttendanceClass(c *gin.Context) {
 	var attendanceClass checkins.AttendanceClass
@@ -28,65 +28,65 @@ func (attendanceClassApi *AttendanceClassApi) CreateAttendanceClass(c *gin.Conte
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-    attendanceClass.CreatedBy = utils.GetUserID(c)
+	attendanceClass.CreatedBy = utils.GetUserID(c)
 	err = attendanceClassService.CreateAttendanceClass(&attendanceClass)
 	if err != nil {
-        global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败:" + err.Error(), c)
+		global.GVA_LOG.Error("tạo thất bại!", zap.Error(err))
+		response.FailWithMessage("tạo thất bại:" + err.Error(), c)
 		return
 	}
-    response.OkWithMessage("创建成功", c)
+	response.OkWithMessage("tạo thành công", c)
 }
 
-// DeleteAttendanceClass 删除AttendanceClass
+// DeleteAttendanceClass xóa AttendanceClass
 // @Tags AttendanceClass
-// @Summary 删除AttendanceClass
+// @Summary xóa AttendanceClass
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body checkins.AttendanceClass true "删除AttendanceClass"
-// @Success 200 {object} response.Response{msg=string} "删除成功"
+// @Param data body checkins.AttendanceClass true "xóa AttendanceClass"
+// @Success 200 {object} response.Response{msg=string} "xóa thành công"
 // @Router /attendanceClass/deleteAttendanceClass [delete]
 func (attendanceClassApi *AttendanceClassApi) DeleteAttendanceClass(c *gin.Context) {
 	ID := c.Query("ID")
-    userID := utils.GetUserID(c)
+	userID := utils.GetUserID(c)
 	err := attendanceClassService.DeleteAttendanceClass(ID,userID)
 	if err != nil {
-        global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败:" + err.Error(), c)
+		global.GVA_LOG.Error("xóa thất bại!", zap.Error(err))
+		response.FailWithMessage("xóa thất bại:" + err.Error(), c)
 		return
 	}
-	response.OkWithMessage("删除成功", c)
+	response.OkWithMessage("xóa thành công", c)
 }
 
-// DeleteAttendanceClassByIds 批量删除AttendanceClass
+// DeleteAttendanceClassByIds xóa nhiều AttendanceClass
 // @Tags AttendanceClass
-// @Summary 批量删除AttendanceClass
+// @Summary xóa nhiều AttendanceClass
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Success 200 {object} response.Response{msg=string} "批量删除成功"
+// @Success 200 {object} response.Response{msg=string} "xóa thành công"
 // @Router /attendanceClass/deleteAttendanceClassByIds [delete]
 func (attendanceClassApi *AttendanceClassApi) DeleteAttendanceClassByIds(c *gin.Context) {
 	IDs := c.QueryArray("IDs[]")
-    userID := utils.GetUserID(c)
+	userID := utils.GetUserID(c)
 	err := attendanceClassService.DeleteAttendanceClassByIds(IDs,userID)
 	if err != nil {
-        global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
-		response.FailWithMessage("批量删除失败:" + err.Error(), c)
+		global.GVA_LOG.Error("xóa thất bại!", zap.Error(err))
+		response.FailWithMessage("xóa thất bại:" + err.Error(), c)
 		return
 	}
-	response.OkWithMessage("批量删除成功", c)
+	response.OkWithMessage("xóa thành công", c)
 }
 
-// UpdateAttendanceClass 更新AttendanceClass
+// UpdateAttendanceClass cập nhật AttendanceClass
 // @Tags AttendanceClass
-// @Summary 更新AttendanceClass
+// @Summary cập nhật AttendanceClass
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body checkins.AttendanceClass true "更新AttendanceClass"
-// @Success 200 {object} response.Response{msg=string} "更新成功"
+// @Param data body checkins.AttendanceClass true "cập nhật AttendanceClass"
+// @Success 200 {object} response.Response{msg=string} "cập nhật thành công"
 // @Router /attendanceClass/updateAttendanceClass [put]
 func (attendanceClassApi *AttendanceClassApi) UpdateAttendanceClass(c *gin.Context) {
 	var attendanceClass checkins.AttendanceClass
@@ -95,44 +95,44 @@ func (attendanceClassApi *AttendanceClassApi) UpdateAttendanceClass(c *gin.Conte
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-    attendanceClass.UpdatedBy = utils.GetUserID(c)
+	attendanceClass.UpdatedBy = utils.GetUserID(c)
 	err = attendanceClassService.UpdateAttendanceClass(attendanceClass)
 	if err != nil {
-        global.GVA_LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败:" + err.Error(), c)
+		global.GVA_LOG.Error("cập nhật thất bại!", zap.Error(err))
+		response.FailWithMessage("cập nhật thất bại:" + err.Error(), c)
 		return
 	}
-	response.OkWithMessage("更新成功", c)
+	response.OkWithMessage("cập nhật thành công", c)
 }
 
-// FindAttendanceClass 用id查询AttendanceClass
+// FindAttendanceClass tìm kiếm AttendanceClass theo ID
 // @Tags AttendanceClass
-// @Summary 用id查询AttendanceClass
+// @Summary tìm kiếm AttendanceClass theo ID
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data query checkins.AttendanceClass true "用id查询AttendanceClass"
-// @Success 200 {object} response.Response{data=checkins.AttendanceClass,msg=string} "查询成功"
+// @Param data query checkins.AttendanceClass true "tìm kiếm AttendanceClass theo ID"
+// @Success 200 {object} response.Response{data=checkins.AttendanceClass,msg=string} "tìm kiếm thành công"
 // @Router /attendanceClass/findAttendanceClass [get]
 func (attendanceClassApi *AttendanceClassApi) FindAttendanceClass(c *gin.Context) {
-	ID := c.Query("ID")
+	ID := c.Query("id")
 	reattendanceClass, err := attendanceClassService.GetAttendanceClass(ID)
 	if err != nil {
-        global.GVA_LOG.Error("查询失败!", zap.Error(err))
-		response.FailWithMessage("查询失败:" + err.Error(), c)
+		global.GVA_LOG.Error("tìm kiếm thất bại!", zap.Error(err))
+		response.FailWithMessage("tìm kiếm thất bại:" + err.Error(), c)
 		return
 	}
 	response.OkWithData(reattendanceClass, c)
 }
 
-// GetAttendanceClassList 分页获取AttendanceClass列表
+// GetAttendanceClassList lấy danh sách AttendanceClass theo trang
 // @Tags AttendanceClass
-// @Summary 分页获取AttendanceClass列表
+// @Summary lấy danh sách AttendanceClass theo trang
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data query checkinsReq.AttendanceClassSearch true "分页获取AttendanceClass列表"
-// @Success 200 {object} response.Response{data=response.PageResult,msg=string} "获取成功"
+// @Param data query checkinsReq.AttendanceClassSearch true "lấy danh sách AttendanceClass theo trang"
+// @Success 200 {object} response.Response{data=response.PageResult,msg=string} "lấy thành công"
 // @Router /attendanceClass/getAttendanceClassList [get]
 func (attendanceClassApi *AttendanceClassApi) GetAttendanceClassList(c *gin.Context) {
 	var pageInfo checkinsReq.AttendanceClassSearch
@@ -143,30 +143,30 @@ func (attendanceClassApi *AttendanceClassApi) GetAttendanceClassList(c *gin.Cont
 	}
 	list, total, err := attendanceClassService.GetAttendanceClassInfoList(pageInfo)
 	if err != nil {
-	    global.GVA_LOG.Error("获取失败!", zap.Error(err))
-        response.FailWithMessage("获取失败:" + err.Error(), c)
-        return
-    }
-    response.OkWithDetailed(response.PageResult{
-        List:     list,
-        Total:    total,
-        Page:     pageInfo.Page,
-        PageSize: pageInfo.PageSize,
-    }, "获取成功", c)
+		global.GVA_LOG.Error("lấy thất bại!", zap.Error(err))
+		response.FailWithMessage("lấy thất bại:" + err.Error(), c)
+		return
+	}
+	response.OkWithDetailed(response.PageResult{
+		List:     list,
+		Total:    total,
+		Page:     pageInfo.Page,
+		PageSize: pageInfo.PageSize,
+	}, "lấy thành công", c)
 }
 
-// GetAttendanceClassPublic 不需要鉴权的AttendanceClass接口
+// GetAttendanceClassPublic các API AttendanceClass không cần xác thực
 // @Tags AttendanceClass
-// @Summary 不需要鉴权的AttendanceClass接口
+// @Summary các API AttendanceClass không cần xác thực
 // @accept application/json
 // @Produce application/json
-// @Param data query checkinsReq.AttendanceClassSearch true "分页获取AttendanceClass列表"
-// @Success 200 {object} response.Response{data=object,msg=string} "获取成功"
+// @Param data query checkinsReq.AttendanceClassSearch true "lấy danh sách AttendanceClass theo trang"
+// @Success 200 {object} response.Response{data=object,msg=string} "lấy thành công"
 // @Router /attendanceClass/getAttendanceClassPublic [get]
 func (attendanceClassApi *AttendanceClassApi) GetAttendanceClassPublic(c *gin.Context) {
-    // 此接口不需要鉴权
-    // 示例为返回了一个固定的消息接口，一般本接口用于C端服务，需要自己实现业务逻辑
-    response.OkWithDetailed(gin.H{
-       "info": "不需要鉴权的AttendanceClass接口信息",
-    }, "获取成功", c)
+	// API này không cần xác thực
+	// Ví dụ trả về một thông điệp cố định, thường được sử dụng cho dịch vụ phía C, cần triển khai logic kinh doanh của riêng mình
+	response.OkWithDetailed(gin.H{
+	   "info": "Thông tin các API AttendanceClass không cần xác thực",
+	}, "lấy thành công", c)
 }
