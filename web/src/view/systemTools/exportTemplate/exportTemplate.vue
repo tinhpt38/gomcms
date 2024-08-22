@@ -608,7 +608,7 @@ const enterDialog = async () => {
     if (res.code === 0) {
       ElMessage({
         type: 'success',
-        message: '创建/更改成功'
+        message: 'Tạo/cập nhật thành công'
       })
       closeDialog()
       getTableData()
