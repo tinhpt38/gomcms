@@ -9,7 +9,7 @@ import (
 type Group struct {
     global.GVA_MODEL
     Name  string `json:"name" form:"name" gorm:"column:name;comment:;" binding:"required"`  //Tên nhóm 
-    AttendanceClassId  *int `json:"attendanceClassId" form:"attendanceClassId" gorm:"column:attendance_class_id;comment:;"`  //Attendance Class 
+    AttendanceId  *int `json:"attendanceId" form:"attendanceId" gorm:"column:attendance_id;comment:;"`  //Attendance Class 
 }
 
 

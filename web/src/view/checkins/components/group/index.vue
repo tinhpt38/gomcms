@@ -38,10 +38,10 @@
             <el-form-item label="Tên nhóm:" prop="name">
                 <el-input v-model="formData.name" :clearable="true" placeholder="Vui lòng nhập Tên nhóm" />
             </el-form-item>
-            <el-form-item label="Attendance Class:" prop="attendanceClassId" class="hidden">
-                <el-select v-model="formData.attendanceClassId" placeholder="Vui lòng chọn Attendance Class"
+            <el-form-item label="Attendance Class:" prop="attendanceId" class="hidden">
+                <el-select v-model="formData.attendanceId" placeholder="Vui lòng chọn Attendance Class"
                     style="width:100%" :clearable="true">
-                    <el-option v-for="(item, key) in dataSource.attendanceClassId" :key="key" :label="item.label"
+                    <el-option v-for="(item, key) in dataSource.attendanceId" :key="key" :label="item.label"
                         :value="item.value" />
                 </el-select>
             </el-form-item>
@@ -74,7 +74,7 @@ const props = defineProps({
 
 const tableData = ref([])
 const searchInfo = ref({
-    attendanceClassId: null
+    attendanceId: null
 })
 const type = ref('')
 
@@ -84,7 +84,7 @@ const size = ref(20)
 const total = ref(0)
 
 const getTableData = async () => {
-    searchInfo.value.attendanceClassId = props.acId
+    searchInfo.value.attendanceId = props.acId
     const table = await getGroupList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
     if (table.code === 0) {
         tableData.value = table.data.list
@@ -109,7 +109,7 @@ const rule = reactive({
 
 const formData = ref({
     name: '',
-    attendanceClassId: props.acId *1,
+    attendanceId: props.acId *1,
 })
 const dataSource = ref([])
 const getDataSourceFunc = async () => {
@@ -141,7 +141,7 @@ const closeDialog = () => {
     dialogFormVisible.value = false
     formData.value = {
         name: '',
-        attendanceClassId: props.acId * 1,
+        attendanceId: props.acId * 1,
     }
 }
 const elFormRef = ref()
