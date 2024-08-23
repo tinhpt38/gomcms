@@ -1,12 +1,16 @@
 package config
 
 import (
+	"fmt"
 	"path/filepath"
+	"strconv"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/config"
 	configReq "github.com/flipped-aurora/gin-vue-admin/server/model/config/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gofrs/uuid/v5"
 	"go.uber.org/zap"
@@ -25,7 +29,7 @@ type CfgFileProcessApi struct{}
 // @Router /FileProcess/createCfgFileProcess [post]
 func (FileProcessApi *CfgFileProcessApi) CreateCfgFileProcess(c *gin.Context) {
 	action := c.PostForm("action")
-	// typeProcess := c.PostForm("type")
+	typeProcess := c.PostForm("type")
 
 	if isValid := config.CheckFileProcessAction(action); !isValid {
 		response.FailWithMessage("Hành động không hợp lệ", c)
@@ -40,29 +44,7 @@ func (FileProcessApi *CfgFileProcessApi) CreateCfgFileProcess(c *gin.Context) {
 	}
 	uuid := u.String()
 
-	if err != nil {
-		response.FailWithMessage("Tạo mã UUID thất bại", c)
-		return
-	}
-
-	// var process config.CfgFileProcess = config.CfgFileProcess{
-	// 	GVA_MODEL:      global.GVA_MODEL{},
-	// 	FileName:       "",
-	// 	Uuid:           uuid,
-	// 	Msg:            "Tập tin đang được xử lý",
-	// 	UniqueFileName: uuid + ".xlsx",
-	// 	Extension:      "xlsx",
-	// 	FileSize:       0,
-	// 	TotalRow:       0,
-	// 	Action:         action,
-	// 	Type:           typeProcess,
-	// 	Url:            "",
-	// 	CreatedBy:      utils.GetUserID(c),
-	// 	UpdatedBy:      0,
-	// 	DeletedBy:      0,
-	// }
-
-	switch action {
+	switch typeProcess {
 	case "import":
 		{
 			// Parse file from form-data
@@ -75,11 +57,65 @@ func (FileProcessApi *CfgFileProcessApi) CreateCfgFileProcess(c *gin.Context) {
 			// Init data
 			extention := filepath.Ext(file.Filename)
 			uniqueFileName := uuid + extention
+			process := config.CfgFileProcess{
+				GVA_MODEL:      global.GVA_MODEL{},
+				Uuid:           uuid,
+				Percent:        0,
+				Msg:            "Tập tin " + file.Filename + " đang được xử lý",
+				Status:         config.FILE_PROCESS_STATUS_PENDING,
+				FileName:       file.Filename,
+				UniqueFileName: uniqueFileName,
+				Extension:      extention,
+				FileSize:       float64(file.Size),
+				Type:           typeProcess,
+				UserID:         utils.GetUserID(c),
+				TotalRow:       0,
+				Action:         action,
+				CreatedBy:      utils.GetUserID(c),
+				UpdatedBy:      0,
+				DeletedBy:      0,
+			}
 
 			// Save file to server
 			if err := c.SaveUploadedFile(file, global.GVA_CONFIG.Local.Path+"/"+uniqueFileName); err != nil {
 				response.FailWithMessage(err.Error(), c)
 				return
+			}
+
+			if err := FileProcessService.CreateCfgFileProcess(&process); err != nil {
+				response.FailWithMessage("Tạo thất bại:"+err.Error(), c)
+				return
+			} else {
+				response.OkWithData(process, c)
+
+				if action == config.ACTION_IMPORT_SAMPLE {
+					//TODO: Handle case of type example: "IMPORT_SAMPLE"
+				}
+
+				// TEST: Run 1 goroutine to simulate process
+				go func() {
+					// Giả lập tiến trình chạy trong 2 phút
+					totalDuration := 2 * time.Minute
+					totalSeconds := int(totalDuration.Seconds())
+					percentPerSecond := 100.0 / float64(totalSeconds)
+
+					percent := 0.0
+
+					// Giả lập tiến trình, mỗi giây tăng percent
+					for i := 0; i < totalSeconds; i++ {
+						time.Sleep(1 * time.Second)
+						fmt.Printf("Tập tin %s đang được xử lý %f%%\n", process.FileName, percent)
+						percent += percentPerSecond
+						process.Msg = "Tập tin đang được xử lý " + strconv.FormatFloat(percent, 'f', 2, 64) + "%"
+						process.Percent = percent
+						FileProcessService.UpdateCfgFileProcess(process)
+					}
+
+					process.Percent = 100
+					process.Status = config.FILE_PROCESS_STATUS_FINISH
+					process.Msg = "Tập tin đã được xử lý"
+					FileProcessService.UpdateCfgFileProcess(process)
+				}()
 			}
 
 			// Create new record process with 10% progress
@@ -237,4 +273,33 @@ func (FileProcessApi *CfgFileProcessApi) GetCfgFileProcessPublic(c *gin.Context)
 	response.OkWithDetailed(gin.H{
 		"info": "不需要鉴权的Lưu trữ thông tin nhập xuất dữ liệu Excel của hệ thống接口信息",
 	}, "获取成功", c)
+}
+
+func (fileProcessApi *CfgFileProcessApi) GetPercentFileProcess(c *gin.Context) {
+	var fileProcess config.CfgFileProcess
+	err := c.ShouldBindQuery(&fileProcess)
+
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	userID := utils.GetUserID(c)
+	fileProcess.UserID = userID
+
+	if userID == 0 {
+		global.GVA_LOG.Error("Mã định danh người dùng không hợp lệ", zap.Error(err))
+		response.FailWithMessage("Mã định danh người dùng không hợp lệ", c)
+		return
+	}
+
+	file, err := FileProcessService.GetPercentFileProcess(fileProcess)
+
+	if err != nil {
+		global.GVA_LOG.Error("Lấy tiến trình xử lý tập tin không thành công!", zap.Error(err))
+		response.FailWithMessage("Lấy tiến trình xử lý tập tin không thành công", c)
+		return
+	}
+
+	response.OkWithData(file, c)
 }

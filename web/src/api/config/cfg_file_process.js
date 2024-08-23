@@ -95,3 +95,12 @@ export const getCfgFileProcessList = (params) => {
     params
   })
 }
+
+
+export const getPercentFileProcess = (params) => {
+  return service({
+    url: '/FileProcess/getPercentFileProcess',
+    method: 'get',
+    params
+  })
+}

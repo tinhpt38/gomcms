@@ -12,8 +12,8 @@
     />
     <gva-header />
     <div class="flex flex-row w-full gva-container pt-16 box-border h-full">
-        <gva-aside v-if="config.side_mode === 'normal' || (device === 'mobile' && config.side_mode == 'head' ) || (device === 'mobile' && config.side_mode == 'combination' )" />
-        <gva-aside v-if="config.side_mode === 'combination' && device !== 'mobile'" mode="normal"/>
+      <gva-aside v-if="config.side_mode === 'normal' || (device === 'mobile' && config.side_mode == 'head' ) || (device === 'mobile' && config.side_mode == 'combination' )" />
+      <gva-aside v-if="config.side_mode === 'combination' && device !== 'mobile'" mode="normal" />
       <div class="flex-1 p-2 w-0 h-full">
         <gva-tabs v-if="config.showTabs" />
         <div
@@ -33,6 +33,7 @@
             </div>
           </router-view>
           <BottomInfo />
+          <NotificationProcess />
         </div>
       </div>
     </div>
@@ -45,6 +46,7 @@ import GvaHeader from "@/view/layout/header/index.vue";
 import useResponsive from "@/hooks/responsive";
 import GvaTabs from "./tabs/index.vue";
 import BottomInfo from "@/components/bottomInfo/bottomInfo.vue";
+import NotificationProcess from '@/components/notificationProcess/notificationProcess.vue'
 import { emitter } from "@/utils/bus.js";
 import { ref, onMounted, nextTick, reactive, watchEffect } from "vue";
 import { useRouter, useRoute } from "vue-router";
@@ -52,7 +54,11 @@ import { useRouterStore } from "@/pinia/modules/router";
 import { useUserStore } from "@/pinia/modules/user";
 import { useAppStore } from "@/pinia";
 import { storeToRefs } from "pinia";
+import {  useFileProcessStore} from '@/pinia/bl'
+
 const appStore = useAppStore();
+
+const fileProcessStore = useFileProcessStore()
 const { config, theme, device } = storeToRefs(appStore);
 
 defineOptions({
@@ -79,6 +85,8 @@ onMounted(() => {
   if (userStore.loadingInstance) {
     userStore.loadingInstance.close();
   }
+
+  fileProcessStore.initFileProcessMemoized()
 });
 
 const userStore = useUserStore();

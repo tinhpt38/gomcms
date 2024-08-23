@@ -38,6 +38,12 @@ func (CfgFileProcess) TableName() string {
 var (
 	// ActionUpload Tải lên
 	ACTION_IMPORT_SAMPLE = "IMPORT_SAMPLE"
+
+	FILE_PROCESS_STATUS_PENDING    = "pending"
+	FILE_PROCESS_STATUS_VALIDATING = "validating"
+	FILE_PROCESS_STATUS_PROCESSING = "processing"
+	FILE_PROCESS_STATUS_FINISH     = "finish"
+	FILE_PROCESS_STATUS_ERROR      = "error"
 )
 
 func CheckFileProcessAction(action string) bool {

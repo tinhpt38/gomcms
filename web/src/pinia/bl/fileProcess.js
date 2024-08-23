@@ -1,7 +1,7 @@
 import { computed, nextTick, ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import { getPercentFileProcess as getPercentFileProcessAPI } from '@/api/fileProcess'
+import { getPercentFileProcess as getPercentFileProcessAPI } from '@/api/config/cfg_file_process'
 import { isJsonString } from '@/utils/validator'
 import memoize from 'lodash/memoize'
 
@@ -42,7 +42,7 @@ export const useFileProcessStore = defineStore('fileProcess', () => {
   const initFileProcessMemoized = memoize(initFileProcess)
 
   const addFileProcess = async(fp, save = true) => {
-    const uuid = fp?.uuidFile || null
+    const uuid = fp?.uuid || null
 
     if (!uuid) {
       return
@@ -75,24 +75,24 @@ export const useFileProcessStore = defineStore('fileProcess', () => {
   }
 
   const removeFileProcess = async(fp) => {
-    const uuid = fp.uuidFile
+    const uuid = fp.uuid
 
     const runningProcess = runningFileProcess.value[uuid] || null
     if (runningFileProcess.value) {
       clearInterval(runningProcess.intervalID)
     }
 
-    runningFileProcess.value = Object.values(runningFileProcess.value).filter(a => a.uuidFile !== uuid).reduce((acc, cur) => {
+    runningFileProcess.value = Object.values(runningFileProcess.value).filter(a => a.uuid !== uuid).reduce((acc, cur) => {
       return {
         ...acc,
-        [cur.uuidFile]: cur
+        [cur.uuid]: cur
       }
     }, {})
 
-    fileProcess.value = Object.values(fileProcess.value).filter(a => a.uuidFile !== uuid).reduce((acc, cur) => {
+    fileProcess.value = Object.values(fileProcess.value).filter(a => a.uuid !== uuid).reduce((acc, cur) => {
       return {
         ...acc,
-        [cur.uuidFile]: cur
+        [cur.uuid]: cur
       }
     }, {})
 
@@ -104,7 +104,7 @@ export const useFileProcessStore = defineStore('fileProcess', () => {
   const getFileProcessStatus = async(uuid) => {
     try {
       const res = await getPercentFileProcessAPI({
-        uuidFile: uuid
+        uuid: uuid
       })
 
       if (res.code === 0) {

@@ -46,9 +46,9 @@
         <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete">
           Xóa
         </el-button>
-        <!-- <el-button icon="Download" style="margin-left: 10px;" @click="() => {}">
-          Xóa
-        </el-button> -->
+        <div class="ms-3">
+          <ImportExcel :form-data="{ action: 'IMPORT_SAMPLE' }" />
+        </div>
       </div>
       <el-table
         ref="multipleTable"
@@ -181,6 +181,7 @@ import {
   getAttendanceClassList
 } from '@/api/checkins/attendanceClass'
 import router from '@/router';
+import ImportExcel from '@/components/importExcel/index.vue'
 
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict ,filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
