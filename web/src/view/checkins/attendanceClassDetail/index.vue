@@ -63,7 +63,7 @@
             </el-tab-pane>
             <el-tab-pane name="groupTab" label="Nhóm">
                 <div class="table-container">
-                    <Group :groups="groupData" />
+                    <Group :acId="currentId" />
                 </div>
             </el-tab-pane>
             <el-tab-pane name="areaTab" label="Khu vực">
