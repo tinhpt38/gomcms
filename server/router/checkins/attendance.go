@@ -13,8 +13,10 @@ func (s *AttendanceRouter) InitAttendanceRouter(Router *gin.RouterGroup, PublicR
 	attendanceRouterWithoutRecord := Router.Group("attendance")
 	attendanceRouterWithoutAuth := PublicRouter.Group("attendance")
 	{
-		attendanceRouter.POST("createAttendance", attendanceApi.CreateAttendance)             // 新建AttendanceClass
-		attendanceRouter.DELETE("deleteAttendance", attendanceApi.DeleteAttendance)           // 删除AttendanceClass
+		attendanceRouter.POST("createAttendance", attendanceApi.CreateAttendance)
+		attendanceRouter.POST("createAttendanceArea", attendanceApi.CreateAttendanceArea) // 新建AttendanceClass
+		attendanceRouter.DELETE("deleteAttendance", attendanceApi.DeleteAttendance)
+		attendanceRouter.DELETE("deleteAttendanceArea", attendanceApi.DeleteAttendanceArea)   // 删除AttendanceClass
 		attendanceRouter.DELETE("deleteAttendanceByIds", attendanceApi.DeleteAttendanceByIds) // 批量删除AttendanceClass
 		attendanceRouter.PUT("updateAttendance", attendanceApi.UpdateAttendance)              // 更新AttendanceClass
 	}

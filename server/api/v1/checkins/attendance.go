@@ -1,6 +1,8 @@
 package checkins
 
 import (
+	"strconv"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
@@ -45,19 +47,39 @@ func (attendanceApi *AttendanceApi) CreateAttendanceArea(c *gin.Context) {
 	response.OkWithMessage("tạo thành công", c)
 }
 
-// DeleteAttendance xóa AttendanceClass
-// @Tags AttendanceClass
-// @Summary xóa AttendanceClass
-// @Security ApiKeyAuth
-// @accept application/json
-// @Produce application/json
-// @Param data body checkins.AttendanceClass true "xóa AttendanceClass"
-// @Success 200 {object} response.Response{msg=string} "xóa thành công"
-// @Router /attendance/deleteAttendance [delete]
 func (attendanceApi *AttendanceApi) DeleteAttendance(c *gin.Context) {
 	ID := c.Query("ID")
 	userID := utils.GetUserID(c)
 	err := attendanceService.DeleteAttendance(ID, userID)
+	if err != nil {
+		global.GVA_LOG.Error("xóa thất bại!", zap.Error(err))
+		response.FailWithMessage("xóa thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithMessage("xóa thành công", c)
+}
+
+func (attendanceApi *AttendanceApi) DeleteAttendanceArea(c *gin.Context) {
+	acid := c.Query("acid")
+	areaId := c.Query("areaId")
+	// userID := utils.GetUserID(c)
+	attendanceID, err := strconv.ParseUint(acid, 10, 64)
+	if err != nil {
+		global.GVA_LOG.Error("failed to parse attendance ID", zap.Error(err))
+		response.FailWithMessage("failed to parse attendance ID", c)
+		return
+	}
+	areaID, err := strconv.ParseUint(areaId, 10, 64)
+	if err != nil {
+		global.GVA_LOG.Error("failed to parse area ID", zap.Error(err))
+		response.FailWithMessage("failed to parse area ID", c)
+		return
+	}
+	var acArea = &checkins.AttendanceArea{
+		AttendanceID: uint(attendanceID),
+		AreaID:       uint(areaID),
+	}
+	err = attendanceService.DeleteAttendanceArea(acArea)
 	if err != nil {
 		global.GVA_LOG.Error("xóa thất bại!", zap.Error(err))
 		response.FailWithMessage("xóa thất bại:"+err.Error(), c)
