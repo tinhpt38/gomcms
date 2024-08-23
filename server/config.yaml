@@ -121,12 +121,12 @@ mssql:
     log-zap: false
 mysql:
     prefix: ""
-    port: "8889"
+    port: "3306"
     config: charset=utf8mb4&parseTime=True&loc=Local
-    db-name: gomcms
-    username: tinhpt
-    password: "123456"
-    path: localhost
+    db-name: cms
+    username: root
+    password:
+    path: 127.0.0.1
     engine: ""
     log-mode: error
     max-idle-conns: 10
