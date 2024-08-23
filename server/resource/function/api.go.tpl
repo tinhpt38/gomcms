@@ -11,11 +11,11 @@ func (a *{{.Abbreviation}}) {{.FuncName}}(c *gin.Context) {
     // 请添加自己的业务逻辑
     err := service{{ .StructName }}.{{.FuncName}}()
        if err != nil {
-    		global.GVA_LOG.Error("失败!", zap.Error(err))
-            response.FailWithMessage("失败", c)
+    		global.GVA_LOG.Error("thất bại!", zap.Error(err))
+            response.FailWithMessage("thất bại", c)
     		return
        }
-    response.OkWithData("返回数据",c)
+    response.OkWithData("thành công",c)
 }
 
 {{- else -}}
@@ -32,10 +32,10 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api){{.FuncName}}(c *gin.Context) {
     // 请添加自己的业务逻辑
     err := {{.Abbreviation}}Service.{{.FuncName}}()
     if err != nil {
-        global.GVA_LOG.Error("失败!", zap.Error(err))
-   		response.FailWithMessage("失败", c)
+        global.GVA_LOG.Error("thất bại!", zap.Error(err))
+   		response.FailWithMessage("thất bạn", c)
    		return
    	}
-   	response.OkWithData("返回数据",c)
+   	response.OkWithData("thành công",c)
 }
 {{end}}
