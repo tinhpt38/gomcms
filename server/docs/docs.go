@@ -218,7 +218,7 @@ const docTemplate = `{
                 "summary": "刷新casbin缓存",
                 "responses": {
                     "200": {
-                        "description": "刷新成功",
+                        "description": "Làm mới thành công",
                         "schema": {
                             "allOf": [
                                 {

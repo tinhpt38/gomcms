@@ -309,7 +309,7 @@ func (s *SystemApiApi) DeleteApisByIds(c *gin.Context) {
 // @Summary   刷新casbin缓存
 // @accept    application/json
 // @Produce   application/json
-// @Success   200   {object}  response.Response{msg=string}  "刷新成功"
+// @Success   200   {object}  response.Response{msg=string}  "Làm mới thành công"
 // @Router    /api/freshCasbin [get]
 func (s *SystemApiApi) FreshCasbin(c *gin.Context) {
 	err := casbinService.FreshCasbin()
@@ -318,5 +318,5 @@ func (s *SystemApiApi) FreshCasbin(c *gin.Context) {
 		response.FailWithMessage("刷新失败", c)
 		return
 	}
-	response.OkWithMessage("刷新成功", c)
+	response.OkWithMessage("Làm mới thành công", c)
 }

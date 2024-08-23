@@ -75,11 +75,8 @@ func (attendanceApi *AttendanceApi) DeleteAttendanceArea(c *gin.Context) {
 		response.FailWithMessage("failed to parse area ID", c)
 		return
 	}
-	var acArea = &checkins.AttendanceArea{
-		AttendanceID: uint(attendanceID),
-		AreaID:       uint(areaID),
-	}
-	err = attendanceService.DeleteAttendanceArea(acArea)
+
+	err = attendanceService.DeleteAttendanceArea(uint(attendanceID), uint(areaID))
 	if err != nil {
 		global.GVA_LOG.Error("xóa thất bại!", zap.Error(err))
 		response.FailWithMessage("xóa thất bại:"+err.Error(), c)

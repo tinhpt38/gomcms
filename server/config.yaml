@@ -121,12 +121,17 @@ mssql:
     log-zap: false
 mysql:
     prefix: ""
-    config: charset=utf8mb4&parseTime=True&loc=Local
+    # port: "8889"
+    # db-name: gomcms
+    # username: tinhpt
+    # password: "123456"
+    # path: localhost
     path: 10.20.6.62
     port: "3306"
     db-name: dlu-cms
     username: dlu-cms
     password: azwRrcjdJMhwSnNp
+    config: charset=utf8mb4&parseTime=True&loc=Local
     engine: ""
     log-mode: error
     max-idle-conns: 10

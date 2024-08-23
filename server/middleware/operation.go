@@ -112,7 +112,7 @@ func OperationRecord() gin.HandlerFunc {
 			strings.Contains(c.Writer.Header().Get("Content-Transfer-Encoding"), "binary") {
 			if len(record.Resp) > bufferSize {
 				// 截断
-				record.Body = "超出记录长度"
+				record.Body = "Đã vượt quá độ dài bản ghi"
 			}
 		}
 

@@ -136,7 +136,7 @@ export const deleteApisByIds = (data) => {
 // @Summary   刷新casbin缓存
 // @accept    application/json
 // @Produce   application/json
-// @Success   200   {object}  response.Response{msg=string}  "刷新成功"
+// @Success   200   {object}  response.Response{msg=string}  "Làm mới thành công"
 // @Router    /api/freshCasbin [get]
 export const freshCasbin = () => {
   return service({
