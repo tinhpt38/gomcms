@@ -7,6 +7,7 @@ type RouterGroup struct {
 	GroupRouter
 	AreaRouter
 	ParticipantRouter
+	ConditionRouter
 }
 
 var (
@@ -14,4 +15,5 @@ var (
 	groupApi       = api.ApiGroupApp.CheckinsApiGroup.GroupApi
 	areaApi        = api.ApiGroupApp.CheckinsApiGroup.AreaApi
 	participantApi = api.ApiGroupApp.CheckinsApiGroup.ParticipantApi
+	conditionApi   = api.ApiGroupApp.CheckinsApiGroup.ConditionApi
 )
