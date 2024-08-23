@@ -33,7 +33,7 @@
                 </div>
             </template>
 
-            <el-form :model="formData" label-position="top" :rule="rules" ref="elFormRef" label-width="80px">
+            <el-form :model="formData" label-position="top" :rules="rules" ref="elFormRef" label-width="80px">
                 <el-form-item label="Tên khu vực:" prop="areaId">
                     <el-select v-model="formData.areaId" placeholder="Chọn khu vực" clearable filterable
                         @change="onSelectChange">
@@ -73,7 +73,7 @@ const elFormRef = ref()
 const dialogFormVisible = ref(false)
 const type = ref('')
 const formData = ref({
-    acId: props.acId,
+    attendanceId: props.acId,
     areaId: null,
     radius: null,
 })
@@ -81,9 +81,6 @@ const formData = ref({
 const rules = ref({
     areaId: [
         { required: true, message: 'Vui lòng chọn khu vực', trigger: 'change' }
-    ],
-    radius: [
-        { required: true, message: 'Vui lòng nhập bán kính', trigger: 'change' }
     ]
 })
 
@@ -121,7 +118,7 @@ const enterDialog = () => {
     elFormRef.value?.validate(async (valid) => {
         if (!valid) return
         let res
-        formData.value.acId = props.acId * 1
+        formData.value.attendanceId = props.acId * 1
         switch (type.value) {
             case 'create':
                 res = await createAttendanceArea(formData.value)

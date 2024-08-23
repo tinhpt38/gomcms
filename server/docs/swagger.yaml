@@ -1749,7 +1749,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 刷新成功
+          description: Làm mới thành công
           schema:
             allOf:
             - $ref: '#/definitions/response.Response'
