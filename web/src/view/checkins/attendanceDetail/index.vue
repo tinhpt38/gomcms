@@ -18,42 +18,41 @@
                   <el-input v-model="formData.title" type="text" clearable />
                 </el-form-item>
                 <el-form-item label="Client URL" prop="formData.clientUrl" class="required">
-                  <el-input v-model="formData.clientUrl" type="text" clearable >
+                  <el-input v-model="formData.clientUrl" type="text" clearable>
                     <template #prepend>https://</template>
                   </el-input>
                 </el-form-item>
+                <div class=" flex justify-between">
+                  <el-form-item label="Ngày bắt đầu" label-width="150px" prop="startDate" class="required">
+                    <el-date-picker v-model="formData.startDate" type="datetime" class="full-width-input" clearable />
+                  </el-form-item>
+                  <el-form-item label="Ngày kết thúc" label-width="150px" prop="endDate" class="required">
+                    <el-date-picker v-model="formData.endDate" type="datetime" class="full-width-input" clearable />
+                  </el-form-item>
+                </div>
+
+                <div class="flex justify-between">
+                  <el-form-item label="Cho thử nghiệm" label-width="150px" prop="isTrial">
+                    <el-switch v-model="formData.isTrial" />
+                  </el-form-item>
+                  <el-form-item label="Khoá" label-width="150px" prop="isLocked">
+                    <el-switch v-model="formData.isLocked" />
+                  </el-form-item>
+                </div>
+
               </el-col>
-              <el-col :span="12" class="grid-cell flex justify-end">
-                <el-button type="primary" @click="saveAttendance">
-                  Lưu
-                </el-button>
+              <el-col :span="12" class="grid-cell flex-column px-4">
+                <div class="flex justify-end p-2">
+                  <el-button type="success" @click="downloadQRCode">Tải xuống QR Code</el-button>
+                  <el-button type="primary" @click="saveAttendance">Lưu</el-button>
+                </div>
+                <div class="flex flex-col items-center justify-center w-full">
+                  <canvas class="border-2 rounded border-gray-500" ref="qrcodeCanvas"></canvas>
+                  <div>Dùng QR Code này để quét điểm danh</div>
+                </div>
               </el-col>
             </el-row>
 
-            <el-row>
-              <el-col :span="12" class="grid-cell">
-                <el-form-item label="Ngày bắt đầu" label-width="150px" prop="startDate" class="required">
-                  <el-date-picker v-model="formData.startDate" type="datetime" class="full-width-input" clearable />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12" class="grid-cell">
-                <el-form-item label="Ngày kết thúc" label-width="150px" prop="endDate" class="required">
-                  <el-date-picker v-model="formData.endDate" type="datetime" class="full-width-input" clearable />
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-row>
-              <el-col :span="12" class="grid-cell">
-                <el-form-item label="Cho thử nghiệm" label-width="150px" prop="isTrailer">
-                  <el-switch v-model="formData.isTrailer" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12" class="grid-cell">
-                <el-form-item label="Khoá" label-width="150px" prop="isLocked">
-                  <el-switch v-model="formData.isLocked" />
-                </el-form-item>
-              </el-col>
-            </el-row>
           </el-form>
         </div>
         <div class="table-container">
@@ -97,7 +96,7 @@ import {
   findAttendance,
 } from '@/api/checkins/attendance'
 import { useRoute } from 'vue-router';
-
+import QRCode from 'qrcode'
 import { ElForm, ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 import Partticipants from '@/view/checkins/components/participant/index.vue'
@@ -105,6 +104,8 @@ import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
 import { getParticipantList } from '@/api/checkins/participant'
+import { onMounted } from 'vue'
+import base32 from 'hi-base32'
 
 defineOptions({
   name: 'AttendanceDetail'
@@ -124,9 +125,8 @@ const getDetailData = async () => {
     formData.value = res.data
   }
   console.log('res', res)
+  generateQRCode();
 }
-
-
 getDetailData();
 
 
@@ -143,6 +143,38 @@ const saveAttendance = async () => {
     }
   })
 }
+
+const qrcodeCanvas = ref(null)
+
+
+
+const generateQRCode = async () => {
+  var params = base32.encode($route.params.id)
+  console.log('params-endcode', params)
+  var url = formData.value.clientUrl + '/checkin/' + params
+  // const decoded = base32.decode.asBytes(params)
+  // const decodedText = String.fromCharCode(...decoded)
+  // console.log('param-decode', decodedText)
+  QRCode.toCanvas(qrcodeCanvas.value, url, { width: 300 }, (error) => {
+    if (error) console.error(error)
+  })
+}
+
+// onMounted(() => {
+//   generateQRCode()
+// })
+
+
+
+const downloadQRCode = () => {
+  const canvas = qrcodeCanvas.value
+  const url = canvas.toDataURL('image/png')
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'Attendance - ' + $route.params.id + '.png'
+  link.click()
+}
+
 
 const rule = reactive({
   title: [{
@@ -406,11 +438,11 @@ const groupHandleSizeChange = (val) => {
 }
 
 const getParticipantListData = async () => {
-    const res = await getParticipantList({ page: groupPage.value, size: groupSize.value })
-    if (res.code == 0) {
-        partticipantsData.value = res.data.list
-    }
-    console.log('res', res)
+  const res = await getParticipantList({ page: groupPage.value, size: groupSize.value })
+  if (res.code == 0) {
+    partticipantsData.value = res.data.list
+  }
+  console.log('res', res)
 }
 
 //endregion
