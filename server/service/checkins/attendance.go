@@ -60,18 +60,10 @@ func (attendanceService *AttendanceService) GetAttendance(ID string) (attendance
 	return
 }
 
-func (attendanceService *AttendanceService) GetAttendanceArea(id uint) (list []checkins.Area, err error) {
+func (attendanceService *AttendanceService) GetAttendanceArea(id uint) (list []checkins.AttendanceArea, err error) {
 
-	db := global.GVA_DB.Model(&checkins.AttendanceArea{})
+	db := global.GVA_DB.Table(checkins.AttendanceArea{}.TableName())
 	err = db.Where("attendance_id = ?", id).Preload("Area").Find(&list).Error
-
-	// var attendance checkins.Attendance
-	// err = global.GVA_DB.Where("id = ?", id).Preload("Areas").First(&attendance).Error
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// list = attendance.Areas
-
 	return
 }
 
