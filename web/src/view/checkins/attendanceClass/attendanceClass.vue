@@ -3,135 +3,171 @@
   <div>
     <div class="gva-search-box">
       <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule" @keyup.enter="onSubmit">
-      <el-form-item label="Ngày tạo" prop="createdAt">
-      <template #label>
-        <span>
-          Ngày tạo
-          <el-tooltip content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
-            <el-icon><QuestionFilled /></el-icon>
-          </el-tooltip>
-        </span>
-      </template>
-      <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="Ngày bắt đầu" :disabled-date="time=> searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false"></el-date-picker>
-       —
-      <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc" :disabled-date="time=> searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false"></el-date-picker>
-      </el-form-item>
-      
+        <el-form-item label="Ngày tạo" prop="createdAt">
+          <template #label>
+            <span>
+              Ngày tạo
+              <el-tooltip content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
+                <el-icon><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </span>
+          </template>
+          <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="Ngày bắt đầu" :disabled-date="time=> searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false" />
+          —
+          <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc" :disabled-date="time=> searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false" />
+        </el-form-item>
+
 
         <template v-if="showAllQuery">
           <!-- Thêm các điều kiện tìm kiếm cần điều khiển hiển thị vào đây -->
         </template>
 
         <el-form-item>
-          <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
-          <el-button icon="refresh" @click="onReset">Đặt lại</el-button>
-          <el-button link type="primary" icon="arrow-down" @click="showAllQuery=true" v-if="!showAllQuery">Mở rộng</el-button>
-          <el-button link type="primary" icon="arrow-up" @click="showAllQuery=false" v-else>Thu gọn</el-button>
+          <el-button type="primary" icon="search" @click="onSubmit">
+            Tìm kiếm
+          </el-button>
+          <el-button icon="refresh" @click="onReset">
+            Đặt lại
+          </el-button>
+          <el-button v-if="!showAllQuery" link type="primary" icon="arrow-down" @click="showAllQuery=true">
+            Mở rộng
+          </el-button>
+          <el-button v-else link type="primary" icon="arrow-up" @click="showAllQuery=false">
+            Thu gọn
+          </el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="gva-table-box">
-        <div class="gva-btn-list">
-            <el-button  type="primary" icon="plus" @click="openDialog">Thêm mới</el-button>
-            <el-button  icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete">Xóa</el-button>
-        </div>
-        <el-table
+      <div class="gva-btn-list">
+        <el-button type="primary" icon="plus" @click="openDialog">
+          Thêm mới
+        </el-button>
+        <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete">
+          Xóa
+        </el-button>
+        <!-- <el-button icon="Download" style="margin-left: 10px;" @click="() => {}">
+          Xóa
+        </el-button> -->
+      </div>
+      <el-table
         ref="multipleTable"
         style="width: 100%"
         tooltip-effect="dark"
         :data="tableData"
         row-key="ID"
         @selection-change="handleSelectionChange"
-        >
+      >
         <el-table-column type="selection" width="55" />
-        
+
         <el-table-column align="left" label="Ngày tạo" prop="createdAt" width="180">
-            <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+          <template #default="scope">
+            {{ formatDate(scope.row.CreatedAt) }}
+          </template>
         </el-table-column>
-        
-          <el-table-column align="left" label="Tiêu đề" prop="title" width="120" />
-         <el-table-column align="left" label="Ngày bắt đầu" prop="startDate" width="180">
-            <template #default="scope">{{ formatDate(scope.row.startDate) }}</template>
-         </el-table-column>
-         <el-table-column align="left" label="Ngày kết thúc" prop="endDate" width="180">
-            <template #default="scope">{{ formatDate(scope.row.endDate) }}</template>
-         </el-table-column>
+
+        <el-table-column align="left" label="Tiêu đề" prop="title" width="120" />
+        <el-table-column align="left" label="Ngày bắt đầu" prop="startDate" width="180">
+          <template #default="scope">
+            {{ formatDate(scope.row.startDate) }}
+          </template>
+        </el-table-column>
+        <el-table-column align="left" label="Ngày kết thúc" prop="endDate" width="180">
+          <template #default="scope">
+            {{ formatDate(scope.row.endDate) }}
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="Cho thử nghiệm" prop="isTrial" width="120">
-            <template #default="scope">{{ formatBoolean(scope.row.isTrial) }}</template>
+          <template #default="scope">
+            {{ formatBoolean(scope.row.isTrial) }}
+          </template>
         </el-table-column>
         <el-table-column align="left" label="Khoá" prop="isLocked" width="120">
-            <template #default="scope">{{ formatBoolean(scope.row.isLocked) }}</template>
+          <template #default="scope">
+            {{ formatBoolean(scope.row.isLocked) }}
+          </template>
         </el-table-column>
         <el-table-column align="left" label="Thao tác" fixed="right" min-width="240">
-            <template #default="scope">
-            <el-button  type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon style="margin-right: 5px"><InfoFilled /></el-icon>Xem chi tiết</el-button>
-            <el-button  type="primary" link icon="edit" class="table-button" @click="updateAttendanceClassFunc(scope.row)">Chỉnh sửa</el-button>
-            <el-button  type="primary" link icon="delete" @click="deleteRow(scope.row)">Xóa</el-button>
-            </template>
+          <template #default="scope">
+            <el-button type="primary" link class="table-button" @click="getDetails(scope.row)">
+              <el-icon style="margin-right: 5px">
+                <InfoFilled />
+              </el-icon>Xem chi tiết
+            </el-button>
+            <el-button type="primary" link icon="edit" class="table-button" @click="updateAttendanceClassFunc(scope.row)">
+              Chỉnh sửa
+            </el-button>
+            <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">
+              Xóa
+            </el-button>
+          </template>
         </el-table-column>
-        </el-table>
-        <div class="gva-pagination">
-            <el-pagination
-            layout="total, sizes, prev, pager, next, jumper"
-            :current-page="page"
-            :page-size="pageSize"
-            :page-sizes="[10, 30, 50, 100]"
-            :total="total"
-            @current-change="handleCurrentChange"
-            @size-change="handleSizeChange"
-            />
-        </div>
+      </el-table>
+      <div class="gva-pagination">
+        <el-pagination
+          layout="total, sizes, prev, pager, next, jumper"
+          :current-page="page"
+          :page-size="pageSize"
+          :page-sizes="[10, 30, 50, 100]"
+          :total="total"
+          @current-change="handleCurrentChange"
+          @size-change="handleSizeChange"
+        />
+      </div>
     </div>
-    <el-drawer destroy-on-close size="800" v-model="dialogFormVisible" :show-close="false" :before-close="closeDialog">
-       <template #header>
-              <div class="flex justify-between items-center">
-                <span class="text-lg">{{type==='create'?'Thêm mới':'Chỉnh sửa'}}</span>
-                <div>
-                  <el-button type="primary" @click="enterDialog">Đồng ý</el-button>
-                  <el-button @click="closeDialog">Hủy</el-button>
-                </div>
-              </div>
-            </template>
+    <el-drawer v-model="dialogFormVisible" destroy-on-close size="800" :show-close="false" :before-close="closeDialog">
+      <template #header>
+        <div class="flex justify-between items-center">
+          <span class="text-lg">{{ type==='create'?'Thêm mới':'Chỉnh sửa' }}</span>
+          <div>
+            <el-button type="primary" @click="enterDialog">
+              Đồng ý
+            </el-button>
+            <el-button @click="closeDialog">
+              Hủy
+            </el-button>
+          </div>
+        </div>
+      </template>
 
-          <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
-            <el-form-item label="Tiêu đề:"  prop="title" >
-              <el-input v-model="formData.title" :clearable="true"  placeholder="Nhập tiêu đề" />
-            </el-form-item>
-            <el-form-item label="Ngày bắt đầu:"  prop="startDate" >
-              <el-date-picker v-model="formData.startDate" type="date" style="width:100%" placeholder="Chọn ngày" :clearable="true"  />
-            </el-form-item>
-            <el-form-item label="Ngày kết thúc:"  prop="endDate" >
-              <el-date-picker v-model="formData.endDate" type="date" style="width:100%" placeholder="Chọn ngày" :clearable="true"  />
-            </el-form-item>
-            <el-form-item label="Cho thử nghiệm:"  prop="isTrial" >
-              <el-switch v-model="formData.isTrial" active-color="#13ce66" inactive-color="#ff4949" active-text="Có" inactive-text="Không" clearable ></el-switch>
-            </el-form-item>
-            <el-form-item label="Khoá:"  prop="isLocked" >
-              <el-switch v-model="formData.isLocked" active-color="#13ce66" inactive-color="#ff4949" active-text="Có" inactive-text="Không" clearable ></el-switch>
-            </el-form-item>
-          </el-form>
+      <el-form ref="elFormRef" :model="formData" label-position="top" :rules="rule" label-width="80px">
+        <el-form-item label="Tiêu đề:" prop="title">
+          <el-input v-model="formData.title" :clearable="true" placeholder="Nhập tiêu đề" />
+        </el-form-item>
+        <el-form-item label="Ngày bắt đầu:" prop="startDate">
+          <el-date-picker v-model="formData.startDate" type="date" style="width:100%" placeholder="Chọn ngày" :clearable="true" />
+        </el-form-item>
+        <el-form-item label="Ngày kết thúc:" prop="endDate">
+          <el-date-picker v-model="formData.endDate" type="date" style="width:100%" placeholder="Chọn ngày" :clearable="true" />
+        </el-form-item>
+        <el-form-item label="Cho thử nghiệm:" prop="isTrial">
+          <el-switch v-model="formData.isTrial" active-color="#13ce66" inactive-color="#ff4949" active-text="Có" inactive-text="Không" clearable />
+        </el-form-item>
+        <el-form-item label="Khoá:" prop="isLocked">
+          <el-switch v-model="formData.isLocked" active-color="#13ce66" inactive-color="#ff4949" active-text="Có" inactive-text="Không" clearable />
+        </el-form-item>
+      </el-form>
     </el-drawer>
 
-    <el-drawer destroy-on-close size="800" v-model="detailShow" :show-close="true" :before-close="closeDetailShow">
-            <el-descriptions column="1" border>
-                    <el-descriptions-item label="Tiêu đề">
-                        {{ detailFrom.title }}
-                    </el-descriptions-item>
-                    <el-descriptions-item label="Ngày bắt đầu">
-                        {{ detailFrom.startDate }}
-                    </el-descriptions-item>
-                    <el-descriptions-item label="Ngày kết thúc">
-                        {{ detailFrom.endDate }}
-                    </el-descriptions-item>
-                    <el-descriptions-item label="Cho thử nghiệm">
-                        {{ detailFrom.isTrial }}
-                    </el-descriptions-item>
-                    <el-descriptions-item label="Khoá">
-                        {{ detailFrom.isLocked }}
-                    </el-descriptions-item>
-            </el-descriptions>
-        </el-drawer>
-
+    <el-drawer v-model="detailShow" destroy-on-close size="800" :show-close="true" :before-close="closeDetailShow">
+      <el-descriptions column="1" border>
+        <el-descriptions-item label="Tiêu đề">
+          {{ detailFrom.title }}
+        </el-descriptions-item>
+        <el-descriptions-item label="Ngày bắt đầu">
+          {{ detailFrom.startDate }}
+        </el-descriptions-item>
+        <el-descriptions-item label="Ngày kết thúc">
+          {{ detailFrom.endDate }}
+        </el-descriptions-item>
+        <el-descriptions-item label="Cho thử nghiệm">
+          {{ detailFrom.isTrial }}
+        </el-descriptions-item>
+        <el-descriptions-item label="Khoá">
+          {{ detailFrom.isLocked }}
+        </el-descriptions-item>
+      </el-descriptions>
+    </el-drawer>
   </div>
 </template>
 

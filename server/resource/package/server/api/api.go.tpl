@@ -35,11 +35,11 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api) Create{{.StructName}}(c *gin.Con
 	{{- end }}
 	err = {{.Abbreviation}}Service.Create{{.StructName}}(&{{.Abbreviation}})
 	if err != nil {
-        global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败:" + err.Error(), c)
+        global.GVA_LOG.Error("thất bại!", zap.Error(err))
+		response.FailWithMessage("thất bại:" + err.Error(), c)
 		return
 	}
-    response.OkWithMessage("创建成功", c)
+    response.OkWithMessage("thành công", c)
 }
 
 // Delete{{.StructName}} 删除{{.Description}}
@@ -58,11 +58,11 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api) Delete{{.StructName}}(c *gin.Con
         {{- end }}
 	err := {{.Abbreviation}}Service.Delete{{.StructName}}({{.PrimaryField.FieldJson}} {{- if .AutoCreateResource -}},userID{{- end -}})
 	if err != nil {
-        global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败:" + err.Error(), c)
+        global.GVA_LOG.Error("thất bại!", zap.Error(err))
+		response.FailWithMessage("thất bại:" + err.Error(), c)
 		return
 	}
-	response.OkWithMessage("删除成功", c)
+	response.OkWithMessage("thành công", c)
 }
 
 // Delete{{.StructName}}ByIds 批量删除{{.Description}}
@@ -80,11 +80,11 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api) Delete{{.StructName}}ByIds(c *gi
         {{- end }}
 	err := {{.Abbreviation}}Service.Delete{{.StructName}}ByIds({{.PrimaryField.FieldJson}}s{{- if .AutoCreateResource }},userID{{- end }})
 	if err != nil {
-        global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
-		response.FailWithMessage("批量删除失败:" + err.Error(), c)
+        global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại:" + err.Error(), c)
 		return
 	}
-	response.OkWithMessage("批量删除成功", c)
+	response.OkWithMessage("Thành công", c)
 }
 
 // Update{{.StructName}} 更新{{.Description}}
@@ -108,11 +108,11 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api) Update{{.StructName}}(c *gin.Con
         {{- end }}
 	err = {{.Abbreviation}}Service.Update{{.StructName}}({{.Abbreviation}})
 	if err != nil {
-        global.GVA_LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败:" + err.Error(), c)
+        global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại:" + err.Error(), c)
 		return
 	}
-	response.OkWithMessage("更新成功", c)
+	response.OkWithMessage("Thành công", c)
 }
 
 // Find{{.StructName}} 用id查询{{.Description}}
@@ -128,8 +128,8 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api) Find{{.StructName}}(c *gin.Conte
 	{{.PrimaryField.FieldJson}} := c.Query("{{.PrimaryField.FieldJson}}")
 	re{{.Abbreviation}}, err := {{.Abbreviation}}Service.Get{{.StructName}}({{.PrimaryField.FieldJson}})
 	if err != nil {
-        global.GVA_LOG.Error("查询失败!", zap.Error(err))
-		response.FailWithMessage("查询失败:" + err.Error(), c)
+        global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại:" + err.Error(), c)
 		return
 	}
 	response.OkWithData(re{{.Abbreviation}}, c)
@@ -153,8 +153,8 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api) Get{{.StructName}}List(c *gin.Co
 	}
 	list, total, err := {{.Abbreviation}}Service.Get{{.StructName}}InfoList(pageInfo)
 	if err != nil {
-	    global.GVA_LOG.Error("获取失败!", zap.Error(err))
-        response.FailWithMessage("获取失败:" + err.Error(), c)
+	    global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+        response.FailWithMessage("Thất bại:" + err.Error(), c)
         return
     }
     response.OkWithDetailed(response.PageResult{
@@ -162,7 +162,7 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api) Get{{.StructName}}List(c *gin.Co
         Total:    total,
         Page:     pageInfo.Page,
         PageSize: pageInfo.PageSize,
-    }, "获取成功", c)
+    }, "Thành công", c)
 }
 
 {{- if .HasDataSource }}
@@ -177,8 +177,8 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api) Get{{.StructName}}DataSource(c *
     // 此接口为获取数据源定义的数据
     dataSource, err := {{.Abbreviation}}Service.Get{{.StructName}}DataSource()
     if err != nil {
-        global.GVA_LOG.Error("查询失败!", zap.Error(err))
-   		response.FailWithMessage("查询失败:" + err.Error(), c)
+        global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+   		response.FailWithMessage("Thất bại:" + err.Error(), c)
    		return
     }
    response.OkWithData(dataSource, c)
@@ -198,5 +198,5 @@ func ({{.Abbreviation}}Api *{{.StructName}}Api) Get{{.StructName}}Public(c *gin.
     // 示例为返回了一个固定的消息接口，一般本接口用于C端服务，需要自己实现业务逻辑
     response.OkWithDetailed(gin.H{
        "info": "不需要鉴权的{{.Description}}接口信息",
-    }, "获取成功", c)
+    }, "Thành công", c)
 }
