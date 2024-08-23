@@ -15,8 +15,7 @@
             </el-table-column>
             <el-table-column label="Hành động">
                 <template #default="scope">
-                    <el-button type="primary" plain round>Sửa</el-button>
-                    <el-button type="danger" plain round>Xoá</el-button>
+                    <el-button type="danger" plain round @click="onDeleteArea(scope.row.ID)">Xoá</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -114,6 +113,16 @@ const getAreaListData = async () => {
 
 getAreaListData();
 
+const onDeleteArea = async (id) => {
+    const res = await deleteAttendanceArea({ id: id })
+    if (res.code === 0) {
+        ElMessage({
+            type: 'success',
+            message: 'Xoá thành công'
+        })
+        getAreaListData();
+    }
+}
 
 const addNewArea = () => {
     type.value = 'create'

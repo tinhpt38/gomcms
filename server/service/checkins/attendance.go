@@ -19,8 +19,8 @@ func (attendanceService *AttendanceService) CreateAttendanceArea(attendanceArea 
 	return err
 }
 
-func (attendanceService *AttendanceService) DeleteAttendanceArea(acId uint, areaId uint) (err error) {
-	err = global.GVA_DB.Delete(&checkins.AttendanceArea{}, "attendance_id = ? AND area_id = ?", acId, areaId).Error
+func (attendanceService *AttendanceService) DeleteAttendanceArea(id string) (err error) {
+	err = global.GVA_DB.Delete(&checkins.AttendanceArea{}, "id = ? ", id).Error
 	return err
 }
 

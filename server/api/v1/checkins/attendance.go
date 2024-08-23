@@ -60,23 +60,8 @@ func (attendanceApi *AttendanceApi) DeleteAttendance(c *gin.Context) {
 }
 
 func (attendanceApi *AttendanceApi) DeleteAttendanceArea(c *gin.Context) {
-	acid := c.Query("acid")
-	areaId := c.Query("areaId")
-	// userID := utils.GetUserID(c)
-	attendanceID, err := strconv.ParseUint(acid, 10, 64)
-	if err != nil {
-		global.GVA_LOG.Error("failed to parse attendance ID", zap.Error(err))
-		response.FailWithMessage("failed to parse attendance ID", c)
-		return
-	}
-	areaID, err := strconv.ParseUint(areaId, 10, 64)
-	if err != nil {
-		global.GVA_LOG.Error("failed to parse area ID", zap.Error(err))
-		response.FailWithMessage("failed to parse area ID", c)
-		return
-	}
-
-	err = attendanceService.DeleteAttendanceArea(uint(attendanceID), uint(areaID))
+	id := c.Query("id")
+	err := attendanceService.DeleteAttendanceArea(id)
 	if err != nil {
 		global.GVA_LOG.Error("xóa thất bại!", zap.Error(err))
 		response.FailWithMessage("xóa thất bại:"+err.Error(), c)
