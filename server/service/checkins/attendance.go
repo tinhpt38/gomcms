@@ -19,8 +19,8 @@ func (attendanceService *AttendanceService) CreateAttendanceArea(attendanceArea 
 	return err
 }
 
-func (attendanceService *AttendanceService) DeleteAttendanceArea(attendanceArea *checkins.AttendanceArea ) (err error) {
-	err = global.GVA_DB.Delete(&checkins.AttendanceArea{}, "attendance_class_id = ? AND area_id = ?", attendanceArea.AttendanceID, attendanceArea.AreaID).Error
+func (attendanceService *AttendanceService) DeleteAttendanceArea(attendanceArea *checkins.AttendanceArea) (err error) {
+	err = global.GVA_DB.Delete(&checkins.AttendanceArea{}, "attendance_id = ? AND area_id = ?", attendanceArea.AttendanceID, attendanceArea.AreaID).Error
 	return err
 }
 
@@ -79,6 +79,6 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Find(&attendanceClasss).Error
+	err = db.Preload("Areas").Find(&attendanceClasss).Error
 	return attendanceClasss, total, err
 }

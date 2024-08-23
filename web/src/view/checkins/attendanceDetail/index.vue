@@ -80,7 +80,7 @@
       </el-tab-pane>
       <el-tab-pane name="areaTab" label="Khu vực">
         <div class="table-container">
-          <Area :areas="areaData" />
+          <Area :ac-id="currentId" />
         </div>
       </el-tab-pane>
       <el-tab-pane name="conditionTab" label="Điều kiện">

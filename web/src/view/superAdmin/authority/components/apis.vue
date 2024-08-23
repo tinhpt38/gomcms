@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="sticky top-0.5 z-10 flex space-x-2">
-      <el-input v-model="filterTextName" class="flex-1" placeholder="筛选名字" />
-      <el-input v-model="filterTextPath" class="flex-1" placeholder="筛选路径" />
+      <el-input v-model="filterTextName" class="flex-1" placeholder="Lọc theo tên" />
+      <el-input v-model="filterTextPath" class="flex-1" placeholder="Lọc theo đường dẫn" />
       <el-button class="float-right" type="primary" @click="authApiEnter">Đồng ý</el-button>
     </div>
     <div class="tree-content">
@@ -94,7 +94,7 @@ const buildApiTree = (apis) => {
   for (const key in apiObj) {
     const treeNode = {
       ID: key,
-      description: key + '组',
+      description: 'Nhóm ' + key,
       children: apiObj[key]
     }
     apiTree.push(treeNode)

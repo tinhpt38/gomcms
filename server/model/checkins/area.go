@@ -28,8 +28,9 @@ type AttendanceArea struct {
 	global.GVA_MODEL
 	AreaID       uint       `json:"area_id" form:"area_id" gorm:"column:area_id;comment:Khu vực"`
 	AttendanceID uint       `json:"attendance_id" form:"attendance_id" gorm:"column:attendance_id;comment:Lớp điểm danh"`
-	Area         Area       `gorm:"foreignKey:AreaID"`       // Thiết lập khóa ngoại đến struct Area
-	Attendance   Attendance `gorm:"foreignKey:AttendanceID"` // Thiết lập khóa ngoại đến struct AttendanceClass
+	Area         Area       `gorm:"foreignKey:AreaID"`                                    // Thiết lập khóa ngoại đến struct Area
+	Attendance   Attendance `gorm:"foreignKey:AttendanceID"`                              // Thiết lập khóa ngoại đến struct AttendanceClass
+	Radius       *float64   `json:"radius" form:"radius" gorm:"column:radius;comment:半径"` // Bán kính
 }
 
 func (AttendanceArea) TableName() string {
