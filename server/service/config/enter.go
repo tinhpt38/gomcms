@@ -1,3 +1,6 @@
 package config
 
-type ServiceGroup struct{ CfgFileProcessService }
+type ServiceGroup struct {
+	FileProcessErrorService
+	CfgFileProcessService
+}

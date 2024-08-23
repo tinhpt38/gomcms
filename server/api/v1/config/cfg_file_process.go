@@ -82,14 +82,15 @@ func (FileProcessApi *CfgFileProcessApi) CreateCfgFileProcess(c *gin.Context) {
 				return
 			}
 
-			if err := FileProcessService.CreateCfgFileProcess(&process); err != nil {
+			if err := fileProcessService.CreateCfgFileProcess(&process); err != nil {
 				response.FailWithMessage("Tạo thất bại:"+err.Error(), c)
 				return
 			} else {
 				response.OkWithData(process, c)
 
-				if action == config.ACTION_IMPORT_SAMPLE {
+				if action == config.ACTION_IMPORT_PARTICIPANT {
 					//TODO: Handle case of type example: "IMPORT_SAMPLE"
+					participateService.ImportExcel(process)
 				}
 
 				// TEST: Run 1 goroutine to simulate process
@@ -108,13 +109,13 @@ func (FileProcessApi *CfgFileProcessApi) CreateCfgFileProcess(c *gin.Context) {
 						percent += percentPerSecond
 						process.Msg = "Tập tin đang được xử lý " + strconv.FormatFloat(percent, 'f', 2, 64) + "%"
 						process.Percent = percent
-						FileProcessService.UpdateCfgFileProcess(process)
+						fileProcessService.UpdateCfgFileProcess(process)
 					}
 
 					process.Percent = 100
 					process.Status = config.FILE_PROCESS_STATUS_FINISH
 					process.Msg = "Tập tin đã được xử lý"
-					FileProcessService.UpdateCfgFileProcess(process)
+					fileProcessService.UpdateCfgFileProcess(process)
 				}()
 			}
 
@@ -136,7 +137,7 @@ func (FileProcessApi *CfgFileProcessApi) CreateCfgFileProcess(c *gin.Context) {
 	// 	response.FailWithMessage(err.Error(), c)
 	// 	return
 	// }
-	// err = FileProcessService.CreateCfgFileProcess(&FileProcess)
+	// err = fileProcessService.CreateCfgFileProcess(&FileProcess)
 	// if err != nil {
 	// 	global.GVA_LOG.Error("Tạo thất bại!", zap.Error(err))
 	// 	response.FailWithMessage("Tạo thất bại:"+err.Error(), c)
@@ -156,7 +157,7 @@ func (FileProcessApi *CfgFileProcessApi) CreateCfgFileProcess(c *gin.Context) {
 // @Router /FileProcess/deleteCfgFileProcess [delete]
 func (FileProcessApi *CfgFileProcessApi) DeleteCfgFileProcess(c *gin.Context) {
 	ID := c.Query("ID")
-	err := FileProcessService.DeleteCfgFileProcess(ID)
+	err := fileProcessService.DeleteCfgFileProcess(ID)
 	if err != nil {
 		global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败:"+err.Error(), c)
@@ -175,7 +176,7 @@ func (FileProcessApi *CfgFileProcessApi) DeleteCfgFileProcess(c *gin.Context) {
 // @Router /FileProcess/deleteCfgFileProcessByIds [delete]
 func (FileProcessApi *CfgFileProcessApi) DeleteCfgFileProcessByIds(c *gin.Context) {
 	IDs := c.QueryArray("IDs[]")
-	err := FileProcessService.DeleteCfgFileProcessByIds(IDs)
+	err := fileProcessService.DeleteCfgFileProcessByIds(IDs)
 	if err != nil {
 		global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败:"+err.Error(), c)
@@ -200,7 +201,7 @@ func (FileProcessApi *CfgFileProcessApi) UpdateCfgFileProcess(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = FileProcessService.UpdateCfgFileProcess(FileProcess)
+	err = fileProcessService.UpdateCfgFileProcess(FileProcess)
 	if err != nil {
 		global.GVA_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败:"+err.Error(), c)
@@ -220,7 +221,7 @@ func (FileProcessApi *CfgFileProcessApi) UpdateCfgFileProcess(c *gin.Context) {
 // @Router /FileProcess/findCfgFileProcess [get]
 func (FileProcessApi *CfgFileProcessApi) FindCfgFileProcess(c *gin.Context) {
 	ID := c.Query("ID")
-	reFileProcess, err := FileProcessService.GetCfgFileProcess(ID)
+	reFileProcess, err := fileProcessService.GetCfgFileProcess(ID)
 	if err != nil {
 		global.GVA_LOG.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败:"+err.Error(), c)
@@ -245,7 +246,7 @@ func (FileProcessApi *CfgFileProcessApi) GetCfgFileProcessList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	list, total, err := FileProcessService.GetCfgFileProcessInfoList(pageInfo)
+	list, total, err := fileProcessService.GetCfgFileProcessInfoList(pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败:"+err.Error(), c)
@@ -293,7 +294,7 @@ func (fileProcessApi *CfgFileProcessApi) GetPercentFileProcess(c *gin.Context) {
 		return
 	}
 
-	file, err := FileProcessService.GetPercentFileProcess(fileProcess)
+	file, err := fileProcessService.GetPercentFileProcess(fileProcess)
 
 	if err != nil {
 		global.GVA_LOG.Error("Lấy tiến trình xử lý tập tin không thành công!", zap.Error(err))

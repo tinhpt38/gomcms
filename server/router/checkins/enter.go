@@ -6,10 +6,12 @@ type RouterGroup struct {
 	AttendanceRouter
 	GroupRouter
 	AreaRouter
+	ParticipantRouter
 }
 
 var (
-	attendanceApi = api.ApiGroupApp.CheckinsApiGroup.AttendanceApi
-	groupApi           = api.ApiGroupApp.CheckinsApiGroup.GroupApi
-	areaApi            = api.ApiGroupApp.CheckinsApiGroup.AreaApi
+	attendanceApi  = api.ApiGroupApp.CheckinsApiGroup.AttendanceApi
+	groupApi       = api.ApiGroupApp.CheckinsApiGroup.GroupApi
+	areaApi        = api.ApiGroupApp.CheckinsApiGroup.AreaApi
+	participantApi = api.ApiGroupApp.CheckinsApiGroup.ParticipantApi
 )

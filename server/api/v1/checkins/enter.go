@@ -6,10 +6,12 @@ type ApiGroup struct {
 	AttendanceApi
 	GroupApi
 	AreaApi
+	ParticipantApi
 }
 
 var (
-	attendanceService = service.ServiceGroupApp.CheckinsServiceGroup.AttendanceService
-	groupService      = service.ServiceGroupApp.CheckinsServiceGroup.GroupService
-	areaService       = service.ServiceGroupApp.CheckinsServiceGroup.AreaService
+	attendanceService  = service.ServiceGroupApp.CheckinsServiceGroup.AttendanceService
+	groupService       = service.ServiceGroupApp.CheckinsServiceGroup.GroupService
+	areaService        = service.ServiceGroupApp.CheckinsServiceGroup.AreaService
+	participantService = service.ServiceGroupApp.CheckinsServiceGroup.ParticipantService
 )

@@ -18,11 +18,14 @@ func initBizRouter(routers ...*gin.RouterGroup) {
 		checkinsRouter.InitAttendanceRouter(privateGroup, publicGroup)
 		checkinsRouter.InitGroupRouter(privateGroup, publicGroup)
 		checkinsRouter.InitAreaRouter(privateGroup, publicGroup)
-	} // 占位方法，保证文件可以正确加载，避免go空变量检测报错，请勿删除。
+		checkinsRouter.InitParticipantRouter(privateGroup, publicGroup)
+	}
 	{
 		configRouter := router.RouterGroupApp.Config
 		configRouter.InitCfgFileProcessRouter(privateGroup, publicGroup)
+		configRouter.InitFileProcessErrorRouter(privateGroup, publicGroup)
 	}
 }
 
+// 占位方法，保证文件可以正确加载，避免go空变量检测报错，请勿删除。
 // 占位方法，保证文件可以正确加载，避免go空变量检测报错，请勿删除。

@@ -121,12 +121,12 @@ mssql:
     log-zap: false
 mysql:
     prefix: ""
-    port: "3306"
     config: charset=utf8mb4&parseTime=True&loc=Local
-    db-name: cms
-    username: root
-    password:
-    path: 127.0.0.1
+    path: 10.20.6.62
+    port: "3306"
+    db-name: dlu-cms
+    username: dlu-cms
+    password: azwRrcjdJMhwSnNp
     engine: ""
     log-mode: error
     max-idle-conns: 10

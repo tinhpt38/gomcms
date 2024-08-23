@@ -8,6 +8,8 @@ import (
 
 type CfgFileProcessService struct{}
 
+var CfgFileProcessServiceApp = new(CfgFileProcessService)
+
 // CreateCfgFileProcess 创建Lưu trữ thông tin nhập xuất dữ liệu Excel của hệ thống记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (FileProcessService *CfgFileProcessService) CreateCfgFileProcess(FileProcess *config.CfgFileProcess) (err error) {

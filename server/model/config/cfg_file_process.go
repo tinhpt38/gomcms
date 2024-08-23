@@ -37,7 +37,8 @@ func (CfgFileProcess) TableName() string {
 // Tạo ra các hằng số cho hành động action
 var (
 	// ActionUpload Tải lên
-	ACTION_IMPORT_SAMPLE = "IMPORT_SAMPLE"
+	ACTION_IMPORT_SAMPLE      = "IMPORT_SAMPLE"
+	ACTION_IMPORT_PARTICIPANT = "IMPORT_PARTICIPANT"
 
 	FILE_PROCESS_STATUS_PENDING    = "pending"
 	FILE_PROCESS_STATUS_VALIDATING = "validating"

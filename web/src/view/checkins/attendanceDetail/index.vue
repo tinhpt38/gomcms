@@ -1,90 +1,97 @@
 <template>
-    <div class="p-2">
-        <div class="p-1 my-1">
-            <el-button type="primary" icon="upload">Nhập Excel</el-button>
-            <el-button type="success" icon="download">Xuất Excel</el-button>
-        </div>
-        <el-tabs v-model="tabsActiveTab" type="border-card">
-            <el-tab-pane name="attendanceInfoTab" label="Chi tiết">
-                <div class="card-container">
-                    <el-row>
-                        <el-col :span="12" class="grid-cell"><el-form-item label="Tiêu đề" prop="formData.title"
-                                class="required">
-                                <el-input v-model="formData.title" type="text" clearable></el-input>
-                            </el-form-item></el-col>
-                        <el-col :span="12" class="grid-cell flex justify-end">
-
-                            <el-button type="primary" @click="saveAttendance">Lưu</el-button>
-                        </el-col>
-                    </el-row>
-
-                    <el-row>
-                        <el-col :span="12" class="grid-cell">
-                            <el-form-item label="Ngày bắt đầu" label-width="150px" prop="startDate" class="required">
-                                <el-date-picker v-model="formData.startDate" type="datetime" class="full-width-input"
-                                    clearable></el-date-picker>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="12" class="grid-cell">
-                            <el-form-item label="Ngày kết thúc" label-width="150px" prop="endDate" class="required">
-                                <el-date-picker v-model="formData.endDate" type="datetime" class="full-width-input"
-                                    clearable></el-date-picker>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="12" class="grid-cell">
-                            <el-form-item label="Cho thử nghiệm" label-width="150px" prop="isTrailer">
-                                <el-switch v-model="formData.isTrailer"></el-switch>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="12" class="grid-cell">
-                            <el-form-item label="Khoá" label-width="150px" prop="isLocked">
-                                <el-switch v-model="formData.isLocked"></el-switch>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </div>
-                <div class="table-container">
-                    <table class="table-layout">
-                        <tbody>
-                            <tr>
-                                <td class="table-cell">
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </el-tab-pane>
-            <el-tab-pane name="partticipantsTab" label="Thành viên">
-                <div class="table-container">
-                    <Partticipants :participants="partticipantsData" />
-                </div>
-            </el-tab-pane>
-            <el-tab-pane name="groupTab" label="Nhóm">
-                <div class="table-container">
-                    <Group :acId="currentId" />
-                </div>
-            </el-tab-pane>
-            <el-tab-pane name="areaTab" label="Khu vực">
-                <div class="table-container">
-                    <Area :areas="areaData" />
-                </div>
-
-            </el-tab-pane>
-            <el-tab-pane name="conditionTab" label="Điều kiện">
-                <div class="table-container">
-                    <Condition :conditions="conditionsData" />
-                </div>
-            </el-tab-pane>
-        </el-tabs>
+  <div class="p-2">
+    <div class="p-1 my-1">
+      <el-button type="primary" icon="upload">
+        Nhập Excel
+      </el-button>
+      <el-button type="success" icon="download">
+        Xuất Excel
+      </el-button>
     </div>
+    <el-tabs v-model="tabsActiveTab" type="border-card">
+      <el-tab-pane name="attendanceInfoTab" label="Chi tiết">
+        <div class="card-container">
+          <el-row>
+            <el-col :span="12" class="grid-cell">
+              <el-form-item
+                label="Tiêu đề" prop="formData.title"
+                class="required"
+              >
+                <el-input v-model="formData.title" type="text" clearable />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12" class="grid-cell flex justify-end">
+              <el-button type="primary" @click="saveAttendance">
+                Lưu
+              </el-button>
+            </el-col>
+          </el-row>
 
-
+          <el-row>
+            <el-col :span="12" class="grid-cell">
+              <el-form-item label="Ngày bắt đầu" label-width="150px" prop="startDate" class="required">
+                <el-date-picker
+                  v-model="formData.startDate" type="datetime" class="full-width-input"
+                  clearable
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12" class="grid-cell">
+              <el-form-item label="Ngày kết thúc" label-width="150px" prop="endDate" class="required">
+                <el-date-picker
+                  v-model="formData.endDate" type="datetime" class="full-width-input"
+                  clearable
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12" class="grid-cell">
+              <el-form-item label="Cho thử nghiệm" label-width="150px" prop="isTrailer">
+                <el-switch v-model="formData.isTrailer" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12" class="grid-cell">
+              <el-form-item label="Khoá" label-width="150px" prop="isLocked">
+                <el-switch v-model="formData.isLocked" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+        <div class="table-container">
+          <table class="table-layout">
+            <tbody>
+              <tr>
+                <td class="table-cell" />
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane name="partticipantsTab" label="Thành viên">
+        <div class="table-container">
+          <Partticipants :participants="partticipantsData" />
+        </div>
+      </el-tab-pane>
+      <el-tab-pane name="groupTab" label="Nhóm">
+        <div class="table-container">
+          <Group :ac-id="currentId" />
+        </div>
+      </el-tab-pane>
+      <el-tab-pane name="areaTab" label="Khu vực">
+        <div class="table-container">
+          <Area :areas="areaData" />
+        </div>
+      </el-tab-pane>
+      <el-tab-pane name="conditionTab" label="Điều kiện">
+        <div class="table-container">
+          <Condition :conditions="conditionsData" />
+        </div>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
 </template>
 
-
-<style lang="scss"></style>
 
 <script setup>
 import {
@@ -474,3 +481,5 @@ const areaHandleSizeChange = (val) => {
 }
 //endregion
 </script>
+
+<style lang="scss"></style>

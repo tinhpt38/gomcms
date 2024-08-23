@@ -1,52 +1,69 @@
 <template>
+  <div>
     <div>
-        <div class="p-1 my-1">
-            <el-button type="primary" icon="plus" @click="openDialog()">Thêm nhóm</el-button>
-        </div>
+      <div class="p-1 my-1">
+        <el-button type="primary" icon="plus" @click="openDialog()">
+          Thêm nhóm
+        </el-button>
+      </div>
 
-        <el-table :data="tableData" style="width: 100%">
-            <el-table-column prop="name" label="Nhóm"></el-table-column>
-            <!-- TODO: Handle totalParts after -->
-            <el-table-column prop="totalParts" label="Số thành viên"></el-table-column>
-            <el-table-column label="Hành động">
-                <template #default="scope">
-                    <el-button type="primary" plain round @click="updateGroupFunc(scope.row)">Sửa</el-button>
-                    <el-button type="danger" plain round @click="deleteRow(scope.row)">Xoá</el-button>
-                </template>
-            </el-table-column>
-        </el-table>
-        <div class="flex justify-end">
-            <el-pagination v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[20, 50, 100, 500]"
-                :size="size" :background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
-                @size-change="handleSizeChange" @current-change="handleCurrentChange" />
-        </div>
-
+      <el-table :data="tableData" style="width: 100%">
+        <el-table-column prop="name" label="Nhóm" />
+        <!-- TODO: Handle totalParts after -->
+        <el-table-column prop="totalParts" label="Số thành viên" />
+        <el-table-column label="Hành động">
+          <template #default="scope">
+            <el-button size="small" type="primary" plain round @click="updateGroupFunc(scope.row)">
+              Sửa
+            </el-button>
+            <el-button size="small" type="danger" plain round @click="deleteRow(scope.row)">
+              Xoá
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="flex justify-end">
+        <el-pagination
+          v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[20, 50, 100, 500]"
+          :size="size" :background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+          @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        />
+      </div>
     </div>
 
-    <el-drawer destroy-on-close size="800" v-model="dialogFormVisible" :show-close="false" :before-close="closeDialog">
-        <template #header>
-            <div class="flex justify-between items-center">
-                <span class="text-lg">{{ type === 'create' ? 'Thêm mới' : 'Chỉnh sửa' }}</span>
-                <div>
-                    <el-button type="primary" @click="enterDialog">Đồng ý</el-button>
-                    <el-button @click="closeDialog">Huỷ</el-button>
-                </div>
-            </div>
-        </template>
+    <el-drawer v-model="dialogFormVisible" destroy-on-close size="800" :show-close="false" :before-close="closeDialog">
+      <template #header>
+        <div class="flex justify-between items-center">
+          <span class="text-lg">{{ type === 'create' ? 'Thêm mới' : 'Chỉnh sửa' }}</span>
+          <div>
+            <el-button type="primary" @click="enterDialog">
+              Đồng ý
+            </el-button>
+            <el-button @click="closeDialog">
+              Huỷ
+            </el-button>
+          </div>
+        </div>
+      </template>
 
-        <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
-            <el-form-item label="Tên nhóm:" prop="name">
-                <el-input v-model="formData.name" :clearable="true" placeholder="Vui lòng nhập Tên nhóm" />
-            </el-form-item>
-            <el-form-item label="Attendance Class:" prop="attendanceId" class="hidden">
-                <el-select v-model="formData.attendanceId" placeholder="Vui lòng chọn Attendance Class"
-                    style="width:100%" :clearable="true">
-                    <el-option v-for="(item, key) in dataSource.attendanceId" :key="key" :label="item.label"
-                        :value="item.value" />
-                </el-select>
-            </el-form-item>
-        </el-form>
+      <el-form ref="elFormRef" :model="formData" label-position="top" :rules="rule" label-width="80px">
+        <el-form-item label="Tên nhóm:" prop="name">
+          <el-input v-model="formData.name" :clearable="true" placeholder="Vui lòng nhập Tên nhóm" />
+        </el-form-item>
+        <el-form-item label="Attendance Class:" prop="attendanceId" class="hidden">
+          <el-select
+            v-model="formData.attendanceId" placeholder="Vui lòng chọn Attendance Class"
+            style="width:100%" :clearable="true"
+          >
+            <el-option
+              v-for="(item, key) in dataSource.attendanceId" :key="key" :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
     </el-drawer>
+  </div>
 </template>
 
 
