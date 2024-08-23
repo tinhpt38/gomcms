@@ -56,6 +56,14 @@ export const findAttendance = (params) => {
   })
 }
 
+export const findAttendanceArea = (params) => {
+  return service({
+    url: '/attendance/findAttendanceArea',
+    method: 'get',
+    params
+  })
+}
+
 export const getAttendanceList = (params) => {
   return service({
     url: '/attendance/getAttendanceList',

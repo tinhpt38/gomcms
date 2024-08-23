@@ -6,8 +6,8 @@
 
         <el-table :data="tableData" style="width: 100%">
             <el-table-column prop="name" label="Nhóm"></el-table-column>
-            <el-table-column prop="lat" label="Kinh độ"></el-table-column>
-            <el-table-column prop="long" label="Vĩ độ"></el-table-column>
+            <el-table-column prop="latitude" label="Kinh độ"></el-table-column>
+            <el-table-column prop="longitude" label="Vĩ độ"></el-table-column>
             <el-table-column prop="radius" label="Bán kính"></el-table-column>
             <el-table-column label="Hành động">
                 <template #default="scope">
@@ -57,9 +57,10 @@ import {
 import {
     createAttendanceArea,
     deleteAttendanceArea,
+    findAttendanceArea
 } from '@/api/checkins/attendance'
 import { ref } from 'vue'
-
+import { ElMessage } from 'element-plus';
 
 const props = defineProps(
     {
@@ -98,12 +99,12 @@ const searchInfo = ref({
 
 const getAreaListData = async () => {
     searchInfo.value.attendanceId = props.acId
-    // const table = await getAreaList({ page: page.value, pageSize: pageSize.value})
-    // if (table.code === 0) {
-    //     tableData.value = table.data.list
-    //     total.value = table.data.total
-    // }
-    // console.log('tableData', tableData)
+    const table = await findAttendanceArea({ id: props.acId })
+    if (table.code === 0) {
+        tableData.value = table.data
+        total.value = table.data.total
+    }
+    console.log('tableData', table)
 }
 
 getAreaListData();

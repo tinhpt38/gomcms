@@ -142,6 +142,23 @@ func (attendanceApi *AttendanceApi) FindAttendance(c *gin.Context) {
 	response.OkWithData(reattendance, c)
 }
 
+func (attendanceApi *AttendanceApi) FindAttendanceArea(c *gin.Context) {
+	id := c.Query("id")
+	aId, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		global.GVA_LOG.Error("failed to parse ID", zap.Error(err))
+		response.FailWithMessage("failed to parse ID", c)
+		return
+	}
+	areas, err := attendanceService.GetAttendanceArea(uint(aId))
+	if err != nil {
+		global.GVA_LOG.Error("tìm kiếm thất bại!", zap.Error(err))
+		response.FailWithMessage("tìm kiếm thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithData(areas, c)
+}
+
 func (attendanceApi *AttendanceApi) GetAttendanceList(c *gin.Context) {
 	var pageInfo checkinsReq.AttendanceSearch
 	err := c.ShouldBindQuery(&pageInfo)

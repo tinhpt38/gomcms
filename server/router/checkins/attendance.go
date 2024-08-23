@@ -7,21 +7,21 @@ import (
 
 type AttendanceRouter struct{}
 
-
 func (s *AttendanceRouter) InitAttendanceRouter(Router *gin.RouterGroup, PublicRouter *gin.RouterGroup) {
 	attendanceRouter := Router.Group("attendance").Use(middleware.OperationRecord())
 	attendanceRouterWithoutRecord := Router.Group("attendance")
 	attendanceRouterWithoutAuth := PublicRouter.Group("attendance")
 	{
 		attendanceRouter.POST("createAttendance", attendanceApi.CreateAttendance)
-		attendanceRouter.POST("createAttendanceArea", attendanceApi.CreateAttendanceArea) 
+		attendanceRouter.POST("createAttendanceArea", attendanceApi.CreateAttendanceArea)
 		attendanceRouter.DELETE("deleteAttendance", attendanceApi.DeleteAttendance)
 		attendanceRouter.DELETE("deleteAttendanceArea", attendanceApi.DeleteAttendanceArea)
 		attendanceRouter.DELETE("deleteAttendanceByIds", attendanceApi.DeleteAttendanceByIds)
-		attendanceRouter.PUT("updateAttendance", attendanceApi.UpdateAttendance)             
+		attendanceRouter.PUT("updateAttendance", attendanceApi.UpdateAttendance)
 	}
 	{
-		attendanceRouterWithoutRecord.GET("findAttendance", attendanceApi.FindAttendance)    
+		attendanceRouterWithoutRecord.GET("findAttendance", attendanceApi.FindAttendance)
+		attendanceRouterWithoutRecord.GET("findAttendanceArea", attendanceApi.FindAttendanceArea)
 		attendanceRouterWithoutRecord.GET("getAttendanceList", attendanceApi.GetAttendanceList)
 	}
 	{
