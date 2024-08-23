@@ -50,7 +50,7 @@ var (
 func CheckFileProcessAction(action string) bool {
 	valids := make([]string, 0)
 
-	valids = append(valids, ACTION_IMPORT_SAMPLE)
+	valids = append(valids, ACTION_IMPORT_SAMPLE, ACTION_IMPORT_PARTICIPANT)
 
 	// Kiểm tra
 	for _, valid := range valids {

@@ -33,8 +33,20 @@ func (FileProcessService *CfgFileProcessService) DeleteCfgFileProcessByIds(IDs [
 
 // UpdateCfgFileProcess 更新Lưu trữ thông tin nhập xuất dữ liệu Excel của hệ thống记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (FileProcessService *CfgFileProcessService) UpdateCfgFileProcess(FileProcess config.CfgFileProcess) (err error) {
-	err = global.GVA_DB.Model(&config.CfgFileProcess{}).Where("id = ?", FileProcess.ID).Updates(&FileProcess).Error
+func (FileProcessService *CfgFileProcessService) UpdateCfgFileProcess(fileProcess config.CfgFileProcess) (err error) {
+	err = global.GVA_DB.
+		Model(&config.CfgFileProcess{}).
+		Where("uuid = ?", fileProcess.Uuid).
+		Updates(config.CfgFileProcess{
+			Percent:   fileProcess.Percent,
+			Status:    fileProcess.Status,
+			Msg:       fileProcess.Msg,
+			TotalRow:  fileProcess.TotalRow,
+			FileName:  fileProcess.FileName,
+			Extension: fileProcess.Extension,
+			Url:       fileProcess.Url,
+		}).Error
+
 	return err
 }
 

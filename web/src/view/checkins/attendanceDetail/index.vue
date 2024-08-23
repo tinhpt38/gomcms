@@ -106,6 +106,7 @@ import Partticipants from '@/view/checkins/components/participant/index.vue'
 import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
+import { getParticipantList } from '@/api/checkins/participant'
 
 defineOptions({
     name: 'AttendanceDetail'
@@ -465,7 +466,17 @@ const groupHandleCurrentChange = (val) => {
 const groupHandleSizeChange = (val) => {
     console.log('groupHandleSizeChange', val)
 }
+
+const getParticipantListData = async () => {
+    const res = await getParticipantList({ page: groupPage.value, size: groupSize.value })
+    if (res.code == 0) {
+        partticipantsData.value = res.data.list
+    }
+    console.log('res', res)
+}
+
 //endregion
+getParticipantListData()
 
 //region Area
 const areaPage = ref(4)

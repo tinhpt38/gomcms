@@ -47,7 +47,7 @@
           Xóa
         </el-button>
         <div class="ms-3">
-          <ImportExcel :form-data="{ action: 'IMPORT_SAMPLE' }" />
+          <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT' }" />
         </div>
       </div>
       <el-table

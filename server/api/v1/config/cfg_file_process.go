@@ -1,10 +1,7 @@
 package config
 
 import (
-	"fmt"
 	"path/filepath"
-	"strconv"
-	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
@@ -90,38 +87,10 @@ func (FileProcessApi *CfgFileProcessApi) CreateCfgFileProcess(c *gin.Context) {
 
 				if action == config.ACTION_IMPORT_PARTICIPANT {
 					//TODO: Handle case of type example: "IMPORT_SAMPLE"
-					participateService.ImportExcel(process)
+					go participateService.ImportExcel(process)
+					return
 				}
-
-				// TEST: Run 1 goroutine to simulate process
-				go func() {
-					// Giả lập tiến trình chạy trong 2 phút
-					totalDuration := 2 * time.Minute
-					totalSeconds := int(totalDuration.Seconds())
-					percentPerSecond := 100.0 / float64(totalSeconds)
-
-					percent := 0.0
-
-					// Giả lập tiến trình, mỗi giây tăng percent
-					for i := 0; i < totalSeconds; i++ {
-						time.Sleep(1 * time.Second)
-						fmt.Printf("Tập tin %s đang được xử lý %f%%\n", process.FileName, percent)
-						percent += percentPerSecond
-						process.Msg = "Tập tin đang được xử lý " + strconv.FormatFloat(percent, 'f', 2, 64) + "%"
-						process.Percent = percent
-						fileProcessService.UpdateCfgFileProcess(process)
-					}
-
-					process.Percent = 100
-					process.Status = config.FILE_PROCESS_STATUS_FINISH
-					process.Msg = "Tập tin đã được xử lý"
-					fileProcessService.UpdateCfgFileProcess(process)
-				}()
 			}
-
-			// Create new record process with 10% progress
-
-			// Handle case of type example: "IMPORT_SAMPLE"
 			break
 		}
 	case "export":

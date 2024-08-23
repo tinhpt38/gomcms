@@ -80,7 +80,8 @@ func (participantService *ParticipantService) GetParticipantInfoList(info checki
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Find(&participants).Error
+	err = db.Preload("Group").
+		Find(&participants).Error
 	return participants, total, err
 }
 
