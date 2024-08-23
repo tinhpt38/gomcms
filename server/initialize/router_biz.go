@@ -17,6 +17,7 @@ func initBizRouter(routers ...*gin.RouterGroup) {
 		checkinsRouter := router.RouterGroupApp.Checkins
 		checkinsRouter.InitAttendanceClassRouter(privateGroup, publicGroup)
 		checkinsRouter.InitGroupRouter(privateGroup, publicGroup)
+		checkinsRouter.InitAreaRouter(privateGroup, publicGroup)
 	}
 }
 
