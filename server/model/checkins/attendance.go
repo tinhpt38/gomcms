@@ -17,7 +17,9 @@ type Attendance struct {
 	CreatedBy uint       `gorm:"column:created_by;comment:创建者"`
 	UpdatedBy uint       `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy uint       `gorm:"column:deleted_by;comment:删除者"`
-	Areas     []Area     `gorm:"many2many:attendance_areas;"` // Quan hệ nhiều-nhiều với Area thông qua bảng trung gian AttendanceArea
+	ClientUrl string     `json:"clientUrl" form:"clientUrl" gorm:"column:client_url;default=\"https://checkins.dlu.edu.vn\";comment:URL truy cập"` //URL của khách hàng
+	Areas     []Area     `gorm:"many2many:attendance_areas;"`                                                                                      // Quan hệ nhiều-nhiều với Area thông qua bảng trung gian AttendanceArea
+
 }
 
 func (Attendance) TableName() string {
