@@ -79,6 +79,6 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Preload("Areas").Find(&attendanceClasss).Error
+	err = db.Preload("Areas").Debug().Find(&attendanceClasss).Error
 	return attendanceClasss, total, err
 }

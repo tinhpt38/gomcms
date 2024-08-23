@@ -18,7 +18,6 @@ type Attendance struct {
 	UpdatedBy uint       `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy uint       `gorm:"column:deleted_by;comment:删除者"`
 	Areas     []Area     `gorm:"many2many:attendance_areas;"` // Quan hệ nhiều-nhiều với Area thông qua bảng trung gian AttendanceArea
-
 }
 
 func (Attendance) TableName() string {
