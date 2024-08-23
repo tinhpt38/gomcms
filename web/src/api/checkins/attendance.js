@@ -8,9 +8,25 @@ export const createAttendance = (data) => {
   })
 }
 
+export const createAttendanceArea = (data) => {
+  return service({
+    url: '/attendance/createAttendanceArea',
+    method: 'post',
+    data
+  })
+}
+
 export const deleteAttendance = (params) => {
   return service({
     url: '/attendance/deleteAttendance',
+    method: 'delete',
+    params
+  })
+}
+
+export const deleteAttendanceArea = (params) => {
+  return service({
+    url: '/attendance/deleteAttendanceArea',
     method: 'delete',
     params
   })
