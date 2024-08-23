@@ -1,4 +1,4 @@
-// 自动生成模板AttendanceClass
+// 自动生成模板Attendance
 package checkins
 
 import (
@@ -7,8 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 )
 
-// AttendanceClass 结构体  AttendanceClass
-type AttendanceClass struct {
+type Attendance struct {
 	global.GVA_MODEL
 	Title     string     `json:"title" form:"title" gorm:"column:title;comment:;" binding:"required"`              //Tiêu đề
 	StartDate *time.Time `json:"startDate" form:"startDate" gorm:"column:start_date;comment:;" binding:"required"` //Ngày bắt đầu
@@ -18,9 +17,10 @@ type AttendanceClass struct {
 	CreatedBy uint       `gorm:"column:created_by;comment:创建者"`
 	UpdatedBy uint       `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy uint       `gorm:"column:deleted_by;comment:删除者"`
+	Areas     []Area     `gorm:"many2many:attendance_area;"` // Quan hệ nhiều-nhiều với Area thông qua bảng trung gian AttendanceArea
+
 }
 
-// TableName AttendanceClass AttendanceClass自定义表名 attendance_class
-func (AttendanceClass) TableName() string {
-	return "attendance_class"
+func (Attendance) TableName() string {
+	return "attendances"
 }

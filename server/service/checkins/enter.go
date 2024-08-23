@@ -1,6 +1,7 @@
 package checkins
 
 type ServiceGroup struct {
-	AttendanceClassService
+	AttendanceService
 	GroupService
+	AreaService
 }

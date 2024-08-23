@@ -88,19 +88,11 @@
           </template>
         </el-table-column>
         <el-table-column align="left" label="Thao tác" fixed="right" min-width="240">
-          <template #default="scope">
-            <el-button type="primary" link class="table-button" @click="getDetails(scope.row)">
-              <el-icon style="margin-right: 5px">
-                <InfoFilled />
-              </el-icon>Xem chi tiết
-            </el-button>
-            <el-button type="primary" link icon="edit" class="table-button" @click="updateAttendanceClassFunc(scope.row)">
-              Chỉnh sửa
-            </el-button>
-            <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">
-              Xóa
-            </el-button>
-          </template>
+            <template #default="scope">
+            <el-button  type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon style="margin-right: 5px"><InfoFilled /></el-icon>Xem chi tiết</el-button>
+            <el-button  type="primary" link icon="edit" class="table-button" @click="updateAttendanceFunc(scope.row)">Chỉnh sửa</el-button>
+            <el-button  type="primary" link icon="delete" @click="deleteRow(scope.row)">Xóa</el-button>
+            </template>
         </el-table-column>
       </el-table>
       <div class="gva-pagination">
@@ -173,13 +165,13 @@
 
 <script setup>
 import {
-  createAttendanceClass,
-  deleteAttendanceClass,
-  deleteAttendanceClassByIds,
-  updateAttendanceClass,
-  findAttendanceClass,
-  getAttendanceClassList
-} from '@/api/checkins/attendanceClass'
+  createAttendance,
+  deleteAttendance,
+  deleteAttendanceByIds,
+  updateAttendance,
+  findAttendance,
+  getAttendanceList
+} from '@/api/checkins/attendance'
 import router from '@/router';
 import ImportExcel from '@/components/importExcel/index.vue'
 
@@ -189,7 +181,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
 defineOptions({
-  name: 'AttendanceClass'
+  name: 'Attendance'
 })
 
 // 控制更多查询条件显示/隐藏状态
@@ -295,7 +287,7 @@ const handleCurrentChange = (val) => {
 
 // Tìm kiếm
 const getTableData = async() => {
-  const table = await getAttendanceClassList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  const table = await getAttendanceList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
   tableData.value = table.data.list
   total.value = table.data.total
@@ -330,7 +322,7 @@ const deleteRow = (row) => {
     cancelButtonText: 'Hủy',
     type: 'warning'
   }).then(() => {
-      deleteAttendanceClassFunc(row)
+      deleteAttendanceFunc(row)
     })
   }
 
@@ -353,7 +345,7 @@ const onDelete = async() => {
     multipleSelection.value.map(item => {
       IDs.push(item.ID)
     })
-    const res = await deleteAttendanceClassByIds({ IDs })
+    const res = await deleteAttendanceByIds({ IDs })
     if (res.code === 0) {
     ElMessage({
       type: 'success',
@@ -371,8 +363,8 @@ const onDelete = async() => {
 const type = ref('')
 
 // Cập nhật hàng
-const updateAttendanceClassFunc = async(row) => {
-  const res = await findAttendanceClass({ ID: row.ID })
+const updateAttendanceFunc = async(row) => {
+  const res = await findAttendance({ ID: row.ID })
   type.value = 'update'
   if (res.code === 0) {
     formData.value = res.data
@@ -382,8 +374,8 @@ const updateAttendanceClassFunc = async(row) => {
 
 
 // Xóa hàng
-const deleteAttendanceClassFunc = async (row) => {
-  const res = await deleteAttendanceClass({ ID: row.ID })
+const deleteAttendanceFunc = async (row) => {
+  const res = await deleteAttendance({ ID: row.ID })
   if (res.code === 0) {
     ElMessage({
         type: 'success',
@@ -423,13 +415,13 @@ const enterDialog = async () => {
         let res
         switch (type.value) {
         case 'create':
-          res = await createAttendanceClass(formData.value)
+          res = await createAttendance(formData.value)
           break
         case 'update':
-          res = await updateAttendanceClass(formData.value)
+          res = await updateAttendance(formData.value)
           break
         default:
-          res = await createAttendanceClass(formData.value)
+          res = await createAttendance(formData.value)
           break
         }
         if (res.code === 0) {
@@ -459,12 +451,12 @@ const openDetailShow = () => {
 // Lấy chi tiết
 const getDetails = async (row) => {
   // Mở hộp thoại
-  // const res = await findAttendanceClass({ ID: row.ID })
+  // const res = await findAttendance({ ID: row.ID })
   // if (res.code === 0) {
   // detailFrom.value = res.data
   // // openDetailShow()
   router.push({
-    name: 'attendanceClassDetail',
+    name: 'attendanceDetail',
     params: {
       id: row.ID
     }

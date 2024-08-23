@@ -8,6 +8,6 @@ import (
 type GroupSearch struct{
     StartCreatedAt *time.Time `json:"startCreatedAt" form:"startCreatedAt"`
     EndCreatedAt   *time.Time `json:"endCreatedAt" form:"endCreatedAt"`
-    AttendanceClassId  *int `json:"attendanceClassId" form:"attendanceClassId" `
+    AttendanceId  *int `json:"attendanceId" form:"attendanceId" `
     request.PageInfo
 }

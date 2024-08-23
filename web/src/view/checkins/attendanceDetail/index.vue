@@ -88,9 +88,9 @@
 
 <script setup>
 import {
-    updateAttendanceClass,
-    findAttendanceClass,
-} from '@/api/checkins/attendanceClass'
+    updateAttendance,
+    findAttendance,
+} from '@/api/checkins/attendance'
 import { useRoute } from 'vue-router';
 
 import { ElForm, ElMessage, ElMessageBox } from 'element-plus'
@@ -101,7 +101,7 @@ import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
 
 defineOptions({
-    name: 'AttendanceClassDetail'
+    name: 'AttendanceDetail'
 })
 
 const $route = useRoute()
@@ -111,7 +111,7 @@ const formData = ref({})
 const getDetailData = async () => {
     var id = $route.params.id
     console.log('id', id)
-    const res = await findAttendanceClass({ id: $route.params.id })
+    const res = await findAttendance({ id: $route.params.id })
     if (res.code == 0) {
         formData.value = res.data
     }
