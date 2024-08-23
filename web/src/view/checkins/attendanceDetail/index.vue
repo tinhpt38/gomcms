@@ -83,7 +83,7 @@
       </el-tab-pane>
       <el-tab-pane name="conditionTab" label="Điều kiện">
         <div class="table-container">
-          <Condition :conditions="conditionsData" />
+          <Condition :ac-id="currentId" />
         </div>
       </el-tab-pane>
     </el-tabs>
