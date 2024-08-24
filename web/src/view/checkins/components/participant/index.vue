@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="p-1 my-1">
-      <el-button type="primary" icon="plus" @click="addNewGroup()">
-        Thêm nhóm
+      <el-button type="primary" icon="plus" @click="() => {}">
+        Thêm thành viên
       </el-button>
     </div>
     <el-table :data="participants" style="width: 100%">

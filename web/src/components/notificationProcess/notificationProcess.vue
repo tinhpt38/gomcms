@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
-    <div v-if="displayFileProcess.length > 0" class="noti-container">
-      <div class="noti-top">
+    <div v-if="displayFileProcess.length > 0" class="noti-container dark:text-slate-500  dark:bg-slate-800">
+      <div class="noti-top dark:text-slate-500  dark:bg-slate-800">
         <div class="noti-title">
           <span>Quá trình tải dữ liệu ({{ displayFileProcess.length }})</span>
         </div>
@@ -18,7 +18,7 @@
       </div>
       <div v-if="isExpand" class="noti-bottom">
         <div v-if="displayFileProcess.length > 0" class="noti-list-file">
-          <div v-for="item in displayFileProcess" :key="item.ID" class="noti-file">
+          <div v-for="item in displayFileProcess" :key="item.ID" class="noti-file dark:text-white dark:bg-slate-800">
             <div class="noti-file-left">
               <i class="el-icon-document" />
               <p class="noti-file-name truncate cursor-pointer" @click="handleFileProcessClick(item)">
