@@ -1,15 +1,13 @@
 package checkins
 
 import (
-	"strconv"
-
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
+	"go.uber.org/zap" 
 )
 
 type AttendanceApi struct{}
@@ -60,23 +58,8 @@ func (attendanceApi *AttendanceApi) DeleteAttendance(c *gin.Context) {
 }
 
 func (attendanceApi *AttendanceApi) DeleteAttendanceArea(c *gin.Context) {
-	acid := c.Query("acid")
-	areaId := c.Query("areaId")
-	// userID := utils.GetUserID(c)
-	attendanceID, err := strconv.ParseUint(acid, 10, 64)
-	if err != nil {
-		global.GVA_LOG.Error("failed to parse attendance ID", zap.Error(err))
-		response.FailWithMessage("failed to parse attendance ID", c)
-		return
-	}
-	areaID, err := strconv.ParseUint(areaId, 10, 64)
-	if err != nil {
-		global.GVA_LOG.Error("failed to parse area ID", zap.Error(err))
-		response.FailWithMessage("failed to parse area ID", c)
-		return
-	}
-
-	err = attendanceService.DeleteAttendanceArea(uint(attendanceID), uint(areaID))
+	id := c.Query("id")
+	err := attendanceService.DeleteAttendanceArea(id)
 	if err != nil {
 		global.GVA_LOG.Error("xóa thất bại!", zap.Error(err))
 		response.FailWithMessage("xóa thất bại:"+err.Error(), c)
@@ -144,13 +127,7 @@ func (attendanceApi *AttendanceApi) FindAttendance(c *gin.Context) {
 
 func (attendanceApi *AttendanceApi) FindAttendanceArea(c *gin.Context) {
 	id := c.Query("id")
-	aId, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		global.GVA_LOG.Error("failed to parse ID", zap.Error(err))
-		response.FailWithMessage("failed to parse ID", c)
-		return
-	}
-	areas, err := attendanceService.GetAttendanceArea(uint(aId))
+	areas, err := attendanceService.GetAttendanceArea(id)
 	if err != nil {
 		global.GVA_LOG.Error("tìm kiếm thất bại!", zap.Error(err))
 		response.FailWithMessage("tìm kiếm thất bại:"+err.Error(), c)

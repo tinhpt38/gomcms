@@ -5,14 +5,17 @@
         </div>
 
         <el-table :data="tableData" style="width: 100%">
-            <el-table-column prop="name" label="Nhóm"></el-table-column>
-            <el-table-column prop="latitude" label="Kinh độ"></el-table-column>
-            <el-table-column prop="longitude" label="Vĩ độ"></el-table-column>
-            <el-table-column prop="radius" label="Bán kính"></el-table-column>
+            <el-table-column prop="Area.name" label="Nhóm"></el-table-column>
+            <el-table-column prop="Area.latitude" label="Kinh độ"></el-table-column>
+            <el-table-column prop="Area.longitude" label="Vĩ độ"></el-table-column>
+            <el-table-column prop="" label="Bán kính">
+                <template #default="scope">
+                    {{scope.row.radius ?? scope.row.Area.radius}}
+                </template>
+            </el-table-column>
             <el-table-column label="Hành động">
                 <template #default="scope">
-                    <el-button type="primary" plain round>Sửa</el-button>
-                    <el-button type="danger" plain round>Xoá</el-button>
+                    <el-button type="danger" plain round @click="onDeleteArea(scope.row.ID)">Xoá</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -100,15 +103,26 @@ const searchInfo = ref({
 const getAreaListData = async () => {
     searchInfo.value.attendanceId = props.acId
     const table = await findAttendanceArea({ id: props.acId })
+    console.log('tableData', table)
     if (table.code === 0) {
         tableData.value = table.data
         total.value = table.data.total
     }
-    console.log('tableData', table)
+  
 }
 
 getAreaListData();
 
+const onDeleteArea = async (id) => {
+    const res = await deleteAttendanceArea({ id: id })
+    if (res.code === 0) {
+        ElMessage({
+            type: 'success',
+            message: 'Xoá thành công'
+        })
+        getAreaListData();
+    }
+}
 
 const addNewArea = () => {
     type.value = 'create'

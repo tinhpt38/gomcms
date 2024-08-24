@@ -5,4 +5,5 @@ type ServiceGroup struct {
 	GroupService
 	AreaService
 	ParticipantService
+	ConditionService
 }

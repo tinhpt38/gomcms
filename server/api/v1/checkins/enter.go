@@ -7,6 +7,7 @@ type ApiGroup struct {
 	GroupApi
 	AreaApi
 	ParticipantApi
+	ConditionApi
 }
 
 var (
@@ -14,4 +15,5 @@ var (
 	groupService       = service.ServiceGroupApp.CheckinsServiceGroup.GroupService
 	areaService        = service.ServiceGroupApp.CheckinsServiceGroup.AreaService
 	participantService = service.ServiceGroupApp.CheckinsServiceGroup.ParticipantService
+	conditionService   = service.ServiceGroupApp.CheckinsServiceGroup.ConditionService
 )
