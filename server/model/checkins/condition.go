@@ -10,9 +10,9 @@ import (
 // Điều kiện để checkins 结构体  Condition
 type Condition struct {
 	global.GVA_MODEL
-	AttendanceId *int            `json:"attendanceId" form:"attendanceId" gorm:"column:attendance_id;comment:;"` //Khu vực
-	GroupId      *int            `json:"groupId" form:"groupId" gorm:"column:group_id;comment:;"`                //Nhóm
-	AreaId       *int            `json:"areaId" form:"areaId" gorm:"column:area_id;comment:;"`                   //Khu vực
+	AttendanceId *uint           `json:"attendanceId" form:"attendanceId" gorm:"column:attendance_id;comment:;"` //Khu vực
+	GroupId      *uint           `json:"groupId" form:"groupId" gorm:"column:group_id;comment:;"`                //Nhóm
+	AreaId       *uint           `json:"areaId" form:"areaId" gorm:"column:area_id;comment:;"`                   //Khu vực
 	StartAt      *time.Time      `json:"startAt" form:"startAt" gorm:"column:start_at;comment:;"`                //Bắt đầu
 	EndAt        *time.Time      `json:"endAt" form:"endAt" gorm:"column:end_at;comment:;"`                      //Kết thúc
 	CreatedBy    uint            `gorm:"column:created_by;comment:创建者"`

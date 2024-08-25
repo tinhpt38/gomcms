@@ -61,6 +61,11 @@ func (conditionService *ConditionService) GetCondition(ID string) (condition che
 	return
 }
 
+func (conditionService *ConditionService) GetConditionsByAttendanceId(ID uint) (list []checkins.Condition, err error) {
+	err = global.GVA_DB.Where("attendance_id = ?", ID).Preload(clause.Associations).Preload("Area.Area").Find(&list).Error
+	return
+}
+
 // GetConditionInfoList 分页获取Điều kiện để checkins记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (conditionService *ConditionService) GetConditionInfoList(info checkinsReq.ConditionSearch) (list []checkins.Condition, total int64, err error) {

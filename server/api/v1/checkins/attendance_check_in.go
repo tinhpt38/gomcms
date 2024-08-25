@@ -115,11 +115,14 @@ func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Conte
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = attendanceCheckInService.CheckinAttendance(checkinReq)
+	ip := c.ClientIP()
+	userAgent := c.GetHeader("User-Agent")
+	result, err := attendanceCheckInService.CheckinAttendance(checkinReq, ip, userAgent)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
 		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
+	response.OkWithData(result, c)
 
 }

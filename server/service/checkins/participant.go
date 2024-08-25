@@ -46,10 +46,13 @@ func (participantService *ParticipantService) UpdateParticipant(participant chec
 	return err
 }
 
-// GetParticipant 根据ID获取Sinh viên (Người tham dự phiên điểm danh)记录
-// Author [piexlmax](https://github.com/piexlmax)
 func (participantService *ParticipantService) GetParticipant(ID string) (participant checkins.Participant, err error) {
 	err = global.GVA_DB.Where("id = ?", ID).First(&participant).Error
+	return
+}
+
+func (participantService *ParticipantService) GetParticipantByEmail(email string) (participant checkins.Participant, err error) {
+	err = global.GVA_DB.Where("email = ?", email).Preload("Group").First(&participant).Error
 	return
 }
 
