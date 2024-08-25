@@ -5,44 +5,31 @@
         Thêm thành viên
       </el-button>
     </div>
-    <el-table :data="participants" style="width: 100%">
+    <el-table :data="tableData" style="width: 100%">
       <el-table-column prop="fullName" label="Họ và tên" />
       <el-table-column prop="email" label="Email" />
-      <el-table-column prop="group['name']" label="Nhóm" />
-      <el-table-column prop="totalCheckin" label="Checkins">
+      <!-- <el-table-column prop="group['name']" label="Nhóm" /> -->
+      <!-- <el-table-column prop="totalCheckin" label="Checkins">
         <template #default="scope">
           <span>{{ scope.row.totalPass }} / {{ scope.row.totalCheckin }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
     <div class="flex justify-end">
       <el-pagination
         v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[20, 50, 100, 500]"
         :size="size" :background="true" layout="total, sizes, prev, pager, next, jumper"
-        :total="participants.length" @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange"
       />
     </div>
   </div>
 </template>
-
-<script>
-export default {
-    props: {
-        participants: {
-            type: Array,
-            required: true
-        }
-    }
-}
-
-</script>
 
 <script setup>
 import {
   createParticipant,
   deleteParticipant,
   deleteParticipantByIds,
-  getParticipantList,
   getParticipantListByAttendance
 } from '@/api/checkins/participant'
 import { getDictFunc, formatDate, formatBoolean, filterDict ,filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
@@ -55,7 +42,7 @@ const props = defineProps({
         required: true
     }
 })
-const page = ref(1)
+const page = ref(0)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])

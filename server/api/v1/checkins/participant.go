@@ -121,6 +121,6 @@ func (participantApi *ParticipantApi) GetParticipantListByAttendance(c *gin.Cont
 func (participantApi *ParticipantApi) GetParticipantPublic(c *gin.Context) {
 
 	response.OkWithDetailed(gin.H{
-		"info": "不需要鉴权的Sinh viên (Người tham dự phiên điểm danh)接口信息",
+		"info": "Check thành viên (Người tham dự phiên điểm danh)",
 	}, "Thành công", c)
 }

@@ -105,18 +105,22 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 	// if info.Email != "" {
 	// 	db = db.Where("email LIKE ?", "%"+info.Email+"%")
 	// }
-
-	err = db.Count(&total).Error
+	// err = db.Count(&total).Error
+	// if err != nil {
+	// 	return
+	// }
+	err = db.Joins("JOIN participant_attendances ON participants.id = participant_attendances.participant_id").
+		Where("participant_attendances.attendance_id = ?", info.AttendanceId).Count(&total).Error
 	if err != nil {
 		return
 	}
-
 	if limit != 0 {
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Joins("JOIN participant_attendances ON participants.id = participant_attendances.participant_id").
-		Find(&participants, "participant_attendances.participant_id = ?", info.AttendanceId).Error
+	// err = db.Joins("JOIN participant_attendances ON participants.id = participant_attendances.participant_id").Debug().
+	// 	Find(&participants, "participant_attendances.attendance_id = ?", info.AttendanceId).Error
+	err = db.Debug().Find(&participants).Error
 	return participants, total, err
 }
 

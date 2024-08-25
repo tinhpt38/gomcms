@@ -1,12 +1,8 @@
 <template>
   <div class="p-2">
     <div class="p-1 my-1">
-      <el-button type="primary" icon="upload">
-        Nhập Excel
-      </el-button>
-      <el-button type="success" icon="download">
-        Xuất Excel
-      </el-button>
+      <el-button type="primary" icon="upload"> Nhập Excel </el-button>
+      <el-button type="success" icon="download"> Xuất Excel</el-button>
     </div>
     <el-tabs v-model="tabsActiveTab" type="border-card">
       <el-tab-pane name="attendanceInfoTab" label="Chi tiết">
@@ -30,7 +26,6 @@
                     <el-date-picker v-model="formData.endDate" type="datetime" class="full-width-input" clearable />
                   </el-form-item>
                 </div>
-
                 <div class="flex justify-between">
                   <el-form-item label="Cho thử nghiệm" label-width="150px" prop="isTrial">
                     <el-switch v-model="formData.isTrial" />
@@ -105,7 +100,7 @@
       </el-tab-pane>
       <el-tab-pane name="partticipantsTab" label="Thành viên">
         <div class="table-container">
-          <Partticipants :participants="partticipantsData" />
+          <Partticipant :ac-id="currentId" />
         </div>
       </el-tab-pane>
       <el-tab-pane name="groupTab" label="Nhóm">
@@ -127,7 +122,6 @@
   </div>
 </template>
 
-
 <script setup>
 import {
   updateAttendance,
@@ -139,13 +133,12 @@ import {
 
 import { useRoute } from 'vue-router';
 import QRCode from 'qrcode'
-import { ElForm, ElMessage, ElMessageBox } from 'element-plus'
+import { ElForm, ElMessage } from 'element-plus'
 import { ref, reactive } from 'vue'
-import Partticipants from '@/view/checkins/components/participant/index.vue'
+import Partticipant from '@/view/checkins/components/participant/index.vue'
 import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
-import { getParticipantList } from '@/api/checkins/participant'
 import { formatDateTime } from '@/utils/format'
 import base32 from 'hi-base32'
 
@@ -192,8 +185,6 @@ const saveAttendance = async () => {
 
 const qrcodeCanvas = ref(null)
 
-
-
 const generateQRCode = async () => {
   var params = base32.encode($route.params.id)
   console.log('params-endcode', params)
@@ -203,7 +194,6 @@ const generateQRCode = async () => {
   })
 }
 
-
 const downloadQRCode = () => {
   const canvas = qrcodeCanvas.value
   const url = canvas.toDataURL('image/png')
@@ -212,7 +202,6 @@ const downloadQRCode = () => {
   link.download = 'QR Điểm danh số - ' + $route.params.id + '.png'
   link.click()
 }
-
 
 const rule = reactive({
   title: [{
@@ -240,20 +229,6 @@ const rule = reactive({
   ],
 })
 
-
-const partticipantsData = ref([])
-
-const getParticipantListData = async () => {
-  // thay đổi sau khi có api
-  const res = await getParticipantList({ page: page.value, size: size.value })
-  if (res.code == 0) {
-    partticipantsData.value = res.data.list
-  }
-  console.log('res', res)
-}
-
-//endregion
-getParticipantListData()
 
 const handleSizeChange = (val) => {
   pageSize.value = val
