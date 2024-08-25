@@ -1,4 +1,4 @@
-// 自动生成模板Participant
+	// 自动生成模板Participant
 package checkins
 
 import (
@@ -19,3 +19,5 @@ type Participant struct {
 func (Participant) TableName() string {
 	return "participants"
 }
+
+

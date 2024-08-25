@@ -159,6 +159,12 @@ const currentId = ref($route.params.id)
 const formData = ref({})
 const elFormRef = ref();
 
+const page = ref(1)
+const total = ref(0)
+const pageSize = ref(10)
+const tableData = ref([])
+const searchInfo = ref({})
+
 const getDetailData = async () => {
   var id = $route.params.id
   const res = await findAttendance({ id: $route.params.id })
@@ -238,8 +244,8 @@ const rule = reactive({
 const partticipantsData = ref([])
 
 const getParticipantListData = async () => {
-  debugger
-  const res = await getParticipantList({ page: groupPage.value, size: groupSize.value })
+  // thay đổi sau khi có api
+  const res = await getParticipantList({ page: page.value, size: size.value })
   if (res.code == 0) {
     partticipantsData.value = res.data.list
   }
@@ -260,11 +266,7 @@ const handleCurrentChange = (val) => {
   getTableData()
 }
 
-const page = ref(1)
-const total = ref(0)
-const pageSize = ref(10)
-const tableData = ref([])
-const searchInfo = ref({})
+
 const getTableData = async () => {
   searchInfo.value.attendanceId = $route.params.id
   const table = await getAttendanceCheckInList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
@@ -274,7 +276,6 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  console.log("get Table Data", tableData.value)
 }
 
 getTableData()
