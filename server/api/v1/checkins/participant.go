@@ -97,6 +97,27 @@ func (participantApi *ParticipantApi) GetParticipantList(c *gin.Context) {
 	}, "Thành công", c)
 }
 
+func (participantApi *ParticipantApi) GetParticipantListByAttendance(c *gin.Context) {
+	var pageInfo checkinsReq.ParticipantSearch
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	list, total, err := participantService.GetParticipantInfoListByAttendance(pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithDetailed(response.PageResult{
+		List:     list,
+		Total:    total,
+		Page:     pageInfo.Page,
+		PageSize: pageInfo.PageSize,
+	}, "Thành công", c)
+}
+
 func (participantApi *ParticipantApi) GetParticipantPublic(c *gin.Context) {
 
 	response.OkWithDetailed(gin.H{

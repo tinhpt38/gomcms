@@ -95,3 +95,12 @@ export const getParticipantList = (params) => {
     params
   })
 }
+
+
+export const getParticipantListByAttendance = (params) => {
+  return service({
+    url: '/participant/getParticipantListByAttendance',
+    method: 'get',
+    params
+  })
+}

@@ -100,15 +100,15 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	if perr != nil {
 		return nil, errors.New("Email của bạn không phải là thành viên")
 	}
-	if uint(*participant.Group.AttendanceId) != attendance.ID {
-		return result, errors.New("Nhóm của bạn không phải là nhóm của phiên điểm danh")
-	}
+	// if uint(*participant.Group.AttendanceId) != attendance.ID {
+	// 	return result, errors.New("Nhóm của bạn không phải là nhóm của phiên điểm danh")
+	// }
 	attendanceCheckIn := checkins.AttendanceCheckIn{
 		CheckinDate:      time.Now().UTC(),
 		AttendanceId:     &attendance.ID,
 		PartpaticipantId: &participant.ID,
 		AreaId:           nil,
-		GroupId:          &participant.Group.ID,
+		GroupId:          nil,
 		ConditionId:      nil,
 		IP:               ip,
 		Lattidue:         nil,

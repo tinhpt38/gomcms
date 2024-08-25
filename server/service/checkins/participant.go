@@ -74,6 +74,7 @@ func (participantService *ParticipantService) GetParticipantInfoList(info checki
 	if info.Email != "" {
 		db = db.Where("email LIKE ?", "%"+info.Email+"%")
 	}
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return
@@ -85,6 +86,37 @@ func (participantService *ParticipantService) GetParticipantInfoList(info checki
 
 	err = db.Preload("Group").
 		Find(&participants).Error
+	return participants, total, err
+}
+
+func (participantService *ParticipantService) GetParticipantInfoListByAttendance(info checkinsReq.ParticipantSearch) (list []checkins.Participant, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+	// 创建db
+	db := global.GVA_DB.Model(&checkins.Participant{})
+	var participants []checkins.Participant
+	// Nếu có điều kiện tìm kiếm, câu lệnh tìm kiếm sẽ được tạo tự động ở dưới đây
+	// if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+	// 	db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
+	// }
+	// if info.FullName != "" {
+	// 	db = db.Where("full_name LIKE ?", "%"+info.FullName+"%")
+	// }
+	// if info.Email != "" {
+	// 	db = db.Where("email LIKE ?", "%"+info.Email+"%")
+	// }
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	if limit != 0 {
+		db = db.Limit(limit).Offset(offset)
+	}
+
+	err = db.Joins("JOIN participant_attendances ON participants.id = participant_attendances.participant_id").
+		Find(&participants, "participant_attendances.participant_id = ?", info.AttendanceId).Error
 	return participants, total, err
 }
 
@@ -310,7 +342,8 @@ func (participantService *ParticipantService) ImportExcel(info config.CfgFilePro
 		//! Get data from row
 		fullName := utils.GetArrayValue(row, 0)
 		email := utils.GetArrayValue(row, 1)
-		group := utils.GetArrayValue(row, 2)
+		//TODO: Model liên kết nhiều nhiều
+		// group := utils.GetArrayValue(row, 2)
 
 		//? Mapping data from raw
 
@@ -318,7 +351,8 @@ func (participantService *ParticipantService) ImportExcel(info config.CfgFilePro
 			GVA_MODEL: global.GVA_MODEL{},
 			FullName:  fullName,
 			Email:     email,
-			GroupId:   groupMap[group].ID,
+			//TODO: Đã remove Group ID tại đây, Tạo model liên kết nhiều nhiều
+			// GroupId:   groupMap[group].ID,
 		}
 
 		// Increment count
