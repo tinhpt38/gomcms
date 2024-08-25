@@ -7,7 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap" 
+	"go.uber.org/zap"
 )
 
 type AttendanceApi struct{}
@@ -165,8 +165,3 @@ func (attendanceApi *AttendanceApi) GetAttendancePublic(c *gin.Context) {
 	}, "lấy thành công", c)
 }
 
-
-func (attendanceApi *AttendanceApi) CheckinAttendance(c *gin.Context){
-
-
-}

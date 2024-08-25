@@ -89,3 +89,4 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 	err = db.Preload("Areas").Debug().Find(&attendanceClasss).Error
 	return attendanceClasss, total, err
 }
+

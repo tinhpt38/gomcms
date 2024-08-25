@@ -6,4 +6,5 @@ type ServiceGroup struct {
 	AreaService
 	ParticipantService
 	ConditionService
+	AttendanceCheckInService
 }

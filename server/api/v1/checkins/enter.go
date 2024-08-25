@@ -8,12 +8,14 @@ type ApiGroup struct {
 	AreaApi
 	ParticipantApi
 	ConditionApi
+	AttendanceCheckInApi
 }
 
 var (
-	attendanceService  = service.ServiceGroupApp.CheckinsServiceGroup.AttendanceService
-	groupService       = service.ServiceGroupApp.CheckinsServiceGroup.GroupService
-	areaService        = service.ServiceGroupApp.CheckinsServiceGroup.AreaService
-	participantService = service.ServiceGroupApp.CheckinsServiceGroup.ParticipantService
-	conditionService   = service.ServiceGroupApp.CheckinsServiceGroup.ConditionService
+	attendanceService        = service.ServiceGroupApp.CheckinsServiceGroup.AttendanceService
+	groupService             = service.ServiceGroupApp.CheckinsServiceGroup.GroupService
+	areaService              = service.ServiceGroupApp.CheckinsServiceGroup.AreaService
+	participantService       = service.ServiceGroupApp.CheckinsServiceGroup.ParticipantService
+	conditionService         = service.ServiceGroupApp.CheckinsServiceGroup.ConditionService
+	attendanceCheckInService = service.ServiceGroupApp.CheckinsServiceGroup.AttendanceCheckInService
 )
