@@ -55,6 +55,44 @@
 
           </el-form>
         </div>
+
+        <el-divider />
+        <div class="text-5xl">Danh sách</div>
+        <div class="mt-4">
+          <el-table style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID">
+            <el-table-column align="left" label="Ngày giờ" prop="checkinDate" width="180">
+              <template #default="scope">{{ formatDateTime(scope.row.checkinDate) }}</template>
+            </el-table-column>
+            <el-table-column align="left" label="Thành viên" prop="participant.fullName" width="200" />
+            <el-table-column align="left" label="Khu vực" width="120">
+              <template #default="scope">
+                <span>{{ scope.row.area?.name ?? '/' }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="left" label="Nhóm" width="120">
+              <template #default="scope">
+                <span>{{ scope.row.group.name ?? '/' }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="left" label="IP" prop="iP" width="90" />
+            <el-table-column align="left" label="Kinh độ" prop="lattidue" width="170">
+              <template #default="scope">
+                <span>{{ '11.953687161569116' }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="left" label="Vĩ độ" prop="longtidue" width="170">
+              <template #default="scope">
+                <span>{{ '11.953687161569116' }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column class="overflow-hidden" label="Agent" prop="agent"></el-table-column>
+          </el-table>
+          <div class="gva-pagination">
+            <el-pagination layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
+              :page-sizes="[10, 30, 50, 100]" :total="total" @current-change="handleCurrentChange"
+              @size-change="handleSizeChange" />
+          </div>
+        </div>
         <div class="table-container">
           <table class="table-layout">
             <tbody>
@@ -95,6 +133,10 @@ import {
   updateAttendance,
   findAttendance,
 } from '@/api/checkins/attendance'
+import {
+  getAttendanceCheckInList
+} from '@/api/checkins/attendanceCheckIn'
+
 import { useRoute } from 'vue-router';
 import QRCode from 'qrcode'
 import { ElForm, ElMessage, ElMessageBox } from 'element-plus'
@@ -104,7 +146,7 @@ import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
 import { getParticipantList } from '@/api/checkins/participant'
-import { onMounted } from 'vue'
+import { formatDateTime } from '@/utils/format'
 import base32 from 'hi-base32'
 
 defineOptions({
@@ -119,7 +161,6 @@ const elFormRef = ref();
 
 const getDetailData = async () => {
   var id = $route.params.id
-  console.log('id', id)
   const res = await findAttendance({ id: $route.params.id })
   if (res.code == 0) {
     formData.value = res.data
@@ -156,18 +197,13 @@ const generateQRCode = async () => {
   })
 }
 
-// onMounted(() => {
-//   generateQRCode()
-// })
-
-
 
 const downloadQRCode = () => {
   const canvas = qrcodeCanvas.value
   const url = canvas.toDataURL('image/png')
   const link = document.createElement('a')
   link.href = url
-  link.download = 'Attendance - ' + $route.params.id + '.png'
+  link.download = 'QR Điểm danh số - ' + $route.params.id + '.png'
   link.click()
 }
 
@@ -200,27 +236,9 @@ const rule = reactive({
 
 
 const partticipantsData = ref([])
-const groupData = ref([])
-const areaData = ref([])
-const conditionsData = ref([])
-
-
-//endregion
-
-//region Group
-const groupPage = ref(4)
-const groupsSize = ref(20)
-const groupSize = ref(20)
-
-
-const groupHandleCurrentChange = (val) => {
-  console.log('groupHandleCurrentChange', val)
-}
-const groupHandleSizeChange = (val) => {
-  console.log('groupHandleSizeChange', val)
-}
 
 const getParticipantListData = async () => {
+  debugger
   const res = await getParticipantList({ page: groupPage.value, size: groupSize.value })
   if (res.code == 0) {
     partticipantsData.value = res.data.list
@@ -231,19 +249,35 @@ const getParticipantListData = async () => {
 //endregion
 getParticipantListData()
 
-//region Area
-const areaPage = ref(4)
-const areasSize = ref(20)
-const areaSize = ref(20)
+const handleSizeChange = (val) => {
+  pageSize.value = val
+  getTableData()
+}
 
 
-const areaHandleCurrentChange = (val) => {
-  console.log('groupHandleCurrentChange', val)
+const handleCurrentChange = (val) => {
+  page.value = val
+  getTableData()
 }
-const areaHandleSizeChange = (val) => {
-  console.log('groupHandleSizeChange', val)
+
+const page = ref(1)
+const total = ref(0)
+const pageSize = ref(10)
+const tableData = ref([])
+const searchInfo = ref({})
+const getTableData = async () => {
+  searchInfo.value.attendanceId = $route.params.id
+  const table = await getAttendanceCheckInList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  if (table.code === 0) {
+    tableData.value = table.data.list
+    total.value = table.data.total
+    page.value = table.data.page
+    pageSize.value = table.data.pageSize
+  }
+  console.log("get Table Data", tableData.value)
 }
-//endregion
+
+getTableData()
 </script>
 
 <style lang="scss"></style>

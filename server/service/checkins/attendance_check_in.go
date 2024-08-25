@@ -10,6 +10,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type AttendanceCheckInService struct{}
@@ -51,7 +52,7 @@ func (attendanceCheckInService *AttendanceCheckInService) UpdateAttendanceCheckI
 }
 
 func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckIn(ID string) (attendanceCheckIn checkins.AttendanceCheckIn, err error) {
-	err = global.GVA_DB.Where("id = ?", ID).First(&attendanceCheckIn).Error
+	err = global.GVA_DB.Where("id = ?", ID).Preload(clause.Associations).First(&attendanceCheckIn).Error
 	return
 }
 
@@ -74,7 +75,7 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInIn
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Find(&attendanceCheckIns).Error
+	err = db.Preload(clause.Associations).Find(&attendanceCheckIns).Error
 	return attendanceCheckIns, total, err
 }
 
