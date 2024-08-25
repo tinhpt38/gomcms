@@ -151,7 +151,7 @@ const qrcodeCanvas = ref(null)
 const generateQRCode = async () => {
   var params = base32.encode($route.params.id)
   console.log('params-endcode', params)
-  var url = formData.value.clientUrl + '/checkin/' + params
+  var url = formData.value.clientUrl + '/checkin/?c=' + params
   // const decoded = base32.decode.asBytes(params)
   // const decodedText = String.fromCharCode(...decoded)
   // console.log('param-decode', decodedText)
