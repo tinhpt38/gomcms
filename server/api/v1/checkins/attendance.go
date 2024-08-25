@@ -164,3 +164,9 @@ func (attendanceApi *AttendanceApi) GetAttendancePublic(c *gin.Context) {
 		"info": "Thông tin các API AttendanceClass không cần xác thực",
 	}, "lấy thành công", c)
 }
+
+
+func (attendanceApi *AttendanceApi) CheckinAttendance(c *gin.Context){
+
+
+}
