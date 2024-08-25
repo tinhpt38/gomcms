@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="p-1 my-1">
-      <el-button type="primary" icon="plus" @click="() => {}">
+      <!-- <el-button type="primary" icon="plus" @click="() => {}">
         Thêm thành viên
-      </el-button>
+      </el-button> -->
     </div>
     <el-table :data="tableData" style="width: 100%">
       <el-table-column prop="fullName" label="Họ và tên" />
