@@ -18,8 +18,7 @@ func bizModel() error {
 		config.FileProcessError{},
 		checkins.Condition{},
 		checkins.AttendanceCheckIn{},
-		checkins.ParticipantGroup{},
-		checkins.ParticipantAttendance{})
+		checkins.AttendanceGroupParticipant{})
 	if err != nil {
 		return err
 	}
