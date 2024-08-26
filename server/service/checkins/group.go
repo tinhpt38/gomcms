@@ -56,7 +56,7 @@ func (groupService *GroupService) GetGroupInfoList(info checkinsReq.GroupSearch)
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Debug().Find(&groups).Error
+	err = db.Find(&groups).Error
 
 	for i, group := range groups {
 		var count int64

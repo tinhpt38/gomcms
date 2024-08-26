@@ -8,7 +8,11 @@
     <el-table :data="tableData" style="width: 100%">
       <el-table-column prop="fullName" label="Họ và tên" />
       <el-table-column prop="email" label="Email" />
-      <!-- <el-table-column prop="group['name']" label="Nhóm" /> -->
+      <el-table-column label="Nhóm">
+        <template #default="scope">
+          <span>{{ scope.row.groups.map((e) => e.name).join(", ") }}</span>
+        </template>
+      </el-table-column>
       <!-- <el-table-column prop="totalCheckin" label="Checkins">
         <template #default="scope">
           <span>{{ scope.row.totalPass }} / {{ scope.row.totalCheckin }}</span>

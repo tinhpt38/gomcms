@@ -119,7 +119,7 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 
 	// err = db.Joins("JOIN participant_attendances ON participants.id = participant_attendances.participant_id").Debug().
 	// 	Find(&participants, "participant_attendances.attendance_id = ?", info.AttendanceId).Error
-	err = db.Debug().Find(&participants).Error
+	err = db.Preload("Groups", "attendance_id = ?", info.AttendanceId).Find(&participants).Error
 	return participants, total, err
 }
 
