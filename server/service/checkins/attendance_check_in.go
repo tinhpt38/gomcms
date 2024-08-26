@@ -3,6 +3,7 @@ package checkins
 import (
 	"encoding/base32"
 	"errors"
+	"fmt"
 	"math"
 	"time"
 
@@ -80,10 +81,11 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInIn
 }
 
 func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req checkinsReq.CheckinsReq, ip string, userAgent string) (result map[string]string, err error) {
-	atId, derr := attendanceCheckInService.DecodeBase32(req.Code)
 	// conditionService := new(ConditionService)
 	attendanceService := new(AttendanceService)
 	participantService := new(ParticipantService)
+
+	atId, derr := attendanceCheckInService.DecodeBase32(req.Code)
 	if derr != nil {
 		return nil, errors.New("Mã QR không hợp lệ")
 	}
@@ -93,16 +95,49 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	if grr != nil {
 		return nil, errors.New("Không tìm thấy thông tin điểm danh")
 	}
+
+	if attendance.IsLocked {
+		return nil, errors.New("Phiên điểm danh đã bị khóa")
+	}
+
+	//TODO: Xử lý IsTrail sau
+
+	var now = time.Now()
+	if attendance.StartDate != nil {
+		if now.Before(*attendance.StartDate) {
+			return nil, errors.New("Chưa đến thời gian điểm danh")
+		}
+	}
+	if attendance.EndDate != nil {
+		if now.After(*attendance.EndDate) {
+			return nil, errors.New("Đã hết thời gian điểm danh")
+		}
+	}
+
 	email := req.Email
 
 	//Participant is _
 	participant, perr := participantService.GetParticipantByEmail(email)
 	if perr != nil {
-		return nil, errors.New("Email của bạn không phải là thành viên")
+		return nil, errors.New("Email của bạn không phải là thành viên của hệ thống")
 	}
-	// if uint(*participant.Group.AttendanceId) != attendance.ID {
-	// 	return result, errors.New("Nhóm của bạn không phải là nhóm của phiên điểm danh")
-	// }
+
+	pa, gerr := participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
+	if gerr != nil {
+		return nil, errors.New("Không tìm thấy thông tin điểm danh của bạn")
+	}
+	fmt.Printf("partticipant in attendance: %v", pa)
+	
+
+
+
+	/*
+		Thành viên có nhóm hay không?
+		Nếu có ? Có điều kiện điểm danh hay không?
+		Nếu ko có đk thì pass => không quan trọng
+		Nếu có điều kiện thì kiểm tra điều kiện
+	*/
+
 	attendanceCheckIn := checkins.AttendanceCheckIn{
 		CheckinDate:      time.Now().UTC(),
 		AttendanceId:     &attendance.ID,

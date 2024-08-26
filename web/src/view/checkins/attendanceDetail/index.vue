@@ -52,7 +52,7 @@
         </div>
 
         <el-divider />
-        <div class="text-5xl">Danh sách</div>
+        <div class="text-xl">Danh sách điểm danh</div>
         <div class="mt-4">
           <el-table style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID">
             <el-table-column align="left" label="Ngày giờ" prop="checkinDate" width="180">

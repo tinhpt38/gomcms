@@ -52,7 +52,13 @@ func (participantService *ParticipantService) GetParticipant(ID string) (partici
 }
 
 func (participantService *ParticipantService) GetParticipantByEmail(email string) (participant checkins.Participant, err error) {
-	err = global.GVA_DB.Where("email = ?", email).Preload("Group").First(&participant).Error
+	err = global.GVA_DB.Where("email = ?", email).First(&participant).Error
+	return
+}
+
+func (participantService *ParticipantService) GetParticipantInAttendance(participantId uint, attendanceId uint) (memberOfAttendance checkins.AttendanceGroupParticipant, err error) {
+	db := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
+	err = db.Where("participant_id = ? AND attendance_id = ?", participantId, attendanceId).Preload("Attendance").Preload("Participant").First(&memberOfAttendance).Error
 	return
 }
 

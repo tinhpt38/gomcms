@@ -23,7 +23,8 @@
           class="font-bold text-active"
           href="https://github.com/flipped-aurora"
         >flipped-aurora团队</a> -->
-        <a class="font-bold text-active" href="">GOM 곰</a>
+        <!-- <a class="font-bold text-active" href="">GOM 곰</a> -->
+        <a class="font-bold text-active" href="">tinhpt@dlu.edu.vn</a>
 
       </span>
     </div>
