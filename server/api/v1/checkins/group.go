@@ -108,6 +108,26 @@ func (groupApi *GroupApi) GetGroupDataSource(c *gin.Context) {
 	response.OkWithData(dataSource, c)
 }
 
+func (groupApi *GroupApi) AssignParticipantToGroupAuto(c *gin.Context) {
+	var info checkinsReq.GroupAuto
+	err := c.ShouldBindJSON(&info)
+
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	err = groupService.AssignParticipantToGroupAuto(info)
+
+	if err != nil {
+		global.GVA_LOG.Error("lấy thất bại!", zap.Error(err))
+		response.FailWithMessage("lấy thất bại:"+err.Error(), c)
+		return
+	}
+
+	response.OkWithMessage("Gắn nhóm tự động cho sinh viên thành công", c)
+}
+
 func (groupApi *GroupApi) GetGroupPublic(c *gin.Context) {
 	// API này không cần xác thực
 	// Ví dụ trả về một thông điệp cố định, thường được sử dụng cho dịch vụ phía C, cần triển khai logic kinh doanh của riêng mình

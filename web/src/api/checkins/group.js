@@ -108,3 +108,11 @@ export const getGroupDataSource = () => {
     method: 'get',
   })
 }
+
+export const assignParticipantToGroupAuto = (data) => {
+  return service({
+    url: '/group/assignParticipantToGroupAuto',
+    method: 'post',
+    data
+  })
+}

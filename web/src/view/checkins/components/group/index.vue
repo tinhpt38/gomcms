@@ -2,11 +2,16 @@
   <div>
     <div>
       <div class="p-1 my-1">
-        <el-button type="primary" icon="plus" @click="openDialog()">Thêm nhóm</el-button>
-        <el-button type="success" icon="loading" @click="openAutoGroup()">Phân nhóm</el-button>
+        <el-button type="primary" icon="plus" @click="openDialog()">
+          Thêm nhóm
+        </el-button>
+        <el-button type="success" icon="loading" @click="openAutoGroup()">
+          Phân nhóm
+        </el-button>
       </div>
 
       <el-table :data="tableData" style="width: 100%">
+        <el-table-column type="index" label="STT" width="80" />
         <el-table-column prop="name" label="Nhóm" />
         <!-- TODO: Handle totalParts after -->
         <el-table-column prop="totalParts" label="Số thành viên" />
@@ -22,9 +27,11 @@
         </el-table-column>
       </el-table>
       <div class="flex justify-end">
-        <el-pagination v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[20, 50, 100, 500]"
+        <el-pagination
+          v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[20, 50, 100, 500]"
           :size="size" :background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
-          @size-change="handleSizeChange" @current-change="handleCurrentChange" />
+          @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        />
       </div>
     </div>
 
@@ -48,17 +55,23 @@
           <el-input v-model="formData.name" :clearable="true" placeholder="Vui lòng nhập Tên nhóm" />
         </el-form-item>
         <el-form-item label="Attendance Class:" prop="attendanceId" class="hidden">
-          <el-select v-model="formData.attendanceId" placeholder="Vui lòng chọn Attendance Class" style="width:100%"
-            :clearable="true">
-            <el-option v-for="(item, key) in dataSource.attendanceId" :key="key" :label="item.label"
-              :value="item.value" />
+          <el-select
+            v-model="formData.attendanceId" placeholder="Vui lòng chọn Attendance Class" style="width:100%"
+            :clearable="true"
+          >
+            <el-option
+              v-for="(item, key) in dataSource.attendanceId" :key="key" :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </el-form>
     </el-drawer>
 
-    <el-drawer v-model="autoGroupVisible" destroy-on-close size="800" :show-close="false"
-      :before-close="closeAutoGroup">
+    <el-drawer
+      v-model="autoGroupVisible" destroy-on-close size="800" :show-close="false"
+      :before-close="closeAutoGroup"
+    >
       <template #header>
         <div class="flex justify-between items-center">
           <span class="text-lg">Phân nhóm</span>
@@ -72,16 +85,24 @@
           </div>
         </div>
       </template>
-      <div class="text-m py-4">Số thành viên sẽ được chia đều vào các nhóm</div>
-      <el-form ref="autoGroupFormRef" :rules="groupRules" :model="autoGroupFormData" label-position="top"
-        label-width="80px">
+      <div class="text-m py-4">
+        Số thành viên sẽ được chia đều vào các nhóm
+      </div>
+      <el-form
+        ref="autoGroupFormRef" :rules="groupRules" :model="autoGroupFormData" label-position="top"
+        label-width="80px"
+      >
         <el-form-item label="Số nhóm:" prop="groupQty">
-          <el-input v-model="autoGroupFormData.groupQty" :clearable="true" type="number"
-            placeholder="Vui lòng số nhóm" />
+          <el-input
+            v-model="autoGroupFormData.groupQty" :clearable="true" type="number"
+            placeholder="Vui lòng số nhóm"
+          />
         </el-form-item>
         <el-form-item label="Cách tạo tên:" prop="groupNameType">
-          <el-select v-model="autoGroupFormData.groupNameType" placeholder="Vui lòng chọn" style="width:100%"
-            :clearable="true">
+          <el-select
+            v-model="autoGroupFormData.groupNameType" placeholder="Vui lòng chọn" style="width:100%"
+            :clearable="true"
+          >
             <el-option label="Số thứ tự" value="baseOnNumberic" />
             <el-option label="Bảng chữ cái" value="baseOnAlphabet" />
           </el-select>
@@ -103,7 +124,8 @@ import {
   deleteGroupByIds,
   updateGroup,
   findGroup,
-  getGroupList
+  getGroupList,
+  assignParticipantToGroupAuto
 } from '@/api/checkins/group'
 
 
@@ -223,7 +245,23 @@ const closeAutoGroup = () => {
 
 
 const enterGroupDialog = async () => {
+  // TODO: Implement auto group
 
+  autoGroupFormRef.value?.validate(async (valid) => {
+    if (!valid) return
+    const res = await assignParticipantToGroupAuto({
+      groupQty: +autoGroupFormData.value.groupQty,
+      groupNameType: autoGroupFormData.value.groupNameType,
+    })
+    if (res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: 'Phân nhóm thành công'
+      })
+      closeAutoGroup()
+      getTableData()
+    }
+  })
 }
 
 const enterDialog = async () => {
