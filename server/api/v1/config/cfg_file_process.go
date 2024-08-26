@@ -2,6 +2,7 @@ package config
 
 import (
 	"path/filepath"
+	"strconv"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
@@ -27,6 +28,12 @@ type CfgFileProcessApi struct{}
 func (FileProcessApi *CfgFileProcessApi) CreateCfgFileProcess(c *gin.Context) {
 	action := c.PostForm("action")
 	typeProcess := c.PostForm("type")
+	atenId := c.PostForm("attendanceId")
+	attendanceId, err := strconv.ParseUint(atenId, 10, 32)
+	if err != nil {
+		response.FailWithMessage("ID không hợp lệ", c)
+		return
+	}
 
 	if isValid := config.CheckFileProcessAction(action); !isValid {
 		response.FailWithMessage("Hành động không hợp lệ", c)
@@ -71,6 +78,7 @@ func (FileProcessApi *CfgFileProcessApi) CreateCfgFileProcess(c *gin.Context) {
 				CreatedBy:      utils.GetUserID(c),
 				UpdatedBy:      0,
 				DeletedBy:      0,
+				AttendanceId:   uint(attendanceId),
 			}
 
 			// Save file to server

@@ -26,6 +26,8 @@ type CfgFileProcess struct {
 	UpdatedBy      uint    `gorm:"column:updated_by;comment:Updater"`
 	DeletedBy      uint    `gorm:"column:deleted_by;comment:Deleter"`
 
+	AttendanceId uint `json:"attendanceId" form:"attendanceId" gorm:"-"`
+
 	User *system.SysUser `json:"user" form:"user" gorm:"foreignKey:CreatedBy"`
 }
 

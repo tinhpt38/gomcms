@@ -1,7 +1,7 @@
 <template>
   <div class="p-2">
     <div class="p-1 my-1 flex">
-      <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT' }" />
+      <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" />
       <el-button class="mx-4 hidden" type="danger" icon="download"> Xuất Excel</el-button>
     </div>
     <el-tabs v-model="tabsActiveTab" type="border-card">

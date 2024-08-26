@@ -345,17 +345,12 @@ func (participantService *ParticipantService) ImportExcel(info config.CfgFilePro
 		//! Get data from row
 		fullName := utils.GetArrayValue(row, 0)
 		email := utils.GetArrayValue(row, 1)
-		//TODO: Model liên kết nhiều nhiều
-		// group := utils.GetArrayValue(row, 2)
-
-		//? Mapping data from raw
+		groupName := utils.GetArrayValue(row, 2)
 
 		itemToSave := checkins.Participant{
 			GVA_MODEL: global.GVA_MODEL{},
 			FullName:  fullName,
 			Email:     email,
-			//TODO: Đã remove Group ID tại đây, Tạo model liên kết nhiều nhiều
-			// GroupId:   groupMap[group].ID,
 		}
 
 		// Increment count
@@ -381,6 +376,76 @@ func (participantService *ParticipantService) ImportExcel(info config.CfgFilePro
 				ExpectedValue:   "",
 				ReceivedValue:   "",
 				Note:            "Lỗi xảy ra khi thực hiện lưu dữ liệu " + err.Error(),
+				Row:             count,
+			}
+
+			global.GVA_DB.Model(&config.FileProcessError{}).Create(&errorEntry)
+
+			fileProcessService.UpdateCfgFileProcess(config.CfgFileProcess{
+				Uuid:    uuid,
+				Percent: 100,
+				Status:  config.FILE_PROCESS_STATUS_ERROR,
+				Msg:     "Đã có lỗi xảy ra, vui lòng thử lại sau",
+			})
+
+			return
+		}
+		var groupId *uint
+		if groupName != "" {
+			groupWillCreate := checkins.Group{
+				GVA_MODEL:    global.GVA_MODEL{},
+				Name:         groupName,
+				AttendanceId: info.AttendanceId,
+			}
+			groupResult := global.GVA_DB.Model(&checkins.Group{}).Where(&checkins.Group{
+				Name:         groupName,
+				AttendanceId: info.AttendanceId,
+			}).FirstOrCreate(&groupWillCreate)
+
+			err = groupResult.Error
+			if err != nil {
+				errorEntry := config.FileProcessError{
+					GVA_MODEL:       global.GVA_MODEL{},
+					FileProcessId:   &info.ID,
+					FileProcessUuid: uuid,
+					FieldTitle:      "Lỗi",
+					ExpectedValue:   "",
+					ReceivedValue:   "",
+					Note:            "Lỗi xảy ra khi thực hiện lưu dữ liệu tại Group " + err.Error(),
+					Row:             count,
+				}
+
+				global.GVA_DB.Model(&config.FileProcessError{}).Create(&errorEntry)
+
+				fileProcessService.UpdateCfgFileProcess(config.CfgFileProcess{
+					Uuid:    uuid,
+					Percent: 100,
+					Status:  config.FILE_PROCESS_STATUS_ERROR,
+					Msg:     "Đã có lỗi xảy ra, vui lòng thử lại sau",
+				})
+
+				return
+			}
+			groupId = &groupWillCreate.ID
+
+		}
+
+		resultMany := global.GVA_DB.Model(&checkins.AttendanceGroupParticipant{}).Create(&checkins.AttendanceGroupParticipant{
+			AttendanceId:  &info.AttendanceId,
+			ParticipantId: &itemToSave.ID,
+			GroupId:       groupId,
+		})
+
+		err = resultMany.Error
+		if err != nil {
+			errorEntry := config.FileProcessError{
+				GVA_MODEL:       global.GVA_MODEL{},
+				FileProcessId:   &info.ID,
+				FileProcessUuid: uuid,
+				FieldTitle:      "Lỗi",
+				ExpectedValue:   "",
+				ReceivedValue:   "",
+				Note:            "Lỗi xảy ra khi thực hiện lưu dữ liệu tại Attendance - Group - Participant " + err.Error(),
 				Row:             count,
 			}
 

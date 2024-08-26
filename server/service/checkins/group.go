@@ -133,7 +133,7 @@ func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.
 		for i := 0; i < int(validGroupQty); i++ {
 			group := checkins.Group{
 				Name:         generator.GenerateName(info.GroupNameType),
-				AttendanceId: &info.AttendanceId,
+				AttendanceId: uint(info.AttendanceId),
 			}
 
 			err = global.GVA_DB.Create(&group).Error

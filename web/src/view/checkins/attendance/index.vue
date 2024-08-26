@@ -46,9 +46,9 @@
         <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete">
           Xóa
         </el-button>
-        <div class="ms-3">
+        <!-- <div class="ms-3">
           <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT' }" />
-        </div>
+        </div> -->
       </div>
       <el-table
         ref="multipleTable"

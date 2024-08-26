@@ -24,7 +24,7 @@ const url = `${baseUrl}/sysExportTemplate/importExcel?templateID=${props.templat
 
 const handleSuccess = (res) => {
   if (res.code === 0) {
-    ElMessage.success('导入成功')
+    ElMessage.success('Nhập thành công')
     emit('on-success')
   } else {
     ElMessage.error(res.msg)

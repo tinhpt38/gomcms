@@ -4,12 +4,7 @@
       Nhập dữ liệu từ excel
     </el-button>
 
-    <el-dialog
-      v-model="dialogVisible"
-      title="Nhập dữ liệu từ excel"
-      width="60%"
-      :before-close="closeDialog"
-    >
+    <el-dialog v-model="dialogVisible" title="Nhập dữ liệu từ excel" width="60%" :before-close="closeDialog">
       <el-form v-if="isShow" ref="formRef" class="doit-form" :model="data">
         <el-row justify="space-around">
           <el-col :span="11">
@@ -25,18 +20,10 @@
         </el-row>
       </el-form>
 
-      <el-upload
-        ref="upload"
-        class="upload-demo"
-        drag
-        action="#"
+      <el-upload ref="upload" class="upload-demo" drag action="#"
         accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-        :limit="1"
-        :auto-upload="false"
-        :on-remove="handleRemove"
-        :on-exceed="handleLogoUploaderExceed"
-        @change="handleFileChange"
-      >
+        :limit="1" :auto-upload="false" :on-remove="handleRemove" :on-exceed="handleLogoUploaderExceed"
+        @change="handleFileChange">
         <el-icon class="el-icon--upload">
           <upload-filled />
         </el-icon>
@@ -93,6 +80,7 @@ const props = defineProps({
       }
     }
   },
+  
 })
 
 onMounted(() => {
@@ -161,6 +149,7 @@ const submitUpload = () => {
     formData.append('file', file)
     formData.append('type', 'import')
     formData.append('filter', JSON.stringify(data.value))
+  
 
     for (const k in props.formData) {
       formData.append(k, props.formData[k])
