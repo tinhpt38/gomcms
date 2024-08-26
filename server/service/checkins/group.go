@@ -148,28 +148,49 @@ func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.
 	rDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
 	var agps []checkins.AttendanceGroupParticipant
 	err = rDb.Where("attendance_id = ?", info.AttendanceId).Find(&agps).Error
-	totalParticipants := len(agps)
 
-	mpg := totalParticipants / info.GroupQty
+	if err != nil {
+		return err
+	}
+
+	totalParticipants := len(agps)
+	groupCount := info.GroupQty
+
+	// Calculate base number of participants per group and the remainder
+	baseParticipantsPerGroup := totalParticipants / groupCount
+	remainder := totalParticipants % groupCount
+
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(agps), func(i, j int) {
 		agps[i], agps[j] = agps[j], agps[i]
 	})
+
+	currentIndex := 0
+
 	for _, group := range groups {
-		for i := 0; i < mpg; i++ {
-			if len(agps) == 0 {
+		// Determine number of participants for this group
+		numParticipants := baseParticipantsPerGroup
+		if remainder > 0 {
+			numParticipants++
+			remainder--
+		}
+
+		// Assign participants to the group
+		for i := 0; i < numParticipants; i++ {
+			if currentIndex >= totalParticipants {
 				break
 			}
-			agp := agps[0]
+			agp := agps[currentIndex]
 			agp.GroupId = &group.ID
 			err = global.GVA_DB.Save(&agp).Error
 			if err != nil {
-				return
+				return err
 			}
-			agps = agps[1:]
+			currentIndex++
 		}
 	}
-	return
+
+	return nil
 }
 
 // func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.GroupAuto) (err error) {
