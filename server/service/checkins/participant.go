@@ -14,6 +14,7 @@ import (
 	"github.com/xuri/excelize/v2"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ParticipantService struct{}
@@ -58,7 +59,14 @@ func (participantService *ParticipantService) GetParticipantByEmail(email string
 
 func (participantService *ParticipantService) GetParticipantInAttendance(participantId uint, attendanceId uint) (memberOfAttendance checkins.AttendanceGroupParticipant, err error) {
 	db := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
-	err = db.Where("participant_id = ? AND attendance_id = ?", participantId, attendanceId).Preload("Attendance").Preload("Participant").First(&memberOfAttendance).Error
+	err = db.Joins("left join groups on groups.id = attendance_group_participants.group_id").
+		Where("attendance_group_participants.participant_id = ? AND attendance_group_participants.attendance_id = ? AND groups.attendance_id = ?", participantId, attendanceId, attendanceId).
+		Where("attendance_group_participants.deleted_at IS NULL").
+		Order("attendance_group_participants.id").
+		Preload(clause.Associations).
+		Debug().
+		First(&memberOfAttendance).
+		Error
 	return
 }
 
@@ -101,22 +109,8 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 	// 创建db
 	db := global.GVA_DB.Model(&checkins.Participant{})
 	var participants []checkins.Participant
-	// Nếu có điều kiện tìm kiếm, câu lệnh tìm kiếm sẽ được tạo tự động ở dưới đây
-	// if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
-	// 	db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
-	// }
-	// if info.FullName != "" {
-	// 	db = db.Where("full_name LIKE ?", "%"+info.FullName+"%")
-	// }
-	// if info.Email != "" {
-	// 	db = db.Where("email LIKE ?", "%"+info.Email+"%")
-	// }
-	// err = db.Count(&total).Error
-	// if err != nil {
-	// 	return
-	// }
-	err = db.Joins("JOIN participant_attendances ON participants.id = participant_attendances.participant_id").
-		Where("participant_attendances.attendance_id = ?", info.AttendanceId).Count(&total).Error
+	err = db.Joins("JOIN attendance_group_participants ON participants.id = attendance_group_participants.participant_id").
+		Where("attendance_group_participants.attendance_id = ?", info.AttendanceId).Count(&total).Error
 	if err != nil {
 		return
 	}

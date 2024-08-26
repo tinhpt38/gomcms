@@ -80,8 +80,8 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInIn
 	return attendanceCheckIns, total, err
 }
 
-func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req checkinsReq.CheckinsReq, ip string, userAgent string) (result map[string]string, err error) {
-	// conditionService := new(ConditionService)
+func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req checkinsReq.CheckinsReq, ip string, userAgent string) (result map[string]interface{}, err error) {
+	conditionService := new(ConditionService)
 	attendanceService := new(AttendanceService)
 	participantService := new(ParticipantService)
 
@@ -122,114 +122,56 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		return nil, errors.New("Email của bạn không phải là thành viên của hệ thống")
 	}
 
-	pa, gerr := participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
+	agp, gerr := participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
 	if gerr != nil {
 		return nil, errors.New("Không tìm thấy thông tin điểm danh của bạn")
 	}
-	fmt.Printf("partticipant in attendance: %v", pa)
-	
-
-
-
-	/*
-		Thành viên có nhóm hay không?
-		Nếu có ? Có điều kiện điểm danh hay không?
-		Nếu ko có đk thì pass => không quan trọng
-		Nếu có điều kiện thì kiểm tra điều kiện
-	*/
-
-	attendanceCheckIn := checkins.AttendanceCheckIn{
-		CheckinDate:      time.Now().UTC(),
-		AttendanceId:     &attendance.ID,
-		PartpaticipantId: &participant.ID,
-		AreaId:           nil,
-		GroupId:          nil,
-		ConditionId:      nil,
-		IP:               ip,
-		Lattidue:         nil,
-		Longtidue:        nil,
-		Agent:            userAgent,
-		Browser:          "",
-	}
-	aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
-	if aciErr != nil {
-		return nil, errors.New("Điểm danh thất bại")
-	}
-
-	// conditions, cerr := conditionService.GetConditionsByAttendanceId(attendance.ID)
-	// hasCondition := true
-	// if conditions == nil || cerr != nil {
-	// 	hasCondition = false
+	fmt.Printf("partticipant in attendance: %v", agp)
+	// attendanceCheckIn is _
+	// attendanceCheckIn := checkins.AttendanceCheckIn{
+	// 	CheckinDate:      time.Now().UTC(),
+	// 	AttendanceId:     &attendance.ID,
+	// 	PartpaticipantId: &participant.ID,
+	// 	AreaId:           nil,
+	// 	GroupId:          agp.GroupId,
+	// 	ConditionId:      nil,
+	// 	IP:               ip,
+	// 	Lattidue:         req.Lat,
+	// 	Longtidue:        req.Lng,
+	// 	Agent:            userAgent,
+	// 	Browser:          "",
 	// }
-	// if !hasCondition {
-	// 	attendanceCheckIn := checkins.AttendanceCheckIn{
-	// 		CheckinDate:      time.Now().UTC(),
-	// 		AttendanceId:     &attendance.ID,
-	// 		PartpaticipantId: &participant.ID,
-	// 		AreaId:           nil,
-	// 		GroupId:          &participant.Group.ID,
-	// 		ConditionId:      nil,
-	// 		IP:               "req.IP",
-	// 		Lattidue:         nil,
-	// 		Longtidue:        nil,
-	// 		Agent:            nil,
-	// 		Browser:          "req.Browser",
-	// 	}
-	// 	aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
-	// 	if aciErr != nil {
-	// 		return errors.New("Điểm danh thất bại")
-	// 	}
-
-	// } else {
-	// go func() {
-	// 	errorMap := make(map[string]string)
-	// 	attendanceCheckIn := checkins.AttendanceCheckIn{
-	// 		CheckinDate:      time.Now().UTC(),
-	// 		AttendanceId:     &attendance.ID,
-	// 		PartpaticipantId: &participant.ID,
-	// 		AreaId:           nil,
-	// 		GroupId:          &participant.Group.ID,
-	// 		ConditionId:      nil,
-	// 		IP:               "req.IP",
-	// 		Lattidue:         nil,
-	// 		Longtidue:        nil,
-	// 		Agent:            nil,
-	// 		Browser:          "req.Browser",
-	// 	}
-	// 	for _, condition := range conditions {
-	// 		if condition.AreaId != nil {
-	// 			areaResult := attendanceCheckInService.CheckinCheckArea(*req.Lat, *req.Lng, *condition.Area)
-	// 			if !areaResult {
-	// 				errorMap["Area"] = "Bạn không ở trong khu vực điểm danh"
-	// 			} else {
-	// 				attendanceCheckIn.AreaId = condition.AreaId
-	// 			}
-	// 		}
-	// 		if condition.GroupId != nil {
-	// 			if *condition.GroupId != participant.Group.ID {
-	// 				errorMap["Group"] = "Nhóm của bạn không phải là nhóm của phiên điểm danh"
-	// 			}
-	// 		}
-	// 		if condition.StartAt != nil {
-	// 			if time.Now().UTC().Before(*condition.StartAt) {
-	// 				errorMap["StartAt"] = "Chưa đến thời gian điểm danh"
-	// 			}
-	// 		}
-	// 		if condition.EndAt != nil {
-	// 			if time.Now().UTC().After(*condition.EndAt) {
-	// 				errorMap["EndAt"] = "Đã hết thời gian điểm danh"
-	// 			}
-	// 		}
-
-	// 	}
-
-	// 	attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
-
-	// }()
-
+	// aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
+	// if aciErr != nil {
+	// 	return nil, errors.New("Điểm danh thất bại")
 	// }
-	result = make(map[string]string)
+
+	conditions, cerr := conditionService.GetConditionsByAttendanceId(attendance.ID)
+	if cerr != nil {
+		return nil, errors.New("Không tìm thấy điều kiện điểm danh")
+	}
+	var satisfiedConditions []checkins.Condition
+	var unsatisfiedConditions []checkins.Condition
+	if len(conditions) > 0 {
+		satisfiedConditions, unsatisfiedConditions = func() ([]checkins.Condition, []checkins.Condition) {
+
+			var usedConditon []checkins.Condition
+			var unUsedConditon []checkins.Condition
+
+			for _, condition := range conditions {
+				if checkCondition(agp, condition, req.Lat, req.Lng) {
+					usedConditon = append(usedConditon, condition)
+				} else {
+					unUsedConditon = append(unUsedConditon, condition)
+				}
+			}
+			return usedConditon, unUsedConditon
+		}()
+	}
+	result = make(map[string]interface{})
 	result["message"] = "Điểm danh thành công"
+	result["passCondition"] = satisfiedConditions
+	result["failCondition"] = unsatisfiedConditions
 	return
 }
 
@@ -241,7 +183,10 @@ func (attendanceCheckInService *AttendanceCheckInService) DecodeBase32(encoded s
 	return string(decoded), nil
 }
 
-func (attendanceCheckInService *AttendanceCheckInService) CheckinCheckArea(lat float64, lng float64, area checkins.AttendanceArea) bool {
+func checkMatchArea(lat *float64, lng *float64, area checkins.AttendanceArea) bool {
+	if lat == nil || lng == nil {
+		return false
+	}
 	latArea := area.Area.Latitude
 	lngArea := area.Area.Longitude
 	defaultRadius := area.Area.Radius // default meter
@@ -250,7 +195,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinCheckArea(lat f
 		radiusArea = defaultRadius
 	}
 	radius := float32(float64(*radiusArea) / float64(1000))
-	result := isWithinRadius(*latArea, *lngArea, float64(radius), lat, lng)
+	result := isWithinRadius(*latArea, *lngArea, float64(radius), *lat, *lng)
 	return result
 }
 
@@ -277,4 +222,65 @@ func haversine(lat1, lon1, lat2, lon2 float64) float64 {
 func isWithinRadius(lat, lon, radius, xLat, xLng float64) bool {
 	distance := haversine(lat, lon, xLat, xLng)
 	return distance <= radius
+}
+
+func checkCondition(participant checkins.AttendanceGroupParticipant, condition checkins.Condition, lat *float64, lng *float64) bool {
+	// Trường hợp 1
+
+	if condition.GroupId == nil && condition.AreaId != nil && condition.StartAt != nil && condition.EndAt != nil {
+		inArea := checkMatchArea(lat, lng, *condition.Area)
+		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
+		return inArea && matchTime
+	}
+
+	// Trường hợp 2
+	if condition.GroupId == nil && condition.AreaId == nil && condition.StartAt != nil && condition.EndAt != nil {
+		return time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
+	}
+
+	// Trường hợp 3
+	if condition.GroupId == nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt != nil {
+		return time.Now().UTC().Before(*condition.EndAt)
+	}
+
+	// Trường hợp 4
+	if condition.GroupId != nil && condition.AreaId != nil && condition.StartAt != nil && condition.EndAt != nil {
+		inArea := checkMatchArea(lat, lng, *condition.Area)
+		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
+		return inArea == matchTime && (*condition.GroupId == *participant.GroupId)
+	}
+
+	// Trường hợp 5
+	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt != nil && condition.EndAt != nil {
+		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
+		return (*condition.GroupId == *participant.GroupId) && matchTime
+	}
+
+	// Trường hợp 6
+	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt != nil {
+		matchTime := time.Now().UTC().Before(*condition.EndAt)
+		return (*condition.GroupId == *participant.GroupId) && matchTime
+	}
+
+	// Trường hợp 7
+	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt == nil {
+		return *condition.GroupId == *participant.GroupId
+	}
+
+	// Trường hợp 8
+	if condition.GroupId == nil && condition.AreaId == nil && condition.StartAt != nil && condition.EndAt == nil {
+		return time.Now().UTC().After(*condition.StartAt)
+		// now := time.Now().UTC()
+		// fmt.Printf("now: %v", now)
+		// fmt.Printf("startAt: %v", *condition.StartAt)
+		// return now.After(*condition.StartAt)
+	}
+
+	// Trường hợp 9
+	if condition.GroupId != nil && condition.AreaId != nil && condition.StartAt == nil && condition.EndAt == nil {
+		inArea := checkMatchArea(lat, lng, *condition.Area)
+		return inArea && (*condition.GroupId == *participant.GroupId)
+	}
+
+	return false
 }

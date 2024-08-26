@@ -62,7 +62,7 @@ func (conditionService *ConditionService) GetCondition(ID string) (condition che
 }
 
 func (conditionService *ConditionService) GetConditionsByAttendanceId(ID uint) (list []checkins.Condition, err error) {
-	err = global.GVA_DB.Where("attendance_id = ?", ID).Preload(clause.Associations).Preload("Area.Area").Find(&list).Error
+	err = global.GVA_DB.Where("attendance_id = ?", ID).Preload("Group").Preload("Area.Area").Find(&list).Error
 	return
 }
 
