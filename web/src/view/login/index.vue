@@ -1,6 +1,6 @@
 <template>
   <div id="userLayout" class="w-full h-full relative">
-    <div class="rounded-lg flex items-center justify-evenly w-full h-full md:w-screen md:h-screen md:bg-[#194bfb]">
+    <div class="rounded-lg flex items-center justify-evenly w-full h-full md:w-screen md:h-screen md:bg-white">
       <div class="md:w-3/5 w-10/12 h-full flex items-center justify-evenly">
         <div class="oblique h-[130%] w-3/5 bg-white dark:bg-slate-900 transform -rotate-12 absolute -ml-52" />
         <!-- Phân khối chéo -->
@@ -12,7 +12,7 @@
             </div>
             <div class="mb-9">
               <p class="text-center text-4xl font-bold">{{ $GIN_VUE_ADMIN.appName }}</p>
-              <p class="text-center text-sm font-normal text-gray-500 mt-2.5">Nền tảng quản lý sử dụng Golang và Vue
+              <p class="text-center text-sm font-normal text-gray-500 mt-2.5">Hệ thống điểm danh sự kiện - Trường Đại học Đà Lạt
               </p>
             </div>
             <el-form ref="loginForm" :model="loginFormData" :rules="rules" :validate-on-rule-change="false"
@@ -47,8 +47,12 @@
           </div>
         </div>
       </div>
-      <div class="hidden md:block w-1/2 h-full float-right bg-[#194bfb]"><img class="h-full"
-          src="@/assets/login_right_banner.jpg" alt="banner"></div>
+      <!-- <div class="hidden md:block w-1/2 h-full float-right bg-[#194bfb]">
+        <img class="h-full" src="@/assets/login_right_banner.jpg" alt="banner">
+      </div> -->
+      <div class="hidden md:block w-1/2 h-full float-right bg-white">
+        <img class="h-full object-contain	w-full" src="@/assets/checkin@3x.webp" alt="banner">
+      </div>
     </div>
 
     <!-- <BottomInfo class="left-0 right-0 absolute bottom-3 mx-auto  w-full z-20">

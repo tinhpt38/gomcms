@@ -4,7 +4,7 @@
 import chalk from "chalk";
 
 const config = {
-  appName: 'GOM CMS',
+  appName: 'DLU Check-ins',
   appLogo: 'logo.png',
   showViteLogo: false,
   logs: [],
