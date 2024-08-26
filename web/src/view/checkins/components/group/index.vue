@@ -14,7 +14,7 @@
         <el-table-column type="index" label="STT" width="80" />
         <el-table-column prop="name" label="Nhóm" />
         <!-- TODO: Handle totalParts after -->
-        <el-table-column prop="totalParts" label="Số thành viên" />
+        <el-table-column prop="total" label="Số thành viên" />
         <el-table-column label="Hành động">
           <template #default="scope">
             <el-button size="small" type="primary" plain round @click="updateGroupFunc(scope.row)">

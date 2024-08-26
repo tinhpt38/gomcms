@@ -3,43 +3,22 @@
     <div class="gva-search-box">
       <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule"
         @keyup.enter="onSubmit">
-        <el-form-item label="Ngày tạo" prop="createdAt">
-          <template #label>
-            <span>
-              Ngày tạo
-              <el-tooltip content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
-                <el-icon>
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="Ngày bắt đầu"
-            :disabled-date="time => searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false"></el-date-picker>
-          —
-          <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc"
-            :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false"></el-date-picker>
-        </el-form-item>
-
-        <el-form-item label="Họ và tên" prop="fullName">
-          <el-input v-model="searchInfo.fullName" placeholder="Điều kiện tìm kiếm" />
-
-        </el-form-item>
         <el-form-item label="Email" prop="email">
           <el-input v-model="searchInfo.email" placeholder="Điều kiện tìm kiếm" />
-
         </el-form-item>
 
-        <template v-if="showAllQuery">
+        <template v-if="showAllQuery" class="hidden">
           <!-- Thêm các điều kiện tìm kiếm cần điều khiển hiển thị vào đây -->
         </template>
 
         <el-form-item>
           <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
           <el-button icon="refresh" @click="onReset">Đặt lại</el-button>
-          <el-button link type="primary" icon="arrow-down" @click="showAllQuery = true"
-            v-if="!showAllQuery">Mở rộng</el-button>
-          <el-button link type="primary" icon="arrow-up" @click="showAllQuery = false" v-else>Thu gọn</el-button>
+          <el-button class="hidden" link type="primary" icon="arrow-down" @click="showAllQuery = true"
+            v-if="!showAllQuery">Mở
+            rộng</el-button>
+          <el-button class="hidden" link type="primary" icon="arrow-up" @click="showAllQuery = false" v-else>Thu
+            gọn</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -52,13 +31,13 @@
       <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
-
-        <el-table-column align="left" label="Ngày" prop="createdAt" width="180">
+        <el-table-column align="left" label="Họ và tên" prop="fullName" width="250" />
+        <el-table-column align="left" label="Email" prop="email" width="200" />
+        <el-table-column align="left" label="Ngày tạo" prop="createdAt" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
 
-        <el-table-column align="left" label="Họ và tên" prop="fullName" width="120" />
-        <el-table-column align="left" label="Email" prop="email" width="120" />
+
         <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
           <template #default="scope">
             <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon

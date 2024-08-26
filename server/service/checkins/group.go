@@ -59,6 +59,16 @@ func (groupService *GroupService) GetGroupInfoList(info checkinsReq.GroupSearch)
 	}
 
 	err = db.Debug().Find(&groups).Error
+
+	for i, group := range groups {
+		var count int64
+		newDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
+		err = newDb.Where("group_id = ? and attendance_id = ?", group.ID, info.AttendanceId).Count(&count).Error
+		if err != nil {
+			return
+		}
+		groups[i].Total = int(count)
+	}
 	return groups, total, err
 }
 

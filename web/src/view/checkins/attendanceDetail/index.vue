@@ -1,8 +1,8 @@
 <template>
   <div class="p-2">
-    <div class="p-1 my-1">
-      <el-button type="primary" icon="upload"> Nhập Excel </el-button>
-      <el-button type="success" icon="download"> Xuất Excel</el-button>
+    <div class="p-1 my-1 flex">
+      <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT' }" />
+      <el-button class="mx-4 hidden" type="danger" icon="download"> Xuất Excel</el-button>
     </div>
     <el-tabs v-model="tabsActiveTab" type="border-card">
       <el-tab-pane name="attendanceInfoTab" label="Chi tiết">
@@ -139,6 +139,7 @@ import Partticipant from '@/view/checkins/components/participant/index.vue'
 import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
+import ImportExcel from '@/components/importExcel/index.vue'
 import { formatDateTime } from '@/utils/format'
 import base32 from 'hi-base32'
 
