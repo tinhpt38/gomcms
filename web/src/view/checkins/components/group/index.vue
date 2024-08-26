@@ -252,6 +252,7 @@ const enterGroupDialog = async () => {
     const res = await assignParticipantToGroupAuto({
       groupQty: +autoGroupFormData.value.groupQty,
       groupNameType: autoGroupFormData.value.groupNameType,
+      attendanceId: +props.acId
     })
     if (res.code === 0) {
       ElMessage({

@@ -91,26 +91,16 @@ func NewGroupNameGenerator(existingNames []string) *checkins.GroupNameGenerator 
 }
 
 func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.GroupAuto) (err error) {
-	// groupQty
-	// groupNameType
-
-	// INPUT
-	// số lượng nhóm
-	// loại tên nhóm
-
-	// Flow
 	// Xem thử hiện tại có bao nhiêu nhóm trong DB rồi từ đó tính toán số nhóm cần tạo
-
 	var count int64
 	var groups []checkins.Group
 
 	// Lấy danh sách nhóm hiện tại
-	err = global.GVA_DB.Find(&groups).Error
+	err = global.GVA_DB.Where("attendance_id = ?", info.AttendanceId).Find(&groups).Error
 	if err != nil {
 		return
 	}
 
-	// Parse thông tin nhóm thành 1 mảng string
 	getGroupNames := func(groups []checkins.Group) []string {
 		names := make([]string, 0)
 		for _, group := range groups {
@@ -126,50 +116,51 @@ func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.
 	// Số nhóm cần tạo = số nhóm cần tạo - số nhóm hiện tại
 	validGroupQty := int64(info.GroupQty) - count
 
-	if validGroupQty <= 0 {
-		var participants []checkins.Participant
-		err = global.GVA_DB.Find(&participants).Error
+	if validGroupQty > 0 {
+		// Tiến hành tạo nhóm theo số lượng cần tạo
+		generator := NewGroupNameGenerator(getGroupNames(groups))
+
+		for i := 0; i < int(validGroupQty); i++ {
+			group := checkins.Group{
+				Name:         generator.GenerateName(info.GroupNameType),
+				AttendanceId: &info.AttendanceId,
+			}
+
+			err = global.GVA_DB.Create(&group).Error
+			if err != nil {
+				return
+			}
+		}
+	}
+
+	var participants []checkins.Participant
+	err = global.GVA_DB.Find(&participants).Error
+
+	if err != nil {
+		return err
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(participants), func(i, j int) {
+		participants[i], participants[j] = participants[j], participants[i]
+	})
+
+	// Phân bổ participants vào các nhóm và lưu vào bảng GroupParticipant
+	for i, participant := range participants {
+		groupID := uint(i%info.GroupQty) + 1
+
+		attendanceID := uint(info.AttendanceId)
+
+		participantGroup := checkins.AttendanceGroupParticipant{
+			ParticipantId: &participant.ID,
+			GroupId:       &groupID,
+			AttendanceId:  &attendanceID,
+		}
+
+		err = global.GVA_DB.Create(&participantGroup).Error
 
 		if err != nil {
 			return err
-		}
-
-		rand.Seed(time.Now().UnixNano())
-		rand.Shuffle(len(participants), func(i, j int) {
-			participants[i], participants[j] = participants[j], participants[i]
-		})
-
-		// Phân bổ participants vào các nhóm và lưu vào bảng GroupParticipant
-		for i, participant := range participants {
-			groupID := uint(i%info.GroupQty) + 1
-
-			participantGroup := checkins.ParticipantGroup{
-				ParticipantId: &participant.ID,
-				GroupId:       &groupID,
-			}
-
-			err = global.GVA_DB.Create(&participantGroup).Error
-
-			if err != nil {
-				return err
-			}
-		}
-
-		return
-	}
-
-	// Tiến hành tạo nhóm theo số lượng cần tạo
-	generator := NewGroupNameGenerator(getGroupNames(groups))
-
-	for i := 0; i < int(validGroupQty); i++ {
-		group := checkins.Group{
-			Name:         generator.GenerateName(info.GroupNameType),
-			AttendanceId: &info.AttendanceId,
-		}
-
-		err = global.GVA_DB.Create(&group).Error
-		if err != nil {
-			return
 		}
 	}
 
