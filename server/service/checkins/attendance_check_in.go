@@ -26,9 +26,11 @@ func (attendanceCheckInService *AttendanceCheckInService) CreateAttendanceCheckI
 	}).Count(&count).Error
 	if count < 0 {
 		err = global.GVA_DB.Create(attendanceCheckIn).Error
+		if err != nil {
+			return err
+		}
 	}
-
-	return err
+	return nil
 }
 
 func (attendanceCheckInService *AttendanceCheckInService) DeleteAttendanceCheckIn(ID string, userID uint) (err error) {
