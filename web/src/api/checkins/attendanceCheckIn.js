@@ -16,6 +16,14 @@ export const createAttendanceCheckIn = (data) => {
   })
 }
 
+export const publicAttendanceCheckIn = (data) => {
+  return service({
+    url: '/attendanceCheckIn/publicAttendanceCheckIn',
+    method: 'post',
+    data
+  })
+}
+
 // @Tags AttendanceCheckIn
 // @Summary 删除Thành viên checkins
 // @Security ApiKeyAuth

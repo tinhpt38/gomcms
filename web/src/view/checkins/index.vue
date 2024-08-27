@@ -29,13 +29,39 @@
                     <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32">
                         <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                             <div class="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
-                                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">We’re changing
-                                    the way people connect.</h1>
+                                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Hệ thống điểm
+                                    danh - Trường Đại học Đà Lạt.</h1>
                                 <p class="relative mt-6 text-lg leading-8 text-gray-600 sm:max-w-md lg:max-w-none">
-                                    Cupidatat minim id magna ipsum sint dolor qui. Sunt sit in quis cupidatat mollit
-                                    aute velit. Et labore commodo nulla aliqua proident mollit ullamco exercitation
-                                    tempor. Sint aliqua anim nulla sunt mollit id pariatur in voluptate cillum. Eu
-                                    voluptate tempor esse minim amet fugiat veniam occaecat aliqua.</p>
+                                    Hãy đăng nhập bằng tài khoảng Email của bạn với Google để đăng nhập.</p>
+                                <button @click="onLoginClick"
+                                    class="my-4 flex items-center bg-white dark:bg-gray-900 border border-gray-300 rounded-lg shadow-md px-6 py-2 text-sm font-medium text-gray-800 dark:text-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    <svg class="h-6 w-6 mr-2" xmlns="http://www.w3.org/2000/svg"
+                                        xmlns:xlink="http://www.w3.org/1999/xlink" width="800px" height="800px"
+                                        viewBox="-0.5 0 48 48" version="1.1">
+                                        <title>Google-color</title>
+                                        <desc>Created with Sketch.</desc>
+                                        <defs> </defs>
+                                        <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                            <g id="Color-" transform="translate(-401.000000, -860.000000)">
+                                                <g id="Google" transform="translate(401.000000, 860.000000)">
+                                                    <path
+                                                        d="M9.82727273,24 C9.82727273,22.4757333 10.0804318,21.0144 10.5322727,19.6437333 L2.62345455,13.6042667 C1.08206818,16.7338667 0.213636364,20.2602667 0.213636364,24 C0.213636364,27.7365333 1.081,31.2608 2.62025,34.3882667 L10.5247955,28.3370667 C10.0772273,26.9728 9.82727273,25.5168 9.82727273,24"
+                                                        id="Fill-1" fill="#FBBC05"> </path>
+                                                    <path
+                                                        d="M23.7136364,10.1333333 C27.025,10.1333333 30.0159091,11.3066667 32.3659091,13.2266667 L39.2022727,6.4 C35.0363636,2.77333333 29.6954545,0.533333333 23.7136364,0.533333333 C14.4268636,0.533333333 6.44540909,5.84426667 2.62345455,13.6042667 L10.5322727,19.6437333 C12.3545909,14.112 17.5491591,10.1333333 23.7136364,10.1333333"
+                                                        id="Fill-2" fill="#EB4335"> </path>
+                                                    <path
+                                                        d="M23.7136364,37.8666667 C17.5491591,37.8666667 12.3545909,33.888 10.5322727,28.3562667 L2.62345455,34.3946667 C6.44540909,42.1557333 14.4268636,47.4666667 23.7136364,47.4666667 C29.4455,47.4666667 34.9177955,45.4314667 39.0249545,41.6181333 L31.5177727,35.8144 C29.3995682,37.1488 26.7323182,37.8666667 23.7136364,37.8666667"
+                                                        id="Fill-3" fill="#34A853"> </path>
+                                                    <path
+                                                        d="M46.1454545,24 C46.1454545,22.6133333 45.9318182,21.12 45.6113636,19.7333333 L23.7136364,19.7333333 L23.7136364,28.8 L36.3181818,28.8 C35.6879545,31.8912 33.9724545,34.2677333 31.5177727,35.8144 L39.0249545,41.6181333 C43.3393409,37.6138667 46.1454545,31.6490667 46.1454545,24"
+                                                        id="Fill-4" fill="#4285F4"> </path>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </svg>
+                                    <span>Đăng nhập bằng Google</span>
+                                </button>
                             </div>
                             <div
                                 class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
@@ -86,167 +112,57 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Content section -->
-            <div class="mx-auto -mt-12 max-w-7xl px-6 sm:mt-0 lg:px-8 xl:-mt-8">
-                <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-none">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Our mission</h2>
-                    <div class="mt-6 flex flex-col gap-x-8 gap-y-20 lg:flex-row">
-                        <div class="lg:w-full lg:max-w-2xl lg:flex-auto">
-                            <p class="text-xl leading-8 text-gray-600">Aliquet nec orci mattis amet quisque ullamcorper
-                                neque, nibh sem. At arcu, sit dui mi, nibh dui, diam eget aliquam. Quisque id at vitae
-                                feugiat egestas ac. Diam nulla orci at in viverra scelerisque eget. Eleifend egestas
-                                fringilla sapien.</p>
-                            <div class="mt-10 max-w-xl text-base leading-7 text-gray-700">
-                                <p>Faucibus commodo massa rhoncus, volutpat. Dignissim sed eget risus enim. Mattis
-                                    mauris semper sed amet vitae sed turpis id. Id dolor praesent donec est. Odio
-                                    penatibus risus viverra tellus varius sit neque erat velit. Faucibus commodo massa
-                                    rhoncus, volutpat. Dignissim sed eget risus enim. Mattis mauris semper sed amet
-                                    vitae sed turpis id.</p>
-                                <p class="mt-10">Et vitae blandit facilisi magna lacus commodo. Vitae sapien duis odio
-                                    id et. Id blandit molestie auctor fermentum dignissim. Lacus diam tincidunt ac
-                                    cursus in vel. Mauris varius vulputate et ultrices hac adipiscing egestas. Iaculis
-                                    convallis ac tempor et ut. Ac lorem vel integer orci.</p>
-                            </div>
-                        </div>
-                        <div class="lg:flex lg:flex-auto lg:justify-center">
-                            <dl class="w-64 space-y-8 xl:w-80">
-                                <div v-for="stat in stats" :key="stat.label" class="flex flex-col-reverse gap-y-4">
-                                    <dt class="text-base leading-7 text-gray-600">{{ stat.label }}</dt>
-                                    <dd class="text-5xl font-semibold tracking-tight text-gray-900">{{ stat.value }}
-                                    </dd>
-                                </div>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Image section -->
-            <div class="mt-32 sm:mt-40 xl:mx-auto xl:max-w-7xl xl:px-8">
-                <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=80"
-                    alt="" class="aspect-[5/2] w-full object-cover xl:rounded-3xl" />
-            </div>
-
-            <!-- Values section -->
-            <div class="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
-                <div class="mx-auto max-w-2xl lg:mx-0">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Our values</h2>
-                    <p class="mt-6 text-lg leading-8 text-gray-600">Lorem ipsum dolor sit amet consect adipisicing elit.
-                        Possimus magnam voluptatum cupiditate veritatis in accusamus quisquam.</p>
-                </div>
-                <dl
-                    class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                    <div v-for="value in values" :key="value.name">
-                        <dt class="font-semibold text-gray-900">{{ value.name }}</dt>
-                        <dd class="mt-1 text-gray-600">{{ value.description }}</dd>
-                    </div>
-                </dl>
-            </div>
-
-            <!-- Logo cloud -->
-            <div class="relative isolate -z-10 mt-32 sm:mt-48">
-                <div
-                    class="absolute inset-x-0 top-1/2 -z-10 flex -translate-y-1/2 justify-center overflow-hidden [mask-image:radial-gradient(50%_45%_at_50%_55%,white,transparent)]">
-                    <svg class="h-[40rem] w-[80rem] flex-none stroke-gray-200" aria-hidden="true">
-                        <defs>
-                            <pattern id="e9033f3e-f665-41a6-84ef-756f6778e6fe" width="200" height="200" x="50%" y="50%"
-                                patternUnits="userSpaceOnUse" patternTransform="translate(-100 0)">
-                                <path d="M.5 200V.5H200" fill="none" />
-                            </pattern>
-                        </defs>
-                        <svg x="50%" y="50%" class="overflow-visible fill-gray-50">
-                            <path d="M-300 0h201v201h-201Z M300 200h201v201h-201Z" stroke-width="0" />
-                        </svg>
-                        <rect width="100%" height="100%" stroke-width="0"
-                            fill="url(#e9033f3e-f665-41a6-84ef-756f6778e6fe)" />
-                    </svg>
-                </div>
-                <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                    <h2 class="text-center text-lg font-semibold leading-8 text-gray-900">Trusted by the world’s most
-                        innovative teams</h2>
-                    <!-- <div
-                        class="mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-5">
-                        <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
-                            src="/img/logos/158x48/transistor-logo-gray-900.svg" alt="Transistor" width="158"
-                            height="48" />
-                        <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
-                            src="/img/logos/158x48/reform-logo-gray-900.svg" alt="Reform" width="158" height="48" />
-                        <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1"
-                            src="/img/logos/158x48/tuple-logo-gray-900.svg" alt="Tuple" width="158" height="48" />
-                        <img class="col-span-2 max-h-12 w-full object-contain sm:col-start-2 lg:col-span-1"
-                            src="/img/logos/158x48/savvycal-logo-gray-900.svg" alt="SavvyCal" width="158" height="48" />
-                        <img class="col-span-2 col-start-2 max-h-12 w-full object-contain sm:col-start-auto lg:col-span-1"
-                            src="/img/logos/158x48/statamic-logo-gray-900.svg" alt="Statamic" width="158" height="48" />
-                    </div> -->
-                </div>
-            </div>
-
-            <!-- Team section -->
-            <div class="mx-auto mt-32 max-w-7xl px-6 sm:mt-48 lg:px-8">
-                <div class="mx-auto max-w-2xl lg:mx-0">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Our team</h2>
-                    <p class="mt-6 text-lg leading-8 text-gray-600">Sit facilis neque ab nulla vel. Cum eos in
-                        laudantium. Temporibus eos totam in dolorum. Nemo vel facere repellendus ut eos dolores
-                        similique.</p>
-                </div>
-                <ul role="list"
-                    class="mx-auto mt-20 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-16 text-center sm:grid-cols-3 md:grid-cols-4 lg:mx-0 lg:max-w-none lg:grid-cols-5 xl:grid-cols-6">
-                    <li v-for="person in team" :key="person.name">
-                        <img class="mx-auto h-24 w-24 rounded-full" :src="person.imageUrl" alt="" />
-                        <h3 class="mt-6 text-base font-semibold leading-7 tracking-tight text-gray-900">{{ person.name
-                            }}</h3>
-                        <p class="text-sm leading-6 text-gray-600">{{ person.role }}</p>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Blog section -->
-            <div class="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
-                <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-none">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">From the blog</h2>
-                    <p class="mt-2 text-lg leading-8 text-gray-600">Vel dolorem qui facilis soluta sint aspernatur totam
-                        cumque.</p>
-                </div>
-                <div
-                    class="mx-auto mt-16 grid max-w-2xl auto-rows-fr grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                    <article v-for="post in blogPosts" :key="post.id"
-                        class="relative isolate flex flex-col justify-end overflow-hidden rounded-2xl bg-gray-900 px-8 pb-8 pt-80 sm:pt-48 lg:pt-80">
-                        <img :src="post.imageUrl" alt="" class="absolute inset-0 -z-10 h-full w-full object-cover" />
-                        <div class="absolute inset-0 -z-10 bg-gradient-to-t from-gray-900 via-gray-900/40" />
-                        <div class="absolute inset-0 -z-10 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
-
-                        <div
-                            class="flex flex-wrap items-center gap-y-1 overflow-hidden text-sm leading-6 text-gray-300">
-                            <time :datetime="post.datetime" class="mr-8">{{ post.date }}</time>
-                            <div class="-ml-4 flex items-center gap-x-4">
-                                <svg viewBox="0 0 2 2" class="-ml-0.5 h-0.5 w-0.5 flex-none fill-white/50">
-                                    <circle cx="1" cy="1" r="1" />
-                                </svg>
-                                <div class="flex gap-x-2.5">
-                                    <img :src="post.author.imageUrl" alt=""
-                                        class="h-6 w-6 flex-none rounded-full bg-white/10" />
-                                    {{ post.author.name }}
-                                </div>
-                            </div>
-                        </div>
-                        <h3 class="mt-3 text-lg font-semibold leading-6 text-white">
-                            <a :href="post.href">
-                                <span class="absolute inset-0" />
-                                {{ post.title }}
-                            </a>
-                        </h3>
-                    </article>
-                </div>
-            </div>
         </main>
     </div>
 </template>
 
 <script setup>
-import { defineComponent, h, ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { publicAttendanceCheckIn } from '@/api/checkins/attendanceCheckIn'
+import { ElMessageBox } from 'element-plus';
+
 defineOptions({
-  name: "Checkins",
+    name: "Checkins",
 })
+
+const qrEncode = ref('')
+const userEmail = ref('2011805@dlu.edu.vn')
+
+onMounted(() => {
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+    qrEncode.value = urlParams.get('c');
+    console.log('qrEncode', qrEncode.value)
+    // const response = await publicAttendanceCheckIn()
+    // qrEncode.value = response.data.qrEncode
+})
+
+const requestCheckin = async () => {
+    var body = {
+        "code": qrEncode.value,
+        "email": userEmail.value,
+    }
+    var res = await publicAttendanceCheckIn(body)
+    console.log('res', res)
+    if (res.code == 0) {
+        ElMessageBox.alert('Điểm danh thành công', 'Thông báo', {
+            confirmButtonText: 'OK',
+            type: 'success'
+        }).then(() => {
+            // window.location.href = 'https://dlu.edu.vn'
+        });
+    }
+}
+
+const onLoginClick = async () => {
+    console.log('Login clicked')
+    await requestCheckin()
+}
+
+
+
+
+
+
+
 
 </script>
