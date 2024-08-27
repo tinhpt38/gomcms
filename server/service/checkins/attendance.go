@@ -20,7 +20,29 @@ func (attendanceService *AttendanceService) CreateAttendanceArea(attendanceArea 
 }
 
 func (attendanceService *AttendanceService) DeleteAttendanceArea(id string) (err error) {
-	err = global.GVA_DB.Delete(&checkins.AttendanceArea{}, "id = ? ", id).Error
+	// err = global.GVA_DB.Delete(&checkins.AttendanceArea{}, "id = ? ", id).Error
+	// Xoá luôn tham chiếu tới điều kiện
+	attArea := checkins.AttendanceArea{}
+
+	err = global.GVA_DB.Where("id = ?", id).First(&attArea).Error
+
+	if err != nil {
+		return err
+	}
+
+	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("area_id = ?", attArea.AreaID).Delete(&checkins.Condition{}).Error; err != nil {
+			return err
+		}
+
+		err = tx.Delete(&checkins.AttendanceArea{}, "id = ?", id).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 	return err
 }
 
