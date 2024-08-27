@@ -82,17 +82,15 @@
                 <span>{{ scope.row.group.name ?? '/' }}</span>
               </template>
             </el-table-column>
+
             <el-table-column align="left" label="IP" prop="iP" width="90" />
-            <el-table-column align="left" label="Kinh độ" prop="lattidue" width="170">
+            <el-table-column align="left" label="Vị trí" width="170">
               <template #default="scope">
-                <span>{{ '11.953687161569116' }}</span>
+                <a target="_blank" :href="'https://www.google.com/maps?q=' + scope.row.lattidue + ',' + scope.row.longtidue">{{
+                  scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
               </template>
             </el-table-column>
-            <el-table-column align="left" label="Vĩ độ" prop="longtidue" width="170">
-              <template #default="scope">
-                <span>{{ '11.953687161569116' }}</span>
-              </template>
-            </el-table-column>
+
             <el-table-column class="overflow-hidden" label="Agent" prop="agent"></el-table-column>
           </el-table>
           <div class="gva-pagination">
@@ -222,7 +220,7 @@ const downloadQRCode = () => {
   const url = canvas.toDataURL('image/png')
   const link = document.createElement('a')
   link.href = url
-  link.download = 'QR Điểm danh số - ' + $route.params.id + '.png'
+  link.download = 'QR Điểm danh - ' + formData.title + '.png'
   link.click()
 }
 
