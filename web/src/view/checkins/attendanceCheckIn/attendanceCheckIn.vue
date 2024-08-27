@@ -3,49 +3,49 @@
     <div class="gva-search-box">
       <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule"
         @keyup.enter="onSubmit">
-        <el-form-item label="创建日期" prop="createdAt">
+        <el-form-item label="Ngày tạo" prop="createdAt">
           <template #label>
             <span>
-              创建日期
-              <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+              Ngày tạo
+              <el-tooltip content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
                 <el-icon>
                   <QuestionFilled />
                 </el-icon>
               </el-tooltip>
             </span>
           </template>
-          <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="开始日期"
+          <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="Ngày bắt đầu"
             :disabled-date="time => searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false"></el-date-picker>
           —
-          <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="结束日期"
+          <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc"
             :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false"></el-date-picker>
         </el-form-item>
 
 
         <template v-if="showAllQuery">
-          <!-- 将需要控制显示状态的查询条件添加到此范围内 -->
+          <!-- Thêm các điều kiện tìm kiếm cần điều khiển hiển thị ở đây -->
         </template>
 
         <el-form-item>
-          <el-button type="primary" icon="search" @click="onSubmit">查询</el-button>
-          <el-button icon="refresh" @click="onReset">重置</el-button>
+          <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
+          <el-button icon="refresh" @click="onReset">Đặt lại</el-button>
           <el-button link type="primary" icon="arrow-down" @click="showAllQuery = true"
-            v-if="!showAllQuery">展开</el-button>
-          <el-button link type="primary" icon="arrow-up" @click="showAllQuery = false" v-else>收起</el-button>
+            v-if="!showAllQuery">Mở rộng</el-button>
+          <el-button link type="primary" icon="arrow-up" @click="showAllQuery = false" v-else>Thu gọn</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="gva-table-box">
       <div class="gva-btn-list">
-        <el-button type="primary" icon="plus" @click="openDialog">新增</el-button>
+        <el-button type="primary" icon="plus" @click="openDialog">Thêm mới</el-button>
         <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length"
-          @click="onDelete">删除</el-button>
+          @click="onDelete">Xóa</el-button>
       </div>
       <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
 
-        <el-table-column align="left" label="日期" prop="createdAt" width="180">
+        <el-table-column align="left" label="Ngày tạo" prop="createdAt" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
 
@@ -66,15 +66,15 @@
           </template>
         </el-table-column>
         <el-table-column align="left" label="Trình duyệt" prop="browser" width="120" />
-        <el-table-column align="left" label="操作" fixed="right" min-width="240">
+        <el-table-column align="left" label="Thao tác" fixed="right" min-width="240">
           <template #default="scope">
             <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon
                 style="margin-right: 5px">
                 <InfoFilled />
-              </el-icon>查看详情</el-button>
+              </el-icon>Xem chi tiết</el-button>
             <el-button type="primary" link icon="edit" class="table-button"
-              @click="updateAttendanceCheckInFunc(scope.row)">变更</el-button>
-            <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
+              @click="updateAttendanceCheckInFunc(scope.row)">Chỉnh sửa</el-button>
+            <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">Xóa</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -87,49 +87,49 @@
     <el-drawer destroy-on-close size="800" v-model="dialogFormVisible" :show-close="false" :before-close="closeDialog">
       <template #header>
         <div class="flex justify-between items-center">
-          <span class="text-lg">{{ type === 'create' ? '添加' : '修改' }}</span>
+          <span class="text-lg">{{ type === 'create' ? 'Thêm mới' : 'Chỉnh sửa' }}</span>
           <div>
             <el-button type="primary" @click="enterDialog">Đồng ý</el-button>
-            <el-button @click="closeDialog">Huỷ</el-button>
+            <el-button @click="closeDialog">Hủy</el-button>
           </div>
         </div>
       </template>
 
       <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
         <el-form-item label="Ngày giờ:" prop="checkinDate">
-          <el-date-picker v-model="formData.checkinDate" type="date" style="width:100%" placeholder="选择日期"
+          <el-date-picker v-model="formData.checkinDate" type="date" style="width:100%" placeholder="Chọn ngày"
             :clearable="true" />
         </el-form-item>
         <el-form-item label="Lớp điểm danh:" prop="attendanceId">
-          <el-input v-model.number="formData.attendanceId" :clearable="true" placeholder="请输入Lớp điểm danh" />
+          <el-input v-model.number="formData.attendanceId" :clearable="true" placeholder="Nhập Lớp điểm danh" />
         </el-form-item>
         <el-form-item label="Thành viên:" prop="partpaticipantId">
-          <el-input v-model.number="formData.partpaticipantId" :clearable="true" placeholder="请输入Thành viên" />
+          <el-input v-model.number="formData.partpaticipantId" :clearable="true" placeholder="Nhập Thành viên" />
         </el-form-item>
         <el-form-item label="Khu vực:" prop="areaId">
-          <el-input v-model.number="formData.areaId" :clearable="true" placeholder="请输入Khu vực" />
+          <el-input v-model.number="formData.areaId" :clearable="true" placeholder="Nhập Khu vực" />
         </el-form-item>
         <el-form-item label="Nhóm:" prop="groupId">
-          <el-input v-model.number="formData.groupId" :clearable="true" placeholder="请输入Nhóm" />
+          <el-input v-model.number="formData.groupId" :clearable="true" placeholder="Nhập Nhóm" />
         </el-form-item>
         <el-form-item label="Điều kiện:" prop="conditionId">
-          <el-input v-model.number="formData.conditionId" :clearable="true" placeholder="请输入Điều kiện" />
+          <el-input v-model.number="formData.conditionId" :clearable="true" placeholder="Nhập Điều kiện" />
         </el-form-item>
         <el-form-item label="Kinh độ:" prop="lattidue">
           <el-input-number v-model="formData.lattidue" style="width:100%" :precision="2" :clearable="true" />
         </el-form-item>
         <el-form-item label="IP:" prop="iP">
-          <el-input v-model.number="formData.iP" :clearable="true" placeholder="请输入IP" />
+          <el-input v-model.number="formData.iP" :clearable="true" placeholder="Nhập IP" />
         </el-form-item>
         <el-form-item label="Vĩ độ:" prop="longtidue">
           <el-input-number v-model="formData.longtidue" style="width:100%" :precision="2" :clearable="true" />
         </el-form-item>
         <el-form-item label="Agent:" prop="agent">
-          // 此字段为json结构，可以前端自行控制展示和数据绑定模式 需绑定json的key为 formData.agent 后端会按照json的类型进行存取
+          // Trường này có cấu trúc json, bạn có thể tự điều khiển hiển thị và ràng buộc dữ liệu trên giao diện người dùng. Khóa json được ràng buộc với formData.agent và phía sau sẽ lưu trữ và truy xuất dữ liệu theo kiểu json.
           {{ formData.agent }}
         </el-form-item>
         <el-form-item label="Trình duyệt:" prop="browser">
-          <el-input v-model="formData.browser" :clearable="true" placeholder="请输入Trình duyệt" />
+          <el-input v-model="formData.browser" :clearable="true" placeholder="Nhập Trình duyệt" />
         </el-form-item>
       </el-form>
     </el-drawer>

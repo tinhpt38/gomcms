@@ -10,5 +10,6 @@ type AttendanceCheckInSearch struct {
 	StartCreatedAt *time.Time `json:"startCreatedAt" form:"startCreatedAt"`
 	EndCreatedAt   *time.Time `json:"endCreatedAt" form:"endCreatedAt"`
 	AttendanceId   *uint      `json:"attendanceId" form:"attendanceId"`
+	Email          *string    `json:"email" form:"email"`
 	request.PageInfo
 }

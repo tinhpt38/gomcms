@@ -66,6 +66,23 @@
 
         <el-divider />
         <div class="text-xl">Danh sách điểm danh</div>
+        <div class="my-4">
+          <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRules"
+            @keyup.enter="onSubmit">
+            <el-form-item label="Ngày tạo" prop="createdAt">
+              <el-date-picker v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu"
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="Email" prop="email">
+              <el-date-picker v-model="searchInfo.email" type="text" placeholder="Email" </el-date-picker>
+            </el-form-item>
+
+            <el-form-item>
+              <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
+              <el-button icon="refresh" @click="onReset">Đặt lại</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
         <div class="mt-4">
           <el-table style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID">
             <el-table-column align="left" label="Ngày giờ" prop="checkinDate" width="180">
@@ -86,8 +103,9 @@
             <el-table-column align="left" label="IP" prop="iP" width="90" />
             <el-table-column align="left" label="Vị trí" width="170">
               <template #default="scope">
-                <a target="_blank" :href="'https://www.google.com/maps?q=' + scope.row.lattidue + ',' + scope.row.longtidue">{{
-                  scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
+                <a target="_blank"
+                  :href="'https://www.google.com/maps?q=' + scope.row.lattidue + ',' + scope.row.longtidue">{{
+                    scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
               </template>
             </el-table-column>
 
@@ -174,6 +192,51 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
+const elSearchFormRef = ref()
+
+// const searchRule = reactive({
+//   createdAt: [
+//     {
+//       validator: (rule, value, callback) => {
+//         if (searchInfo.value.startCreatedAt && !searchInfo.value.endCreatedAt) {
+//           callback(new Error('Vui lòng nhập ngày kết thúc'))
+//         } else if (!searchInfo.value.startCreatedAt && searchInfo.value.endCreatedAt) {
+//           callback(new Error('Vui lòng nhập ngày bắt đầu'))
+//         } else if (searchInfo.value.startCreatedAt && searchInfo.value.endCreatedAt && (searchInfo.value.startCreatedAt.getTime() === searchInfo.value.endCreatedAt.getTime() || searchInfo.value.startCreatedAt.getTime() > searchInfo.value.endCreatedAt.getTime())) {
+//           callback(new Error('Ngày bắt đầu phải trước ngày kết thúc'))
+//         } else {
+//           callback()
+//         }
+//       }, trigger: 'change'
+//     }
+//   ],
+// })
+
+
+const searchRules = reactive({
+  createdAt: [
+    {
+      validator: (rule, value, callback) => {
+        if (!searchInfo.value.startCreatedAt) {
+          callback(new Error('Vui lòng nhập ngày kết thúc'))
+        } else {
+          callback()
+        }
+      }, trigger: 'change'
+    }
+  ],
+  email: [
+    {
+      validator: (rule, value, callback) => {
+        if (!searchInfo.value.email) {
+          callback(new Error('Vui lòng nhập email'))
+        } else {
+          callback()
+        }
+      }, trigger: 'change'
+    }
+  ],
+})
 
 const getDetailData = async () => {
   var id = $route.params.id
@@ -209,7 +272,7 @@ const qrcodeCanvas = ref(null)
 const generateQRCode = async () => {
   var params = base32.encode($route.params.id * 1)
   console.log('params-endcode', params)
-  var url = clientURL.value + '/checkin/?c=' + params
+  var url = clientURL.value + '/?c=' + params
   QRCode.toCanvas(qrcodeCanvas.value, url, { width: 300 }, (error) => {
     if (error) console.error(error)
   })
@@ -272,9 +335,26 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
+  console.log("Danh sách điểm danh")
 }
 
 getTableData()
+
+const onSubmit = () => {
+  elSearchFormRef.value?.validate(async (valid) => {
+    if (!valid) return
+    page.value = 1
+    pageSize.value = 10
+    getTableData()
+  })
+
+}
+
+const onReset = () => {
+  searchInfo.value = {}
+  getTableData()
+}
+
 </script>
 
 <style lang="scss"></style>

@@ -71,6 +71,9 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInIn
 	if info.AttendanceId != nil {
 		db = db.Where("attendance_id = ?", *info.AttendanceId)
 	}
+	if info.Email != nil {
+		db = db.Joins("left join participant on attendance_checkins.participant_id = participant.id").Where("participant.email = ?", *info.Email)
+	}
 
 	err = db.Count(&total).Error
 	if err != nil {
