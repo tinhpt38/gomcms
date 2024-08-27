@@ -16,13 +16,20 @@ import auth from '@/directive/auth'
 import { store } from '@/pinia'
 import App from './App.vue'
 import viVn from 'element-plus/dist/locale/vi.mjs'
+import vue3GoogleLogin from 'vue3-google-login'
 
+
+// const clientId = import.meta.env.VITE_CLIENT_ID
+// console.log('clientId', clientId)
 const app = createApp(App)
 app.config.productionTip = false
 
 app
     .use(ElementPlus, {
         locale: viVn,
+    })
+    .use(vue3GoogleLogin, {
+        clientId: "108318721887-kjb69p11u16kcimkhqfcpunad4hlvlhf.apps.googleusercontent.com"
     })
     .use(run)
     .use(store)

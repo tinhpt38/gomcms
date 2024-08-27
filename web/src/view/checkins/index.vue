@@ -3,6 +3,7 @@
 
         <main class="isolate">
             <!-- Hero section -->
+
             <div class="relative isolate -z-10">
                 <svg class="absolute inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
                     aria-hidden="true">
@@ -33,8 +34,9 @@
                                     danh - Trường Đại học Đà Lạt.</h1>
                                 <p class="relative mt-6 text-lg leading-8 text-gray-600 sm:max-w-md lg:max-w-none">
                                     Hãy đăng nhập bằng tài khoảng Email của bạn với Google để đăng nhập.</p>
+                                <GoogleLogin class="my-4" :callback="callback" :error="gError" prompt />
                                 <button @click="onLoginClick"
-                                    class="my-4 flex items-center bg-white dark:bg-gray-900 border border-gray-300 rounded-lg shadow-md px-6 py-2 text-sm font-medium text-gray-800 dark:text-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    class=" hidden my-4 flex items-center bg-white dark:bg-gray-900 border border-gray-300 rounded-lg shadow-md px-6 py-2 text-sm font-medium text-gray-800 dark:text-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                     <svg class="h-6 w-6 mr-2" xmlns="http://www.w3.org/2000/svg"
                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="800px" height="800px"
                                         viewBox="-0.5 0 48 48" version="1.1">
@@ -119,35 +121,48 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { publicAttendanceCheckIn } from '@/api/checkins/attendanceCheckIn'
-import { ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { useGeolocation } from '@vueuse/core'
+import { decodeCredential } from 'vue3-google-login'
 
+import { useRoute } from 'vue-router';
+
+const route = useRoute()
+
+// console.log(route)
 
 
 defineOptions({
     name: "Checkins",
 })
-
-const qrEncode = ref('')
-const userEmail = ref('2011805@dlu.edu.vn')
-
 const { coords, locatedAt, error, resume, pause } = useGeolocation()
 
-onMounted(() => {
-    const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
-    qrEncode.value = urlParams.get('c');
-    console.log('qrEncode', qrEncode.value)
-    data.value.code = qrEncode.value
-})
-
-var data = ref({
+const data = ref({
     email: null,
     code: null,
-    lat: null, 
+    lat: null,
     lng: null,
 })
 
+const callback = async (response) => {
+    const userData = decodeCredential(response.credential)
+    data.value.email = userData.email
+    await requestCheckin()
+}
+
+const gError = (error) => {
+    console.log("Handle the error", error)
+}
+
+
 const requestCheckin = async () => {
+    if (route.query?.c == null ){
+        ElMessage("Không có điểm danh nào đang hiện hành")
+        return
+    }
+    data.value.lat = coords.value.latitude
+    data.value.lng = coords.value.longitude
+    data.value.code = route.query.c
     var res = await publicAttendanceCheckIn(data.value)
     console.log('res', res)
     if (res.code == 0) {
@@ -157,24 +172,10 @@ const requestCheckin = async () => {
         }).then(() => {
             // window.location.href = 'https://dlu.edu.vn'
         });
+    } else {
+        ElMessage(res.msg)
     }
 }
-
-const onLoginClick = async () => {
-    console.log('Login clicked')
-    // await requestCheckin()
-    console.log('coords', coords.value)
-    console.log('lat', coords.value.latitude)
-    console.log('lng', coords.value.longitude)
-    // console.log('accuracy', coords.value.accuracy)
-
-}
-
-
-
-
-
-
 
 
 </script>

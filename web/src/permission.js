@@ -27,7 +27,7 @@ async function handleKeepAlive(to) {
           to.matched.splice(i, 1)
           await handleKeepAlive(to)
         }
-        // 如果没有按需加载完成则等待加载
+        // Nếu chưa hoàn thành tải theo nhu cầu thì đợi tải
         if (typeof element.components.default === 'function') {
           await element.components.default()
           await handleKeepAlive(to)
@@ -44,7 +44,7 @@ router.beforeEach(async(to, from) => {
   to.meta.matched = [...to.matched]
   handleKeepAlive(to)
   const token = userStore.token
-  // 在白名单中的判断情况
+  // Trường hợp nằm trong danh sách trắng
   document.title = getPageTitle(to.meta.title, to)
   if(to.meta.client) {
     return true
@@ -54,7 +54,7 @@ router.beforeEach(async(to, from) => {
       if (!routerStore.asyncRouterFlag && whiteList.indexOf(from.name) < 0) {
         await getRouter(userStore)
       }
-      // token 可以解析但是却是不存在的用户 id 或角色 id 会导致无限调用
+      // token có thể giải mã nhưng không tồn tại id người dùng hoặc id vai trò sẽ dẫn đến việc gọi vô hạn
       if (userStore.userInfo?.authority?.defaultRouter != null) {
         if (router.hasRoute(userStore.userInfo.authority.defaultRouter)) {
           return { name: userStore.userInfo.authority.defaultRouter }
@@ -62,7 +62,7 @@ router.beforeEach(async(to, from) => {
           return { path: '/layout/404' }
         }
       } else {
-        // 强制退出账号
+        // Đăng xuất người dùng một cách bắt buộc
         userStore.ClearStorage()
         return {
           name: 'Login',

@@ -62,6 +62,7 @@ export default ({
       'process.env': {}
     },
     server: {
+      historyApiFallback: true,
       // 如果使用docker-compose开发模式，设置为false
       open: true,
       port: process.env.VITE_CLI_PORT,
