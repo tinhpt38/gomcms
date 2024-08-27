@@ -233,7 +233,7 @@ const requestCheckin = async () => {
     if (res.code == 0) {
         conditionData.value = res.data.conditions
         attendance.value = res.data.attendance
-        ElMessageBox.alert('Cảm ơn bạn đã điểm danh', 'Thông báo', {
+        ElMessageBox.alert('Điểm danh thành công', 'Thông báo', {
             confirmButtonText: 'Xem chi tiết',
             type: 'success'
         }).then(() => {
