@@ -61,8 +61,32 @@ func (conditionService *ConditionService) GetCondition(ID string) (condition che
 	return
 }
 
-func (conditionService *ConditionService) GetConditionsByAttendanceId(ID uint) (list []checkins.Condition, err error) {
-	err = global.GVA_DB.Where("attendance_id = ?", ID).Preload("Group").Preload("Area.Area").Find(&list).Error
+func (conditionService *ConditionService) GetConditionsByAttendanceId(aId uint, pId uint) (list []checkins.Condition, err error) {
+	// err = global.GVA_DB.Where("attendance_id = ?", ID).Preload(clause.Associations).Preload("Group").Preload("Area.Area").Find(&list).Error
+	query := `
+		SELECT
+	c.*
+FROM
+	conditions c
+LEFT JOIN (
+	SELECT
+		ac.condition_id as conid
+	FROM
+		attendance_checkins ac
+	WHERE
+		ac.partpaticipant_id = ?
+		AND ac.attendance_id = ?
+		AND ac.deleted_at IS NULL
+		AND ac.condition_id != 0
+) as ak
+ON
+	c.id = ak.conid
+WHERE
+	c.attendance_id = ?
+	AND ak.conid IS NULL
+	AND c.deleted_at IS NULL;
+`
+	err = global.GVA_DB.Raw(query, pId, aId, aId).Preload(clause.Associations).Preload("Area.Area").Debug().Scan(&list).Error
 	return
 }
 

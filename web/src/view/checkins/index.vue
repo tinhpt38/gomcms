@@ -160,10 +160,11 @@
 import { onMounted, ref } from 'vue'
 import { publicAttendanceCheckIn } from '@/api/checkins/attendanceCheckIn'
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { useGeolocation } from '@vueuse/core'
+import { formatDate, useGeolocation } from '@vueuse/core'
 import { decodeCredential } from 'vue3-google-login'
 
 import { useRoute } from 'vue-router';
+import { formatDateTime } from '@/utils/format';
 
 const route = useRoute()
 
@@ -194,9 +195,41 @@ const gError = (error) => {
     console.log("Handle the error", error)
 }
 
+const conditionString = (item) => {
+    var condition = {
+        group: item?.group?.name,
+        area: item?.area?.area?.name,
+        startAt: item.startAt ? formatDateTime(item.startAt) : null,
+        endAt: item.endAt ? formatDateTime(item.endAt) : null,
+        isPass: item.isPass
+    }
+    if (condition.group != null && condition.area != null && condition.startAt != null && condition.endAt != null) {
+        return `Nhóm ${condition.group}, tại ${condition.area}, từ ${condition.startAt} đến ${condition.endAt}`
+    } else if (condition.group != null && condition.area == null && condition.startAt != null) {
+        return `Nhóm ${condition.group}, từ ${condition.startAt} đến ${condition.endAt}`
+    } else if (condition.group != null && condition.area != null) {
+        return `Nhóm ${condition.group}, tại ${condition.area}`
+    } else if (condition.group != null) {
+        return `Nhóm ${condition.group}`
+    } else if (condition.area != null) {
+        return `Tại ${condition.area}`
+    } else if (condition.area != null && condition.startAt != null && condition.endAt != null) {
+        return `Tại ${condition.area}, từ ${condition.startAt} đến ${condition.endAt}`
+    } else if (condition.area != null && condition.startAt != null) {
+        return `Tại ${condition.area}, từ ${condition.startAt}`
+    }else if (condition.startAt != null && condition.endAt != null) {
+        return `Từ ${condition.startAt} đến ${condition.endAt}`
+    } else if (condition.startAt != null) {
+        return `Từ ${condition.startAt}`
+    } else if (condition.endAt != null) {
+        return `Hạn cuối ${condition.endAt}`
+    }
+}
 
+const conditionData = ref([])
+const attendance = ref({})
 const requestCheckin = async () => {
-    if (route.query?.c == null ){
+    if (route.query?.c == null) {
         ElMessage("Không có điểm danh nào đang hiện hành")
         return
     }
@@ -208,11 +241,13 @@ const requestCheckin = async () => {
 
     console.log('res', res)
     if (res.code == 0) {
+        conditionData.value = res.data.conditions
+        attendance.value = res.data.attendance
         ElMessageBox.alert('Điểm danh thành công', 'Thông báo', {
             confirmButtonText: 'OK',
             type: 'success'
         }).then(() => {
-            // window.location.href = 'https://dlu.edu.vn'
+
         });
     } else {
         ElMessage(res.msg)

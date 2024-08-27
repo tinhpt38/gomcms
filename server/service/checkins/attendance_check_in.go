@@ -18,7 +18,16 @@ import (
 type AttendanceCheckInService struct{}
 
 func (attendanceCheckInService *AttendanceCheckInService) CreateAttendanceCheckIn(attendanceCheckIn *checkins.AttendanceCheckIn) (err error) {
-	err = global.GVA_DB.Create(attendanceCheckIn).Error
+	var count int64
+	err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{
+		AttendanceId:     attendanceCheckIn.AttendanceId,
+		PartpaticipantId: attendanceCheckIn.PartpaticipantId,
+		ConditionId:      attendanceCheckIn.ConditionId,
+	}).Count(&count).Error
+	if count < 0 {
+		err = global.GVA_DB.Create(attendanceCheckIn).Error
+	}
+
 	return err
 }
 
@@ -55,6 +64,11 @@ func (attendanceCheckInService *AttendanceCheckInService) UpdateAttendanceCheckI
 
 func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckIn(ID string) (attendanceCheckIn checkins.AttendanceCheckIn, err error) {
 	err = global.GVA_DB.Where("id = ?", ID).Preload(clause.Associations).First(&attendanceCheckIn).Error
+	return
+}
+
+func (attendanceCheckInService *AttendanceCheckInService) GetConditionPassCheckIn(aId uint, pId uint) (list []checkins.AttendanceCheckIn, err error) {
+	err = global.GVA_DB.Where("attendance_id = ? AND participant_id = ? AND condition_id != 0", aId, pId).Find(&list).Error
 	return
 }
 
@@ -179,23 +193,24 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	// Đã đạt số lần giới hạn hay chưa
 	var list []checkins.AttendanceCheckIn
 	global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&list)
-	if attendance.LimitCount != nil && len(list) >= *attendance.LimitCount {
+	if attendance.LimitCount != nil && len(list) >= *attendance.LimitCount && *attendance.LimitCount > 0 {
 		return nil, errors.New("Bạn đã điểm danh đủ số lần cho phép")
 	}
 
-	conditions, cerr := conditionService.GetConditionsByAttendanceId(attendance.ID)
+	conditions, cerr := conditionService.GetConditionsByAttendanceId(attendance.ID, participant.ID)
 	if cerr != nil {
 		return nil, errors.New("Không tìm thấy điều kiện điểm danh")
 	}
+	// var pPassConditionIds []uint
+	// // global.GVA_DB.Table().Select("condition_id").Where("partpaticipant_id = ? AND attendance_id = ? AND condition_id != 0", participant.ID, attendance.ID).Debug().Find(&pPassConditionIds)
+
 	var satisfiedConditions []checkins.Condition
 	var conditionsStatus []checkins.Condition
 	if len(conditions) > 0 {
 		satisfiedConditions, conditionsStatus = func() ([]checkins.Condition, []checkins.Condition) {
-
 			var usedConditon []checkins.Condition
 			// var unUsedConditon []checkins.Condition
 			var conditionsStatus []checkins.Condition
-
 			for _, condition := range conditions {
 				if checkCondition(agp, condition, req.Lat, req.Lng) {
 					condition.IsPass = true
@@ -213,6 +228,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	// result["pass"] = satisfiedConditions
 	// result["fail"] = unsatisfiedConditions
 	result["conditions"] = conditionsStatus
+	result["attendance"] = attendance
 	// xử lý những thằng nào đã pass
 	firstCondition := &checkins.Condition{}
 	if len(conditions) > 0 {
