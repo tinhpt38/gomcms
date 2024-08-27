@@ -120,6 +120,9 @@
 import { onMounted, ref } from 'vue'
 import { publicAttendanceCheckIn } from '@/api/checkins/attendanceCheckIn'
 import { ElMessageBox } from 'element-plus';
+import { useGeolocation } from '@vueuse/core'
+
+
 
 defineOptions({
     name: "Checkins",
@@ -128,20 +131,24 @@ defineOptions({
 const qrEncode = ref('')
 const userEmail = ref('2011805@dlu.edu.vn')
 
+const { coords, locatedAt, error, resume, pause } = useGeolocation()
+
 onMounted(() => {
     const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
     qrEncode.value = urlParams.get('c');
     console.log('qrEncode', qrEncode.value)
-    // const response = await publicAttendanceCheckIn()
-    // qrEncode.value = response.data.qrEncode
+    data.value.code = qrEncode.value
+})
+
+var data = ref({
+    email: null,
+    code: null,
+    lat: null, 
+    lng: null,
 })
 
 const requestCheckin = async () => {
-    var body = {
-        "code": qrEncode.value,
-        "email": userEmail.value,
-    }
-    var res = await publicAttendanceCheckIn(body)
+    var res = await publicAttendanceCheckIn(data.value)
     console.log('res', res)
     if (res.code == 0) {
         ElMessageBox.alert('Điểm danh thành công', 'Thông báo', {
@@ -155,7 +162,12 @@ const requestCheckin = async () => {
 
 const onLoginClick = async () => {
     console.log('Login clicked')
-    await requestCheckin()
+    // await requestCheckin()
+    console.log('coords', coords.value)
+    console.log('lat', coords.value.latitude)
+    console.log('lng', coords.value.longitude)
+    // console.log('accuracy', coords.value.accuracy)
+
 }
 
 
