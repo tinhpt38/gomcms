@@ -10,36 +10,40 @@
           <el-form ref="elFormRef" :model="formData" label-position="top" :rules="rule" label-width="80px">
             <el-row>
               <el-col :span="12" class="grid-cell">
-                <el-form-item label="Tiêu đề" prop="formData.title" class="required">
+                <el-form-item label="Tiêu đề" prop="formData.title" class=" required">
                   <el-input v-model="formData.title" type="text" clearable />
                 </el-form-item>
-                <el-form-item label="Client URL" prop="formData.clientUrl" :value="clientURL" class="required">
-                  <el-input v-model="formData.clientUrl" type="text" clearable>
-                    <template #prepend>https://</template>
-                  </el-input>
+                <el-form-item label="URL Điểm danh" prop="formData.clientUrl" class=" required">
+                  <el-input v-model="formData.clientUrl" type="text" clearable :value="clientURL" />
                 </el-form-item>
                 <div class=" flex justify-between">
                   <el-form-item label="Ngày bắt đầu" label-width="150px" prop="startDate" class="required">
                     <el-date-picker v-model="formData.startDate" type="datetime" class="full-width-input" clearable />
                   </el-form-item>
-                  <el-form-item label="Ngày kết thúc" label-width="150px" prop="endDate" class="required">
+                  <el-form-item class=" required" label="Ngày kết thúc" label-width="150px" prop="endDate">
                     <el-date-picker v-model="formData.endDate" type="datetime" class="full-width-input" clearable />
                   </el-form-item>
                 </div>
                 <div class="flex justify-between">
-                  <!-- <el-form-item label="Cho thử nghiệm" label-width="150px" prop="isTrial">
-                    <el-switch v-model="formData.isTrial" />
-                  </el-form-item> -->
-                  <el-form-item label="Khoá" label-width="150px" prop="isLocked">
+                  <el-form-item label="Đóng điểm danh" label-width="150px" prop="isLocked">
                     <el-switch v-model="formData.isLocked" />
                   </el-form-item>
+                  <el-form-item label="Tổng số lần điểm danh / thành viên" prop="formData.limitCount" class=" required">
+                    <el-input v-model="formData.limitCount" type="number" clearable />
+                  </el-form-item>
                 </div>
-                <div>
-                  <span class="text-sm">Để giới hạn các IP điểm danh, nhập các IP được cho phép vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
-                  <el-form-item label="Giới hạn IP" prop="formData.restrictIp">
-                  <el-input v-model="formData.restrictIp" type="text" clearable placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32" />
+
+                <el-form-item label="Giới hạn IP truy cập" prop="formData.restrictIp">
+                  <el-input v-model="formData.restrictIp" type="text" clearable
+                    placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32" />
+                  <span class="text-sm my-1 italic font-normal">Để giới hạn các IP điểm danh, nhập các IP được cho phép
+                    vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
                 </el-form-item>
-                </div>
+                <el-form-item label="URL chuyển hướng" prop="formData.clientUrl">
+                  <el-input v-model="formData.redirectUrl" type="text" clearable />
+                  <span class="text-sm my-1 italic font-normal">Hệ thống sẽ chuyển hướng bạn đến địa chỉ được nhập vào
+                    sau khi điểm danh</span>
+                </el-form-item>
 
               </el-col>
               <el-col :span="12" class="grid-cell flex-column px-4">
@@ -160,7 +164,7 @@ const currentId = ref($route.params.id)
 const clientURL = ref(import.meta.env.VITE_CLIENT_URL)
 
 const formData = ref({
-  isLocked: false
+  isLocked: false,
 })
 
 const elFormRef = ref();
@@ -183,6 +187,9 @@ getDetailData();
 
 
 const saveAttendance = async () => {
+  if(formData.value.limitCount){
+    formData.value.limitCount = parseInt(formData.value.limitCount)
+  }
   elFormRef.value?.validate(async (valid) => {
     if (!valid) return
     var res = await updateAttendance(formData.value)

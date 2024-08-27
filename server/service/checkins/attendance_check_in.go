@@ -77,7 +77,7 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInIn
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Preload(clause.Associations).Find(&attendanceCheckIns).Error
+	err = db.Order("created_at desc").Preload(clause.Associations).Find(&attendanceCheckIns).Error
 	return attendanceCheckIns, total, err
 }
 
