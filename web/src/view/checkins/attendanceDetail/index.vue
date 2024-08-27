@@ -67,16 +67,15 @@
         <el-divider />
         <div class="text-xl">Danh sách điểm danh</div>
         <div class="my-4">
-          <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRules"
-            @keyup.enter="onSubmit">
+          <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
+            :rules="searchRules" @keyup.enter="onSubmit">
             <el-form-item label="Ngày tạo" prop="createdAt">
               <el-date-picker v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu"
                 </el-date-picker>
             </el-form-item>
             <el-form-item label="Email" prop="email">
-              <el-date-picker v-model="searchInfo.email" type="text" placeholder="Email" </el-date-picker>
+              <el-input v-model="searchInfo.email" type="text" placeholder="Email" />
             </el-form-item>
-
             <el-form-item>
               <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
               <el-button icon="refresh" @click="onReset">Đặt lại</el-button>
@@ -96,7 +95,7 @@
             </el-table-column>
             <el-table-column align="left" label="Nhóm" width="120">
               <template #default="scope">
-                <span>{{ scope.row.group.name ?? '/' }}</span>
+                <span>{{ scope.row.group?.name ?? '/' }}</span>
               </template>
             </el-table-column>
 
@@ -335,18 +334,22 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  console.log("Danh sách điểm danh")
+  // console.log("Danh sách điểm danh")
+  // console.log(table)
 }
 
 getTableData()
 
 const onSubmit = () => {
-  elSearchFormRef.value?.validate(async (valid) => {
-    if (!valid) return
-    page.value = 1
-    pageSize.value = 10
-    getTableData()
-  })
+  page.value = 1
+  pageSize.value = 10
+  getTableData()
+  // elSearchFormRef.value?.validate(async (valid) => {
+  //   if (!valid) return
+  //   page.value = 1
+  //   pageSize.value = 10
+  //   getTableData()
+  // })
 
 }
 
