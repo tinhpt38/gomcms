@@ -22,7 +22,7 @@ type ParticipantService struct{}
 // CreateParticipant 创建Sinh viên (Người tham dự phiên điểm danh)记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (participantService *ParticipantService) CreateParticipant(participant *checkins.Participant) (err error) {
-	err = global.GVA_DB.Create(participant).Error
+	err = global.GVA_DB.FirstOrCreate(participant).Error
 	return err
 }
 

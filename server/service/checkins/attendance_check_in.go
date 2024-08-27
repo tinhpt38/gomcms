@@ -148,7 +148,27 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 	agp, gerr := participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
 	if gerr != nil {
-		return nil, errors.New("Không tìm thấy thông tin điểm danh của bạn")
+		if attendance.AllowGuest {
+			agpDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
+			newagp := &checkins.AttendanceGroupParticipant{
+				ParticipantId: &participant.ID,
+				GroupId:       nil,
+				AttendanceId:  &attendance.ID,
+			}
+
+			err := agpDb.Where(checkins.AttendanceGroupParticipant{
+				ParticipantId: &participant.ID,
+				GroupId:       nil,
+				AttendanceId:  &attendance.ID,
+			}).FirstOrCreate(&newagp).Error
+			if err != nil {
+				// return nil, errors.New("Không thể thêm thông tin điểm danh")
+				return nil, err
+			}
+			agp = *newagp
+		} else {
+			return nil, errors.New("Không tìm thấy thông tin điểm danh của bạn")
+		}
 	}
 
 	// Đã đạt số lần giới hạn hay chưa

@@ -190,7 +190,7 @@ getDetailData();
 
 
 const saveAttendance = async () => {
-  if(formData.value.limitCount){
+  if (formData.value.limitCount) {
     formData.value.limitCount = parseInt(formData.value.limitCount)
   }
   elFormRef.value?.validate(async (valid) => {
@@ -209,9 +209,9 @@ const saveAttendance = async () => {
 const qrcodeCanvas = ref(null)
 
 const generateQRCode = async () => {
-  var params = base32.encode($route.params.id)
+  var params = base32.encode($route.params.id * 1)
   console.log('params-endcode', params)
-  var url = formData.value.clientUrl + '/checkin/?c=' + params
+  var url = clientURL.value + '/checkin/?c=' + params
   QRCode.toCanvas(qrcodeCanvas.value, url, { width: 300 }, (error) => {
     if (error) console.error(error)
   })
