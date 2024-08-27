@@ -28,6 +28,9 @@
                   <el-form-item label="Đóng điểm danh" label-width="150px" prop="isLocked">
                     <el-switch v-model="formData.isLocked" />
                   </el-form-item>
+                  <el-form-item label="Cho phép khách" label-width="150px" prop="allowGuest">
+                    <el-switch v-model="formData.allowGuest" />
+                  </el-form-item>
                   <el-form-item label="Tổng số lần điểm danh / thành viên" prop="formData.limitCount" class=" required">
                     <el-input v-model="formData.limitCount" type="number" clearable />
                   </el-form-item>

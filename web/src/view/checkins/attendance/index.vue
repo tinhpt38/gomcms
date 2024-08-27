@@ -66,6 +66,11 @@
             {{ formatDate(scope.row.endDate) }}
           </template>
         </el-table-column>
+        <el-table-column align="left" label="Cho phép khách" prop="allowGuest" width="150">
+          <template #default="scope">
+            {{ scope.row.allowGuest ? "Cho phép" : "Không cho phép" }}
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="Trạng thái" prop="isLocked" width="100">
           <template #default="scope">
             {{ scope.row.isLocked ? "Đã đóng" : "Đang mở" }}
@@ -121,8 +126,8 @@
           <el-date-picker v-model="formData.endDate" type="date" style="width:100%" placeholder="Chọn ngày"
             :clearable="true" />
         </el-form-item>
-        <el-form-item label="Cho thử nghiệm:" prop="isTrial">
-          <el-switch v-model="formData.isTrial" active-color="#13ce66" inactive-color="#ff4949" active-text="Có"
+        <el-form-item label="Cho phép khách:" prop="allowGuest">
+          <el-switch v-model="formData.allowGuest" active-color="#13ce66" inactive-color="#ff4949" active-text="Có"
             inactive-text="Không" clearable />
         </el-form-item>
         <el-form-item label="Khoá:" prop="isLocked">
@@ -357,7 +362,7 @@ const type = ref('')
 
 // Cập nhật hàng
 const updateAttendanceFunc = async (row) => {
-  const res = await findAttendance({ ID: row.ID })
+  const res = await findAttendance({ id: row.ID })
   type.value = 'update'
   if (res.code === 0) {
     formData.value = res.data
@@ -397,7 +402,7 @@ const closeDialog = () => {
     title: '',
     startDate: new Date(),
     endDate: new Date(),
-    isTrial: false,
+    allowGuest: false,
     isLocked: false,
   }
 }

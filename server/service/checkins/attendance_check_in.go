@@ -68,6 +68,10 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInIn
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
 	}
+	if info.AttendanceId != nil {
+		db = db.Where("attendance_id = ?", *info.AttendanceId)
+	}
+	
 	err = db.Count(&total).Error
 	if err != nil {
 		return
