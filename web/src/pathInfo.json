@@ -11,6 +11,7 @@
   "/src/view/checkins/condition/conditionForm.vue": "ConditionForm",
   "/src/view/checkins/group/group.vue": "Group",
   "/src/view/checkins/group/groupForm.vue": "GroupForm",
+  "/src/view/checkins/index.vue": "Checkins",
   "/src/view/checkins/participant/participant.vue": "Participant",
   "/src/view/checkins/participant/participantForm.vue": "ParticipantForm",
   "/src/view/config/cfg_file_process/cfg_file_process.vue": "CfgFileProcess",
