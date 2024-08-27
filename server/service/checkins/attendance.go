@@ -51,7 +51,7 @@ func (attendanceService *AttendanceService) DeleteAttendanceByIds(IDs []string, 
 }
 
 func (attendanceService *AttendanceService) UpdateAttendance(attendanceClass checkins.Attendance) (err error) {
-	err = global.GVA_DB.Model(&checkins.Attendance{}).Where("id = ?", attendanceClass.ID).Updates(&attendanceClass).Error
+	err = global.GVA_DB.Model(&checkins.Attendance{}).Where("id = ?", attendanceClass.ID).Save(&attendanceClass).Error
 	return err
 }
 

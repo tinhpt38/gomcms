@@ -27,12 +27,18 @@
                   </el-form-item>
                 </div>
                 <div class="flex justify-between">
-                  <el-form-item label="Cho thử nghiệm" label-width="150px" prop="isTrial">
+                  <!-- <el-form-item label="Cho thử nghiệm" label-width="150px" prop="isTrial">
                     <el-switch v-model="formData.isTrial" />
-                  </el-form-item>
+                  </el-form-item> -->
                   <el-form-item label="Khoá" label-width="150px" prop="isLocked">
                     <el-switch v-model="formData.isLocked" />
                   </el-form-item>
+                </div>
+                <div>
+                  <span class="text-sm">Để giới hạn các IP điểm danh, nhập các IP được cho phép vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
+                  <el-form-item label="Giới hạn IP" prop="formData.restrictIp">
+                  <el-input v-model="formData.restrictIp" type="text" clearable placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32" />
+                </el-form-item>
                 </div>
 
               </el-col>
@@ -150,7 +156,9 @@ defineOptions({
 const $route = useRoute()
 const tabsActiveTab = ref('attendanceInfoTab')
 const currentId = ref($route.params.id)
-const formData = ref({})
+const formData = ref({
+  isLocked: false,
+})
 const elFormRef = ref();
 
 const page = ref(1)

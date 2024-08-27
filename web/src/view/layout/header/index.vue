@@ -11,7 +11,7 @@
       <div class="flex items-center cursor-pointer min-w-48" @click="router.push({ path: '/' })">
         <img
           alt
-          class="h-12 bg-white rounded-s"
+          class="h-8 bg-white rounded-s"
           :src="$GIN_VUE_ADMIN.appLogo"
         >
         <div

@@ -3,8 +3,9 @@ package checkins
 import (
 	"encoding/base32"
 	"errors"
-	"fmt"
 	"math"
+	"net"
+	"strings"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -100,7 +101,15 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		return nil, errors.New("Phiên điểm danh đã bị khóa")
 	}
 
-	//TODO: Xử lý IsTrail sau
+	if attendance.RestrictIp != nil && *attendance.RestrictIp != "" {
+		ipString := attendance.RestrictIp
+		ipRanges := strings.Split(*ipString, ",")
+		if len(ipRanges) > 0 {
+			if !isIPAllowed(ip, ipRanges) {
+				return nil, errors.New("Địa chỉ IP không được phép")
+			}
+		}
+	}
 
 	var now = time.Now()
 	if attendance.StartDate != nil {
@@ -126,25 +135,8 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	if gerr != nil {
 		return nil, errors.New("Không tìm thấy thông tin điểm danh của bạn")
 	}
-	fmt.Printf("partticipant in attendance: %v", agp)
+	// fmt.Printf("partticipant in attendance: %v", agp)
 	// attendanceCheckIn is _
-	// attendanceCheckIn := checkins.AttendanceCheckIn{
-	// 	CheckinDate:      time.Now().UTC(),
-	// 	AttendanceId:     &attendance.ID,
-	// 	PartpaticipantId: &participant.ID,
-	// 	AreaId:           nil,
-	// 	GroupId:          agp.GroupId,
-	// 	ConditionId:      nil,
-	// 	IP:               ip,
-	// 	Lattidue:         req.Lat,
-	// 	Longtidue:        req.Lng,
-	// 	Agent:            userAgent,
-	// 	Browser:          "",
-	// }
-	// aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
-	// if aciErr != nil {
-	// 	return nil, errors.New("Điểm danh thất bại")
-	// }
 
 	conditions, cerr := conditionService.GetConditionsByAttendanceId(attendance.ID)
 	if cerr != nil {
@@ -169,9 +161,35 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		}()
 	}
 	result = make(map[string]interface{})
-	result["message"] = "Điểm danh thành công"
-	result["passCondition"] = satisfiedConditions
-	result["failCondition"] = unsatisfiedConditions
+	result["pass"] = satisfiedConditions
+	result["fail"] = unsatisfiedConditions
+	firstCondition := &checkins.Condition{}
+	if len(conditions) > 0 {
+		if len(satisfiedConditions) == 0 {
+			result["message"] = "Không thoả điều kiện điểm danh"
+		} else {
+			firstCondition = &satisfiedConditions[0]
+			result["message"] = "Điểm danh thành công"
+		}
+	}
+
+	attendanceCheckIn := checkins.AttendanceCheckIn{
+		CheckinDate:      time.Now().UTC(),
+		AttendanceId:     &attendance.ID,
+		PartpaticipantId: &participant.ID,
+		AreaId:           firstCondition.AreaId,
+		GroupId:          agp.GroupId,
+		ConditionId:      &firstCondition.ID,
+		IP:               ip,
+		Lattidue:         req.Lat,
+		Longtidue:        req.Lng,
+		Agent:            userAgent,
+		Browser:          "",
+	}
+	aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
+	if aciErr != nil {
+		return nil, errors.New("Điểm danh thất bại")
+	}
 	return
 }
 
@@ -282,5 +300,20 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 		return inArea && (*condition.GroupId == *participant.GroupId)
 	}
 
+	return false
+}
+
+func isIPAllowed(clientIP string, ipRanges []string) bool {
+	for _, ipRange := range ipRanges {
+		_, ipNet, err := net.ParseCIDR(ipRange)
+		if err != nil {
+			ip := net.ParseIP(ipRange)
+			if ip != nil && ip.String() == clientIP {
+				return true
+			}
+		} else if ipNet.Contains(net.ParseIP(clientIP)) {
+			return true
+		}
+	}
 	return false
 }

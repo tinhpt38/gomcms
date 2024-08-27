@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="p-1 my-1">
-            <el-button type="primary" icon="plus" @click="addNewArea()">Thêm nhóm</el-button>
+            <el-button type="primary" icon="plus" @click="addNewArea()">Thêm khu vực</el-button>
         </div>
 
         <el-table :data="tableData" style="width: 100%">

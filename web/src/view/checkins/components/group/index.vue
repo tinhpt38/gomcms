@@ -2,9 +2,9 @@
   <div>
     <div>
       <div class="p-1 my-1">
-        <el-button type="primary" icon="plus" @click="openDialog()">
+        <!-- <el-button type="primary" icon="plus" @click="openDialog()">
           Thêm nhóm
-        </el-button>
+        </el-button> -->
         <el-button type="success" icon="loading" @click="openAutoGroup()">
           Phân nhóm
         </el-button>
