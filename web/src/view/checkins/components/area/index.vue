@@ -7,7 +7,6 @@
     </div>
 
     <el-table :data="tableData" style="width: 100%" border>
-      <el-table-column type="index" label="STT" width="60" />
       <el-table-column prop="Area.name" label="Nhóm" />
       <el-table-column prop="Area.latitude" label="Kinh độ" />
       <el-table-column prop="Area.longitude" label="Vĩ độ" />

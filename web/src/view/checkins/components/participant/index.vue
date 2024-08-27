@@ -6,7 +6,6 @@
       </el-button> -->
     </div>
     <el-table :data="tableData" style="width: 100%" border>
-      <el-table-column type="index" label="STT" width="60" />
       <el-table-column prop="fullName" label="Họ và tên" />
       <el-table-column prop="email" label="Email" />
       <el-table-column label="Nhóm">

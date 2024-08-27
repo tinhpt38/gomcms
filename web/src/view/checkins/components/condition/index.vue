@@ -18,10 +18,12 @@
         <!-- <el-table-column align="left" label="Ngày" prop="createdAt" width="180">
                     <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
 </el-table-column> -->
-
-        <el-table-column type="index" label="STT" width="60" />
         <el-table-column align="left" label="Nhóm" prop="group.name" min-width="120" />
-        <el-table-column align="left" label="Khu vực" prop="area.Area.name" min-width="300" />
+        <el-table-column align="left" label="Khu vực" prop="area.Area.name" min-width="300">
+          <template #default="scope">
+            {{ scope.row.area?.Area?.name }} <span v-if="scope.row.area?.radius">(Bán kính {{ scope.row.area?.radius }})</span>
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="Bắt đầu" prop="startAt" min-width="180">
           <template #default="scope">
             {{ formatDateTime(scope.row.startAt) }}

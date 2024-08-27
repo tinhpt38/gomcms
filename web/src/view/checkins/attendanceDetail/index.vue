@@ -75,8 +75,10 @@
           Danh sách điểm danh
         </div>
         <div class="my-4">
-          <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
-            :rules="searchRules" @keyup.enter="onSubmit">
+          <el-form
+            ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
+            :rules="searchRules" @keyup.enter="onSubmit"
+          >
             <el-form-item label="Ngày tạo" prop="createdAt">
               <el-date-picker
                 v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu"
@@ -96,7 +98,7 @@
           </el-form>
         </div>
         <div class="mt-4">
-          <el-table style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID">
+          <el-table style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID" border>
             <el-table-column align="left" label="Ngày giờ" prop="checkinDate" width="180">
               <template #default="scope">
                 {{ formatDateTime(scope.row.checkinDate) }}
@@ -181,7 +183,7 @@ import {
 import { useRoute } from 'vue-router';
 import QRCode from 'qrcode'
 import { ElForm, ElMessage } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ref, reactive, nextTick } from 'vue'
 import Partticipant from '@/view/checkins/components/participant/index.vue'
 import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
