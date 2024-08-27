@@ -84,6 +84,9 @@ func (conditionService *ConditionService) GetConditionInfoList(info checkinsReq.
 	if info.AreaId != nil {
 		db = db.Where("area_id = ?", info.AreaId)
 	}
+	if info.AttendanceId != nil {
+		db = db.Where("attendance_id = ?", info.AttendanceId)
+	}
 	err = db.Count(&total).Error
 	if err != nil {
 		return
