@@ -71,7 +71,7 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInIn
 	if info.AttendanceId != nil {
 		db = db.Where("attendance_id = ?", *info.AttendanceId)
 	}
-	
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return
@@ -132,7 +132,18 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	//Participant is _
 	participant, perr := participantService.GetParticipantByEmail(email)
 	if perr != nil {
-		return nil, errors.New("Email của bạn không phải là thành viên của hệ thống")
+		if attendance.AllowGuest {
+			participant = checkins.Participant{
+				Email:    email,
+				FullName: *req.FullName,
+			}
+			perr = participantService.CreateParticipant(&participant)
+			if perr != nil {
+				return nil, errors.New("Tạo mới thông tin thất bại")
+			}
+		} else {
+			return nil, errors.New("Email của bạn không phải là thành viên của hệ thống")
+		}
 	}
 
 	agp, gerr := participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
