@@ -13,7 +13,7 @@
                 <el-form-item label="Tiêu đề" prop="formData.title" class="required">
                   <el-input v-model="formData.title" type="text" clearable />
                 </el-form-item>
-                <el-form-item label="Client URL" prop="formData.clientUrl" class="required">
+                <el-form-item label="Client URL" prop="formData.clientUrl" :value="clientURL" class="required">
                   <el-input v-model="formData.clientUrl" type="text" clearable>
                     <template #prepend>https://</template>
                   </el-input>
@@ -156,11 +156,14 @@ defineOptions({
 const $route = useRoute()
 const tabsActiveTab = ref('attendanceInfoTab')
 const currentId = ref($route.params.id)
-const formData = ref({
-  isLocked: false,
-})
-const elFormRef = ref();
 
+const clientURL = ref(import.meta.env.VITE_CLIENT_URL)
+
+const formData = ref({
+  isLocked: false
+})
+
+const elFormRef = ref();
 const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
@@ -169,6 +172,7 @@ const searchInfo = ref({})
 
 const getDetailData = async () => {
   var id = $route.params.id
+  console.log('client URL', clientURL.value)
   const res = await findAttendance({ id: $route.params.id })
   if (res.code == 0) {
     formData.value = res.data
