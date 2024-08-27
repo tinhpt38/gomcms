@@ -149,7 +149,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { publicAttendanceCheckIn } from '@/api/checkins/attendanceCheckIn'
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import { formatDate, useGeolocation } from '@vueuse/core'
 import { decodeCredential } from 'vue3-google-login'
 
@@ -220,7 +220,7 @@ const conditionData = ref([])
 const attendance = ref({})
 const requestCheckin = async () => {
     if (route.query?.c == null) {
-        ElMessage("Không có điểm danh nào đang hiện hành")
+        ElNotification("Không có điểm danh nào đang hiện hành")
         return
     }
     data.value.lat = coords.value.latitude
