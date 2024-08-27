@@ -1,100 +1,122 @@
 <template>
-    <div>
-        <div class="gva-table-box">
-            <div class="gva-btn-list">
-                <el-button type="primary" icon="plus" @click="openDialog">Thêm mới</el-button>
-                <!-- <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length"
+  <div>
+    <div class="gva-table-box">
+      <div class="gva-btn-list">
+        <el-button type="primary" icon="plus" @click="openDialog">
+          Thêm mới
+        </el-button>
+        <!-- <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length"
                     @click="onDelete">Xóa</el-button> -->
-            </div>
-            <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
-                @selection-change="handleSelectionChange">
-                <!-- <el-table-column type="selection" width="55" /> -->
+      </div>
+      <el-table
+        ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
+        border
+        @selection-change="handleSelectionChange"
+      >
+        <!-- <el-table-column type="selection" width="55" /> -->
 
-                <!-- <el-table-column align="left" label="Ngày" prop="createdAt" width="180">
+        <!-- <el-table-column align="left" label="Ngày" prop="createdAt" width="180">
                     <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
 </el-table-column> -->
 
-                <el-table-column align="left" label="Nhóm" prop="group.name" width="120" />
-                <el-table-column align="left" label="Khu vực" prop="area.Area.name" width="300" />
-                <el-table-column align="left" label="Bắt đầu" prop="startAt" width="180">
-                    <template #default="scope">{{ formatDateTime(scope.row.startAt) }}</template>
-                </el-table-column>
-                <el-table-column align="left" label="Kết thúc" prop="endAt" width="180">
-                    <template #default="scope">{{ formatDateTime(scope.row.endAt) }}</template>
-                </el-table-column>
-                <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
-                    <template #default="scope">
-                        <!-- <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon
+        <el-table-column type="index" label="STT" width="60" />
+        <el-table-column align="left" label="Nhóm" prop="group.name" min-width="120" />
+        <el-table-column align="left" label="Khu vực" prop="area.Area.name" min-width="300" />
+        <el-table-column align="left" label="Bắt đầu" prop="startAt" min-width="180">
+          <template #default="scope">
+            {{ formatDateTime(scope.row.startAt) }}
+          </template>
+        </el-table-column>
+        <el-table-column align="left" label="Kết thúc" prop="endAt" min-width="180">
+          <template #default="scope">
+            {{ formatDateTime(scope.row.endAt) }}
+          </template>
+        </el-table-column>
+        <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
+          <template #default="scope">
+            <!-- <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon
                                 style="margin-right: 5px">
                                 <InfoFilled />
                             </el-icon>Xem chi tiết</el-button> -->
-                        <el-button type="primary" link icon="edit" class="table-button"
-                            @click="updateConditionFunc(scope.row)">Chỉnh sửa</el-button>
-                        <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">Xóa</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-            <div class="gva-pagination">
-                <el-pagination layout="total, sizes, prev, pager, next, jumper" :current-page="page"
-                    :page-size="pageSize" :page-sizes="[10, 30, 50, 100]" :total="total"
-                    @current-change="handleCurrentChange" @size-change="handleSizeChange" />
-            </div>
-        </div>
-        <el-drawer destroy-on-close size="800" v-model="dialogFormVisible" :show-close="false"
-            :before-close="closeDialog">
-            <template #header>
-                <div class="flex justify-between items-center">
-                    <span class="text-lg">{{ type === 'create' ? 'Thêm mới' : 'Chỉnh sửa' }}</span>
-                    <div>
-                        <el-button type="primary" @click="enterDialog">Đồng ý</el-button>
-                        <el-button @click="closeDialog">Hủy</el-button>
-                    </div>
-                </div>
-            </template>
-
-            <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
-                <el-form-item label="Nhóm:" prop="groupId">
-                    <el-select v-model="formData.groupId" placeholder="Chọn nhóm" clearable filterable>
-                        <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="Khu vực:" prop="areaId">
-                    <!-- <el-input v-model.number="formData.areaId" :clearable="true" placeholder="Nhập Khu vực" /> -->
-                    <el-select v-model="formData.areaId" placeholder="Chọn khu vực" clearable filterable>
-                        <el-option v-for="item in areaOptions" :key="item.ID" :label="item.name" :value="item.ID">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="Bắt đầu:" prop="startAt">
-                    <el-date-picker v-model="formData.startAt" type="datetime" style="width:100%"
-                        placeholder="Chọn ngày giờ" :clearable="true" />
-                </el-form-item>
-                <el-form-item label="Kết thúc:" prop="endAt">
-                    <el-date-picker v-model="formData.endAt" type="datetime" style="width:100%"
-                        placeholder="Chọn ngày giờ" :clearable="true" />
-                </el-form-item>
-            </el-form>
-        </el-drawer>
-
-        <el-drawer destroy-on-close size="800" v-model="detailShow" :show-close="true" :before-close="closeDetailShow">
-            <el-descriptions column="1" border>
-                <el-descriptions-item label="Nhóm">
-                    {{ detailFrom.groupId }}
-                </el-descriptions-item>
-                <el-descriptions-item label="Khu vực">
-                    {{ detailFrom.areaId }}
-                </el-descriptions-item>
-                <el-descriptions-item label="Bắt đầu">
-                    {{ detailFrom.startAt }}
-                </el-descriptions-item>
-                <el-descriptions-item label="Kết thúc">
-                    {{ detailFrom.endAt }}
-                </el-descriptions-item>
-            </el-descriptions>
-        </el-drawer>
-
+            <el-button type="primary" link icon="edit" class="table-button" @click="updateConditionFunc(scope.row)">
+              Chỉnh sửa
+            </el-button>
+            <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">
+              Xóa
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="gva-pagination">
+        <el-pagination
+          layout="total, sizes, prev, pager, next, jumper" :current-page="page"
+          :page-size="pageSize" :page-sizes="[10, 30, 50, 100]" :total="total"
+          @current-change="handleCurrentChange" @size-change="handleSizeChange"
+        />
+      </div>
     </div>
+    <el-drawer
+      v-model="dialogFormVisible" destroy-on-close size="800" :show-close="false"
+      :before-close="closeDialog"
+    >
+      <template #header>
+        <div class="flex justify-between items-center">
+          <span class="text-lg">{{ type === 'create' ? 'Thêm mới' : 'Chỉnh sửa' }}</span>
+          <div>
+            <el-button type="primary" @click="enterDialog">
+              Đồng ý
+            </el-button>
+            <el-button @click="closeDialog">
+              Hủy
+            </el-button>
+          </div>
+        </div>
+      </template>
+
+      <el-form ref="elFormRef" :model="formData" label-position="top" :rules="rule" label-width="80px">
+        <el-form-item label="Nhóm:" prop="groupId">
+          <el-select v-model="formData.groupId" placeholder="Chọn nhóm" clearable filterable>
+            <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Khu vực:" prop="areaId">
+          <!-- <el-input v-model.number="formData.areaId" :clearable="true" placeholder="Nhập Khu vực" /> -->
+          <el-select v-model="formData.areaId" placeholder="Chọn khu vực" clearable filterable>
+            <el-option v-for="item in areaOptions" :key="item.ID" :label="item.name" :value="item.ID" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Bắt đầu:" prop="startAt">
+          <el-date-picker
+            v-model="formData.startAt" type="datetime" style="width:100%"
+            placeholder="Chọn ngày giờ" :clearable="true"
+          />
+        </el-form-item>
+        <el-form-item label="Kết thúc:" prop="endAt">
+          <el-date-picker
+            v-model="formData.endAt" type="datetime" style="width:100%"
+            placeholder="Chọn ngày giờ" :clearable="true"
+          />
+        </el-form-item>
+      </el-form>
+    </el-drawer>
+
+    <el-drawer v-model="detailShow" destroy-on-close size="800" :show-close="true" :before-close="closeDetailShow">
+      <el-descriptions column="1" border>
+        <el-descriptions-item label="Nhóm">
+          {{ detailFrom.groupId }}
+        </el-descriptions-item>
+        <el-descriptions-item label="Khu vực">
+          {{ detailFrom.areaId }}
+        </el-descriptions-item>
+        <el-descriptions-item label="Bắt đầu">
+          {{ detailFrom.startAt }}
+        </el-descriptions-item>
+        <el-descriptions-item label="Kết thúc">
+          {{ detailFrom.endAt }}
+        </el-descriptions-item>
+      </el-descriptions>
+    </el-drawer>
+  </div>
 </template>
 
 

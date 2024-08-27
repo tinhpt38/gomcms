@@ -2,7 +2,9 @@
   <div class="p-2">
     <div class="p-1 my-1 flex">
       <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" />
-      <el-button class="mx-4 hidden" type="danger" icon="download"> Xuất Excel</el-button>
+      <el-button class="mx-4 hidden" type="danger" icon="download">
+        Xuất Excel
+      </el-button>
     </div>
     <el-tabs v-model="tabsActiveTab" type="border-card">
       <el-tab-pane name="attendanceInfoTab" label="Chi tiết">
@@ -37,8 +39,10 @@
                 </div>
 
                 <el-form-item label="Giới hạn IP truy cập" prop="formData.restrictIp">
-                  <el-input v-model="formData.restrictIp" type="text" clearable
-                    placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32" />
+                  <el-input
+                    v-model="formData.restrictIp" type="text" clearable
+                    placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32"
+                  />
                   <span class="text-sm my-1 italic font-normal">Để giới hạn các IP điểm danh, nhập các IP được cho phép
                     vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
                 </el-form-item>
@@ -47,46 +51,59 @@
                   <span class="text-sm my-1 italic font-normal">Hệ thống sẽ chuyển hướng bạn đến địa chỉ được nhập vào
                     sau khi điểm danh</span>
                 </el-form-item>
-
               </el-col>
               <el-col :span="12" class="grid-cell flex-column px-4">
                 <div class="flex justify-end p-2">
-                  <el-button type="success" @click="downloadQRCode">Tải xuống QR Code</el-button>
-                  <el-button type="primary" @click="saveAttendance">Lưu</el-button>
+                  <el-button type="success" @click="downloadQRCode">
+                    Tải xuống QR Code
+                  </el-button>
+                  <el-button type="primary" @click="saveAttendance">
+                    Lưu
+                  </el-button>
                 </div>
                 <div class="flex flex-col items-center justify-center w-full">
-                  <canvas class="border-2 rounded border-gray-500" ref="qrcodeCanvas"></canvas>
+                  <canvas ref="qrcodeCanvas" class="border-2 rounded border-gray-500" />
                   <div>Dùng QR Code này để quét điểm danh</div>
                 </div>
               </el-col>
             </el-row>
-
           </el-form>
         </div>
 
         <el-divider />
-        <div class="text-xl">Danh sách điểm danh</div>
+        <div class="text-xl">
+          Danh sách điểm danh
+        </div>
         <div class="my-4">
-          <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRules"
-            @keyup.enter="onSubmit">
+          <el-form
+            ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRules"
+            @keyup.enter="onSubmit"
+          >
             <el-form-item label="Ngày tạo" prop="createdAt">
-              <el-date-picker v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu"
-                </el-date-picker>
+              <el-date-picker
+                v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu"
+              />
             </el-form-item>
             <el-form-item label="Email" prop="email">
-              <el-date-picker v-model="searchInfo.email" type="text" placeholder="Email" </el-date-picker>
+              <el-date-picker v-model="searchInfo.email" type="text" placeholder="Email" />
             </el-form-item>
 
             <el-form-item>
-              <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
-              <el-button icon="refresh" @click="onReset">Đặt lại</el-button>
+              <el-button type="primary" icon="search" @click="onSubmit">
+                Tìm kiếm
+              </el-button>
+              <el-button icon="refresh" @click="onReset">
+                Đặt lại
+              </el-button>
             </el-form-item>
           </el-form>
         </div>
         <div class="mt-4">
           <el-table style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID">
             <el-table-column align="left" label="Ngày giờ" prop="checkinDate" width="180">
-              <template #default="scope">{{ formatDateTime(scope.row.checkinDate) }}</template>
+              <template #default="scope">
+                {{ formatDateTime(scope.row.checkinDate) }}
+              </template>
             </el-table-column>
             <el-table-column align="left" label="Thành viên" prop="participant.fullName" width="200" />
             <el-table-column align="left" label="Khu vực" width="120">
@@ -103,18 +120,22 @@
             <el-table-column align="left" label="IP" prop="iP" width="90" />
             <el-table-column align="left" label="Vị trí" width="170">
               <template #default="scope">
-                <a target="_blank"
-                  :href="'https://www.google.com/maps?q=' + scope.row.lattidue + ',' + scope.row.longtidue">{{
-                    scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
+                <a
+                  target="_blank"
+                  :href="'https://www.google.com/maps?q=' + scope.row.lattidue + ',' + scope.row.longtidue"
+                >{{
+                  scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
               </template>
             </el-table-column>
 
-            <el-table-column class="overflow-hidden" label="Agent" prop="agent"></el-table-column>
+            <el-table-column class="overflow-hidden" label="Agent" prop="agent" />
           </el-table>
           <div class="gva-pagination">
-            <el-pagination layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
+            <el-pagination
+              layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
               :page-sizes="[10, 30, 50, 100]" :total="total" @current-change="handleCurrentChange"
-              @size-change="handleSizeChange" />
+              @size-change="handleSizeChange"
+            />
           </div>
         </div>
         <div class="table-container">
@@ -283,7 +304,7 @@ const downloadQRCode = () => {
   const url = canvas.toDataURL('image/png')
   const link = document.createElement('a')
   link.href = url
-  link.download = 'QR Điểm danh - ' + formData.title + '.png'
+  link.download = 'QR Điểm danh - ' + formData.value.title + '.png'
   link.click()
 }
 
