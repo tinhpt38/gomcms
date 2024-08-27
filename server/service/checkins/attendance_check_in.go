@@ -72,7 +72,9 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInIn
 		db = db.Where("attendance_id = ?", *info.AttendanceId)
 	}
 	if info.Email != nil {
-		db = db.Joins("left join participant on attendance_checkins.participant_id = participant.id").Where("participant.email = ?", *info.Email)
+		partSer := new(ParticipantService)
+		participant, _ := partSer.GetParticipantByEmail(*info.Email)
+		db = db.Where("partpaticipant_id = ?", participant.ID)
 	}
 
 	err = db.Count(&total).Error
