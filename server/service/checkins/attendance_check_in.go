@@ -314,25 +314,46 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 
 	// Trường hợp 4
 	if condition.GroupId != nil && condition.AreaId != nil && condition.StartAt != nil && condition.EndAt != nil {
+		// Kiểm tra xem có participant.GroupId không
+		if participant.GroupId == nil {
+			return false
+		}
+
 		inArea := checkMatchArea(lat, lng, *condition.Area)
 		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
+
 		return inArea == matchTime && (*condition.GroupId == *participant.GroupId)
 	}
 
 	// Trường hợp 5
 	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt != nil && condition.EndAt != nil {
+		// Kiểm tra xem có participant.GroupId không
+		if participant.GroupId == nil {
+			return false
+		}
+
 		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
 		return (*condition.GroupId == *participant.GroupId) && matchTime
 	}
 
 	// Trường hợp 6
 	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt != nil {
+		// Kiểm tra xem có participant.GroupId không
+		if participant.GroupId == nil {
+			return false
+		}
+
 		matchTime := time.Now().UTC().Before(*condition.EndAt)
 		return (*condition.GroupId == *participant.GroupId) && matchTime
 	}
 
 	// Trường hợp 7
 	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt == nil {
+		// Kiểm tra xem có participant.GroupId không
+		if participant.GroupId == nil {
+			return false
+		}
+
 		return *condition.GroupId == *participant.GroupId
 	}
 
@@ -347,6 +368,11 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 
 	// Trường hợp 9
 	if condition.GroupId != nil && condition.AreaId != nil && condition.StartAt == nil && condition.EndAt == nil {
+		// Kiểm tra xem có participant.GroupId không
+		if participant.GroupId == nil {
+			return false
+		}
+
 		inArea := checkMatchArea(lat, lng, *condition.Area)
 		return inArea && (*condition.GroupId == *participant.GroupId)
 	}
