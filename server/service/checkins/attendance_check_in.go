@@ -135,34 +135,45 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	if gerr != nil {
 		return nil, errors.New("Không tìm thấy thông tin điểm danh của bạn")
 	}
-	// fmt.Printf("partticipant in attendance: %v", agp)
-	// attendanceCheckIn is _
+
+	// Đã đạt số lần giới hạn hay chưa
+	var list []checkins.AttendanceCheckIn
+	global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&list)
+	if attendance.LimitCount != nil && len(list) >= *attendance.LimitCount {
+		return nil, errors.New("Bạn đã điểm danh đủ số lần cho phép")
+	}
 
 	conditions, cerr := conditionService.GetConditionsByAttendanceId(attendance.ID)
 	if cerr != nil {
 		return nil, errors.New("Không tìm thấy điều kiện điểm danh")
 	}
 	var satisfiedConditions []checkins.Condition
-	var unsatisfiedConditions []checkins.Condition
+	var conditionsStatus []checkins.Condition
 	if len(conditions) > 0 {
-		satisfiedConditions, unsatisfiedConditions = func() ([]checkins.Condition, []checkins.Condition) {
+		satisfiedConditions, conditionsStatus = func() ([]checkins.Condition, []checkins.Condition) {
 
 			var usedConditon []checkins.Condition
-			var unUsedConditon []checkins.Condition
+			// var unUsedConditon []checkins.Condition
+			var conditionsStatus []checkins.Condition
 
 			for _, condition := range conditions {
 				if checkCondition(agp, condition, req.Lat, req.Lng) {
+					condition.IsPass = true
 					usedConditon = append(usedConditon, condition)
 				} else {
-					unUsedConditon = append(unUsedConditon, condition)
+					condition.IsPass = false
+					// unUsedConditon = append(unUsedConditon, condition)
 				}
+				conditionsStatus = append(conditionsStatus, condition)
 			}
-			return usedConditon, unUsedConditon
+			return usedConditon, conditionsStatus
 		}()
 	}
 	result = make(map[string]interface{})
-	result["pass"] = satisfiedConditions
-	result["fail"] = unsatisfiedConditions
+	// result["pass"] = satisfiedConditions
+	// result["fail"] = unsatisfiedConditions
+	result["conditions"] = conditionsStatus
+	// xử lý những thằng nào đã pass
 	firstCondition := &checkins.Condition{}
 	if len(conditions) > 0 {
 		if len(satisfiedConditions) == 0 {

@@ -20,6 +20,7 @@ type Condition struct {
 	DeletedBy    uint            `gorm:"column:deleted_by;comment:删除者"`
 	Group        *Group          `json:"group" gorm:"foreignKey:GroupId;references:ID;comment:Nhóm;"`  //Nhóm
 	Area         *AttendanceArea `json:"area" gorm:"foreignKey:AreaId;references:ID;comment:Khu vực;"` //Khu vực
+	IsPass       bool            `json:"isPass" form:"isPass" gorm:"-"`                                //是否通过
 }
 
 // TableName Điều kiện để checkins Condition自定义表名 conditions
