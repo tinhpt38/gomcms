@@ -179,7 +179,7 @@ const getAreaListData = async () => {
         areaOptions.value = table.data.map(item => {
             return {
                 ID: item.ID,
-                name: item.Area.name
+                name: item.Area?.name
             }
         })
     }
