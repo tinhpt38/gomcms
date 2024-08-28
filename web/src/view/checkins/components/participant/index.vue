@@ -1,10 +1,30 @@
 <template>
   <div>
     <div class="p-1 my-1">
-      <!-- <el-button type="primary" icon="plus" @click="() => {}">
+      <el-button type="primary" icon="plus" @click="() => {}">
         Thêm thành viên
-      </el-button> -->
+      </el-button>
     </div>
+
+    <div class="gva-search-box">
+      <el-form ref="searchForm" :inline="true" :model="searchInfo">
+        <el-form-item label="Họ và tên">
+          <el-input v-model="searchInfo.fullName" placeholder="Họ và tên" />
+        </el-form-item>
+        <el-form-item label="Email">
+          <el-input v-model="searchInfo.email" placeholder="Email" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="search" @click="onSubmit">
+            Tìm kiếm
+          </el-button>
+          <el-button icon="refresh" @click="onReset">
+            Đặt lại
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+
     <el-table :data="tableData" style="width: 100%" border>
       <el-table-column prop="fullName" label="Họ và tên" />
       <el-table-column prop="email" label="Email" />
@@ -50,7 +70,11 @@ const page = ref(0)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
-const searchInfo = ref({})
+const searchInfo = ref({
+    fullName: '',
+    email: '',
+    attendanceId: props.acId
+})
 
 
 const handleSizeChange = (val) => {
@@ -196,6 +220,19 @@ const enterDialog = async () => {
                 getTableData()
               }
       })
+}
+
+const onSubmit = () => {
+    getTableData()
+}
+
+const onReset = () => {
+    searchInfo.value = {
+        fullName: '',
+        email: '',
+        attendanceId: props.acId
+    }
+    getTableData()
 }
 
 

@@ -20,10 +20,12 @@
         </el-row>
       </el-form>
 
-      <el-upload ref="upload" class="upload-demo" drag action="#"
+      <el-upload
+        ref="upload" class="upload-demo" drag action="#"
         accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
         :limit="1" :auto-upload="false" :on-remove="handleRemove" :on-exceed="handleLogoUploaderExceed"
-        @change="handleFileChange">
+        @change="handleFileChange"
+      >
         <el-icon class="el-icon--upload">
           <upload-filled />
         </el-icon>
@@ -80,7 +82,7 @@ const props = defineProps({
       }
     }
   },
-  
+
 })
 
 onMounted(() => {
@@ -149,7 +151,7 @@ const submitUpload = () => {
     formData.append('file', file)
     formData.append('type', 'import')
     formData.append('filter', JSON.stringify(data.value))
-  
+
 
     for (const k in props.formData) {
       formData.append(k, props.formData[k])
