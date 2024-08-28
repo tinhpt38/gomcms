@@ -7,12 +7,12 @@
     </div>
 
     <el-table :data="tableData" style="width: 100%" border>
-      <el-table-column prop="Area.name" label="Nhóm" />
-      <el-table-column prop="Area.latitude" label="Kinh độ" />
-      <el-table-column prop="Area.longitude" label="Vĩ độ" />
+      <el-table-column prop="area.name" label="Nhóm" />
+      <el-table-column prop="area.latitude" label="Kinh độ" />
+      <el-table-column prop="area.longitude" label="Vĩ độ" />
       <el-table-column prop="" label="Bán kính">
         <template #default="scope">
-          {{ scope.row.radius ?? scope.row.Area.radius }}
+          {{ scope.row.radius ?? scope.row.area.radius }}
         </template>
       </el-table-column>
       <el-table-column label="Hành động">
@@ -116,7 +116,7 @@ const searchInfo = ref({
 const getAreaListData = async () => {
     searchInfo.value.attendanceId = props.acId
     const table = await findAttendanceArea({ id: props.acId })
-    console.log('tableData', table)
+    console.log('getAreaListData', table)
     if (table.code === 0) {
         tableData.value = table.data
         total.value = table.data.total
