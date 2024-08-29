@@ -85,7 +85,7 @@
       </template>
 
       <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
-        <el-form-item label="Tên khu vực:" prop="name" >
+        <el-form-item label="Tên khu vực:" prop="name">
           <el-input v-model="formData.name" :clearable="true" placeholder="Nhập tên khu vực" />
         </el-form-item>
         <el-form-item label="Vĩ độ:" prop="latitude">
@@ -97,7 +97,13 @@
         <el-form-item label="Bán kính:" prop="radius">
           <el-input-number v-model="formData.radius" style="width:100%" :precision="2" :clearable="true" />
         </el-form-item>
+        <el-form-item label="Giới hạn địa chỉ IP">
+          <span class="text-sm my-1 italic font-normal">Để giới hạn các IP điểm danh, nhập các IP được cho
+            phép vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
+          <el-input v-model="formData.restrictIp" tyle="width:100%"></el-input>
+        </el-form-item>
       </el-form>
+
     </el-drawer>
 
     <el-drawer destroy-on-close size="800" v-model="detailShow" :show-close="true" :before-close="closeDetailShow">
@@ -113,6 +119,9 @@
         </el-descriptions-item>
         <el-descriptions-item label="Bán kính">
           {{ detailFrom.radius }}
+        </el-descriptions-item>
+        <el-descriptions-item label="IP giới hạn">
+          {{ detailFrom.restrictIp }}
         </el-descriptions-item>
       </el-descriptions>
     </el-drawer>
@@ -145,9 +154,10 @@ const showAllQuery = ref(false)
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
   name: '',
-  latitude: 0,
-  longitude: 0,
-  radius: 0,
+  latitude: null,
+  longitude: null,
+  radius: 50,
+  restrictIp: null
 })
 
 
