@@ -7,4 +7,6 @@ type ServiceGroup struct {
 	ParticipantService
 	ConditionService
 	AttendanceCheckInService
+	AttendanceCategoryService
+	AttendanceAgencyService
 }

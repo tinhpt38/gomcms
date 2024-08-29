@@ -21,6 +21,8 @@ func initBizRouter(routers ...*gin.RouterGroup) {
 		checkinsRouter.InitParticipantRouter(privateGroup, publicGroup)
 		checkinsRouter.InitConditionRouter(privateGroup, publicGroup)
 		checkinsRouter.InitAttendanceCheckInRouter(privateGroup, publicGroup)
+		checkinsRouter.InitAttendanceCategoryRouter(privateGroup, publicGroup)
+		checkinsRouter.InitAttendanceAgencyRouter(privateGroup, publicGroup)
 	}
 	{
 		configRouter := router.RouterGroupApp.Config
