@@ -39,10 +39,8 @@
                 </div>
 
                 <el-form-item label="Giới hạn IP truy cập" prop="formData.restrictIp">
-                  <el-input
-                    v-model="formData.restrictIp" type="text" clearable
-                    placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32"
-                  />
+                  <el-input v-model="formData.restrictIp" type="text" clearable
+                    placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32" />
                   <span class="text-sm my-1 italic font-normal">Để giới hạn các IP điểm danh, nhập các IP được cho phép
                     vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
                 </el-form-item>
@@ -71,81 +69,7 @@
         </div>
 
         <el-divider />
-        <div class="text-xl">
-          Danh sách điểm danh
-        </div>
-        <div class="my-4">
-          <el-form
-            ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
-            :rules="searchRules" @keyup.enter="onSubmit"
-          >
-            <el-form-item label="Ngày tạo" prop="createdAt">
-              <el-date-picker
-                v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu"
-              />
-            </el-form-item>
-            <el-form-item label="Email" prop="email">
-              <el-input v-model="searchInfo.email" type="text" placeholder="Email" />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" icon="search" @click="onSubmit">
-                Tìm kiếm
-              </el-button>
-              <el-button icon="refresh" @click="onReset">
-                Đặt lại
-              </el-button>
-            </el-form-item>
-          </el-form>
-        </div>
-        <div class="mt-4">
-          <el-table style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID" border>
-            <el-table-column align="left" label="Ngày giờ" prop="checkinDate" width="180">
-              <template #default="scope">
-                {{ formatDateTime(scope.row.checkinDate) }}
-              </template>
-            </el-table-column>
-            <el-table-column align="left" label="Thành viên" prop="participant.fullName" width="200" />
-            <el-table-column align="left" label="Khu vực" width="120">
-              <template #default="scope">
-                <span>{{ scope.row.area?.name ?? '/' }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column align="left" label="Nhóm" width="120">
-              <template #default="scope">
-                <span>{{ scope.row.group?.name ?? '/' }}</span>
-              </template>
-            </el-table-column>
 
-            <el-table-column align="left" label="IP" prop="iP" width="90" />
-            <el-table-column align="left" label="Vị trí" width="170">
-              <template #default="scope">
-                <a
-                  target="_blank"
-                  :href="'https://www.google.com/maps?q=' + scope.row.lattidue + ',' + scope.row.longtidue"
-                >{{
-                  scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
-              </template>
-            </el-table-column>
-
-            <el-table-column class="overflow-hidden" label="Agent" prop="agent" />
-          </el-table>
-          <div class="gva-pagination">
-            <el-pagination
-              layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
-              :page-sizes="[10, 30, 50, 100]" :total="total" @current-change="handleCurrentChange"
-              @size-change="handleSizeChange"
-            />
-          </div>
-        </div>
-        <div class="table-container">
-          <table class="table-layout">
-            <tbody>
-              <tr>
-                <td class="table-cell" />
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </el-tab-pane>
       <el-tab-pane name="partticipantsTab" label="Thành viên">
         <div class="table-container">
@@ -165,6 +89,77 @@
       <el-tab-pane name="conditionTab" label="Điều kiện">
         <div class="table-container">
           <Condition :ac-id="currentId" />
+        </div>
+      </el-tab-pane>
+      <el-tab-pane name="histories" label="Lịch sử">
+        <div class="table-container">
+          <div class="text-xl">
+            Danh sách điểm danh
+          </div>
+          <div class="my-4">
+            <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
+              :rules="searchRules" @keyup.enter="onSubmit">
+              <el-form-item label="Ngày tạo" prop="createdAt">
+                <el-date-picker v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu" />
+              </el-form-item>
+              <el-form-item label="Email" prop="email">
+                <el-input v-model="searchInfo.email" type="text" placeholder="Email" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" icon="search" @click="onSubmit">
+                  Tìm kiếm
+                </el-button>
+                <el-button icon="refresh" @click="onReset">
+                  Đặt lại
+                </el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+          <div class="mt-4">
+            <el-table style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID" border>
+              <el-table-column align="left" label="Ngày giờ" prop="checkinDate" width="180">
+                <template #default="scope">
+                  {{ formatDateTime(scope.row.checkinDate) }}
+                </template>
+              </el-table-column>
+              <el-table-column align="left" label="Thành viên" prop="participant.fullName" width="200" />
+              <el-table-column align="left" label="Khu vực" width="120">
+                <template #default="scope">
+                  <span>{{ scope.row.area?.name ?? '/' }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column align="left" label="Nhóm" width="120">
+                <template #default="scope">
+                  <span>{{ scope.row.group?.name ?? '/' }}</span>
+                </template>
+              </el-table-column>
+
+              <el-table-column align="left" label="IP" prop="iP" width="90" />
+              <el-table-column align="left" label="Vị trí" width="170">
+                <template #default="scope">
+                  <a target="_blank"
+                    :href="'https://www.google.com/maps?q=' + scope.row.lattidue + ',' + scope.row.longtidue">{{
+                      scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
+                </template>
+              </el-table-column>
+
+              <el-table-column class="overflow-hidden" label="Agent" prop="agent" />
+            </el-table>
+            <div class="gva-pagination">
+              <el-pagination layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
+                :page-sizes="[10, 30, 50, 100]" :total="total" @current-change="handleCurrentChange"
+                @size-change="handleSizeChange" />
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="table-layout">
+              <tbody>
+                <tr>
+                  <td class="table-cell" />
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </el-tab-pane>
     </el-tabs>
