@@ -7,7 +7,6 @@
   "/src/view/checkins/attendanceAgency/attendanceAgency.vue": "AttendanceAgency",
   "/src/view/checkins/attendanceAgency/attendanceAgencyForm.vue": "AttendanceAgencyForm",
   "/src/view/checkins/attendanceCategory/attendanceCategory.vue": "AttendanceCategory",
-  "/src/view/checkins/attendanceCategory/attendanceCategoryForm.vue": "AttendanceCategoryForm",
   "/src/view/checkins/attendanceCheckIn/attendanceCheckIn.vue": "AttendanceCheckIn",
   "/src/view/checkins/attendanceCheckIn/attendanceCheckInForm.vue": "AttendanceCheckInForm",
   "/src/view/checkins/attendanceDetail/index.vue": "AttendanceDetail",

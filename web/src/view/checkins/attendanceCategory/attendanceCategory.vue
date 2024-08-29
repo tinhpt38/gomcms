@@ -47,13 +47,8 @@
           @click="onDelete">Xóa</el-button>
       </div>
       <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
-        @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" />
-
-        <!-- <el-table-column align="left" label="Ngày" prop="createdAt" width="180">
-            <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
-        </el-table-column>
-         -->
+        @selection-change="handleSelectionChange"  :tree-props="treeProps">
+        <!-- <el-table-column type="selection" width="55" /> -->
         <el-table-column align="left" label="Tên phân loại" prop="name" width="200" />
         <!-- <el-table-column align="left" label="Danh mục cha" prop="parentId" width="120" /> -->
         <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
@@ -216,7 +211,32 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
+
+  tableData.value = convertToTree(tableData.value)
 }
+
+const convertToTree = (data) => {
+  const map = {}
+  const roots = []
+
+  // Create a map of nodes using their ID as the key
+  data.forEach((node) => {
+    map[node.ID] = { ...node, children: [] }
+  })
+
+  // Iterate over the nodes and assign children to their parent
+  data.forEach((node) => {
+    const parent = map[node.parentId]
+    if (parent) {
+      parent.children.push(map[node.ID])
+    } else {
+      roots.push(map[node.ID])
+    }
+  })
+
+  return roots
+}
+
 
 getTableData()
 
