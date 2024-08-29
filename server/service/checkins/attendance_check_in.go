@@ -195,7 +195,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	// Đã đạt số lần giới hạn hay chưa
 	var list []checkins.AttendanceCheckIn
 	global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&list)
-	if attendance.LimitCount != nil && len(list) >= *attendance.LimitCount && *attendance.LimitCount > 0 {
+	if attendance.LimitCount > 0 && len(list) >= attendance.LimitCount {
 		return nil, errors.New("Bạn đã điểm danh đủ số lần cho phép")
 	}
 

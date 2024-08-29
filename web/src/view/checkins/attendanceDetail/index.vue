@@ -26,6 +26,16 @@
                     <el-date-picker v-model="formData.endDate" type="datetime" class="full-width-input" clearable />
                   </el-form-item>
                 </div>
+
+                <el-form-item label="Danh mục" prop="categoryId" class="w-full required">
+                  <el-tree-select class="w-full" v-model="formData.categoryId" :data="categoryOptions"
+                    check-on-click-node :render-after-expand="false" style="width: 240px" />
+                </el-form-item>
+                <el-form-item label="Đơn vị" prop="agencyId" class="w-full required">
+                  <el-select v-model="formData.agencyId" placeholder="Chọn đơn vị" clearable filterable>
+                    <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
+                  </el-select>
+                </el-form-item>
                 <div class="flex justify-between">
                   <el-form-item label="Đóng điểm danh" label-width="150px" prop="isLocked">
                     <el-switch v-model="formData.isLocked" />
@@ -33,22 +43,36 @@
                   <el-form-item label="Cho phép khách" label-width="150px" prop="allowGuest">
                     <el-switch v-model="formData.allowGuest" />
                   </el-form-item>
-                  <el-form-item label="Tổng số lần điểm danh / thành viên" prop="formData.limitCount" class=" required">
-                    <el-input v-model="formData.limitCount" type="number" clearable />
-                  </el-form-item>
                 </div>
+                <el-button link type="primary" icon="arrow-down" @click="showAllOptionConfig = true"
+                  v-if="!showAllOptionConfig">Mở
+                  rộng</el-button>
+                <el-button link type="primary" icon="arrow-up" @click="showAllOptionConfig = false" v-else>Thu
+                  gọn</el-button>
+                <template v-if="showAllOptionConfig">
+                  <div class="flex justify-between">
+                    <el-form-item label="Giới hạn số lần / thành viên" prop="formData.limitCount">
+                      <el-input v-model="formData.limitCount" type="number" clearable />
+                    </el-form-item>
+                    <el-form-item label="Giới hạn số lần / máy" prop="formData.limitClientCount">
+                      <el-input v-model="formData.limitClientCount" type="number" clearable />
+                    </el-form-item>
+                  </div>
 
-                <el-form-item label="Giới hạn IP truy cập" prop="formData.restrictIp">
-                  <el-input v-model="formData.restrictIp" type="text" clearable
-                    placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32" />
-                  <span class="text-sm my-1 italic font-normal">Để giới hạn các IP điểm danh, nhập các IP được cho phép
-                    vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
-                </el-form-item>
-                <el-form-item label="URL chuyển hướng" prop="formData.clientUrl">
-                  <el-input v-model="formData.redirectUrl" type="text" clearable />
-                  <span class="text-sm my-1 italic font-normal">Hệ thống sẽ chuyển hướng bạn đến địa chỉ được nhập vào
-                    sau khi điểm danh</span>
-                </el-form-item>
+                  <el-form-item label="Giới hạn IP truy cập" prop="formData.restrictIp">
+                    <el-input v-model="formData.restrictIp" type="text" clearable
+                      placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32" />
+                    <span class="text-sm my-1 italic font-normal">Để giới hạn các IP điểm danh, nhập các IP được cho
+                      phép
+                      vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
+                  </el-form-item>
+                  <el-form-item label="URL chuyển hướng" prop="formData.clientUrl">
+                    <el-input v-model="formData.redirectUrl" type="text" clearable />
+                    <span class="text-sm my-1 italic font-normal">Hệ thống sẽ chuyển hướng bạn đến địa chỉ được nhập vào
+                      sau khi điểm danh</span>
+                  </el-form-item>
+                </template>
+
               </el-col>
               <el-col :span="12" class="grid-cell flex-column px-4">
                 <div class="flex justify-end p-2">
@@ -151,15 +175,6 @@
                 @size-change="handleSizeChange" />
             </div>
           </div>
-          <div class="table-container">
-            <table class="table-layout">
-              <tbody>
-                <tr>
-                  <td class="table-cell" />
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
       </el-tab-pane>
     </el-tabs>
@@ -187,6 +202,14 @@ import ImportExcel from '@/components/importExcel/index.vue'
 import { formatDateTime } from '@/utils/format'
 import base32 from 'hi-base32'
 
+import {
+  getAttendanceCategoryList
+} from '@/api/checkins/attendanceCategory'
+
+import {
+  getAttendanceAgencyList
+} from '@/api/checkins/attendanceAgency'
+
 defineOptions({
   name: 'AttendanceDetail'
 })
@@ -199,6 +222,11 @@ const clientURL = ref(import.meta.env.VITE_CLIENT_URL)
 
 const formData = ref({
   isLocked: false,
+  allowGuest: false,
+  title: '',
+  categoryId: null,
+  agencyId: null,
+
 })
 
 const elFormRef = ref();
@@ -208,25 +236,10 @@ const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
 const elSearchFormRef = ref()
+const categoryOptions = ref([])
+const agencyOptions = ref([])
 
-// const searchRule = reactive({
-//   createdAt: [
-//     {
-//       validator: (rule, value, callback) => {
-//         if (searchInfo.value.startCreatedAt && !searchInfo.value.endCreatedAt) {
-//           callback(new Error('Vui lòng nhập ngày kết thúc'))
-//         } else if (!searchInfo.value.startCreatedAt && searchInfo.value.endCreatedAt) {
-//           callback(new Error('Vui lòng nhập ngày bắt đầu'))
-//         } else if (searchInfo.value.startCreatedAt && searchInfo.value.endCreatedAt && (searchInfo.value.startCreatedAt.getTime() === searchInfo.value.endCreatedAt.getTime() || searchInfo.value.startCreatedAt.getTime() > searchInfo.value.endCreatedAt.getTime())) {
-//           callback(new Error('Ngày bắt đầu phải trước ngày kết thúc'))
-//         } else {
-//           callback()
-//         }
-//       }, trigger: 'change'
-//     }
-//   ],
-// })
-
+const showAllOptionConfig = ref(false)
 
 const searchRules = reactive({
   createdAt: [
@@ -261,6 +274,7 @@ const getDetailData = async () => {
     formData.value = res.data
   }
   generateQRCode();
+  console.log("getDetailData: ", formData.value)
 }
 getDetailData();
 
@@ -324,8 +338,18 @@ const rule = reactive({
     required: true,
     message: 'Ngày kết thúc là bắt buộc',
     trigger: ['input', 'blur'],
-  },
-  ],
+  }],
+  categoryId: [{
+    required: true,
+    message: 'Danh mục không được để trống',
+    trigger: ['input', 'blur'],
+  }],
+  agencyId: [{
+    required: true,
+    message: 'Đơn vị không được để trống',
+    trigger: ['input', 'blur'],
+  }],
+
 })
 
 
@@ -373,6 +397,49 @@ const onReset = () => {
   searchInfo.value = {}
   getTableData()
 }
+
+const getCategoryOptions = async () => {
+  const table = await getAttendanceCategoryList({ page: 0, pageSize: -1 })
+  if (table.code === 0) {
+    categoryOptions.value = convertToTree(table.data.list)
+  }
+  // console.log("parent Options", categoryOptions.value)
+}
+
+getCategoryOptions()
+
+const getAgencyOptions = async () => {
+  const table = await getAttendanceAgencyList({ page: 0, pageSize: -1 })
+  if (table.code === 0) {
+    agencyOptions.value = table.data.list
+  }
+}
+getAgencyOptions()
+
+
+const convertToTree = (data) => {
+  const map = {}
+  const roots = []
+
+  // Create a map of nodes using their ID as the key
+  data.forEach((node) => {
+    map[node.ID] = { ...node, value: node.ID, label: node.name, children: [] }
+  })
+
+  // Iterate over the nodes and assign children to their parent
+  data.forEach((node) => {
+    const parent = map[node.parentId]
+
+    if (parent) {
+      parent.children.push(map[node.ID])
+    } else {
+      roots.push(map[node.ID])
+    }
+  })
+  console.log('roots', roots)
+  return roots
+}
+
 
 </script>
 

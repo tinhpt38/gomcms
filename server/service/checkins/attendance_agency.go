@@ -80,7 +80,7 @@ func (attendanceAgencyService *AttendanceAgencyService)GetAttendanceAgencyInfoLi
     	return
     }
 
-	if limit != 0 {
+	if limit != 0 && limit != -1 {
        db = db.Limit(limit).Offset(offset)
     }
 	

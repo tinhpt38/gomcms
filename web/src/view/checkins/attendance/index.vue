@@ -126,6 +126,15 @@
           <el-date-picker v-model="formData.endDate" type="date" style="width:100%" placeholder="Chọn ngày"
             :clearable="true" />
         </el-form-item>
+        <el-form-item label="Danh mục" prop="categoryId" class="w-full required">
+          <el-tree-select class="w-full" v-model="formData.categoryId" :data="categoryOptions" check-on-click-node
+            :render-after-expand="false" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="Đơn vị" prop="agencyId" class="w-full required">
+          <el-select v-model="formData.agencyId" placeholder="Chọn đơn vị" clearable filterable>
+            <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="Cho phép khách:" prop="allowGuest">
           <el-switch v-model="formData.allowGuest" active-color="#13ce66" inactive-color="#ff4949" active-text="Có"
             inactive-text="Không" clearable />
@@ -169,7 +178,13 @@ import {
   getAttendanceList
 } from '@/api/checkins/attendance'
 import router from '@/router';
-import ImportExcel from '@/components/importExcel/index.vue'
+import {
+  getAttendanceCategoryList
+} from '@/api/checkins/attendanceCategory'
+
+import {
+  getAttendanceAgencyList
+} from '@/api/checkins/attendanceAgency'
 
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
@@ -219,6 +234,17 @@ const rule = reactive({
     trigger: ['input', 'blur'],
   },
   ],
+  categoryId: [{
+    required: true,
+    message: 'Danh mục không được để trống',
+    trigger: ['input', 'blur'],
+  }],
+  agencyId: [{
+    required: true,
+    message: 'Đơn vị không được để trống',
+    trigger: ['input', 'blur'],
+  }],
+
 })
 
 const searchRule = reactive({
@@ -248,6 +274,8 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
+const categoryOptions = ref([])
+const agencyOptions = ref([])
 
 // Đặt lại
 const onReset = () => {
@@ -295,6 +323,50 @@ const getTableData = async () => {
 }
 
 getTableData()
+
+
+const getCategoryOptions = async () => {
+  const table = await getAttendanceCategoryList({ page: 0, pageSize: -1 })
+  if (table.code === 0) {
+    categoryOptions.value = convertToTree(table.data.list)
+  }
+  // console.log("parent Options", categoryOptions.value)
+}
+
+getCategoryOptions()
+
+const getAgencyOptions = async () => {
+  const table = await getAttendanceAgencyList({ page: 0, pageSize: -1 })
+  if (table.code === 0) {
+    agencyOptions.value = table.data.list
+  }
+}
+getAgencyOptions()
+
+const convertToTree = (data) => {
+  const map = {}
+  const roots = []
+
+  // Create a map of nodes using their ID as the key
+  data.forEach((node) => {
+    map[node.ID] = { ...node, value: node.ID, label: node.name, children: [] }
+  })
+
+  // Iterate over the nodes and assign children to their parent
+  data.forEach((node) => {
+    const parent = map[node.parentId]
+
+    if (parent) {
+      parent.children.push(map[node.ID])
+    } else {
+      roots.push(map[node.ID])
+    }
+  })
+  console.log('roots', roots)
+  return roots
+}
+
+
 
 // ============== Kết thúc bảng điều khiển ===============
 

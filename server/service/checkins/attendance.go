@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type AttendanceService struct{}
@@ -78,7 +79,7 @@ func (attendanceService *AttendanceService) UpdateAttendance(attendanceClass che
 }
 
 func (attendanceService *AttendanceService) GetAttendance(ID string) (attendanceClass checkins.Attendance, err error) {
-	err = global.GVA_DB.Where("id = ?", ID).Preload("Areas").First(&attendanceClass).Error
+	err = global.GVA_DB.Where("id = ?", ID).Preload(clause.Associations).First(&attendanceClass).Error
 	return
 }
 
