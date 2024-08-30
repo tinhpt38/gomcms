@@ -192,19 +192,31 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		}
 	}
 
-	// Đã đạt số lần giới hạn hay chưa
-	var list []checkins.AttendanceCheckIn
-	global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&list)
-	if attendance.LimitCount > 0 && len(list) >= attendance.LimitCount {
-		return nil, errors.New("Bạn đã điểm danh đủ số lần cho phép")
+	// Kiểm tra số lần điểm danh của thành viên đó
+
+	if attendance.LimitCount > 0 {
+		var list []checkins.AttendanceCheckIn
+		global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&list)
+		if len(list) >= attendance.LimitCount {
+			return nil, errors.New("Bạn đã điểm danh đủ số lần cho phép")
+		}
+	}
+
+	// Kiểm tra số lần điểm danh của thiết bị đó
+
+	if attendance.LimitClientCount > 0 {
+		var limitClientCount int64
+		global.GVA_DB.Where("visitor_id = ?", req.VisitorId).Model(&checkins.AttendanceCheckIn{}).Count(&limitClientCount)
+		if limitClientCount >= int64(attendance.LimitClientCount) {
+			return nil, errors.New("Thiết bị đã điểm danh đủ số lần cho phép")
+		}
+
 	}
 
 	conditions, cerr := conditionService.GetConditionsByAttendanceId(attendance.ID, participant.ID)
 	if cerr != nil {
 		return nil, errors.New("Không tìm thấy điều kiện điểm danh")
 	}
-	// var pPassConditionIds []uint
-	// // global.GVA_DB.Table().Select("condition_id").Where("partpaticipant_id = ? AND attendance_id = ? AND condition_id != 0", participant.ID, attendance.ID).Debug().Find(&pPassConditionIds)
 
 	var satisfiedConditions []checkins.Condition
 	var conditionsStatus []checkins.Condition
@@ -214,7 +226,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			// var unUsedConditon []checkins.Condition
 			var conditionsStatus []checkins.Condition
 			for _, condition := range conditions {
-				if checkCondition(agp, condition, req.Lat, req.Lng) {
+				if checkCondition(agp, condition, req, ip) {
 					condition.IsPass = true
 					usedConditon = append(usedConditon, condition)
 				} else {
@@ -227,8 +239,6 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		}()
 	}
 	result = make(map[string]interface{})
-	// result["pass"] = satisfiedConditions
-	// result["fail"] = unsatisfiedConditions
 	result["conditions"] = conditionsStatus
 	result["attendance"] = attendance
 	// xử lý những thằng nào đã pass
@@ -253,7 +263,6 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		Lattidue:         req.Lat,
 		Longtidue:        req.Lng,
 		Agent:            userAgent,
-		Browser:          "",
 	}
 	aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
 	if aciErr != nil {
@@ -270,19 +279,32 @@ func (attendanceCheckInService *AttendanceCheckInService) DecodeBase32(encoded s
 	return string(decoded), nil
 }
 
-func checkMatchArea(lat *float64, lng *float64, area checkins.AttendanceArea) bool {
+func checkMatchArea(ip string, lat *float64, lng *float64, accuracy *float64, area checkins.AttendanceArea) bool {
 	if lat == nil || lng == nil {
 		return false
 	}
 	latArea := area.Area.Latitude
 	lngArea := area.Area.Longitude
 	defaultRadius := area.Area.Radius // default meter
+	if accuracy == nil || *accuracy == 0 {
+		*accuracy = float64(0.1)
+	}
+
 	radiusArea := area.Radius
 	if radiusArea == nil {
 		radiusArea = defaultRadius
 	}
 	radius := float32(float64(*radiusArea) / float64(1000))
-	result := isWithinRadius(*latArea, *lngArea, float64(radius), *lat, *lng)
+	result := isWithinRadius(*latArea, *lngArea, float64(radius), *lat, *lng, *accuracy)
+	if area.AllowRestrictIp {
+		ipString := area.Area.RestrictIp
+		ipRanges := strings.Split(*ipString, ",")
+		if len(ipRanges) > 0 {
+			if !isIPAllowed(ip, ipRanges) {
+				return false
+			}
+		}
+	}
 	return result
 }
 
@@ -306,16 +328,19 @@ func haversine(lat1, lon1, lat2, lon2 float64) float64 {
 }
 
 // isWithinRadius checks if the point (xLat, xLng) is within the given radius (in kilometers) of (lat, lon).
-func isWithinRadius(lat, lon, radius, xLat, xLng float64) bool {
+func isWithinRadius(lat, lon, radius, xLat, xLng, accuracy float64) bool {
 	distance := haversine(lat, lon, xLat, xLng)
-	return distance <= radius
+	// return distance <= radius
+	return math.Abs(distance-radius) <= accuracy
 }
 
-func checkCondition(participant checkins.AttendanceGroupParticipant, condition checkins.Condition, lat *float64, lng *float64) bool {
+func checkCondition(participant checkins.AttendanceGroupParticipant, condition checkins.Condition, req checkinsReq.CheckinsReq, ip string) bool {
 	// Trường hợp 1
+	lat := req.Lat
+	lng := req.Lng
 
 	if condition.GroupId == nil && condition.AreaId != nil && condition.StartAt != nil && condition.EndAt != nil {
-		inArea := checkMatchArea(lat, lng, *condition.Area)
+		inArea := checkMatchArea(ip, lat, lng, req.Accuracy, *condition.Area)
 		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
 		return inArea && matchTime
 	}
@@ -337,7 +362,7 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 			return false
 		}
 
-		inArea := checkMatchArea(lat, lng, *condition.Area)
+		inArea := checkMatchArea(ip, lat, lng, req.Accuracy, *condition.Area)
 		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
 
 		return inArea == matchTime && (*condition.GroupId == *participant.GroupId)
@@ -391,7 +416,7 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 			return false
 		}
 
-		inArea := checkMatchArea(lat, lng, *condition.Area)
+		inArea := checkMatchArea(ip, lat, lng, req.Accuracy, *condition.Area)
 		return inArea && (*condition.GroupId == *participant.GroupId)
 	}
 

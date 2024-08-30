@@ -156,9 +156,10 @@ import { decodeCredential } from 'vue3-google-login'
 import { useRoute } from 'vue-router';
 import { formatDateTime } from '@/utils/format';
 
-const route = useRoute()
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
-// console.log(route)
+
+const route = useRoute()
 
 
 defineOptions({
@@ -184,6 +185,24 @@ const callback = async (response) => {
 const gError = (error) => {
     console.log("Handle the error", error)
 }
+
+
+async function getFingerprint() {
+  const fpPromise = FingerprintJS.load();
+  const fp = await fpPromise;
+  const result = await fp.get();
+  return result.visitorId;
+}
+
+const fingerPrint = () =>{
+  getFingerprint().then(visitorId => {
+  console.log(visitorId);
+});
+}
+
+fingerPrint()
+
+
 
 const conditionString = (item) => {
     var condition = {

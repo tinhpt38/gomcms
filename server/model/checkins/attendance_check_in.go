@@ -20,7 +20,7 @@ type AttendanceCheckIn struct {
 	Lattidue         *float64     `json:"lattidue" form:"lattidue" gorm:"column:lattidue;comment:;"`                                             //Kinh độ
 	Longtidue        *float64     `json:"longtidue" form:"longtidue" gorm:"column:longtidue;comment:;"`                                          //Vĩ độ
 	Agent            string       `json:"agent" form:"agent" gorm:"column:agent;comment:;type:text;`                                             //Agent
-	Browser          string       `json:"browser" form:"browser" gorm:"column:browser;comment:;"`                                                //Trình duyệt
+	VisitorId        string       `json:"visitorId" form:"visitorId" gorm:"column:visitor_id;comment:;"`                                         //ID khách
 	CreatedBy        uint         `gorm:"column:created_by;comment:创建者"`
 	UpdatedBy        uint         `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy        uint         `gorm:"column:deleted_by;comment:删除者"`
