@@ -18,9 +18,10 @@ type AttendanceCheckIn struct {
 	ConditionId      *uint        `json:"conditionId" form:"conditionId" gorm:"column:condition_id;comment:;"`                                   //Điều kiện
 	IP               string       `json:"iP" form:"iP" gorm:"column:ip;comment:;"`                                                               //IP
 	Lattidue         *float64     `json:"lattidue" form:"lattidue" gorm:"column:lattidue;comment:;"`                                             //Kinh độ
-	Longtidue        *float64     `json:"longtidue" form:"longtidue" gorm:"column:longtidue;comment:;"`                                          //Vĩ độ
-	Agent            string       `json:"agent" form:"agent" gorm:"column:agent;comment:;type:text;`                                             //Agent
-	VisitorId        string       `json:"visitorId" form:"visitorId" gorm:"column:visitor_id;comment:;"`                                         //ID khách
+	Longtidue        *float64     `json:"longtidue" form:"longtidue" gorm:"column:longtidue;comment:;"`
+	Accuracy         *float64     `json:"accuracy" form:"accuracy" gorm:"column:accuracy;comment:;"`     //Độ chính xác
+	Agent            string       `json:"agent" form:"agent" gorm:"column:agent;comment:;type:text;`     //Agent
+	VisitorId        string       `json:"visitorId" form:"visitorId" gorm:"column:visitor_id;comment:;"` //ID khách
 	CreatedBy        uint         `gorm:"column:created_by;comment:创建者"`
 	UpdatedBy        uint         `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy        uint         `gorm:"column:deleted_by;comment:删除者"`

@@ -263,6 +263,8 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		Lattidue:         req.Lat,
 		Longtidue:        req.Lng,
 		Agent:            userAgent,
+		Accuracy:         req.Accuracy,
+		VisitorId:        req.VisitorId,
 	}
 	aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
 	if aciErr != nil {

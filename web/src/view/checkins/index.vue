@@ -196,7 +196,7 @@ async function getFingerprint() {
 
 const fingerPrint = () =>{
   getFingerprint().then(visitorId => {
-  console.log(visitorId);
+  data.value.visitorId = visitorId
 });
 }
 
@@ -244,7 +244,9 @@ const requestCheckin = async () => {
     }
     data.value.lat = coords.value.latitude
     data.value.lng = coords.value.longitude
+    data.value.accuracy = coords.value.accuracy
     data.value.code = route.query.c
+    console.log(data.value)
 
     var res = await publicAttendanceCheckIn(data.value)
 

@@ -159,6 +159,7 @@
               </el-table-column>
 
               <el-table-column align="left" label="IP" prop="iP" width="90" />
+              <el-table-column align="left" label="Client ID" prop="visitorId" width="90" />
               <el-table-column align="left" label="Vị trí" width="170">
                 <template #default="scope">
                   <a target="_blank"
