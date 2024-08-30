@@ -159,7 +159,6 @@
               </el-table-column>
 
               <el-table-column align="left" label="IP" prop="iP" width="90" />
-              <el-table-column align="left" label="Client ID" prop="visitorId" width="90" />
               <el-table-column align="left" label="Vị trí" width="170">
                 <template #default="scope">
                   <a target="_blank"
@@ -167,7 +166,7 @@
                       scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
                 </template>
               </el-table-column>
-
+              <el-table-column align="left" label="Client ID" prop="visitorId" width="200" />
               <el-table-column class="overflow-hidden" label="Agent" prop="agent" />
             </el-table>
             <div class="gva-pagination">

@@ -18,17 +18,22 @@ import (
 type AttendanceCheckInService struct{}
 
 func (attendanceCheckInService *AttendanceCheckInService) CreateAttendanceCheckIn(attendanceCheckIn *checkins.AttendanceCheckIn) (err error) {
-	var count int64
-	err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{
-		AttendanceId:     attendanceCheckIn.AttendanceId,
-		PartpaticipantId: attendanceCheckIn.PartpaticipantId,
-		ConditionId:      attendanceCheckIn.ConditionId,
-	}).Count(&count).Error
-	if count < 0 {
-		err = global.GVA_DB.Create(attendanceCheckIn).Error
-		if err != nil {
-			return err
-		}
+	// var count int64
+	// err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{
+	// 	AttendanceId:     attendanceCheckIn.AttendanceId,
+	// 	PartpaticipantId: attendanceCheckIn.PartpaticipantId,
+	// 	ConditionId:      attendanceCheckIn.ConditionId,
+	// }).Count(&count).Error
+	// if count == 0 {
+	// 	err = global.GVA_DB.Create(attendanceCheckIn).Error
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+	// return nil
+	err = global.GVA_DB.Create(attendanceCheckIn).Error
+	if err != nil {
+		return err
 	}
 	return nil
 }
