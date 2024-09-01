@@ -34,8 +34,8 @@
                                 </h1>
                                 <h2>Danh sách điểm danh sắp tới</h2>
                                 <div
-                                    class="mx-auto mt-2 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                                    <article v-for="post in postData" :key="post.ID"
+                                    class="rounded-md mx-auto mt-2 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 border-1 border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                                    <article  v-for="post in postData" :key="post.ID"
                                         class="flex max-w-xl flex-col items-start justify-between">
                                         <div class="flex flex-col items-start gap-x-4 text-base">
 
@@ -134,11 +134,6 @@ const postData = ref([])
 
 const getPostData = async () => {
     var now = moment()
-    // "2006-01-02T15:04:05Z07:00"
-    // var searchInfo = {
-    //     startDate: now.format('DD/MM/YYYY HH:mm:ss'),
-    //     endDate: now.add(10, 'days').format('DD/MM/YYYY HH:mm:ss')
-    // }
     var searchInfo = {
         startDate: now.format('YYYY-MM-DDTHH:mm:ssZ'),
         endDate: now.add(10, 'days').format('YYYY-MM-DDTHH:mm:ssZ')
