@@ -9,6 +9,8 @@ import (
 type AttendanceSearch struct {
 	StartCreatedAt *time.Time `json:"startCreatedAt" form:"startCreatedAt"`
 	EndCreatedAt   *time.Time `json:"endCreatedAt" form:"endCreatedAt"`
+	StartDate      *time.Time `json:"startDate" form:"startDate"`
+	EndDate        *time.Time `json:"endDate" form:"endDate"`
 	request.PageInfo
 }
 

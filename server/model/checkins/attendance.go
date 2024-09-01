@@ -22,6 +22,7 @@ type Attendance struct {
 	RedirectUrl      *string    `json:"redirectUrl" form:"redirectUrl" gorm:"column:redirect_url;comment:URL chuyển hướng"` //URL chuyển hướng
 	AgencyId         *uint      `json:"agencyId" form:"agencyId" gorm:"column:agency_id;comment:Đơn vị"`                    //Đơn vị
 	CategoryId       *uint      `json:"categoryId" form:"categoryId" gorm:"column:category_id;comment:Loại"`                //Loại
+	Description      string     `json:"description" form:"description" gorm:"column:description;comment:Ghi chú"`           //Ghi chú
 	CreatedBy        uint       `gorm:"column:created_by;comment:创建者"`
 	UpdatedBy        uint       `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy        uint       `gorm:"column:deleted_by;comment:删除者"`

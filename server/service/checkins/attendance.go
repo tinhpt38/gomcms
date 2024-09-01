@@ -100,15 +100,20 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
 	}
+
+	if info.StartDate != nil && info.EndDate != nil {
+		db = db.Where("DATE(start_date) >= ? AND DATE(end_date) <= ?", info.StartDate.Format("2006-01-02"), info.EndDate.Format("2006-01-02"))
+	}
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
 
-	if limit != 0 {
+	if limit != 0 && limit != -1 {
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Preload("Areas").Debug().Find(&attendanceClasss).Error
+	err = db.Preload("Areas").Preload(clause.Associations).Debug().Find(&attendanceClasss).Error
 	return attendanceClasss, total, err
 }

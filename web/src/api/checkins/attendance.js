@@ -71,3 +71,11 @@ export const getAttendanceList = (params) => {
     params
   })
 }
+
+export const getAttendancePublic = (params) => {
+  return service({
+    url: '/attendance/getAttendancePublic',
+    method: 'get',
+    params
+  })
+}

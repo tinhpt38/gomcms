@@ -25,6 +25,6 @@ func (s *AttendanceRouter) InitAttendanceRouter(Router *gin.RouterGroup, PublicR
 		attendanceRouterWithoutRecord.GET("getAttendanceList", attendanceApi.GetAttendanceList)
 	}
 	{
-		attendanceRouterWithoutAuth.GET("getAttendancePublic", attendanceApi.GetAttendancePublic)
+		attendanceRouterWithoutAuth.GET("getAttendancePublic", attendanceApi.GetAttendanceList)
 	}
 }

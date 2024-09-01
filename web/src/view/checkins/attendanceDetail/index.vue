@@ -36,6 +36,9 @@
                     <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
                   </el-select>
                 </el-form-item>
+                <el-form-item prop="description" label="Mô tả" class="w-full">
+                  <el-input type="text" v-model="formData.description"></el-input>
+                </el-form-item>
                 <div class="flex justify-between">
                   <el-form-item label="Đóng điểm danh" label-width="150px" prop="isLocked">
                     <el-switch v-model="formData.isLocked" />

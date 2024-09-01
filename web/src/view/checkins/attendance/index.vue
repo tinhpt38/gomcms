@@ -135,6 +135,9 @@
             <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
+        <el-form-item prop="description" label="Mô tả" class="w-full">
+          <el-input type="text" v-model="formData.description" ></el-input>
+        </el-form-item>
         <el-form-item label="Cho phép khách:" prop="allowGuest">
           <el-switch v-model="formData.allowGuest" active-color="#13ce66" inactive-color="#ff4949" active-text="Có"
             inactive-text="Không" clearable />
@@ -320,6 +323,7 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
+  console.log('table, ', table.data.list)
 }
 
 getTableData()
