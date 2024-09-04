@@ -17,7 +17,7 @@ import { store } from '@/pinia'
 import App from './App.vue'
 import viVn from 'element-plus/dist/locale/vi.mjs'
 import vue3GoogleLogin from 'vue3-google-login'
-
+// import ElementPlus from 'element-plus'
 
 // const clientId = import.meta.env.VITE_CLIENT_ID
 // console.log('clientId', clientId)
