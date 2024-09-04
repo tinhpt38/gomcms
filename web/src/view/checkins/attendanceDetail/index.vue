@@ -180,6 +180,36 @@
           </div>
         </div>
       </el-tab-pane>
+      <el-tab-pane name="statistics" label="Thống kê">
+        <div>Chức năng đang được cập nhật</div>
+        <div class="flex flex-row justify-evenly hidden">
+          <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
+            <p class="text-5xl font-bold text-center py-3">0</p>
+            <p class="text-slate-800">Tổng số thành viên</p>
+          </div>
+          <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
+            <p class="text-5xl font-bold text-center py-3">0</p>
+            <p class="text-slate-800">Đã điểm danh</p>
+          </div>
+          <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
+            <p class="text-5xl font-bold text-center py-3">0</p>
+            <p class="text-slate-800">Chưa điểm danh</p>
+          </div>
+          <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
+            <p class="text-5xl font-bold text-center py-3">0</p>
+            <p class="text-slate-800">Tổng lượt truy cập</p>
+          </div>
+        </div>
+        <div class="my-8 grid-rows-2 w-full hidden">
+          <div class="my-8 w-6/12 h-96">
+            <div id="trendline" style="width: 500px;height:500px;" />
+          </div>
+          <div class="my-8 w-6/12 h-96">
+            <div id="trendline2" style="width: 500px;height:500px;" />
+          </div>
+        </div>
+
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -204,6 +234,7 @@ import Condition from '@/view/checkins/components/condition/index.vue'
 import ImportExcel from '@/components/importExcel/index.vue'
 import { formatDateTime } from '@/utils/format'
 import base32 from 'hi-base32'
+import * as echarts from 'echarts'
 
 import {
   getAttendanceCategoryList
@@ -278,6 +309,7 @@ const getDetailData = async () => {
   }
   generateQRCode();
   console.log("getDetailData: ", formData.value)
+
 }
 getDetailData();
 
@@ -302,9 +334,8 @@ const saveAttendance = async () => {
 const qrcodeCanvas = ref(null)
 
 const generateQRCode = async () => {
-  debugger
   var params = base32.encode($route.params.id)
-  console.log('params-endcode'+ params)
+  console.log('params-endcode' + params)
 
   var url = clientURL.value + '/?c=' + params
   QRCode.toCanvas(qrcodeCanvas.value, url, { width: 300 }, (error) => {
@@ -381,6 +412,7 @@ const getTableData = async () => {
   }
   // console.log("Danh sách điểm danh")
   // console.log(table)
+  getTrendline()
 }
 
 getTableData()
@@ -444,6 +476,33 @@ const convertToTree = (data) => {
   console.log('roots', roots)
   return roots
 }
+
+const getTrendline = () => {
+  const trendline = echarts.init(document.getElementById('trendline'))
+  var option = {
+    title: {
+      text: 'ECharts Getting Started Example'
+    },
+    tooltip: {},
+    legend: {
+      data: ['sales']
+    },
+    xAxis: {
+      data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks']
+    },
+    yAxis: {},
+    series: [
+      {
+        name: 'sales',
+        type: 'bar',
+        data: [5, 20, 36, 10, 10, 20]
+      }
+    ]
+  };
+  trendline.setOption(option);
+}
+
+
 
 
 </script>
