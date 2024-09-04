@@ -54,17 +54,17 @@
                                         <div class="flex flex-col items-start gap-x-4 text-base">
 
                                             <a
-                                                class="relative z-10 rounded-md p-2 my-1 bg-[#7BA227] font-medium text-white hover:bg-gray-100">{{
+                                                class="relative z-10 rounded-md p-1 my-1 bg-[#7BA227] font-medium text-white hover:bg-gray-100">{{
                                                     post.category.name }}</a>
                                             <a
-                                                class="relative z-10 rounded-md p-2 my-1 text-[#514C39] font-medium  hover:bg-gray-100">{{
+                                                class="relative z-10 rounded-md p-1 my-1 text-[#E67F32] text-base  hover:bg-gray-100">{{
                                                     post.agency.name }}</a>
                                         </div>
                                         <div class="group relative">
                                             <h3
-                                                class="mt-3 text-2xl font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+                                                class="mt-3 text-2xl font-semibold p-1 leading-6 text-gray-900 group-hover:text-gray-600">
                                                 <a :href="post.href">
-                                                    <span class="absolute inset-0" />
+                                                    <span class="absolute inset-0 " />
                                                     {{ post.title }}
                                                 </a>
                                             </h3>

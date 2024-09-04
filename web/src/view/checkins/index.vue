@@ -46,34 +46,38 @@
                   Hệ thống điểm
                   danh<br><span class="text-[#7BA227]">Trường Đại học Đà Lạt</span>.
                 </h1>
-                <p class="relative mt-6 text-lg leading-8 text-gray-600 sm:max-w-md lg:max-w-none">
+                <p class="relative mt-6 text-lg font-bold leading-8 text-[#E67F32] sm:max-w-md lg:max-w-none">
                   Hãy đăng nhập bằng tài khoảng Email của bạn với Google để đăng nhập.
                 </p>
-                <div v-if="conditionData.length > 0" class="px-4 sm:px-0">
-                  <h3 class="text-base font-semibold leading-7 text-gray-900">
-                    Danh sách cần điểm danh
-                  </h3>
-                  <dl class="divide-y divide-gray-100">
-                    <div v-for="(item, key) in conditionData" :key="key"
-                      class="px-2 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-                      <dt class="text-sm font-medium leading-6 text-gray-900">
-                        Lần thứ {{ key + 1
-                        }}
-                      </dt>
-                      <dd class="my-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                        {{ conditionString(item) }}
-                      </dd>
-                      <el-tag v-if="item.isPass" effect="dark" type="success">
-                        Đã điểm
-                        danh
-                      </el-tag>
-                      <el-tag v-if="!item.isPass" effect="dart" type="danger">
-                        Chưa điểm
-                        danh
-                      </el-tag>
+                <div v-if="attendance.title != null" class="mt-4 bg-slate-50 p-2 rounded shadow-slate-400">
+                  <h3>{{ attendance.title }}</h3>
+                  <div v-if="conditionData.length > 0">
+                    <div class="text-base  text-gray-900">
+                      Danh sách điều kiện điểm danh
                     </div>
-                  </dl>
+                    <dl class="divide-y divide-gray-100">
+                      <div v-for="(item, key) in conditionData" :key="key"
+                        class="px-2 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt class="text-sm font-medium leading-6 text-gray-900">
+                          Lần thứ {{ key + 1
+                          }}
+                        </dt>
+                        <dd class="my-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+                          {{ conditionString(item) }}
+                        </dd>
+                        <el-tag v-if="item.isPass" effect="dark" type="success">
+                          Đã điểm
+                          danh
+                        </el-tag>
+                        <el-tag v-if="!item.isPass" effect="dart" type="danger">
+                          Chưa điểm
+                          danh
+                        </el-tag>
+                      </div>
+                    </dl>
+                  </div>
                 </div>
+
                 <GoogleLogin class="my-4" :callback="callback" :error="gError" prompt />
               </div>
               <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
