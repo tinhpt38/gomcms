@@ -41,28 +41,28 @@
                 <div class="overflow-scroll">
                     <div class="mx-auto max-w-7xl px-6 pb-32 pt-24 sm:pt-60 lg:px-8 lg:pt-32">
                         <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-                            <div class="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
-                                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                            <div class="w-full max-w-xl lg:shrink-0 xl:max-w-4xl">
+                                <h1 class="text-4xl font-bold tracking-tight text-[#514C39] sm:text-6xl">
                                     Hệ thống điểm
-                                    danh - Trường Đại học Đà Lạt.
+                                    danh<br><span class="text-[#7BA227]">Trường Đại học Đà Lạt</span>.
                                 </h1>
                                 <h2>Danh sách điểm danh sắp tới</h2>
                                 <div
-                                    class="rounded-md mx-auto mt-2 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 border-1 border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                                    class="mx-auto mt-2 grid max-w-2xl grid-cols-1 gap-x-4 gap-y-4 border-1 border-gray-200 pt-4 sm:mt-16 sm:pt-4 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                                     <article v-for="post in postData" :key="post.ID"
-                                        class="flex max-w-xl flex-col items-start justify-between">
+                                        class="flex max-w-xl flex-col items-start justify-between bg-slate-50 p-2 rounded shadow-slate-400">
                                         <div class="flex flex-col items-start gap-x-4 text-base">
 
                                             <a
-                                                class="relative z-10 rounded-md p-2 my-1 bg-gray-50 font-medium text-gray-600 hover:bg-gray-100">{{
+                                                class="relative z-10 rounded-md p-2 my-1 bg-[#7BA227] font-medium text-white hover:bg-gray-100">{{
                                                     post.category.name }}</a>
                                             <a
-                                                class="relative z-10 rounded-md p-2 my-1 bg-gray-50 font-medium text-gray-600 hover:bg-gray-100">{{
+                                                class="relative z-10 rounded-md p-2 my-1 text-[#514C39] font-medium  hover:bg-gray-100">{{
                                                     post.agency.name }}</a>
                                         </div>
                                         <div class="group relative">
                                             <h3
-                                                class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+                                                class="mt-3 text-2xl font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
                                                 <a :href="post.href">
                                                     <span class="absolute inset-0" />
                                                     {{ post.title }}
@@ -70,7 +70,7 @@
                                             </h3>
                                             <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{{
                                                 post.description
-                                            }}</p>
+                                                }}</p>
                                         </div>
                                         <div class="flex flex-col items-start gap-x-4 text-base">
 

@@ -102,7 +102,7 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 	}
 
 	if info.StartDate != nil && info.EndDate != nil {
-		db = db.Where("DATE(start_date) >= ? AND DATE(end_date) <= ?", info.StartDate.Format("2006-01-02"), info.EndDate.Format("2006-01-02"))
+		db = db.Where("DATE(start_date) >= ? OR DATE(end_date) <= ?", info.StartDate.Format("2006-01-02"), info.EndDate.Format("2006-01-02"))
 	}
 
 	err = db.Count(&total).Error

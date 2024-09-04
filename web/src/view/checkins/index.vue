@@ -2,19 +2,19 @@
   <div class="bg-white">
     <main class="isolate">
       <div class="relative z-10">
-                <div class="mx-auto max-w-7xl px-6 pt-6 sm:pt-12 lg:px-6 lg:pt-16">
-                    <div class="flex items
+        <div class="mx-auto max-w-7xl px-6 pt-6 sm:pt-12 lg:px-6 lg:pt-16">
+          <div class="flex items
                 -center justify-between">
-                        <div class="flex items
+            <div class="flex items
                     -center">
-                            <a href="/" class="flex items-center gap-2">
-                                <img src="/logo-hoat-dong.webp" alt="Trường Đại học Đà Lạt" class="h-32 w-auto" />
-                                <!-- <span class="text-lg font-semibold text-gray-900">Trường Đại học Đà Lạt</span> -->
-                            </a>
-                        </div>
-                    </div>
-                </div>
+              <a href="/" class="flex items-center gap-2">
+                <img src="/logo-hoat-dong.webp" alt="Trường Đại học Đà Lạt" class="h-32 w-auto" />
+                <!-- <span class="text-lg font-semibold text-gray-900">Trường Đại học Đà Lạt</span> -->
+              </a>
             </div>
+          </div>
+        </div>
+      </div>
       <!-- Hero section -->
       <div class="relative isolate -z-10">
         <svg
@@ -42,9 +42,9 @@
           <div class="mx-auto max-w-7xl px-6 pb-32 pt-24 sm:pt-60 lg:px-8 lg:pt-32">
             <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
-                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                <h1 class="text-4xl font-bold tracking-tight text-[#514C39] sm:text-6xl">
                   Hệ thống điểm
-                  danh - Trường Đại học Đà Lạt.
+                  danh<br><span class="text-[#7BA227]">Trường Đại học Đà Lạt</span>.
                 </h1>
                 <p class="relative mt-6 text-lg leading-8 text-gray-600 sm:max-w-md lg:max-w-none">
                   Hãy đăng nhập bằng tài khoảng Email của bạn với Google để đăng nhập.
@@ -233,7 +233,7 @@ const requestCheckin = async () => {
       confirmButtonText: 'OK',
       type: 'success'
     }).then(() => {
-      if (attendance.value.redirectUrl){
+      if (attendance.value.redirectUrl) {
         window.location.href = attendance.value.redirectUrl
       }
     });
