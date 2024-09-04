@@ -137,6 +137,7 @@ const route = useRoute()
 defineOptions({
   name: "Checkins",
 })
+
 const { coords, locatedAt, error, resume, pause } = useGeolocation()
 
 const data = ref({
@@ -214,6 +215,7 @@ const requestCheckin = async () => {
     ElNotification("Không có điểm danh nào đang hiện hành")
     return
   }
+  console.log('geo location error', error)
   data.value.lat = coords.value.latitude
   data.value.lng = coords.value.longitude
   data.value.accuracy = coords.value.accuracy
@@ -226,7 +228,8 @@ const requestCheckin = async () => {
   if (res.code == 0) {
     conditionData.value = res.data.conditions
     attendance.value = res.data.attendance
-    ElMessageBox.alert('Điểm danh thành công', 'Thông báo', {
+    var msg = res.data.message
+    ElMessageBox.alert(msg, 'Thông báo', {
       confirmButtonText: 'OK',
       type: 'success'
     }).then(() => {

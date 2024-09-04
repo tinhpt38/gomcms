@@ -33,3 +33,4 @@ server/uploads/
 *.iml
 web/.pnpm-debug.log
 web/pnpm-lock.yaml
+server/config.yaml

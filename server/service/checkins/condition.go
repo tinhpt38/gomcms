@@ -86,7 +86,7 @@ WHERE
 	AND ak.conid IS NULL
 	AND c.deleted_at IS NULL;
 `
-	err = global.GVA_DB.Raw(query, pId, aId, aId).Preload(clause.Associations).Preload("Area.Area").Debug().Scan(&list).Error
+	err = global.GVA_DB.Raw(query, pId, aId, aId).Preload(clause.Associations).Preload("Area.Area").Debug().Find(&list).Error
 	return
 }
 

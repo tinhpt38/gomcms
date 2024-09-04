@@ -6,7 +6,7 @@
         Xuất Excel
       </el-button>
     </div>
-    <el-tabs v-model="tabsActiveTab" type="border-card">
+    <el-tabs v-model="tabsActiveTab" type="border-card" @tab-click="tabHandleClick">
       <el-tab-pane name="attendanceInfoTab" label="Chi tiết">
         <div class="card-container">
           <el-form ref="elFormRef" :model="formData" label-position="top" :rules="rule" label-width="80px">
@@ -15,8 +15,8 @@
                 <el-form-item label="Tiêu đề" prop="formData.title" class=" required">
                   <el-input v-model="formData.title" type="text" clearable />
                 </el-form-item>
-                <el-form-item label="URL Điểm danh" prop="formData.clientUrl" class=" required">
-                  <el-input v-model="formData.clientUrl" type="text" clearable :value="clientURL" />
+                <el-form-item label="URL Điểm danh" prop="formData.clientUrl" class="required">
+                  <el-input v-model="formData.clientUrl" type="text" clearable :value="clientURL" disabled />
                 </el-form-item>
                 <div class=" flex justify-between">
                   <el-form-item label="Ngày bắt đầu" label-width="150px" prop="startDate" class="required">
@@ -96,7 +96,6 @@
         </div>
 
         <el-divider />
-
       </el-tab-pane>
       <el-tab-pane name="partticipantsTab" label="Thành viên">
         <div class="table-container">
@@ -115,7 +114,7 @@
       </el-tab-pane>
       <el-tab-pane name="conditionTab" label="Điều kiện">
         <div class="table-container">
-          <Condition :ac-id="currentId" />
+          <Condition :ref="conditionTabRef" :ac-id="currentId" />
         </div>
       </el-tab-pane>
       <el-tab-pane name="histories" label="Lịch sử">
@@ -274,6 +273,7 @@ const categoryOptions = ref([])
 const agencyOptions = ref([])
 
 const showAllOptionConfig = ref(false)
+const conditionTabRef = ref()
 
 const searchRules = reactive({
   createdAt: [
@@ -341,6 +341,8 @@ const generateQRCode = async () => {
   console.log('params-endcode' + params)
 
   var url = clientURL.value + '/?c=' + params
+  formData.value.clientUrl = url  
+  clientURL.value = url
   QRCode.toCanvas(qrcodeCanvas.value, url, { width: 300 }, (error) => {
     if (error) console.error(error)
   })
@@ -478,6 +480,14 @@ const convertToTree = (data) => {
   })
   console.log('roots', roots)
   return roots
+}
+
+const tabHandleClick = async (tab, event) =>{
+  
+  if(tab.props.name === 'conditionTab'){
+    await conditionTabRef.value?.getAgencyOptions()
+    await conditionTabRef.value?.getGroupOptions()
+  }
 }
 
 const getTrendline = () => {

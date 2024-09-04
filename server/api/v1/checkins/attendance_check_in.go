@@ -117,6 +117,10 @@ func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Conte
 	}
 	ip := c.ClientIP()
 	userAgent := c.GetHeader("User-Agent")
+	if (checkinReq.Lat == nil || checkinReq.Lng == nil) || (*checkinReq.Lat == 0 || *checkinReq.Lng == 0) {
+		response.FailWithMessage("Vui lòng cho phép truy cập vị trí của thiết bị", c)
+		return
+	}
 	result, err := attendanceCheckInService.CheckinAttendance(checkinReq, ip, userAgent)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
