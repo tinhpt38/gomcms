@@ -1,6 +1,20 @@
 <template>
   <div class="bg-white">
     <main class="isolate">
+      <div class="relative z-10">
+                <div class="mx-auto max-w-7xl px-6 pt-6 sm:pt-12 lg:px-6 lg:pt-16">
+                    <div class="flex items
+                -center justify-between">
+                        <div class="flex items
+                    -center">
+                            <a href="/" class="flex items-center gap-2">
+                                <img src="/logo-hoat-dong.webp" alt="Trường Đại học Đà Lạt" class="h-32 w-auto" />
+                                <!-- <span class="text-lg font-semibold text-gray-900">Trường Đại học Đà Lạt</span> -->
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
       <!-- Hero section -->
       <div class="relative isolate -z-10">
         <svg

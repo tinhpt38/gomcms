@@ -1,6 +1,20 @@
 <template>
     <div class="bg-white">
         <main class="isolate">
+            <div class="relative z-10">
+                <div class="mx-auto max-w-7xl px-6 pt-6 sm:pt-12 lg:px-6 lg:pt-16">
+                    <div class="flex items
+                -center justify-between">
+                        <div class="flex items
+                    -center">
+                            <a href="/" class="flex items-center gap-2">
+                                <img src="/logo-hoat-dong.webp" alt="Trường Đại học Đà Lạt" class="h-32 w-auto" />
+                                <!-- <span class="text-lg font-semibold text-gray-900">Trường Đại học Đà Lạt</span> -->
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Hero section -->
             <div class="relative isolate -z-10">
                 <svg class="absolute inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
@@ -35,15 +49,15 @@
                                 <h2>Danh sách điểm danh sắp tới</h2>
                                 <div
                                     class="rounded-md mx-auto mt-2 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 border-1 border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                                    <article  v-for="post in postData" :key="post.ID"
+                                    <article v-for="post in postData" :key="post.ID"
                                         class="flex max-w-xl flex-col items-start justify-between">
                                         <div class="flex flex-col items-start gap-x-4 text-base">
 
                                             <a
-                                                class="relative z-10 rounded-md py-2 my-1 bg-gray-50 font-medium text-gray-600 hover:bg-gray-100">{{
+                                                class="relative z-10 rounded-md p-2 my-1 bg-gray-50 font-medium text-gray-600 hover:bg-gray-100">{{
                                                     post.category.name }}</a>
                                             <a
-                                                class="relative z-10 rounded-md py-2 my-1 bg-gray-50 font-medium text-gray-600 hover:bg-gray-100">{{
+                                                class="relative z-10 rounded-md p-2 my-1 bg-gray-50 font-medium text-gray-600 hover:bg-gray-100">{{
                                                     post.agency.name }}</a>
                                         </div>
                                         <div class="group relative">
@@ -56,7 +70,7 @@
                                             </h3>
                                             <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{{
                                                 post.description
-                                                }}</p>
+                                            }}</p>
                                         </div>
                                         <div class="flex flex-col items-start gap-x-4 text-base">
 
@@ -148,19 +162,21 @@ const getPostData = async () => {
 
 getPostData()
 
-
-const posts = [
-    {
-        id: 1,
-        title: 'Boost your conversion rate',
-        href: '#',
-        description:
-            'Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel. Iusto corrupti dicta.',
-        startAt: 'Mar 16, 2020',
-        endAt: '2020-03-16',
-        agency: { name: 'Marketing', },
-        condition: []
-    },
-
-]
 </script>
+
+<style scope>
+body,
+html {
+    height: auto;
+    overflow-y: auto;
+}
+
+main.isolate {
+    overflow-y: auto;
+}
+
+#app {
+    height: 100%;
+    overflow-y: auto;
+}
+</style>
