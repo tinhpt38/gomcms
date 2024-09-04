@@ -316,7 +316,10 @@ getDetailData();
 
 const saveAttendance = async () => {
   if (formData.value.limitCount) {
-    formData.value.limitCount = parseInt(formData.value.limitCount)
+    formData.value.limitCount = Number(formData.value.limitCount)
+  }
+  if (formData.value.limitClientCount) {
+    formData.value.limitClientCount = Number(formData.value.limitClientCount)
   }
   elFormRef.value?.validate(async (valid) => {
     if (!valid) return

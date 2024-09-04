@@ -227,10 +227,12 @@ const requestCheckin = async () => {
     conditionData.value = res.data.conditions
     attendance.value = res.data.attendance
     ElMessageBox.alert('Điểm danh thành công', 'Thông báo', {
-      confirmButtonText: 'Xem chi tiết',
+      confirmButtonText: 'OK',
       type: 'success'
     }).then(() => {
-
+      if (attendance.value.redirectUrl){
+        window.location.href = attendance.value.redirectUrl
+      }
     });
   } else {
     ElMessage(res.msg)
