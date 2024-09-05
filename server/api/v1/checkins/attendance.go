@@ -143,7 +143,8 @@ func (attendanceApi *AttendanceApi) GetAttendanceList(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	list, total, err := attendanceService.GetAttendanceInfoList(pageInfo)
+	craeteBy := utils.GetUserID(c)
+	list, total, err := attendanceService.GetAttendanceInfoList(pageInfo, craeteBy)
 	if err != nil {
 		global.GVA_LOG.Error("lấy thất bại!", zap.Error(err))
 		response.FailWithMessage("lấy thất bại:"+err.Error(), c)

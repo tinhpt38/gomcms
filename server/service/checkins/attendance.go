@@ -90,7 +90,7 @@ func (attendanceService *AttendanceService) GetAttendanceArea(id string) (list [
 	return
 }
 
-func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsReq.AttendanceSearch) (list []checkins.Attendance, total int64, err error) {
+func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsReq.AttendanceSearch, createdBy uint) (list []checkins.Attendance, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 
@@ -103,6 +103,10 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 
 	if info.StartDate != nil && info.EndDate != nil {
 		db = db.Where("DATE(start_date) >= ? OR DATE(end_date) <= ?", info.StartDate.Format("2006-01-02"), info.EndDate.Format("2006-01-02"))
+	}
+
+	if createdBy != 0 && createdBy != 1 {
+		db = db.Where("created_by = ?", createdBy)
 	}
 
 	err = db.Count(&total).Error
