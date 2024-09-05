@@ -236,7 +236,10 @@ const requestCheckin = async () => {
   if (res.code == 0) {
     conditionData.value = res.data.conditions
     attendance.value = res.data.attendance
-    var msg = res.data.message.join(', ')
+    var msg = "Điểm danh thành công"
+    if (res.data.message) {
+      msg = res.data.message.join(', ')
+    }
     ElMessageBox.alert(msg, 'Thông báo', {
       confirmButtonText: 'OK',
       type: 'success'
