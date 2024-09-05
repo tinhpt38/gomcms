@@ -161,7 +161,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		if attendance.AllowGuest {
 			participant = checkins.Participant{
 				Email:    email,
-				FullName: *req.FullName,
+				FullName: req.FullName,
 			}
 			perr = participantService.CreateParticipant(&participant)
 			if perr != nil {

@@ -16,9 +16,9 @@
                     <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
 </el-table-column> -->
         <el-table-column align="left" label="Nhóm" prop="group.name" min-width="120" />
-        <el-table-column align="left" label="Khu vực" prop="area.Area.name" min-width="300">
+        <el-table-column align="left" label="Khu vực" prop="area.area.name" min-width="300">
           <template #default="scope">
-            {{ scope.row.area?.Area?.name }} <span v-if="scope.row.area?.radius">(Bán kính {{ scope.row.area?.radius
+            {{ scope.row.area?.area?.name }} <span v-if="scope.row.area?.radius">(Bán kính {{ scope.row.area?.radius
               }})</span>
           </template>
         </el-table-column>

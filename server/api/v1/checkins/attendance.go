@@ -165,3 +165,19 @@ func (attendanceApi *AttendanceApi) GetAttendancePublic(c *gin.Context) {
 	}, "lấy thành công", c)
 }
 
+func (attendanceApi *AttendanceApi) CloneAttendance(c *gin.Context) {
+	var clone checkinsReq.AttendanceCloneRequest
+	err := c.ShouldBindJSON(&clone)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	createdBy := utils.GetUserID(c)
+	err = attendanceService.CloneAttendance(clone, createdBy)
+	if err != nil {
+		global.GVA_LOG.Error("Nhân bản thất bại!", zap.Error(err))
+		response.FailWithMessage("Nhân bản thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithMessage("Nhân bản thành công", c)
+}

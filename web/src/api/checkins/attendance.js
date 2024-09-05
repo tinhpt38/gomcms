@@ -8,6 +8,15 @@ export const createAttendance = (data) => {
   })
 }
 
+
+export const cloneAttendance = (data) => {
+  return service({
+    url: '/attendance/cloneAttendance',
+    method: 'post',
+    data
+  })
+}
+
 export const createAttendanceArea = (data) => {
   return service({
     url: '/attendance/createAttendanceArea',

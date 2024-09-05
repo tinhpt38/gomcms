@@ -18,3 +18,8 @@ type AttendanceAreaRequest struct {
 	AttendanceID uint `json:"attendanceID" form:"attendanceID"`
 	AreaID       uint `json:"areaID" form:"areaID"`
 }
+
+type AttendanceCloneRequest struct {
+	AttendanceID uint `json:"attendanceID" form:"attendanceID"`
+	WithData     bool `json:"withData" form:"withData"`
+}

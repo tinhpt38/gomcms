@@ -233,6 +233,7 @@ const getTableData = async() => {
   page.value = table.data.page
   pageSize.value = table.data.pageSize
   }
+  console.log("getConditionList: ", table.data)
 }
 
 getTableData()

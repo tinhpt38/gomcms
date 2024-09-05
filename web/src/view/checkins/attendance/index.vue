@@ -55,17 +55,19 @@
         @selection-change="handleSelectionChange">
         <!-- <el-table-column type="selection" width="55" /> -->
 
-        <el-table-column align="left" label="Tiêu đề" prop="title" width="300" />
+        <el-table-column align="left" label="Tiêu đề" prop="title" width="250" />
         <el-table-column align="left" label="Bắt đầu" prop="startDate" width="120">
           <template #default="scope">
-            {{ formatDate(scope.row.startDate) }}
+            {{ formatDateTime(scope.row.startDate) }}
           </template>
         </el-table-column>
         <el-table-column align="left" label="Kết thúc" prop="endDate" width="120">
           <template #default="scope">
-            {{ formatDate(scope.row.endDate) }}
+            {{ formatDateTime(scope.row.endDate) }}
           </template>
         </el-table-column>
+        <el-table-column label="Đơn vị" prop="agency.name" width="150" />
+        <el-table-column label="Danh mục" prop="category.name" width="120" />
         <el-table-column align="left" label="Cho phép khách" prop="allowGuest" width="150">
           <template #default="scope">
             {{ scope.row.allowGuest ? "Cho phép" : "Không cho phép" }}
@@ -87,8 +89,10 @@
                 style="margin-right: 5px">
                 <InfoFilled />
               </el-icon>Xem chi tiết</el-button>
-            <el-button type="primary" link icon="edit" class="table-button"
-              @click="updateAttendanceFunc(scope.row)">Chỉnh sửa</el-button>
+            <!-- <el-button type="primary" link icon="edit" class="table-button"
+              @click="updateAttendanceFunc(scope.row)">Chỉnh sửa</el-button> -->
+            <el-button type="primary" link icon="documentCopy" class="table-button" @click="cloneRow(scope.row)">Nhân
+              bản</el-button>
             <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">Xóa</el-button>
           </template>
         </el-table-column>
@@ -117,6 +121,9 @@
       <el-form ref="elFormRef" :model="formData" label-position="top" :rules="rule" label-width="80px">
         <el-form-item label="Tiêu đề:" prop="title">
           <el-input v-model="formData.title" :clearable="true" placeholder="Nhập tiêu đề" />
+        </el-form-item>
+        <el-form-item label="Hệ số:" prop="weight">
+          <el-input v-model="formData.weight" :clearable="true" type="number" placeholder="Nhập hệ số" />
         </el-form-item>
         <el-form-item label="Ngày bắt đầu:" prop="startDate">
           <el-date-picker v-model="formData.startDate" type="datetime" style="width:100%" placeholder="Chọn ngày"
@@ -168,6 +175,17 @@
         </el-descriptions-item>
       </el-descriptions>
     </el-drawer>
+    <el-dialog v-model="dialogClone">
+      <template #title>
+        <span>Xác nhận</span>
+      </template>
+      <p>Bạn có muốn nhân bản mục này với dữ liệu thành viên không?</p>
+      <br>
+      <span slot="footer" class="dialog-footer mt-4">
+        <el-button type="danger" @click="cloneAttendanceFun(false)">Không</el-button>
+        <el-button type="primary" @click="cloneAttendanceFun(true)">Có</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -178,7 +196,8 @@ import {
   deleteAttendanceByIds,
   updateAttendance,
   findAttendance,
-  getAttendanceList
+  getAttendanceList,
+  cloneAttendance
 } from '@/api/checkins/attendance'
 import router from '@/router';
 import {
@@ -190,7 +209,7 @@ import {
 } from '@/api/checkins/attendanceAgency'
 
 // 全量引入格式化工具 请按需保留
-import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
+import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile, formatDateTime } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
@@ -210,6 +229,7 @@ const formData = ref({
   isLocked: false,
 })
 
+const dialogClone = ref(false)
 
 
 // 验证规则
@@ -333,8 +353,10 @@ const getCategoryOptions = async () => {
   const table = await getAttendanceCategoryList({ page: 0, pageSize: -1 })
   if (table.code === 0) {
     categoryOptions.value = convertToTree(table.data.list)
+    var selectCurrent = table.data.list.filter((e) => e.isCurrent)
+    formData.value.categoryId = selectCurrent[0].ID
   }
-  // console.log("parent Options", categoryOptions.value)
+
 }
 
 getCategoryOptions()
@@ -344,6 +366,7 @@ const getAgencyOptions = async () => {
   if (table.code === 0) {
     agencyOptions.value = table.data.list
   }
+
 }
 getAgencyOptions()
 
@@ -398,6 +421,33 @@ const deleteRow = (row) => {
   }).then(() => {
     deleteAttendanceFunc(row)
   })
+}
+
+const formClone = ref({
+  id: null,
+  withData: false
+})
+const cloneRow = (row) => {
+  dialogClone.value = true
+  formClone.value.id = row.ID
+}
+
+const cloneAttendanceFun = async (withData) => {
+  dialogClone.value = false
+  var res = await cloneAttendance({ attendanceId: formClone.value.id, withData: withData })
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Nhân bản thành công'
+    })
+    getTableData()
+  }else{
+    ElMessage({
+      type: 'error',
+      message: res.message
+    })
+  }
+  console.log('res', res)
 }
 
 // Xóa nhiều hàng
@@ -484,6 +534,10 @@ const closeDialog = () => {
 }
 // Xác nhận hộp thoại
 const enterDialog = async () => {
+  if (formData.value.weight) {
+    formData.value.weight = Number(formData.value.weight)
+  }
+
   elFormRef.value?.validate(async (valid) => {
     if (!valid) return
     let res

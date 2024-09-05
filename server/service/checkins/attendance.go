@@ -117,3 +117,89 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 	err = db.Preload("Areas").Preload(clause.Associations).Debug().Find(&attendanceClasss).Error
 	return attendanceClasss, total, err
 }
+
+func (attendanceService *AttendanceService) CloneAttendance(req checkinsReq.AttendanceCloneRequest, createdBy uint) (err error) {
+	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		// Retrieve the current attendance
+		curAttendance := checkins.Attendance{}
+		err = tx.First(&curAttendance, req.AttendanceID).Error
+		if err != nil {
+			return err
+		}
+		newAtendance := curAttendance
+		newAtendance.CreatedBy = createdBy
+		newAtendance.ID = 0
+		newAtendance.Title = newAtendance.Title + " - Copy"
+		if err := tx.Create(&newAtendance).Error; err != nil {
+			return err
+		}
+
+		curAttendanceAreas := []checkins.AttendanceArea{}
+		if err := tx.Where("attendance_id = ?", curAttendance.ID).Find(&curAttendanceAreas).Error; err != nil {
+			return err
+		}
+
+		for _, area := range curAttendanceAreas {
+			newArea := area
+			newArea.ID = 0
+			newArea.AttendanceID = &newAtendance.ID
+			if err := tx.Create(&newArea).Error; err != nil {
+				return err
+			}
+		}
+
+		curConditions := []checkins.Condition{}
+		if err := tx.Where("attendance_id = ?", curAttendance.ID).Find(&curConditions).Error; err != nil {
+			return err
+		}
+		for _, condition := range curConditions {
+			newCondition := condition
+			newCondition.ID = 0
+			newCondition.AttendanceId = &newAtendance.ID
+			if err := tx.Create(&newCondition).Error; err != nil {
+				return err
+			}
+		}
+
+		if req.WithData {
+
+			curGroups := []checkins.Group{}
+			if err := tx.Where("attendance_id = ?", curAttendance.ID).Find(&curGroups).Error; err != nil {
+				return err
+			}
+			newGroups := []checkins.Group{}
+			for _, group := range curGroups {
+				newGroup := group
+				newGroup.ID = 0
+				newGroup.AttendanceId = newAtendance.ID
+				if err := tx.Create(&newGroup).Error; err != nil {
+					return err
+				}
+				newGroups = append(newGroups, newGroup)
+			}
+
+			agps := []checkins.AttendanceGroupParticipant{}
+			if err := tx.Where("attendance_id = ?", curAttendance.ID).Find(&agps).Error; err != nil {
+				return err
+			}
+			for _, agp := range agps {
+				newAgp := agp
+				newAgp.ID = 0
+				newAgp.AttendanceId = &newAtendance.ID
+				for index, group := range curGroups {
+					if group.ID == *agp.GroupId {
+						newAgp.GroupId = &newGroups[index].ID
+						break
+					}
+				}
+				if err := tx.Create(&newAgp).Error; err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
+
+	return
+}
