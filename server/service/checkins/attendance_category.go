@@ -12,6 +12,10 @@ type AttendanceCategoryService struct{}
 // CreateAttendanceCategory 创建Danh mục điểm danh记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (attendanceCategoryService *AttendanceCategoryService) CreateAttendanceCategory(attendanceCategory *checkins.AttendanceCategory) (err error) {
+
+	if attendanceCategory.IsCurrent {
+		global.GVA_DB.Model(&checkins.AttendanceCategory{}).Where("is_current = ?", true).Update("is_current", false)
+	}
 	err = global.GVA_DB.Create(attendanceCategory).Error
 	return err
 }

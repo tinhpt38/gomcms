@@ -47,16 +47,20 @@
           @click="onDelete">Xóa</el-button>
       </div>
       <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
-        @selection-change="handleSelectionChange"  :tree-props="treeProps">
+        @selection-change="handleSelectionChange" :tree-props="treeProps">
         <!-- <el-table-column type="selection" width="55" /> -->
-        <el-table-column align="left" label="Tên phân loại" prop="name" width="200" />
-        <!-- <el-table-column align="left" label="Danh mục cha" prop="parentId" width="120" /> -->
+        <el-table-column align="left" label="Tên phân loại" prop="name" width="300" />
+        <el-table-column align="left" label="Mặc định" prop="isCurrent" width="120">
+          <template #default="scope">
+            {{ scope.row.isCurrent ? 'Có' : 'Không' }}
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
           <template #default="scope">
-            <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon
+            <!-- <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon
                 style="margin-right: 5px">
                 <InfoFilled />
-              </el-icon>Xem chi tiết</el-button>
+              </el-icon>Xem chi tiết</el-button> -->
             <el-button type="primary" link icon="edit" class="table-button"
               @click="updateAttendanceCategoryFunc(scope.row)">Chỉnh sửa</el-button>
             <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">Xóa</el-button>
@@ -83,6 +87,9 @@
       <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
         <el-form-item label="Tên phân loại:" prop="name">
           <el-input v-model="formData.name" type="text" :clearable="true" placeholder="Nhập tên phân loại" />
+        </el-form-item>
+        <el-form-item label="Đặt làm mặc định:" prop="isCurrent">
+          <el-switch v-model="formData.isCurrent" />
         </el-form-item>
         <el-form-item label="Danh mục cha:" prop="parentId">
           <!-- <el-input v-model.number="formData.parentId" :clearable="true" placeholder="Nhập danh mục cha" /> -->

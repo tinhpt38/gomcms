@@ -119,24 +119,24 @@
           <el-input v-model="formData.title" :clearable="true" placeholder="Nhập tiêu đề" />
         </el-form-item>
         <el-form-item label="Ngày bắt đầu:" prop="startDate">
-          <el-date-picker v-model="formData.startDate" type="date" style="width:100%" placeholder="Chọn ngày"
+          <el-date-picker v-model="formData.startDate" type="datetime" style="width:100%" placeholder="Chọn ngày"
             :clearable="true" />
         </el-form-item>
         <el-form-item label="Ngày kết thúc:" prop="endDate">
-          <el-date-picker v-model="formData.endDate" type="date" style="width:100%" placeholder="Chọn ngày"
+          <el-date-picker v-model="formData.endDate" type="datetime" style="width:100%" placeholder="Chọn ngày"
             :clearable="true" />
-        </el-form-item>
-        <el-form-item label="Danh mục" prop="categoryId" class="w-full required">
-          <el-tree-select class="w-full" v-model="formData.categoryId" :data="categoryOptions" check-on-click-node
-            :render-after-expand="false" style="width: 240px" />
         </el-form-item>
         <el-form-item label="Đơn vị" prop="agencyId" class="w-full required">
           <el-select v-model="formData.agencyId" placeholder="Chọn đơn vị" clearable filterable>
             <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
+        <el-form-item label="Danh mục" prop="categoryId" class="w-full required">
+          <el-tree-select class="w-full" v-model="formData.categoryId" :data="categoryOptions" check-on-click-node
+            :render-after-expand="false" style="width: 240px" />
+        </el-form-item>
         <el-form-item prop="description" label="Mô tả" class="w-full">
-          <el-input type="text" v-model="formData.description" ></el-input>
+          <el-input type="text" v-model="formData.description"></el-input>
         </el-form-item>
         <el-form-item label="Cho phép khách:" prop="allowGuest">
           <el-switch v-model="formData.allowGuest" active-color="#13ce66" inactive-color="#ff4949" active-text="Có"
