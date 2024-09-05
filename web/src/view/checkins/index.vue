@@ -47,7 +47,11 @@
                   danh<br><span class="text-[#7BA227]">Trường Đại học Đà Lạt</span>.
                 </h1>
                 <p class="relative mt-6 text-lg font-bold leading-8 text-[#E67F32] sm:max-w-md lg:max-w-none">
-                  Hãy đăng nhập bằng tài khoảng Email của bạn với Google để đăng nhập.
+                  Hãy đăng nhập bằng tài khoản Email của bạn với Google để đăng nhập.
+                </p>
+                <p class="relative mt-1 text-base italic leading-8 text-gray-500 sm:max-w-md lg:max-w-none">
+                  {{isSupported ? "Trình duyệt hỗ trợ lấy vị trí: " : "Trình duyệt không hỗ trợ lấy vị trí"}}
+                  {{coords.latitude + ", " + coords.longitude}}
                 </p>
                 <div v-if="attendance.title != null" class="mt-4 bg-slate-50 p-2 rounded shadow-slate-400">
                   <h3>{{ attendance.title }}</h3>
@@ -142,7 +146,7 @@ defineOptions({
   name: "Checkins",
 })
 
-const { coords, locatedAt, error, resume, pause } = useGeolocation()
+const { coords, locatedAt, error, isSupported} = useGeolocation()
 
 const data = ref({
   email: null,
@@ -232,7 +236,7 @@ const requestCheckin = async () => {
   if (res.code == 0) {
     conditionData.value = res.data.conditions
     attendance.value = res.data.attendance
-    var msg = res.data.message
+    var msg = res.data.message.join(', ')
     ElMessageBox.alert(msg, 'Thông báo', {
       confirmButtonText: 'OK',
       type: 'success'
