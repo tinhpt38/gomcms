@@ -213,3 +213,45 @@ func (attendanceService *AttendanceService) CloneAttendance(req checkinsReq.Atte
 
 	return
 }
+
+func (attendanceService *AttendanceService) StatsByAgencyCategory(req checkinsReq.StatsByAgencyCategory) (result map[string]interface{}, err error) {
+
+	category := checkins.AttendanceCategory{}
+	err = global.GVA_DB.Where("id = ?", req.CategoryId).First(&category).Error
+	if err != nil {
+		return
+	}
+	var listCatIs []uint
+	if *category.ParentId == 0 {
+		err = global.GVA_DB.Model(&checkins.AttendanceCategory{}).Select("id").Where("id = ?", category.ParentId).Scan(&listCatIs).Error
+		if err != nil {
+			return
+		}
+	} else {
+		listCatIs = append(listCatIs, req.CategoryId)
+	}
+
+	var resultRows []struct {
+		AgencyName    string
+		CountByAgency int
+		TotalParts    int
+	}
+
+	rawDB := global.GVA_DB.Table("attendances as att").
+		Select("attagen.name as AgencyName, count(att.agency_id) as CountByAgency, acheckins.totalParts as TotalParts").
+		Joins("LEFT JOIN attendance_agencies as attagen on attagen.id = att.agency_id").
+		Joins("LEFT JOIN attendance_categories as attcat on attcat.id = att.category_id").
+		Joins("LEFT JOIN (SELECT attendance_checkins.attendance_id as attid, COUNT(DISTINCT attendance_checkins.partpaticipant_id) as totalParts FROM attendance_checkins WHERE attendance_checkins.deleted_at is NULL GROUP by attid) as acheckins on acheckins.attid = att.id").
+		Where("att.deleted_at is NULL")
+	if req.AgencyId != 0 {
+		rawDB.Where("att.agency_id = ?", req.AgencyId)
+	}
+	rawDB.Where("att.category_id IN (?)", listCatIs).Group("att.agency_id")
+	err = rawDB.Debug().Find(&resultRows).Error
+	if err != nil {
+		return
+	}
+	result = make(map[string]interface{})
+	result["data"] = resultRows
+	return result, err
+}

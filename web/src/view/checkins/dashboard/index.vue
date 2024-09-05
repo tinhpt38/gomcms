@@ -25,6 +25,10 @@
                 </el-form-item>
             </el-form>
         </div>
+        <div class="text-base my-1 mx-1">Biểu đồ thể hiện tổng số điểm danh và tổng số thành viên điểm danh theo đơn vị và danh mục</div>
+        <div class="mt-1 flex flex-row justify-between p-4 rounded bg-slate-100">
+            <vue-echarts :option="statsByAgencyCategoryOptions" style="height: 440px; width: 100%;" />
+        </div>
     </div>
 </template>
 
@@ -37,7 +41,13 @@ import {
 import {
     getAttendanceAgencyList
 } from '@/api/checkins/attendanceAgency'
-import { ref } from 'vue';
+
+import {
+    statsByAgencyCategory
+} from '@/api/checkins/attendance'
+
+import { onMounted, ref } from 'vue';
+import { VueEcharts } from 'vue3-echarts';
 
 
 defineOptions({
@@ -54,6 +64,7 @@ const searchInfo = ref({
 
 const onSubmit = () => {
     console.log('submit', searchInfo.value)
+    statsByAgencyCategoryFun()
 }
 
 const onReset = () => {
@@ -64,6 +75,72 @@ const onReset = () => {
     }
 }
 
+
+// Charts 
+const statsByAgencyCategoryOptions = ref({})
+const createStatsByAgencyCategory = (data) => {
+
+    var xAxisData = data.map((e) => e.AgencyName)
+    var seriesDataAgency = data.map((e) => e.CountByAgency)
+    var seriesDataParts = data.map((e) => e.TotalParts)
+    statsByAgencyCategoryOptions.value = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: [
+            {
+                type: 'category',
+                data: xAxisData,
+                axisTick: {
+                    alignWithLabel: true
+                }
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value'
+            }
+        ],
+        series: [
+            {
+                name: 'Tổng số điểm danh',
+                type: 'bar',
+                barWidth: '50%',
+                data: seriesDataAgency
+            },
+            {
+                name: 'Tổng số thành viên',
+                type: 'bar',
+                barWidth: '50%',
+                data: seriesDataParts
+            }
+        ]
+    }
+}
+
+
+// Data
+
+const statsByAgencyCategoryFun = async () => {
+    console.log('statsByAgencyCategory', searchInfo.value)
+    const table = await statsByAgencyCategory(searchInfo.value)
+    console.log('statsByAgencyCategory', table)
+    if (table.code === 0) {
+        createStatsByAgencyCategory(table.data.data)
+    }
+
+}
+
+
 // Load Options
 const categoryOptions = ref([])
 const agencyOptions = ref([])
@@ -73,8 +150,10 @@ const getCategoryOptions = async () => {
     const table = await getAttendanceCategoryList({ page: 0, pageSize: -1 })
     if (table.code === 0) {
         categoryOptions.value = convertToTree(table.data.list)
+        var selectCurrent = table.data.list.filter((e) => e.isCurrent)
+        searchInfo.value.categoryId = selectCurrent[0].ID
+        statsByAgencyCategoryFun()
     }
-    // console.log("parent Options", categoryOptions.value)
 }
 
 getCategoryOptions()
@@ -112,3 +191,5 @@ const convertToTree = (data) => {
 }
 
 </script>
+
+<style></style>

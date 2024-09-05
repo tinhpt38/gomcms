@@ -182,3 +182,19 @@ func (attendanceApi *AttendanceApi) CloneAttendance(c *gin.Context) {
 	}
 	response.OkWithMessage("Nhân bản thành công", c)
 }
+
+func (attendanceApi *AttendanceApi) StatsByAgencyCategory(c *gin.Context) {
+	var stats checkinsReq.StatsByAgencyCategory
+	err := c.ShouldBindJSON(&stats)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	res, err := attendanceService.StatsByAgencyCategory(stats)
+	if err != nil {
+		global.GVA_LOG.Error("Không lấy được dữ liệu!", zap.Error(err))
+		response.FailWithMessage("Không lấy được dữ liệu:"+err.Error(), c)
+		return
+	}
+	response.OkWithData(res, c)
+}

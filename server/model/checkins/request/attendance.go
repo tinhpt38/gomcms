@@ -25,3 +25,8 @@ type AttendanceCloneRequest struct {
 	AttendanceID uint `json:"attendanceID" form:"attendanceID"`
 	WithData     bool `json:"withData" form:"withData"`
 }
+
+type StatsByAgencyCategory struct {
+	AgencyId   uint `json:"agencyId" form:"agencyId"`
+	CategoryId uint `json:"categoryId" form:"categoryId"`
+}

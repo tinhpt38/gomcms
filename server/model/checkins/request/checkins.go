@@ -9,3 +9,5 @@ type CheckinsReq struct {
 	Accuracy  *float64 `json:"accuracy" form:"accuracy" gorm:"column:accuracy;comment:Độ chính xác"`
 	FullName  *string  `json:"fullName" form:"fullName"`
 }
+
+
