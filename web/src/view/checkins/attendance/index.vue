@@ -3,27 +3,35 @@
     <div class="gva-search-box">
       <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule"
         @keyup.enter="onSubmit">
-        <el-form-item label="Ngày tạo" prop="createdAt">
-          <template #label>
-            <span>
-              Ngày tạo
-              <el-tooltip content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
-                <el-icon>
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="Ngày bắt đầu"
-            :disabled-date="time => searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false" />
-          —
-          <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc"
-            :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false" />
+        <el-form-item label="Đơn vị" prop="agencyId" class="">
+          <el-select v-model="searchInfo.agencyId" placeholder="Chọn đơn vị" clearable filterable>
+            <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Danh mục" prop="categoryId" class="w-[300px]">
+          <el-tree-select class="w-full" v-model="searchInfo.categoryId" :data="categoryOptions" check-on-click-node
+            :render-after-expand="false" style="width: 240px" />
         </el-form-item>
 
 
         <template v-if="showAllQuery">
-          <!-- Thêm các điều kiện tìm kiếm cần điều khiển hiển thị vào đây -->
+          <el-form-item label="Ngày tạo" prop="createdAt">
+            <template #label>
+              <span>
+                Ngày tạo˝
+                <el-tooltip content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </span>
+            </template>
+            <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="Ngày bắt đầu"
+              :disabled-date="time => searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false" />
+            —
+            <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc"
+              :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false" />
+          </el-form-item>
         </template>
 
         <el-form-item>
@@ -68,11 +76,11 @@
         </el-table-column>
         <el-table-column label="Đơn vị" prop="agency.name" width="150" />
         <el-table-column label="Danh mục" prop="category.name" width="120" />
-        <el-table-column align="left" label="Cho phép khách" prop="allowGuest" width="150">
+        <!-- <el-table-column align="left" label="Cho phép khách" prop="allowGuest" width="150">
           <template #default="scope">
             {{ scope.row.allowGuest ? "Cho phép" : "Không cho phép" }}
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column align="left" label="Trạng thái" prop="isLocked" width="100">
           <template #default="scope">
             {{ scope.row.isLocked ? "Đã đóng" : "Đang mở" }}
@@ -312,12 +320,6 @@ const onSubmit = () => {
     if (!valid) return
     page.value = 1
     pageSize.value = 10
-    if (searchInfo.value.isTrial === "") {
-      searchInfo.value.isTrial = null
-    }
-    if (searchInfo.value.isLocked === "") {
-      searchInfo.value.isLocked = null
-    }
     getTableData()
   })
 }
@@ -441,7 +443,7 @@ const cloneAttendanceFun = async (withData) => {
       message: 'Nhân bản thành công'
     })
     getTableData()
-  }else{
+  } else {
     ElMessage({
       type: 'error',
       message: res.message

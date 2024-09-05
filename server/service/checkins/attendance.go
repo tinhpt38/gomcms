@@ -108,6 +108,12 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 	if createdBy != 0 && createdBy != 1 {
 		db = db.Where("created_by = ?", createdBy)
 	}
+	if info.AgencyId != 0 {
+		db = db.Where("agency_id = ?", info.AgencyId)
+	}
+	if info.CategoryId != 0 {
+		db = db.Where("category_id = ?", info.CategoryId)
+	}
 
 	err = db.Count(&total).Error
 	if err != nil {

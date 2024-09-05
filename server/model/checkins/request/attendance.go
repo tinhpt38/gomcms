@@ -11,6 +11,8 @@ type AttendanceSearch struct {
 	EndCreatedAt   *time.Time `json:"endCreatedAt" form:"endCreatedAt"`
 	StartDate      *time.Time `json:"startDate" form:"startDate"`
 	EndDate        *time.Time `json:"endDate" form:"endDate"`
+	AgencyId       uint       `json:"agencyId" form:"agencyId"`
+	CategoryId     uint       `json:"categoryId" form:"categoryId"`
 	request.PageInfo
 }
 
