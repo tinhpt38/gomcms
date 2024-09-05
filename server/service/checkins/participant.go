@@ -48,7 +48,18 @@ func (participantService *ParticipantService) DeleteParticipantByIds(IDs []strin
 // UpdateParticipant 更新Sinh viên (Người tham dự phiên điểm danh)记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (participantService *ParticipantService) UpdateParticipant(participant checkins.Participant) (err error) {
-	err = global.GVA_DB.Model(&checkins.Participant{}).Where("id = ?", participant.ID).Updates(&participant).Error
+	err = global.GVA_DB.Model(&checkins.Participant{}).Where("id = ?", participant.ID).Save(&participant).Error
+	agbDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
+	agp := checkins.AttendanceGroupParticipant{}
+	rerr := agbDb.Where("participant_id = ? AND attendance_id = ?", participant.ID, participant.AttendanceId).First(&agp).Error
+	if rerr != nil {
+		return rerr
+	}
+	agp.GroupId = participant.GroupId
+	rerr = agbDb.Save(&agp).Error
+	if rerr != nil {
+		return rerr
+	}
 	return err
 }
 

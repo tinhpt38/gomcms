@@ -54,6 +54,9 @@
                   gọn</el-button>
                 <template v-if="showAllOptionConfig">
                   <div class="flex justify-between">
+                    <el-form-item label="Hệ số" prop="formData.weight">
+                      <el-input v-model="formData.weight" type="number" clearable />
+                    </el-form-item>
                     <el-form-item label="Giới hạn số lần / thành viên" prop="formData.limitCount">
                       <el-input v-model="formData.limitCount" type="number" clearable />
                     </el-form-item>
@@ -99,7 +102,7 @@
       </el-tab-pane>
       <el-tab-pane name="partticipantsTab" label="Thành viên">
         <div class="table-container">
-          <Partticipant :ac-id="currentId" />
+          <Partticipant :ac-id="currentId" :group-options="groupOptions" />
         </div>
       </el-tab-pane>
       <el-tab-pane name="groupTab" label="Nhóm">
@@ -222,6 +225,14 @@ import {
   getAttendanceCheckInList
 } from '@/api/checkins/attendanceCheckIn'
 
+import {
+  findAttendanceArea
+} from '@/api/checkins/attendance'
+
+import {
+  getGroupList
+} from '@/api/checkins/group'
+
 import { useRoute } from 'vue-router';
 import QRCode from 'qrcode'
 import { ElForm, ElMessage } from 'element-plus'
@@ -312,7 +323,12 @@ const getDetailData = async () => {
 
 }
 getDetailData();
-
+//TODO: thay đổi cấu trúc nhận props của các component 
+/**
+ * Đưa các API lấy dữ liệu Option từ bên index
+ * Truyền thông qua props của component
+ * Emit event ra ngoài để bên index lấy dữ liệu
+ */
 
 const saveAttendance = async () => {
   if (formData.value.limitCount) {
@@ -321,6 +337,11 @@ const saveAttendance = async () => {
   if (formData.value.limitClientCount) {
     formData.value.limitClientCount = Number(formData.value.limitClientCount)
   }
+
+  if (formData.value.weight) {
+    formData.value.weight = Number(formData.value.weight)
+  }
+
   elFormRef.value?.validate(async (valid) => {
     if (!valid) return
     var res = await updateAttendance(formData.value)
@@ -489,6 +510,32 @@ const tabHandleClick = async (tab, event) =>{
     await conditionTabRef.value?.getGroupOptions()
   }
 }
+
+const areaOptions = ref([])
+const getAreaListData = async () => {
+  const table = await findAttendanceArea({ id: searchInfo.value.attendanceId })
+  if (table.code === 0) {
+    areaOptions.value = table.data.map(item => {
+      return {
+        ID: item.ID,
+        name: item.area?.name
+      }
+    })
+  }
+
+}
+getAreaListData();
+
+const groupOptions = ref([])
+const getGroupOptions = async () => {
+  const table = await getGroupList({ page: 1, pageSize: -1, ...searchInfo.value })
+  if (table.code === 0) {
+    groupOptions.value = table.data.list
+  }
+  console.log('groupOptions', groupOptions.value)
+}
+getGroupOptions();
+
 
 const getTrendline = () => {
   const trendline = echarts.init(document.getElementById('trendline'))

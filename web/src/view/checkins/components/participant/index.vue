@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="p-1 my-1">
-      <el-button type="primary" icon="plus" @click="() => {}">
+      <el-button type="primary" icon="plus" @click="() => { }">
         Thêm thành viên
       </el-button>
     </div>
@@ -38,14 +38,43 @@
           <span>{{ scope.row.totalPass }} / {{ scope.row.totalCheckin }}</span>
         </template>
       </el-table-column> -->
+      <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
+        <template #default="scope">
+          <el-button type="primary" link icon="edit" class="table-button"
+            @click="updateParticipantFunc(scope.row)">Chỉnh sửa</el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <div class="flex justify-end">
-      <el-pagination
-        v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[20, 50, 100, 500]"
-        :size="size" :background="true" layout="total, sizes, prev, pager, next, jumper"
-        :total="total" @size-change="handleSizeChange" @current-change="handleCurrentChange"
-      />
+      <el-pagination v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[20, 50, 100, 500]"
+        :size="size" :background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+        @size-change="handleSizeChange" @current-change="handleCurrentChange" />
     </div>
+    <el-drawer destroy-on-close size="800" v-model="dialogFormVisible" :show-close="false" :before-close="closeDialog">
+      <template #header>
+        <div class="flex justify-between items-center">
+          <span class="text-lg">{{ type === 'create' ? 'Thêm mới' : 'Chỉnh sửa' }}</span>
+          <div>
+            <el-button type="primary" @click="enterDialog">Đồng ý</el-button>
+            <el-button @click="closeDialog">Hủy</el-button>
+          </div>
+        </div>
+      </template>
+
+      <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
+        <el-form-item label="Họ và tên:" prop="fullName">
+          <el-input v-model="formData.fullName" :clearable="true" placeholder="Nhập Họ và tên" />
+        </el-form-item>
+        <el-form-item label="Email:" prop="email">
+          <el-input v-model="formData.email" :clearable="true" placeholder="Nhập Email" />
+        </el-form-item>
+        <el-form-item label="Nhóm:" prop="groupId">
+          <el-select v-model="formData.groupId" placeholder="Chọn nhóm">
+            <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+    </el-drawer>
   </div>
 </template>
 
@@ -54,26 +83,37 @@ import {
   createParticipant,
   deleteParticipant,
   deleteParticipantByIds,
+  findParticipant,
+  updateParticipant,
   getParticipantListByAttendance
 } from '@/api/checkins/participant'
-import { getDictFunc, formatDate, formatBoolean, filterDict ,filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
+import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
 const props = defineProps({
-    acId: {
-        type: Number,
-        required: true
-    }
+  acId: {
+    type: Number,
+    required: true
+  },
+  groupOptions: {
+    type: Array,
+    required: false
+  }
 })
 const page = ref(0)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
+
+const formData = ref({
+})
+
 const searchInfo = ref({
-    fullName: '',
-    email: '',
-    attendanceId: props.acId
+  fullName: '',
+  email: '',
+  attendanceId: props.acId,
+  groupId: null,
 })
 
 
@@ -87,7 +127,7 @@ const handleCurrentChange = (val) => {
   getTableData()
 }
 
-const getTableData = async() => {
+const getTableData = async () => {
   searchInfo.value.attendanceId = props.acId
   const table = await getParticipantListByAttendance({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
@@ -105,134 +145,140 @@ getTableData()
 const multipleSelection = ref([])
 
 const handleSelectionChange = (val) => {
-    multipleSelection.value = val
+  multipleSelection.value = val
 }
 
 const deleteRow = (row) => {
-    ElMessageBox.confirm('Bạn có chắc muốn xóa không?', 'Cảnh báo', {
-      confirmButtonText: 'Đồng ý',
-      cancelButtonText: 'Hủy',
-      type: 'warning'
-    }).then(() => {
-      deleteParticipantFunc(row)
-    })
-  }
-
-const onDelete = async() => {
   ElMessageBox.confirm('Bạn có chắc muốn xóa không?', 'Cảnh báo', {
     confirmButtonText: 'Đồng ý',
     cancelButtonText: 'Hủy',
     type: 'warning'
-  }).then(async() => {
-      const IDs = []
-      if (multipleSelection.value.length === 0) {
-        ElMessage({
-          type: 'warning',
-          message: 'Vui lòng chọn dữ liệu để xóa'
-        })
-        return
-      }
-      multipleSelection.value &&
-        multipleSelection.value.map(item => {
-          IDs.push(item.ID)
-        })
-      const res = await deleteParticipantByIds({ IDs })
-      if (res.code === 0) {
-        ElMessage({
-          type: 'success',
-          message: 'Xoá thành công'
-        })
-        if (tableData.value.length === IDs.length && page.value > 1) {
-          page.value--
-        }
-        getTableData()
-      }
+  }).then(() => {
+    deleteParticipantFunc(row)
+  })
+}
+
+const onDelete = async () => {
+  ElMessageBox.confirm('Bạn có chắc muốn xóa không?', 'Cảnh báo', {
+    confirmButtonText: 'Đồng ý',
+    cancelButtonText: 'Hủy',
+    type: 'warning'
+  }).then(async () => {
+    const IDs = []
+    if (multipleSelection.value.length === 0) {
+      ElMessage({
+        type: 'warning',
+        message: 'Vui lòng chọn dữ liệu để xóa'
       })
+      return
     }
+    multipleSelection.value &&
+      multipleSelection.value.map(item => {
+        IDs.push(item.ID)
+      })
+    const res = await deleteParticipantByIds({ IDs })
+    if (res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: 'Xoá thành công'
+      })
+      if (tableData.value.length === IDs.length && page.value > 1) {
+        page.value--
+      }
+      getTableData()
+    }
+  })
+}
 
 
 const type = ref('')
 
 
-const updateParticipantFunc = async(row) => {
-    const res = await findParticipant({ ID: row.ID })
-    type.value = 'update'
-    if (res.code === 0) {
-        formData.value = res.data
-        dialogFormVisible.value = true
-    }
+const updateParticipantFunc = async (row) => {
+  const res = await findParticipant({ ID: row.ID })
+  type.value = 'update'
+  if (res.code === 0) {
+    formData.value = res.data
+    dialogFormVisible.value = true
+  }
 }
 
 
 
 const deleteParticipantFunc = async (row) => {
-    const res = await deleteParticipant({ ID: row.ID })
-    if (res.code === 0) {
-        ElMessage({
-                type: 'success',
-                message: 'Xoá thành công'
-            })
-            if (tableData.value.length === 1 && page.value > 1) {
-            page.value--
-        }
-        getTableData()
+  const res = await deleteParticipant({ ID: row.ID })
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Xoá thành công'
+    })
+    if (tableData.value.length === 1 && page.value > 1) {
+      page.value--
     }
+    getTableData()
+  }
 }
 
 const dialogFormVisible = ref(false)
 
 
 const openDialog = () => {
-    type.value = 'create'
-    dialogFormVisible.value = true
+  type.value = 'create'
+  dialogFormVisible.value = true
 }
 
 
 const closeDialog = () => {
-    dialogFormVisible.value = false
-    formData.value = {
-        fullName: '',
-        email: '',
-        }
+  dialogFormVisible.value = false
+  formData.value = {
+    fullName: '',
+    email: '',
+  }
 }
 
+const elFormRef = ref()
 const enterDialog = async () => {
-     elFormRef.value?.validate( async (valid) => {
-             if (!valid) return
-              let res
-              switch (type.value) {
-                case 'create':
-                  res = await createParticipant(formData.value)
-                  break
-                case 'update':
-                  res = await updateParticipant(formData.value)
-                  break
-                default:
-                  res = await createParticipant(formData.value)
-                  break
-              }
-              if (res.code === 0) {
-                ElMessage({
-                  type: 'success',
-                  message: 'Tạo/cập nhật thành công'
-                })
-                closeDialog()
-                getTableData()
-              }
+  if(  formData.value.groupId ){
+    formData.value.groupId = Number(  formData.value.groupId )
+  }
+  formData.value.attendanceId = Number(props.acId)
+  console.log(formData.value  )
+  elFormRef.value?.validate(async (valid) => {
+    if (!valid) return
+    let res
+    switch (type.value) {
+      case 'create':
+        res = await createParticipant(formData.value)
+        break
+      case 'update':
+        res = await updateParticipant(formData.value)
+        break
+      default:
+        res = await createParticipant(formData.value)
+        break
+    }
+    if (res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: 'Tạo/cập nhật thành công'
       })
+      closeDialog()
+      getTableData()
+    }
+  })
 }
 
 const onSubmit = () => {
-    getTableData()
+  getTableData()
 }
 
 const onReset = () => {
-    searchInfo.value = {
-        fullName: '',
-        email: '',
-        attendanceId: props.acId
-    }
-    getTableData()
+  searchInfo.value = {
+    fullName: '',
+    email: '',
+    attendanceId: props.acId
+  }
+  getTableData()
 }
 
 

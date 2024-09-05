@@ -52,7 +52,7 @@ func (groupService *GroupService) GetGroupInfoList(info checkinsReq.GroupSearch)
 		return
 	}
 
-	if limit != 0 {
+	if limit != 0 && limit != -1 {
 		db = db.Limit(limit).Offset(offset)
 	}
 
