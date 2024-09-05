@@ -15,6 +15,23 @@
                     <el-tree-select class="w-full" v-model="searchInfo.categoryId" :data="categoryOptions"
                         check-on-click-node :render-after-expand="false" style="width: 240px" />
                 </el-form-item>
+                <el-form-item label="Ngày" prop="startAt">
+                    <template #label>
+                        <span>
+                            Ngày tạo
+                            <el-tooltip
+                                content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
+                                <el-icon>
+                                    <QuestionFilled />
+                                </el-icon>
+                            </el-tooltip>
+                        </span>
+                    </template>
+                    <el-date-picker v-model="searchInfo.startAt" type="date"
+                        placeholder="Ngày bắt đầu"></el-date-picker>
+                    —
+                    <el-date-picker v-model="searchInfo.endAt" type="date" placeholder="Ngày kết thúc"></el-date-picker>
+                </el-form-item>
                 <el-form-item>
                     <el-button type="primary" icon="search" @click="onSubmit">
                         Xem dữ liệu
@@ -25,9 +42,21 @@
                 </el-form-item>
             </el-form>
         </div>
-        <div class="text-base my-1 mx-1">Biểu đồ thể hiện tổng số điểm danh và tổng số thành viên điểm danh theo đơn vị và danh mục</div>
-        <div class="mt-1 flex flex-row justify-between p-4 rounded bg-slate-100">
-            <vue-echarts :option="statsByAgencyCategoryOptions" style="height: 440px; width: 100%;" />
+        <div class="rounded p-4">
+            <div class="text-xl my-1 mx-1">Biểu đồ thể hiện tổng số điểm danh và tổng số thành viên điểm danh theo đơn
+                vị và danh mục</div>
+            <div class="mt-1 flex flex-row justify-between p-4 rounded bg-slate-100">
+                <vue-echarts :option="statsByAgencyCategoryOptions" style="height: 440px; width: 100%;" />
+            </div>
+        </div>
+
+        <div class="rounded p-4">
+            <div class="text-xl my-1 mx-1">Thống kê sự liên quan giữa thời gian điểm danh và số lượng điểm danh trong
+                ngày.
+            </div>
+            <div class="mt-1 flex flex-row justify-between p-4 rounded bg-slate-100">
+                <vue-echarts :option="scatterPlotOptions" style="height: 550px; width: 100%;" />
+            </div>
         </div>
     </div>
 </template>
@@ -43,7 +72,8 @@ import {
 } from '@/api/checkins/attendanceAgency'
 
 import {
-    statsByAgencyCategory
+    statsByAgencyCategory,
+    statsScatterPlot
 } from '@/api/checkins/attendance'
 
 import { onMounted, ref } from 'vue';
@@ -60,11 +90,12 @@ const elSearchFormRef = ref()
 const searchInfo = ref({
     agencyId: null,
     categoryId: null,
+    startAt: new Date(),
+    endAt: new Date(new Date().setMonth(new Date().getMonth() + 1)),
 })
 
 const onSubmit = () => {
-    console.log('submit', searchInfo.value)
-    statsByAgencyCategoryFun()
+    statsFunc()
 }
 
 const onReset = () => {
@@ -127,6 +158,38 @@ const createStatsByAgencyCategory = (data) => {
     }
 }
 
+const scatterPlotOptions = ref({
+    xAxis: {
+        type: 'value',  // Trục X là giá trị số (số phút)
+        name: 'Time (Minutes from 00:00)',
+        min: 0,  // Bắt đầu từ 0 phút (00:00)
+        max: 1440  // 1440 phút là 24:00
+    },
+    yAxis: {
+        type: 'value',  // Trục Y là số lượng điểm danh
+        name: 'Check-in Count'
+    },
+    series: [
+        {
+            symbolSize: 20,
+            data: [],  // Dữ liệu sẽ được cập nhật
+            type: 'scatter'
+        }
+    ]
+});
+const updateScatterPlotOptions = (data) => {
+    const seriesData = data.map(item => [timeToMinutes(item.CheckinTime), item.CheckinCount]);
+
+// Cập nhật option cho scatter plot
+scatterPlotOptions.value.xAxis.data = seriesData.map(item => item[0]);  // Đặt trục X là thời gian đã chuyển đổi
+scatterPlotOptions.value.series[0].data = seriesData;  // Đặt series data cho biểu đồ
+}
+
+function timeToMinutes(timeStr) {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes;  // Chuyển giờ thành phút và cộng với phút
+}
+
 
 // Data
 
@@ -140,6 +203,20 @@ const statsByAgencyCategoryFun = async () => {
 
 }
 
+const statsScatterPlotFun = async () => {
+    const table = await statsScatterPlot(searchInfo.value)
+    console.log('statsScatterPlot', table)
+    if (table.code === 0) {
+        updateScatterPlotOptions(table.data.data)
+    }
+
+}
+
+
+const statsFunc = async () => {
+    statsByAgencyCategoryFun()
+    statsScatterPlotFun()
+}
 
 // Load Options
 const categoryOptions = ref([])
@@ -152,8 +229,8 @@ const getCategoryOptions = async () => {
         categoryOptions.value = convertToTree(table.data.list)
         var selectCurrent = table.data.list.filter((e) => e.isCurrent)
         searchInfo.value.categoryId = selectCurrent[0].ID
-        statsByAgencyCategoryFun()
     }
+    statsFunc()
 }
 
 getCategoryOptions()

@@ -8,14 +8,6 @@ export const createAttendance = (data) => {
   })
 }
 
-export const statsByAgencyCategory = (data) => {
-  return service({
-    url: '/attendance/statsByAgencyCategory',
-    method: 'post',
-    data
-  })
-}
-
 
 export const cloneAttendance = (data) => {
   return service({
@@ -94,5 +86,22 @@ export const getAttendancePublic = (params) => {
     url: '/attendance/getAttendancePublic',
     method: 'get',
     params
+  })
+}
+
+export const statsByAgencyCategory = (data) => {
+  return service({
+    url: '/attendance/statsByAgencyCategory',
+    method: 'post',
+    data
+  })
+}
+
+
+export const statsScatterPlot = (data) => {
+  return service({
+    url: '/attendance/statsScatterPlot',
+    method: 'post',
+    data
   })
 }

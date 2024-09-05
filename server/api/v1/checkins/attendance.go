@@ -184,13 +184,29 @@ func (attendanceApi *AttendanceApi) CloneAttendance(c *gin.Context) {
 }
 
 func (attendanceApi *AttendanceApi) StatsByAgencyCategory(c *gin.Context) {
-	var stats checkinsReq.StatsByAgencyCategory
+	var stats checkinsReq.StatsByInfoRequest
 	err := c.ShouldBindJSON(&stats)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	res, err := attendanceService.StatsByAgencyCategory(stats)
+	if err != nil {
+		global.GVA_LOG.Error("Không lấy được dữ liệu!", zap.Error(err))
+		response.FailWithMessage("Không lấy được dữ liệu:"+err.Error(), c)
+		return
+	}
+	response.OkWithData(res, c)
+}
+
+func (attendanceApi *AttendanceApi) StatsScatterPlot(c *gin.Context) {
+	var stats checkinsReq.StatsByInfoRequest
+	err := c.ShouldBindJSON(&stats)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	res, err := attendanceService.StatsScatterPlot(stats)
 	if err != nil {
 		global.GVA_LOG.Error("Không lấy được dữ liệu!", zap.Error(err))
 		response.FailWithMessage("Không lấy được dữ liệu:"+err.Error(), c)

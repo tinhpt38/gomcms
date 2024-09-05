@@ -214,7 +214,7 @@ func (attendanceService *AttendanceService) CloneAttendance(req checkinsReq.Atte
 	return
 }
 
-func (attendanceService *AttendanceService) StatsByAgencyCategory(req checkinsReq.StatsByAgencyCategory) (result map[string]interface{}, err error) {
+func (attendanceService *AttendanceService) StatsByAgencyCategory(req checkinsReq.StatsByInfoRequest) (result map[string]interface{}, err error) {
 
 	category := checkins.AttendanceCategory{}
 	err = global.GVA_DB.Where("id = ?", req.CategoryId).First(&category).Error
@@ -251,6 +251,63 @@ func (attendanceService *AttendanceService) StatsByAgencyCategory(req checkinsRe
 	if err != nil {
 		return
 	}
+	result = make(map[string]interface{})
+	result["data"] = resultRows
+	return result, err
+}
+
+func (attendanceService *AttendanceService) StatsScatterPlot(req checkinsReq.StatsByInfoRequest) (result map[string]interface{}, err error) {
+	// Xác định category
+	category := checkins.AttendanceCategory{}
+	err = global.GVA_DB.Where("id = ?", req.CategoryId).First(&category).Error
+	if err != nil {
+		return
+	}
+
+	var listCatIds []uint
+	// Kiểm tra xem category có parent hay không
+	if *category.ParentId == 0 {
+		// Lấy tất cả các category con nếu có
+		err = global.GVA_DB.Model(&checkins.AttendanceCategory{}).Select("id").Where("parent_id = ?", category.ID).Scan(&listCatIds).Error
+		if err != nil {
+			return
+		}
+	} else {
+		listCatIds = append(listCatIds, req.CategoryId)
+	}
+
+	// Cấu trúc để nhận kết quả
+	var resultRows []struct {
+		CheckinTime  string
+		CheckinCount int
+	}
+
+	// Xây dựng truy vấn thô
+	rawDB := global.GVA_DB.Table("attendance_checkins as attci").
+		Select("DATE_FORMAT(attci.created_at, '%H:%i') as CheckinTime, COUNT(attci.id) as CheckinCount").
+		Joins("LEFT JOIN attendances as att on att.id = attci.attendance_id").
+		Where("attci.deleted_at IS NULL").
+		Where("att.category_id IN (?)", listCatIds).
+		Group("DATE_FORMAT(attci.created_at, '%H:%i')").
+		Order("CheckinTime")
+
+	// Lọc theo agency nếu có
+	// if req.AgencyId != 0 {
+	// 	rawDB = rawDB.Where("att.agency_id = ?", req.AgencyId)
+	// }
+
+	// Lọc theo khoảng thời gian (nếu có trong request)
+	if req.StartAt != nil && req.EndAt != nil {
+		rawDB = rawDB.Where("attci.created_at BETWEEN ? AND ?", req.StartAt, req.EndAt)
+	}
+
+	// Thực thi truy vấn và lưu kết quả
+	err = rawDB.Debug().Find(&resultRows).Error
+	if err != nil {
+		return
+	}
+
+	// Định dạng kết quả trả về
 	result = make(map[string]interface{})
 	result["data"] = resultRows
 	return result, err
