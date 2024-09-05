@@ -53,6 +53,9 @@ func (attendanceCategoryService *AttendanceCategoryService) DeleteAttendanceCate
 // UpdateAttendanceCategory 更新Danh mục điểm danh记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (attendanceCategoryService *AttendanceCategoryService) UpdateAttendanceCategory(attendanceCategory checkins.AttendanceCategory) (err error) {
+	if attendanceCategory.IsCurrent {
+		global.GVA_DB.Model(&checkins.AttendanceCategory{}).Where("is_current = ?", true).Update("is_current", false)
+	}
 	err = global.GVA_DB.Model(&checkins.AttendanceCategory{}).Where("id = ?", attendanceCategory.ID).Updates(&attendanceCategory).Error
 	return err
 }
