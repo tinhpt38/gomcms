@@ -27,6 +27,22 @@ func (participantApi *ParticipantApi) CreateParticipant(c *gin.Context) {
 	response.OkWithMessage("thành công", c)
 }
 
+func (participantApi *ParticipantApi) BulkCreateParticipants(c *gin.Context) {
+	var req checkinsReq.ListEmailParticipantRequest
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = participantService.BulkCreateParticipants(req)
+	if err != nil {
+		global.GVA_LOG.Error("Thêm hàng loạt thất bại!", zap.Error(err))
+		response.FailWithMessage("Thêm hàng loạt thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithMessage("Thêm hàng loạt thành công", c)
+}
+
 func (participantApi *ParticipantApi) DeleteParticipant(c *gin.Context) {
 	ID := c.Query("ID")
 	err := participantService.DeleteParticipant(ID)

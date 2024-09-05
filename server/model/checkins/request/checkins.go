@@ -7,5 +7,5 @@ type CheckinsReq struct {
 	Lat       *float64 `json:"lat" form:"lat" gorm:"column:lat;comment:Vĩ độ"`
 	Lng       *float64 `json:"lng" form:"lng" gorm:"column:lng;comment:Kinh độ"`
 	Accuracy  *float64 `json:"accuracy" form:"accuracy" gorm:"column:accuracy;comment:Độ chính xác"`
-	FullName  string   `json:"fullName" form:"fullName" binding:"required"`
+	FullName  *string  `json:"fullName" form:"fullName"`
 }

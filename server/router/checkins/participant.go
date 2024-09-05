@@ -13,7 +13,8 @@ func (s *ParticipantRouter) InitParticipantRouter(Router *gin.RouterGroup, Publi
 	participantRouterWithoutRecord := Router.Group("participant")
 	participantRouterWithoutAuth := PublicRouter.Group("participant")
 	{
-		participantRouter.POST("createParticipant", participantApi.CreateParticipant)             // 新建Sinh viên (Người tham dự phiên điểm danh)
+		participantRouter.POST("createParticipant", participantApi.CreateParticipant) // 新建Sinh viên (Người tham dự phiên điểm danh)
+		participantRouter.POST("bulkParticipants", participantApi.BulkCreateParticipants)
 		participantRouter.DELETE("deleteParticipant", participantApi.DeleteParticipant)           // 删除Sinh viên (Người tham dự phiên điểm danh)
 		participantRouter.DELETE("deleteParticipantByIds", participantApi.DeleteParticipantByIds) // 批量删除Sinh viên (Người tham dự phiên điểm danh)
 		participantRouter.PUT("updateParticipant", participantApi.UpdateParticipant)              // 更新Sinh viên (Người tham dự phiên điểm danh)

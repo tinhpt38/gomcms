@@ -8,8 +8,8 @@ import (
 // Sinh viên (Người tham dự phiên điểm danh) 结构体  Participant
 type Participant struct {
 	global.GVA_MODEL
-	FullName     string  `json:"fullName" form:"fullName" gorm:"column:full_name;comment:Họ và tên;" binding:"required"` //Họ và tên
-	Email        string  `json:"email" form:"email" gorm:"column:email;comment:Email;" binding:"required"`               //Email
+	Email        string  `json:"email" form:"email" gorm:"column:email;comment:Email;" binding:"required"` //Email
+	FullName     *string `json:"fullName" form:"fullName" gorm:"column:full_name;comment:Họ và tên;"`      //Họ và tên
 	GroupId      *uint   `json:"groupId" form:"groupId"`
 	AttendanceId *uint   `json:"attendanceId" form:"attendanceId"`
 	Groups       []Group `json:"groups" gorm:"many2many:attendance_group_participants;"`

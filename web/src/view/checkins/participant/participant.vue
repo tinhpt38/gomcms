@@ -31,8 +31,8 @@
       <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="Họ và tên" prop="fullName" width="250" />
         <el-table-column align="left" label="Email" prop="email" width="200" />
+        <el-table-column align="left" label="Họ và tên" prop="fullName" width="250" />
         <el-table-column align="left" label="Ngày tạo" prop="createdAt" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>

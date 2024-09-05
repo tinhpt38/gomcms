@@ -16,6 +16,14 @@ export const createParticipant = (data) => {
   })
 }
 
+export const bulkParticipants = (data) => {
+  return service({
+    url: '/participant/bulkParticipants',
+    method: 'post',
+    data
+  })
+}
+
 // @Tags Participant
 // @Summary 删除Sinh viên (Người tham dự phiên điểm danh)
 // @Security ApiKeyAuth

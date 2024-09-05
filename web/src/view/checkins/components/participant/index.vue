@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="p-1 my-1">
-      <el-button type="primary" icon="plus" @click="() => { }">
+      <el-button type="primary" icon="plus" @click="openBulkAdd">
         Thêm thành viên
       </el-button>
     </div>
@@ -80,6 +80,25 @@
         </el-form-item>
       </el-form>
     </el-drawer>
+
+    <el-drawer destroy-on-close size="800" v-model="bulkAddVisible" :show-close="false">
+      <template #header>
+        <div class="flex justify-between items-center">
+          <span class="text-lg">Thêm hàng loạt thành viên</span>
+          <div>
+            <el-button type="primary" @click="bulkAddParticipantsFunc">Đồng ý</el-button>
+            <el-button @click="bulkAddVisible == false">Hủy</el-button>
+          </div>
+        </div>
+      </template>
+
+      <el-form :model="bulkFormData" ref="bulkFormRef" :rules="bulkRules" label-position="top" label-width="80px">
+        <div class="font-bold py-2">Copy và dán danh sách mã số của thành viên vào đây. Mỗi mã số một dòng</div>
+        <el-form-item label="Danh sách thành viên:" prop="list">
+          <el-input type="textarea" :rows="20" v-model="bulkFormData.list" :clearable="true" placeholder="Nhập mã số" />
+        </el-form-item>
+      </el-form>
+    </el-drawer>
   </div>
 </template>
 
@@ -90,6 +109,7 @@ import {
   deleteParticipantByIds,
   findParticipant,
   updateParticipant,
+  bulkParticipants,
   getParticipantListByAttendance
 } from '@/api/checkins/participant'
 import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
@@ -285,7 +305,48 @@ const onReset = () => {
   getTableData()
 }
 
+const bulkAddVisible = ref(false)
+const bulkFormData = ref({
+  list: ''
+})
+const bulkFormRef = ref()
 
+const bulkRules = reactive({
+  list: [
+    {
+      validator: (rule, value, callback) => {
+        if (!value) {
+          callback(new Error('Không được để trống'))
+        } else if (value.includes("@")) {
+          callback(new Error('Chỉ nhập mã số thành viên (MSSV)'))
+        } else {
+          callback()
+        }
+      }, trigger: 'blur'
+    }
+  ],
+})
+
+const openBulkAdd = () => {
+  bulkAddVisible.value = true
+}
+
+const bulkAddParticipantsFunc = async () => {
+  bulkFormRef.value?.validate(async (valid) => {
+    if (!valid) return
+    var list = bulkFormData.value.list.split("\n")
+    var res = await bulkParticipants({ list, attendanceId: Number(props.acId) })
+    if (res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: 'Thêm thành công'
+      })
+      bulkAddVisible.value = false
+      getTableData()
+    }
+
+  })
+}
 
 </script>
 

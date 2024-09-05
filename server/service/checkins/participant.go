@@ -31,6 +31,39 @@ func (participantService *ParticipantService) CreateParticipant(participant *che
 	return err
 }
 
+func (participantService *ParticipantService) BulkCreateParticipants(req checkinsReq.ListEmailParticipantRequest) (err error) {
+
+	for _, email := range req.List {
+		fullEmail := email + "@dlu.edu.vn"
+		participant := checkins.Participant{
+			Email: fullEmail,
+		}
+		err = global.GVA_DB.Model(&checkins.Participant{}).Where(&checkins.Participant{
+			Email: fullEmail,
+		}).FirstOrCreate(&participant).Error
+		if err != nil {
+			return err
+		}
+		agp := checkins.AttendanceGroupParticipant{
+			ParticipantId: &participant.ID,
+			AttendanceId:  req.AttendanceId,
+		}
+		err = global.GVA_DB.Model(&checkins.AttendanceGroupParticipant{}).Where(&checkins.AttendanceGroupParticipant{
+			ParticipantId: &participant.ID,
+			AttendanceId:  req.AttendanceId,
+		}).FirstOrCreate(&agp).Error
+	}
+
+	return
+	// err = global.GVA_DB.FirstOrCreate(participant).Error
+
+	// err = global.GVA_DB.Model(&checkins.Participant{}).Where(&checkins.Participant{
+	// 	Email: participant.Email,
+	// }).FirstOrCreate(participant).Error
+
+	return err
+}
+
 // DeleteParticipant 删除Sinh viên (Người tham dự phiên điểm danh)记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (participantService *ParticipantService) DeleteParticipant(ID string) (err error) {
@@ -374,7 +407,7 @@ func (participantService *ParticipantService) ImportExcel(info config.CfgFilePro
 
 		itemToSave := checkins.Participant{
 			GVA_MODEL: global.GVA_MODEL{},
-			FullName:  fullName,
+			FullName:  &fullName,
 			Email:     email,
 		}
 
