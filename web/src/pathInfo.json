@@ -12,6 +12,7 @@
   "/src/view/checkins/attendanceDetail/index.vue": "AttendanceDetail",
   "/src/view/checkins/condition/condition.vue": "Condition",
   "/src/view/checkins/condition/conditionForm.vue": "ConditionForm",
+  "/src/view/checkins/dashboard/index.vue": "CheckinDashboard",
   "/src/view/checkins/group/group.vue": "Group",
   "/src/view/checkins/group/groupForm.vue": "GroupForm",
   "/src/view/checkins/index.vue": "Checkins",
