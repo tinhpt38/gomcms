@@ -58,6 +58,14 @@
                 <vue-echarts :option="scatterPlotOptions" style="height: 550px; width: 100%;" />
             </div>
         </div>
+        <div class="rounded p-4">
+            <div class="text-xl my-1 mx-1">Thống kê sự liên quan giữa thời gian điểm danh và số lượng điểm danh trong
+                ngày.
+            </div>
+            <div class="mt-1 flex flex-row justify-between p-4 rounded bg-slate-100">
+                <vue-echarts :option="lineChartOptions" style="height: 550px; width: 100%;" />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -73,7 +81,8 @@ import {
 
 import {
     statsByAgencyCategory,
-    statsScatterPlot
+    statsScatterPlot,
+    statsTrendLine
 } from '@/api/checkins/attendance'
 
 import { onMounted, ref } from 'vue';
@@ -180,15 +189,46 @@ const scatterPlotOptions = ref({
 const updateScatterPlotOptions = (data) => {
     const seriesData = data.map(item => [timeToMinutes(item.CheckinTime), item.CheckinCount]);
 
-// Cập nhật option cho scatter plot
-scatterPlotOptions.value.xAxis.data = seriesData.map(item => item[0]);  // Đặt trục X là thời gian đã chuyển đổi
-scatterPlotOptions.value.series[0].data = seriesData;  // Đặt series data cho biểu đồ
+    // Cập nhật option cho scatter plot
+    scatterPlotOptions.value.xAxis.data = seriesData.map(item => item[0]);  // Đặt trục X là thời gian đã chuyển đổi
+    scatterPlotOptions.value.series[0].data = seriesData;  // Đặt series data cho biểu đồ
 }
 
 function timeToMinutes(timeStr) {
     const [hours, minutes] = timeStr.split(":").map(Number);
     return hours * 60 + minutes;  // Chuyển giờ thành phút và cộng với phút
 }
+
+const lineChartOptions = ref({
+    xAxis: {
+        type: 'category',  // Trục X là dạng thời gian (ngày)
+        name: 'Date',
+        data: []  // Dữ liệu sẽ được cập nhật
+    },
+    yAxis: {
+        type: 'value',  // Trục Y là số lượng điểm danh
+        name: 'Check-in Count'
+    },
+    series: [
+        {
+            type: 'line',  // Kiểu biểu đồ đường
+            data: [],  // Dữ liệu sẽ được cập nhật
+            smooth: true,  // Làm mịn đường
+            areaStyle: {}  // Thuộc tính để tạo biểu đồ vùng nếu cần
+        }
+    ]
+});
+const updateStatsTrendLineOptions = (data) => {
+    const seriesData = data.map(item => ({
+        name: item.CheckinDate,
+        value: [item.CheckinDate, item.CheckinCount]
+    }));
+
+    // Cập nhật option cho line chart
+    lineChartOptions.value.xAxis.data = seriesData.map(item => item.name);  // Đặt trục X là các ngày
+    lineChartOptions.value.series[0].data = seriesData.map(item => item.value);  // Đặt dữ liệu cho biểu đồ
+}
+
 
 
 // Data
@@ -212,10 +252,20 @@ const statsScatterPlotFun = async () => {
 
 }
 
+const statsTrendLineFun = async () => {
+    const table = await statsTrendLine(searchInfo.value)
+    console.log('statsTrendLine', table)
+    if (table.code === 0) {
+        updateStatsTrendLineOptions(table.data.data)
+    }
+
+}
+
 
 const statsFunc = async () => {
     statsByAgencyCategoryFun()
     statsScatterPlotFun()
+    statsTrendLineFun()
 }
 
 // Load Options

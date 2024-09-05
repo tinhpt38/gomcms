@@ -214,3 +214,18 @@ func (attendanceApi *AttendanceApi) StatsScatterPlot(c *gin.Context) {
 	}
 	response.OkWithData(res, c)
 }
+func (attendanceApi *AttendanceApi) StatsTrendLine(c *gin.Context) {
+	var stats checkinsReq.StatsByInfoRequest
+	err := c.ShouldBindJSON(&stats)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	res, err := attendanceService.StatsTrendLine(stats)
+	if err != nil {
+		global.GVA_LOG.Error("Không lấy được dữ liệu!", zap.Error(err))
+		response.FailWithMessage("Không lấy được dữ liệu:"+err.Error(), c)
+		return
+	}
+	response.OkWithData(res, c)
+}

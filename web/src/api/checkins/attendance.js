@@ -105,3 +105,13 @@ export const statsScatterPlot = (data) => {
     data
   })
 }
+
+export const statsTrendLine = (data) => {
+  return service({
+    url: '/attendance/statsTrendLine',
+    method: 'post',
+    data
+  })
+}
+
+

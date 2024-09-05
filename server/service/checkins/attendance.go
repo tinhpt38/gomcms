@@ -312,3 +312,73 @@ func (attendanceService *AttendanceService) StatsScatterPlot(req checkinsReq.Sta
 	result["data"] = resultRows
 	return result, err
 }
+
+func (attendanceService *AttendanceService) StatsTrendLine(req checkinsReq.StatsByInfoRequest) (result map[string]interface{}, err error) {
+	// Xác định category
+	category := checkins.AttendanceCategory{}
+	err = global.GVA_DB.Where("id = ?", req.CategoryId).First(&category).Error
+	if err != nil {
+		return
+	}
+
+	var listCatIds []uint
+	// Kiểm tra xem category có parent hay không
+	if *category.ParentId == 0 {
+		// Lấy tất cả các category con nếu có
+		err = global.GVA_DB.Model(&checkins.AttendanceCategory{}).Select("id").Where("parent_id = ?", category.ID).Scan(&listCatIds).Error
+		if err != nil {
+			return
+		}
+	} else {
+		listCatIds = append(listCatIds, req.CategoryId)
+	}
+
+	// Cấu trúc để nhận kết quả
+	var resultRows []struct {
+		CheckinTime  string
+		CheckinCount int
+	}
+
+	// Xây dựng truy vấn thô
+	// rawDB := global.GVA_DB.Table("attendance_checkins as attci").
+	// 	Select("DATE_FORMAT(attci.created_at, '%H:%i') as CheckinTime, COUNT(attci.id) as CheckinCount").
+	// 	Joins("LEFT JOIN attendances as att on att.id = attci.attendance_id").
+	// 	Where("attci.deleted_at IS NULL").
+	// 	Where("att.category_id IN (?)", listCatIds).
+	// 	Group("DATE_FORMAT(attci.created_at, '%H:%i')").
+	// 	Order("CheckinTime")
+
+	rawDB := global.GVA_DB.Table("attendance_checkins as ac").
+		Select("DATE(ac.created_at) as CheckinDate, COUNT(ac.partpaticipant_id) as CheckinCount, attagen.name as AgencyName, attcat.name as CategoryName").
+		Joins("LEFT JOIN attendances att ON att.id = ac.attendance_id").
+		Joins("LEFT JOIN attendance_agencies attagen ON attagen.id = att.agency_id").
+		Joins("LEFT JOIN attendance_categories attcat ON attcat.id = att.category_id").
+		Where("ac.deleted_at IS NULL").
+		Where("att.deleted_at IS NULL").
+		Where("attagen.deleted_at IS NULL").
+		Where("attcat.deleted_at IS NULL").
+		Where("att.category_id IN (?)", listCatIds).
+		Group("DATE(ac.created_at), attagen.name, attcat.name").
+		Order("CheckinDate")
+
+	// Lọc theo agency nếu có
+	if req.AgencyId != 0 {
+		rawDB = rawDB.Where("attagen.agency_id = ?", req.AgencyId)
+	}
+
+	// Lọc theo khoảng thời gian (nếu có trong request)
+	if req.StartAt != nil && req.EndAt != nil {
+		rawDB = rawDB.Where("ac.created_at BETWEEN ? AND ?", req.StartAt, req.EndAt)
+	}
+
+	// Thực thi truy vấn và lưu kết quả
+	err = rawDB.Debug().Find(&resultRows).Error
+	if err != nil {
+		return
+	}
+
+	// Định dạng kết quả trả về
+	result = make(map[string]interface{})
+	result["data"] = resultRows
+	return result, err
+}
