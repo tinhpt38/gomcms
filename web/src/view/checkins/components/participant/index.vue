@@ -14,6 +14,11 @@
         <el-form-item label="Email">
           <el-input v-model="searchInfo.email" placeholder="Email" />
         </el-form-item>
+        <el-form-item label="Nhóm:">
+          <el-select v-model="searchInfo.groupId" placeholder="Chọn nhóm" filterable clearable>
+            <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="search" @click="onSubmit">
             Tìm kiếm
@@ -69,7 +74,7 @@
           <el-input v-model="formData.email" :clearable="true" placeholder="Nhập Email" />
         </el-form-item>
         <el-form-item label="Nhóm:" prop="groupId">
-          <el-select v-model="formData.groupId" placeholder="Chọn nhóm">
+          <el-select v-model="formData.groupId" placeholder="Chọn nhóm" filterable clearable>
             <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
@@ -238,11 +243,10 @@ const closeDialog = () => {
 
 const elFormRef = ref()
 const enterDialog = async () => {
-  if(  formData.value.groupId ){
-    formData.value.groupId = Number(  formData.value.groupId )
+  if (formData.value.groupId) {
+    formData.value.groupId = Number(formData.value.groupId)
   }
   formData.value.attendanceId = Number(props.acId)
-  console.log(formData.value  )
   elFormRef.value?.validate(async (valid) => {
     if (!valid) return
     let res
