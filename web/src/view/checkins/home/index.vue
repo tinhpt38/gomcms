@@ -77,7 +77,7 @@
                   Chào mừng bạn đến với hệ thống điểm danh hiện đại của Trường Đại học Đà Lạt.
                   Hãy đăng nhập để bắt đầu quá trình điểm danh của bạn.
                 </p>
-                <div class="mt-10 flex items-center gap-x-6">
+                <!-- <div class="mt-10 flex items-center gap-x-6">
                   <a
                     href="#"
                     class="rounded-md bg-[#7BA227] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#6B8F23] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7BA227]"
@@ -88,7 +88,7 @@
                   <a href="#" class="text-sm font-semibold leading-6 text-gray-900">
                     Tìm hiểu thêm <span aria-hidden="true">→</span>
                   </a>
-                </div>
+                </div> -->
               </div>
 
               <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
@@ -216,7 +216,7 @@
             </div>
           </div>
           <div class="flex justify-center mt-8">
-            <nav class="inline-flex rounded-md shadow">
+            <!-- <nav class="inline-flex rounded-md shadow">
               <a
                 href="#"
                 class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
@@ -241,7 +241,16 @@
               >
                 Sau
               </a>
-            </nav>
+            </nav> -->
+
+            <el-pagination
+              background
+              layout="prev, pager, next"
+              :total="total"
+              :current-page="page"
+              :page-size="pageSize"
+              @current-change="handlePageChange"
+            />
           </div>
         </div>
       </section>
@@ -310,6 +319,11 @@ const redirectToLogin = () => {
 const calProgress = (totalCheckin, total) => {
     total = total == 0 ? 1 : total
     return `${(totalCheckin / total * 100).toFixed(2)}%`;
+}
+
+const handlePageChange = async (newPage) => {
+  page.value = newPage
+  await getPostData()
 }
 
 </script>
