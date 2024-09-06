@@ -1,21 +1,21 @@
 <template>
   <div class="bg-white relative">
     <main class="isolate">
-      <header ref="header" class="sticky top-0 bg-white z-50 mx-auto px-4 sm:px-6 lg:px-52">
+      <header ref="header" class="sticky top-0 bg-transparent z-50 mx-auto px-4 sm:px-6 lg:px-52">
         <div class="container mx-auto py-3">
           <div class="flex items-center justify-between">
             <a href="/" class="flex items-center">
               <img src="/logo-hoat-dong.webp" alt="Trường Đại học Đà Lạt" class="h-16 sm:h-20 lg:h-28 w-auto">
             </a>
-            <div class="hidden md:flex items-center gap-4 lg:gap-7">
+            <!-- <div class="hidden md:flex items-center gap-4 lg:gap-7">
               <a href="/checkin" class="text-base lg:text-lg font-semibold text-gray-500">Hoạt động</a>
               <a href="/checkin" class="text-base lg:text-lg font-semibold text-gray-500">Lịch sử điểm danh</a>
               <a href="/checkin" class="text-base lg:text-lg font-semibold text-gray-500">Website Trường</a>
               <a href="/checkin" class="text-base lg:text-lg font-semibold text-gray-500">Liên hệ</a>
-            </div>
-            <button class="hidden md:block bg-[#79a227] text-white text-base lg:text-lg py-2 px-6 lg:py-3 lg:px-10 rounded-xl outline-none border-none cursor-pointer" @click="redirectToLogin">
+            </div> -->
+            <!-- <button class="hidden md:block bg-[#79a227] text-white text-base lg:text-lg py-2 px-6 lg:py-3 lg:px-10 rounded-xl outline-none border-none cursor-pointer" @click="redirectToLogin">
               Đăng nhập
-            </button>
+            </button> -->
             <button class="md:hidden text-gray-500 hover:text-gray-700" @click="toggleMobileMenu">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -167,68 +167,6 @@
           </div>
         </div>
       </div>
-
-      <section class="py-16 bg-white">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-800">
-            Các hoạt động
-          </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            <div v-for="(activity, index) in activities" :key="index" class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
-              <div class="relative overflow-hidden">
-                <img :src="activity.image" :alt="activity.title" class="w-full h-48 object-cover">
-                <div class="absolute top-2 left-2 bg-[#79a227] text-white px-3 py-1 rounded">
-                  QR code
-                </div>
-              </div>
-              <div class="p-6 flex-grow flex flex-col justify-between bg-gradient-to-br from-white to-gray-50">
-                <div>
-                  <h3 class="text-2xl font-bold mb-3 mt-0 text-gray-800">
-                    {{ activity.title }}
-                  </h3>
-                  <p class="text-gray-600 mb-4 leading-relaxed">
-                    {{ activity.description }}
-                  </p>
-                </div>
-                <div class="text-sm text-gray-500 space-y-2">
-                  <p><span class="font-medium">Tiêu đề:</span> {{ activity.subtitle }}</p>
-                  <p><span class="font-medium">Mã lớp:</span> <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ activity.classCode }}</span></p>
-                  <p><span class="font-medium">Số SV:</span> <span class="bg-green-100 text-green-800 px-2 py-1 rounded">{{ activity.studentCount }}</span></p>
-                </div>
-              </div>
-              <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-blue-50">
-                <div class="flex justify-between items-center mb-2">
-                  <span class="text-gray-700 font-medium">Đã điểm danh:</span>
-                  <div class="bg-white rounded-full px-4 py-2 shadow-md">
-                    <span class="text-green-600 font-bold">90</span>
-                    <span class="text-gray-400 mx-1">/</span>
-                    <span class="text-gray-600 font-bold">100</span>
-                  </div>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div class="bg-green-600 h-2 rounded-full" style="width: 90%" />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="flex justify-center mt-8">
-            <nav class="inline-flex rounded-md shadow">
-              <a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Trước
-              </a>
-              <a href="#" class="px-3 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                1
-              </a>
-              <a href="#" class="px-3 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                2
-              </a>
-              <a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                Sau
-              </a>
-            </nav>
-          </div>
-        </div>
-      </section>
     </main>
   </div>
 </template>
@@ -264,32 +202,6 @@ const data = ref({
 
 const header = ref(null)
 
-const activities = ref([
-  {
-    image: "https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_3589-scaled-1.jpg",
-    title: "Gặp gỡ các bạn sinh viên mới",
-    description: "Mô tả ngắn về hoạt động 1.",
-    subtitle: "Tiêu đề phụ 1",
-    classCode: "ABC123",
-    studentCount: 50
-  },
-  {
-    image: "https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_4601-scaled-1.jpg",
-    title: "Tạo dựng cộng đồng sinh viên",
-    description: "Mô tả ngắn về hoạt động 2.",
-    subtitle: "Tiêu đề phụ 2",
-    classCode: "DEF456",
-    studentCount: 40
-  },
-  {
-    image: "https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_9950-scaled-1.jpg",
-    title: "Khởi động học tập",
-    description: "Mô tả ngắn về hoạt động 3.",
-    subtitle: "Tiêu đề phụ 3",
-    classCode: "GHI789",
-    studentCount: 60
-  }
-]);
 
 const callback = async (response) => {
   const userData = decodeCredential(response.credential)
@@ -387,10 +299,6 @@ const requestCheckin = async () => {
   } else {
     ElMessage(res.msg)
   }
-}
-
-const redirectToLogin = () => {
-  window.location.href = '/login'
 }
 
 

@@ -158,6 +158,28 @@ func (attendanceApi *AttendanceApi) GetAttendanceList(c *gin.Context) {
 	}, "lấy thành công", c)
 }
 
+func (attendanceApi *AttendanceApi) GetPublicAttendanceList(c *gin.Context) {
+	var pageInfo checkinsReq.AttendanceSearch
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	craeteBy := utils.GetUserID(c)
+	list, total, err := attendanceService.GetPublicAttendanceInfoList(pageInfo, craeteBy)
+	if err != nil {
+		global.GVA_LOG.Error("lấy thất bại!", zap.Error(err))
+		response.FailWithMessage("lấy thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithDetailed(response.PageResult{
+		List:     list,
+		Total:    total,
+		Page:     pageInfo.Page,
+		PageSize: pageInfo.PageSize,
+	}, "lấy thành công", c)
+}
+
 func (attendanceApi *AttendanceApi) GetAttendancePublic(c *gin.Context) {
 	// API này không cần xác thực
 	// Ví dụ trả về một thông điệp cố định, thường được sử dụng cho dịch vụ phía C, cần triển khai logic kinh doanh của riêng mình

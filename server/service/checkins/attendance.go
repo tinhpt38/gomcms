@@ -80,6 +80,33 @@ func (attendanceService *AttendanceService) UpdateAttendance(attendanceClass che
 
 func (attendanceService *AttendanceService) GetAttendance(ID string) (attendanceClass checkins.Attendance, err error) {
 	err = global.GVA_DB.Where("id = ?", ID).Preload(clause.Associations).First(&attendanceClass).Error
+	if err != nil {
+		return
+	}
+	var totalParticipants, totalCheckin int64
+
+	// Tính tổng số thành viên từ bảng attendance_group_participant
+	err = global.GVA_DB.Table("attendance_group_participants").
+		Where("attendance_id = ?", attendanceClass.ID).
+		Count(&totalParticipants).Error
+	if err != nil {
+		return
+	}
+
+	// Tính tổng số thành viên đã check-in từ bảng attendance_check_in
+	err = global.GVA_DB.Table("attendance_checkins").
+		Select("count(DISTINCT partpaticipant_id) as total").
+		Where("deleted_at is NULL").
+		Where("attendance_id = ?", attendanceClass.ID).
+		Scan(&totalCheckin).Error
+	if err != nil {
+		return
+	}
+
+	// Cập nhật vào model Attendance
+	attendanceClass.Total = int(totalParticipants)
+	attendanceClass.TotalCheckin = int(totalCheckin)
+
 	return
 }
 
@@ -125,6 +152,95 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 	}
 
 	err = db.Preload("Areas").Preload(clause.Associations).Debug().Find(&attendanceClasss).Error
+	for i, attendance := range attendanceClasss {
+		var totalParticipants, totalCheckin int64
+
+		// Tính tổng số thành viên từ bảng attendance_group_participant
+		err = global.GVA_DB.Table("attendance_group_participants").
+			Where("attendance_id = ?", attendance.ID).
+			Count(&totalParticipants).Error
+		if err != nil {
+			return
+		}
+
+		// Tính tổng số thành viên đã check-in từ bảng attendance_check_in
+		err = global.GVA_DB.Table("attendance_checkins").
+			Select("count(DISTINCT partpaticipant_id) as total").
+			Where("deleted_at is NULL").
+			Where("attendance_id = ?", attendance.ID).
+			Scan(&totalCheckin).Error
+		if err != nil {
+			return
+		}
+
+		// Cập nhật vào model Attendance
+		attendanceClasss[i].Total = int(totalParticipants)
+		attendanceClasss[i].TotalCheckin = int(totalCheckin)
+	}
+	return attendanceClasss, total, err
+}
+
+func (attendanceService *AttendanceService) GetPublicAttendanceInfoList(info checkinsReq.AttendanceSearch, createdBy uint) (list []checkins.Attendance, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+
+	db := global.GVA_DB.Model(&checkins.Attendance{})
+	var attendanceClasss []checkins.Attendance
+
+	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
+	}
+
+	if info.StartDate != nil && info.EndDate != nil {
+		db = db.Where("DATE(start_date) >= ? OR DATE(end_date) <= ?", info.StartDate.Format("2006-01-02"), info.EndDate.Format("2006-01-02"))
+	}
+
+	if createdBy != 0 && createdBy != 1 {
+		db = db.Where("created_by = ?", createdBy)
+	}
+	if info.AgencyId != 0 {
+		db = db.Where("agency_id = ?", info.AgencyId)
+	}
+	if info.CategoryId != 0 {
+		db = db.Where("category_id = ?", info.CategoryId)
+	}
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	if limit != 0 && limit != -1 {
+		db = db.Limit(limit).Offset(offset)
+	}
+
+	err = db.Debug().Preload(clause.Associations).Find(&attendanceClasss).Error
+	for i, attendance := range attendanceClasss {
+		var totalParticipants, totalCheckin int64
+
+		// Tính tổng số thành viên từ bảng attendance_group_participant
+		err = global.GVA_DB.Table("attendance_group_participants").
+			Where("attendance_id = ?", attendance.ID).
+			Count(&totalParticipants).Error
+		if err != nil {
+			return
+		}
+
+		// Tính tổng số thành viên đã check-in từ bảng attendance_check_in
+		err = global.GVA_DB.Table("attendance_checkins").
+			Select("count(DISTINCT partpaticipant_id) as total").
+			Where("deleted_at is NULL").
+			Where("attendance_id = ?", attendance.ID).
+			Scan(&totalCheckin).Error
+		if err != nil {
+			return
+		}
+
+		// Cập nhật vào model Attendance
+		attendanceClasss[i].Total = int(totalParticipants)
+		attendanceClasss[i].TotalCheckin = int(totalCheckin)
+	}
+
 	return attendanceClasss, total, err
 }
 

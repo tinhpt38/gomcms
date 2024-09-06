@@ -1,20 +1,31 @@
 <template>
     <div class="bg-white">
         <main class="isolate">
-            <div class="relative z-10">
-                <div class="mx-auto max-w-7xl px-6 pt-6 sm:pt-12 lg:px-6 lg:pt-16">
-                    <div class="flex items
-                -center justify-between">
-                        <div class="flex items
-                    -center">
-                            <a href="/" class="flex items-center gap-2">
-                                <img src="/logo-hoat-dong.webp" alt="Trường Đại học Đà Lạt" class="h-32 w-auto" />
-                                <!-- <span class="text-lg font-semibold text-gray-900">Trường Đại học Đà Lạt</span> -->
-                            </a>
+            <header ref="header" class="sticky top-0 bg-white z-50 mx-auto px-4 sm:px-6 lg:px-52">
+                <div class="container mx-auto py-3">
+                    <div class="flex items-center justify-between">
+                        <a href="/" class="flex items-center">
+                            <img src="/logo-hoat-dong.webp" alt="Trường Đại học Đà Lạt"
+                                class="h-16 sm:h-20 lg:h-28 w-auto">
+                        </a>
+                        <div class="hidden md:flex items-center gap-4 lg:gap-7">
+
                         </div>
+                        <button
+                            class="hidden md:block bg-[#79a227] text-white text-base lg:text-lg py-2 px-6 lg:py-3 lg:px-10 rounded-xl outline-none border-none cursor-pointer"
+                            @click="redirectToLogin">
+                            Đăng nhập
+                        </button>
+                        <button class="md:hidden text-gray-500 hover:text-gray-700" @click="toggleMobileMenu">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
-            </div>
+            </header>
             <!-- Hero section -->
             <div class="relative isolate -z-10">
                 <svg class="absolute inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
@@ -39,48 +50,13 @@
                         style="clip-path: polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.7%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)" />
                 </div>
                 <div class="overflow-scroll">
-                    <div class="mx-auto max-w-7xl px-6 pb-32 pt-24 sm:pt-60 lg:px-8 lg:pt-32">
+                    <div class="mx-auto max-w-7xl px-6 pb-32 pt-24 sm:pt-60 lg:px-8 lg:pt-10">
                         <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                             <div class="w-full max-w-xl lg:shrink-0 xl:max-w-4xl">
                                 <h1 class="text-4xl font-bold tracking-tight text-[#514C39] sm:text-6xl">
                                     Hệ thống điểm
                                     danh<br><span class="text-[#7BA227]">Trường Đại học Đà Lạt</span>.
                                 </h1>
-                                <h2>Danh sách điểm danh sắp tới</h2>
-                                <div
-                                    class="mx-auto mt-2 grid max-w-2xl grid-cols-1 gap-x-4 gap-y-4 border-1 border-gray-200 pt-4 sm:mt-16 sm:pt-4 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                                    <article v-for="post in postData" :key="post.ID"
-                                        class="flex max-w-xl flex-col items-start justify-between bg-slate-50 p-2 rounded shadow-slate-400">
-                                        <div class="flex flex-col items-start gap-x-4 text-base">
-
-                                            <a
-                                                class="relative z-10 rounded-md p-1 my-1 bg-[#7BA227] font-medium text-white hover:bg-gray-100">{{
-                                                    post.category.name }}</a>
-                                            <a
-                                                class="relative z-10 rounded-md p-1 my-1 text-[#E67F32] text-base  hover:bg-gray-100">{{
-                                                    post.agency.name }}</a>
-                                        </div>
-                                        <div class="group relative">
-                                            <h3
-                                                class="mt-3 text-2xl font-semibold p-1 leading-6 text-gray-900 group-hover:text-gray-600">
-                                                <a :href="post.href">
-                                                    <span class="absolute inset-0 " />
-                                                    {{ post.title }}
-                                                </a>
-                                            </h3>
-                                            <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{{
-                                                post.description
-                                                }}</p>
-                                        </div>
-                                        <div class="flex flex-col items-start gap-x-4 text-base">
-
-                                            <span class="text-gray-500 py-2">Bắt đầu: {{ formatDate(post.startDate)
-                                                }}</span>
-                                            <span class="text-red-500 py-2">Kết thúc: {{ formatDate(post.endDate)
-                                                }}</span>
-                                        </div>
-                                    </article>
-                                </div>
                             </div>
 
                             <div
@@ -132,6 +108,82 @@
                     </div>
                 </div>
             </div>
+            <section class="py-16 bg-white">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-800">
+                        Các hoạt động
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                        <div v-for="(activity, index) in postData" :key="index"
+                            class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                            <div class="relative overflow-hidden">
+                                <img :src="activity.image" :alt="activity.title" class="w-full h-48 object-cover">
+                                <div class="absolute top-2 left-2 bg-[#79a227] text-white px-3 py-1 rounded">
+                                    QR code
+                                </div>
+                            </div>
+                            <div
+                                class="p-6 flex-grow flex flex-col justify-between bg-gradient-to-br from-white to-gray-50">
+                                <div>
+                                    <h3 class="text-2xl font-bold mb-3 mt-0 text-gray-800">
+                                        {{ activity.title }}
+                                    </h3>
+                                    <p class="text-gray-600 mb-4 leading-relaxed">
+                                        {{ activity.description }}
+                                    </p>
+                                </div>
+                                <div class="text-sm text-gray-500 space-y-2">
+                                    <p class="p-1">
+                                        <span class="font-medium">Đơn vị:
+                                        </span> <span class="text-[#E67F32]"> {{ activity.agency.name }}</span>
+                                    </p>
+                                    <p class="p-1"><span class="font-medium">Danh mục:</span>
+                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">{{
+                                            activity.category.name }}</span>
+                                    </p>
+                                    <p class="p-1"><span class="font-medium">Hệ số:</span> <span
+                                            class="bg-green-100 text-green-800 px-2 py-1 rounded">{{
+                                                activity.weight }}</span></p>
+                                </div>
+                            </div>
+                            <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-blue-50">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-700 font-medium">Đã điểm danh:</span>
+                                    <div class="bg-white rounded-full px-4 py-2 shadow-md">
+                                        <span class="text-green-600 font-bold">{{ activity.totalCheckin }}</span>
+                                        <span class="text-gray-400 mx-1">/</span>
+                                        <span class="text-gray-600 font-bold">{{ activity.total }}</span>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div :style="{ width: calProgress(activity.totalCheckin, activity.total) }"
+                                        class="bg-green-600 h-2 rounded-full" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center mt-8">
+                        <nav class="inline-flex rounded-md shadow">
+                            <a href="#"
+                                class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                Trước
+                            </a>
+                            <a href="#"
+                                class="px-3 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                1
+                            </a>
+                            <a href="#"
+                                class="px-3 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                2
+                            </a>
+                            <a href="#"
+                                class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                Sau
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 </template>
@@ -142,37 +194,67 @@ import { formatDate } from '@/utils/format';
 import { getAttendancePublic } from '@/api/checkins/attendance';
 import { ref } from 'vue'
 import moment from 'moment';
+import QRCode from 'qrcode'
+
 
 
 const postData = ref([])
+const page = ref(1)
+const total = ref(0)
+const pageSize = ref(10)
 
 const getPostData = async () => {
     var now = moment()
     var searchInfo = {
         startDate: now.format('YYYY-MM-DDTHH:mm:ssZ'),
-        endDate: now.add(10, 'days').format('YYYY-MM-DDTHH:mm:ssZ')
+        endDate: now.add(30, 'days').format('YYYY-MM-DDTHH:mm:ssZ')
     }
-    console.log(searchInfo)
-    const res = await getAttendancePublic({ page: 0, pageSize: -1, startDate: searchInfo.startDate, endDate: searchInfo.endDate })
+    const res = await getAttendancePublic({ page: page.value, pageSize: pageSize.value, startDate: searchInfo.startDate, endDate: searchInfo.endDate })
     console.log(res)
     if (res.code == 0) {
         postData.value = res.data.list
+        total.value = res.data.total
+        page.value = res.data.page
+        pageSize.value = res.data.pageSize
     }
+    console.log(postData.value)
 }
 
 getPostData()
+
+
+const generateQRCode = async (id) => {
+  var params = base32.encode(id)
+  console.log('params-endcode' + params)
+
+  var url = clientURL.value + '/?c=' + params
+  formData.value.clientUrl = url  
+  clientURL.value = url
+  QRCode.toCanvas(qrcodeCanvas.value, url, { width: 300 }, (error) => {
+    if (error) console.error(error)
+  })
+}
+
+const redirectToLogin = () => {
+    window.location.href = '/login'
+}
+
+const calProgress = (totalCheckin, total) => {
+    total = total == 0 ? 1 : total
+    return `${(totalCheckin / total * 100).toFixed(2)}%`;
+}
 
 </script>
 
 <style scope>
 body,
 html {
-    height: auto;
+    height: 100%;
     overflow-y: auto;
 }
 
 main.isolate {
-    overflow-y: auto;
+    overflow-y: unset;
 }
 
 #app {

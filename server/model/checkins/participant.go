@@ -20,18 +20,6 @@ func (Participant) TableName() string {
 	return "participants"
 }
 
-// type ParticipantGroup struct {
-// 	global.GVA_MODEL
-// 	ParticipantId *uint        `json:"participantId" form:"participantId" gorm:"column:participant_id;comment:Sinh viên"`
-// 	GroupId       *uint        `json:"groupId" form:"groupId" gorm:"column:group_id;comment:Nhóm"`
-// 	Participant   *Participant `gorm:"foreignKey:ParticipantId"` // Thiết lập khóa ngoại đến struct Participant
-// 	Group         *Group       `gorm:"foreignKey:GroupId"`       // Thiết lập khóa ngoại đến struct Group
-// }
-
-// func (ParticipantGroup) TableName() string {
-// 	return "participant_groups"
-// }
-
 type AttendanceGroupParticipant struct {
 	global.GVA_MODEL
 	ParticipantId *uint        `json:"participantId" form:"participantId" gorm:"column:participant_id;comment:Sinh viên"`

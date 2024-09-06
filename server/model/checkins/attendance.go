@@ -31,6 +31,8 @@ type Attendance struct {
 	Agency       *AttendanceAgency   `json:"agency" form:"agency" gorm:"foreignKey:AgencyId;references:ID"` //Đơn vị
 	Areas        []Area              `gorm:"many2many:attendance_areas;"`                                   // Quan hệ nhiều-nhiều với Area thông qua bảng trung gian AttendanceArea
 	Participants []Participant       `gorm:"many2many:participant_attendances;"`                            // Quan hệ nhiều-nhiều với Participant thông qua bảng trung gian AttendanceGroupParticipant
+	Total        int                 `json:"total" form:"total"`
+	TotalCheckin int                 `json:"totalCheckin" form:"totalCheckin" `
 }
 
 func (Attendance) TableName() string {
