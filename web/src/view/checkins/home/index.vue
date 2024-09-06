@@ -216,41 +216,26 @@
             </div>
           </div>
           <div class="flex justify-center mt-8">
-            <!-- <nav class="inline-flex rounded-md shadow">
-              <a
-                href="#"
-                class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                Trước
-              </a>
-              <a
-                href="#"
-                class="px-3 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                1
-              </a>
-              <a
-                href="#"
-                class="px-3 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                2
-              </a>
-              <a
-                href="#"
-                class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                Sau
-              </a>
-            </nav> -->
-
             <el-pagination
-              background
-              layout="prev, pager, next"
-              :total="total"
-              :current-page="page"
+              v-model:current-page="page"
               :page-size="pageSize"
+              :total="total"
+              :background="true"
+              layout="prev, pager, next"
+              class="mt-8 flex justify-center"
               @current-change="handlePageChange"
-            />
+            >
+              <template #prev-button>
+                <el-button type="primary" circle>
+                  <i class="el-icon-arrow-left" />
+                </el-button>
+              </template>
+              <template #next-button>
+                <el-button type="primary" circle>
+                  <i class="el-icon-arrow-right" />
+                </el-button>
+              </template>
+            </el-pagination>
           </div>
         </div>
       </section>
