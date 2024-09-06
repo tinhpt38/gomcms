@@ -75,22 +75,23 @@
           </template>
         </el-table-column>
         <el-table-column label="Đơn vị" prop="agency.name" width="150" />
-        <el-table-column label="Danh mục" prop="category.name" width="120" />
-        <!-- <el-table-column align="left" label="Cho phép khách" prop="allowGuest" width="150">
+        <el-table-column align="left" label="Danh mục" prop="category.name" width="100" />
+        <el-table-column align="left" label="Hệ số" prop="weight" width="100" />
+        <el-table-column align="left" label="Điểm danh" width="100">
           <template #default="scope">
-            {{ scope.row.allowGuest ? "Cho phép" : "Không cho phép" }}
+            {{ scope.row.totalCheckin }} / {{ scope.row.total }}
           </template>
-        </el-table-column> -->
+        </el-table-column>
         <el-table-column align="left" label="Trạng thái" prop="isLocked" width="100">
           <template #default="scope">
             {{ scope.row.isLocked ? "Đã đóng" : "Đang mở" }}
           </template>
         </el-table-column>
-        <el-table-column align="left" label="Ngày tạo" prop="createdAt" width="120">
+        <!-- <el-table-column align="left" label="Ngày tạo" prop="createdAt" width="120">
           <template #default="scope">
             {{ formatDate(scope.row.CreatedAt) }}
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column align="left" label="Thao tác" fixed="right" min-width="240">
           <template #default="scope">
             <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon

@@ -125,6 +125,24 @@
           <div class="text-xl">
             Danh sách điểm danh
           </div>
+          <div class="flex flex-row justify-evenly py-2">
+            <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
+              <p class="text-5xl font-bold text-center py-3">{{ formData.total }}</p>
+              <p class="text-slate-700">Tổng số thành viên</p>
+            </div>
+            <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
+              <p class="text-5xl font-bold text-center py-3">{{ formData.totalCheckin }}</p>
+              <p class="text-slate-700">Đã điểm danh</p>
+            </div>
+            <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
+              <p class="text-5xl font-bold text-center py-3">{{ formData.total - formData.totalCheckin }}</p>
+              <p class="text-slate-700">Chưa điểm danh</p>
+            </div>
+            <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
+              <p class="text-5xl font-bold text-center py-3">{{ total }}</p>
+              <p class="text-slate-700">Tổng lượt truy cập</p>
+            </div>
+          </div>
           <div class="my-4">
             <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
               :rules="searchRules" @keyup.enter="onSubmit">
@@ -182,7 +200,7 @@
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane name="statistics" label="Thống kê">
+      <!-- <el-tab-pane name="statistics" label="Thống kê">
         <div>Chức năng đang được cập nhật</div>
         <div class="flex flex-row justify-evenly hidden">
           <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
@@ -211,7 +229,7 @@
           </div>
         </div>
 
-      </el-tab-pane>
+      </el-tab-pane> -->
     </el-tabs>
   </div>
 </template>
@@ -362,7 +380,7 @@ const generateQRCode = async () => {
   console.log('params-endcode' + params)
 
   var url = clientURL.value + '/?c=' + params
-  formData.value.clientUrl = url  
+  formData.value.clientUrl = url
   clientURL.value = url
   QRCode.toCanvas(qrcodeCanvas.value, url, { width: 300 }, (error) => {
     if (error) console.error(error)
@@ -503,9 +521,9 @@ const convertToTree = (data) => {
   return roots
 }
 
-const tabHandleClick = async (tab, event) =>{
-  
-  if(tab.props.name === 'conditionTab'){
+const tabHandleClick = async (tab, event) => {
+
+  if (tab.props.name === 'conditionTab') {
     await conditionTabRef.value?.getAgencyOptions()
     await conditionTabRef.value?.getGroupOptions()
   }
