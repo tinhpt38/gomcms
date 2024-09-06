@@ -117,10 +117,12 @@
                         <div v-for="(activity, index) in postData" :key="index"
                             class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
                             <div class="relative overflow-hidden">
-                                <img :src="activity.image" :alt="activity.title" class="w-full h-48 object-cover">
-                                <div class="absolute top-2 left-2 bg-[#79a227] text-white px-3 py-1 rounded">
-                                    QR code
-                                </div>
+                                <!-- <img :src="activity.image" :alt="activity.title" class="w-full h-48 object-cover"> -->
+                                <canvas :ref="canvasRefs[index]" class="w-full h-48"></canvas>
+                                <!-- <div class="absolute top-2 left-2 bg-[#79a227] text-white px-3 py-1 rounded">
+                                    Mã QR 
+                                </div> -->
+                                <!-- <canvas :ref="(el) => (canvasRefs.value[index] = el)" class="w-full h-48"></canvas> -->
                             </div>
                             <div
                                 class="p-6 flex-grow flex flex-col justify-between bg-gradient-to-br from-white to-gray-50">
@@ -190,18 +192,16 @@
 
 
 <script setup>
-import { formatDate } from '@/utils/format';
 import { getAttendancePublic } from '@/api/checkins/attendance';
-import { ref } from 'vue'
+import { onMounted, ref, watch, nextTick } from 'vue'
 import moment from 'moment';
 import QRCode from 'qrcode'
-
-
 
 const postData = ref([])
 const page = ref(1)
 const total = ref(0)
-const pageSize = ref(10)
+const pageSize = ref(6)
+
 
 const getPostData = async () => {
     var now = moment()
@@ -216,24 +216,42 @@ const getPostData = async () => {
         total.value = res.data.total
         page.value = res.data.page
         pageSize.value = res.data.pageSize
+        // Update canvasRefs to reference canvas elements
+        // await nextTick()  // Ensure the DOM is updated
+        
+        postData.value.forEach((activity, index) => {
+            generateQRCode(index, activity.clientUrl)
+        })
     }
     console.log(postData.value)
 }
 
-getPostData()
 
 
-const generateQRCode = async (id) => {
-  var params = base32.encode(id)
-  console.log('params-endcode' + params)
 
-  var url = clientURL.value + '/?c=' + params
-  formData.value.clientUrl = url  
-  clientURL.value = url
-  QRCode.toCanvas(qrcodeCanvas.value, url, { width: 300 }, (error) => {
-    if (error) console.error(error)
-  })
+const canvasRefs = ref( Array(6).fill(null) )
+console.log("canvasRefs: ", canvasRefs)
+const generateQRCode = async(index, url) => {
+    const canvas = canvasRefs.value[index]
+    if (canvas) {
+        try {
+            await QRCode.toCanvas(canvas, url, { width: 300 })
+        } catch (error) {
+            console.error("QR code canvas error: ", error)
+        }
+    }
 }
+
+
+watch(postData, (newPostData) => {
+    newPostData.forEach((activity, index) => {
+        generateQRCode(index, activity.clientUrl)
+    })
+})
+
+onMounted(() => {
+    getPostData()
+})
 
 const redirectToLogin = () => {
     window.location.href = '/login'
