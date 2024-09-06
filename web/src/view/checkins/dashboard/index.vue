@@ -51,7 +51,7 @@
         </div>
 
         <div class="rounded p-4">
-            <div class="text-xl my-1 mx-1">Thống kê sự liên quan giữa thời gian điểm danh và số lượng điểm danh trong
+            <div class="text-xl my-1 mx-1">Thống kê tổng số điểm danh theo tháng hiện tại
                 ngày.
             </div>
             <div class="mt-1 flex flex-row justify-between p-4 rounded bg-slate-100">
@@ -59,8 +59,7 @@
             </div>
         </div>
         <div class="rounded p-4">
-            <div class="text-xl my-1 mx-1">Thống kê sự liên quan giữa thời gian điểm danh và số lượng điểm danh trong
-                ngày.
+            <div class="text-xl my-1 mx-1">Thống kê sự số lượng điểm danh của đơn vị, danh mục theo ngày
             </div>
             <div class="mt-1 flex flex-row justify-between p-4 rounded bg-slate-100">
                 <vue-echarts :option="lineChartOptions" style="height: 550px; width: 100%;" />
@@ -87,6 +86,7 @@ import {
 
 import { onMounted, ref } from 'vue';
 import { VueEcharts } from 'vue3-echarts';
+import { formatDate } from '@/utils/format'
 
 
 defineOptions({
@@ -99,9 +99,9 @@ const elSearchFormRef = ref()
 const searchInfo = ref({
     agencyId: null,
     categoryId: null,
-    startAt: new Date(),
-    endAt: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-})
+    startAt: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    endAt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0),
+});
 
 const onSubmit = () => {
     statsFunc()
@@ -115,6 +115,10 @@ const onReset = () => {
     }
 }
 
+const timeToDate = (dateString) => {
+    const [day, month, year] = dateString.split('/').map(Number);
+    return new Date(year, month - 1, day);
+};
 
 // Charts 
 const statsByAgencyCategoryOptions = ref({})
@@ -167,66 +171,89 @@ const createStatsByAgencyCategory = (data) => {
     }
 }
 
-const scatterPlotOptions = ref({
-    xAxis: {
-        type: 'value',  // Trục X là giá trị số (số phút)
-        name: 'Time (Minutes from 00:00)',
-        min: 0,  // Bắt đầu từ 0 phút (00:00)
-        max: 1440  // 1440 phút là 24:00
-    },
-    yAxis: {
-        type: 'value',  // Trục Y là số lượng điểm danh
-        name: 'Check-in Count'
-    },
-    series: [
-        {
-            symbolSize: 20,
-            data: [],  // Dữ liệu sẽ được cập nhật
-            type: 'scatter'
-        }
-    ]
-});
+const scatterPlotOptions = ref({});
+
 const updateScatterPlotOptions = (data) => {
-    const seriesData = data.map(item => [timeToMinutes(item.CheckinTime), item.CheckinCount]);
-
-    // Cập nhật option cho scatter plot
-    scatterPlotOptions.value.xAxis.data = seriesData.map(item => item[0]);  // Đặt trục X là thời gian đã chuyển đổi
-    scatterPlotOptions.value.series[0].data = seriesData;  // Đặt series data cho biểu đồ
+    const sData = data.map(item => [timeToDate(item.CheckinTime), item.CheckinCount]);
+    scatterPlotOptions.value = {
+        xAxis: {
+            type: 'time',  // Sử dụng trục thời gian
+            name: 'Date',
+            axisLabel: {
+                formatter: (value) => {
+                    const date = new Date(value);
+                    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;  // Định dạng hiển thị ngày
+                }
+            }
+        },
+        yAxis: {
+            type: 'value',  // Trục Y là số lượng điểm danh
+            name: 'Tổng số lượt điểm danh'
+        },
+        series: [
+            {
+                symbolSize: 20,
+                data: sData,  // Dữ liệu sẽ được cập nhật
+                type: 'scatter'
+            }
+        ]
+    }
 }
 
-function timeToMinutes(timeStr) {
-    const [hours, minutes] = timeStr.split(":").map(Number);
-    return hours * 60 + minutes;  // Chuyển giờ thành phút và cộng với phút
-}
 
-const lineChartOptions = ref({
-    xAxis: {
-        type: 'category',  // Trục X là dạng thời gian (ngày)
-        name: 'Date',
-        data: []  // Dữ liệu sẽ được cập nhật
-    },
-    yAxis: {
-        type: 'value',  // Trục Y là số lượng điểm danh
-        name: 'Check-in Count'
-    },
-    series: [
-        {
-            type: 'line',  // Kiểu biểu đồ đường
-            data: [],  // Dữ liệu sẽ được cập nhật
-            smooth: true,  // Làm mịn đường
-            areaStyle: {}  // Thuộc tính để tạo biểu đồ vùng nếu cần
-        }
-    ]
-});
+
+
+const lineChartOptions = ref({});
 const updateStatsTrendLineOptions = (data) => {
-    const seriesData = data.map(item => ({
-        name: item.CheckinDate,
-        value: [item.CheckinDate, item.CheckinCount]
-    }));
+    // Gom nhóm dữ liệu theo AgencyName và CategoryName
+    const groupedData = {};
+    data.forEach(item => {
+        const key = `${item.AgencyName} - ${item.CategoryName}`;
+        if (!groupedData[key]) {
+            groupedData[key] = { name: key, data: [], dates: [] };
+        }
+        groupedData[key].data.push(item.CheckinCount);
+        groupedData[key].dates.push(formatDate(item.CheckinDate));
+    });
+    // Tạo danh sách các ngày cho trục X (xAxis)
+    const xAxisData = [...new Set(data.map(item => formatDate(item.CheckinDate)))];
 
-    // Cập nhật option cho line chart
-    lineChartOptions.value.xAxis.data = seriesData.map(item => item.name);  // Đặt trục X là các ngày
-    lineChartOptions.value.series[0].data = seriesData.map(item => item.value);  // Đặt dữ liệu cho biểu đồ
+    // Cấu hình biểu đồ
+    lineChartOptions.value = {
+        
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: Object.keys(groupedData)  // Hiển thị các dòng theo AgencyName - CategoryName
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: xAxisData  // Dữ liệu trục X từ CheckinDate
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: Object.keys(groupedData).map(key => ({
+            name: key,
+            type: 'line',
+            stack: 'Total',
+            data: groupedData[key].data  // Dữ liệu số liệu từ CheckinCount
+        }))
+    };
+
 }
 
 

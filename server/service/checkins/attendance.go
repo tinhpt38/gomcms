@@ -284,11 +284,11 @@ func (attendanceService *AttendanceService) StatsScatterPlot(req checkinsReq.Sta
 
 	// Xây dựng truy vấn thô
 	rawDB := global.GVA_DB.Table("attendance_checkins as attci").
-		Select("DATE_FORMAT(attci.created_at, '%H:%i') as CheckinTime, COUNT(attci.id) as CheckinCount").
+		Select("DATE_FORMAT(attci.created_at, '%d/%m/%Y') as CheckinTime, COUNT(attci.id) as CheckinCount").
 		Joins("LEFT JOIN attendances as att on att.id = attci.attendance_id").
 		Where("attci.deleted_at IS NULL").
 		Where("att.category_id IN (?)", listCatIds).
-		Group("DATE_FORMAT(attci.created_at, '%H:%i')").
+		Group("DATE_FORMAT(attci.created_at, '%d/%m/%Y')").
 		Order("CheckinTime")
 
 	// Lọc theo agency nếu có
@@ -335,19 +335,11 @@ func (attendanceService *AttendanceService) StatsTrendLine(req checkinsReq.Stats
 
 	// Cấu trúc để nhận kết quả
 	var resultRows []struct {
-		CheckinTime  string
+		CheckinDate  string
 		CheckinCount int
+		AgencyName   string
+		CategoryName string
 	}
-
-	// Xây dựng truy vấn thô
-	// rawDB := global.GVA_DB.Table("attendance_checkins as attci").
-	// 	Select("DATE_FORMAT(attci.created_at, '%H:%i') as CheckinTime, COUNT(attci.id) as CheckinCount").
-	// 	Joins("LEFT JOIN attendances as att on att.id = attci.attendance_id").
-	// 	Where("attci.deleted_at IS NULL").
-	// 	Where("att.category_id IN (?)", listCatIds).
-	// 	Group("DATE_FORMAT(attci.created_at, '%H:%i')").
-	// 	Order("CheckinTime")
-
 	rawDB := global.GVA_DB.Table("attendance_checkins as ac").
 		Select("DATE(ac.created_at) as CheckinDate, COUNT(ac.partpaticipant_id) as CheckinCount, attagen.name as AgencyName, attcat.name as CategoryName").
 		Joins("LEFT JOIN attendances att ON att.id = ac.attendance_id").
@@ -363,7 +355,7 @@ func (attendanceService *AttendanceService) StatsTrendLine(req checkinsReq.Stats
 
 	// Lọc theo agency nếu có
 	if req.AgencyId != 0 {
-		rawDB = rawDB.Where("attagen.agency_id = ?", req.AgencyId)
+		rawDB = rawDB.Where("att.agency_id = ?", req.AgencyId)
 	}
 
 	// Lọc theo khoảng thời gian (nếu có trong request)
