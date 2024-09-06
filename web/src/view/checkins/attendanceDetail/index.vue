@@ -16,7 +16,7 @@
                   <el-input v-model="formData.title" type="text" clearable />
                 </el-form-item>
                 <el-form-item label="URL Điểm danh" prop="formData.clientUrl" class="required">
-                  <el-input v-model="formData.clientUrl" type="text" clearable :value="clientURL" disabled />
+                  <el-input v-model="formData.clientUrl" type="text" clearable  disabled />
                 </el-form-item>
                 <div class=" flex justify-between">
                   <el-form-item label="Ngày bắt đầu" label-width="150px" prop="startDate" class="required">
@@ -200,36 +200,6 @@
           </div>
         </div>
       </el-tab-pane>
-      <!-- <el-tab-pane name="statistics" label="Thống kê">
-        <div>Chức năng đang được cập nhật</div>
-        <div class="flex flex-row justify-evenly hidden">
-          <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
-            <p class="text-5xl font-bold text-center py-3">0</p>
-            <p class="text-slate-800">Tổng số thành viên</p>
-          </div>
-          <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
-            <p class="text-5xl font-bold text-center py-3">0</p>
-            <p class="text-slate-800">Đã điểm danh</p>
-          </div>
-          <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
-            <p class="text-5xl font-bold text-center py-3">0</p>
-            <p class="text-slate-800">Chưa điểm danh</p>
-          </div>
-          <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
-            <p class="text-5xl font-bold text-center py-3">0</p>
-            <p class="text-slate-800">Tổng lượt truy cập</p>
-          </div>
-        </div>
-        <div class="my-8 grid-rows-2 w-full hidden">
-          <div class="my-8 w-6/12 h-96">
-            <div id="trendline" style="width: 500px;height:500px;" />
-          </div>
-          <div class="my-8 w-6/12 h-96">
-            <div id="trendline2" style="width: 500px;height:500px;" />
-          </div>
-        </div>
-
-      </el-tab-pane> -->
     </el-tabs>
   </div>
 </template>
@@ -378,22 +348,23 @@ const qrcodeCanvas = ref(null)
 const generateQRCode = async () => {
   var params = base32.encode($route.params.id)
   console.log('params-endcode' + params)
-
+  console.log(clientURL.value)
   var url = clientURL.value + '/?c=' + params
+  console.log(url)
   formData.value.clientUrl = url
-  clientURL.value = url
   QRCode.toCanvas(qrcodeCanvas.value, url, { width: 300 }, (error) => {
     if (error) console.error(error)
   })
 }
 
-const downloadQRCode = () => {
+const downloadQRCode = async () => {
   const canvas = qrcodeCanvas.value
   const url = canvas.toDataURL('image/png')
   const link = document.createElement('a')
   link.href = url
   link.download = 'QR Điểm danh - ' + formData.value.title + '.png'
   link.click()
+  await saveAttendance()
 }
 
 const rule = reactive({
