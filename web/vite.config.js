@@ -13,6 +13,8 @@ import fullImportPlugin from './vitePlugin/fullImport/fullImport.js'
 import VueFilePathPlugin from './vitePlugin/componentName/index.js'
 import { svgBuilder } from 'vite-auto-import-svg'
 import { AddSecret } from './vitePlugin/secret'
+import vue from '@vitejs/plugin-vue';
+
 // @see https://cn.vitejs.dev/config/
 export default ({
   command,
@@ -44,6 +46,9 @@ export default ({
   const esbuild = {}
 
   const rollupOptions = {
+    external: [
+      'vue-echarts'
+    ],
     output: {
       entryFileNames: 'assets/087AC4D233B64EB0[name].[hash].js',
       chunkFileNames: 'assets/087AC4D233B64EB0[name].[hash].js',
