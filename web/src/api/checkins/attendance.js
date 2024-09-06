@@ -88,3 +88,30 @@ export const getAttendancePublic = (params) => {
     params
   })
 }
+
+export const statsByAgencyCategory = (data) => {
+  return service({
+    url: '/attendance/statsByAgencyCategory',
+    method: 'post',
+    data
+  })
+}
+
+
+export const statsScatterPlot = (data) => {
+  return service({
+    url: '/attendance/statsScatterPlot',
+    method: 'post',
+    data
+  })
+}
+
+export const statsTrendLine = (data) => {
+  return service({
+    url: '/attendance/statsTrendLine',
+    method: 'post',
+    data
+  })
+}
+
+

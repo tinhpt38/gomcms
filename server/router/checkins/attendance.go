@@ -15,6 +15,10 @@ func (s *AttendanceRouter) InitAttendanceRouter(Router *gin.RouterGroup, PublicR
 		attendanceRouter.POST("createAttendance", attendanceApi.CreateAttendance)
 		attendanceRouter.POST("createAttendanceArea", attendanceApi.CreateAttendanceArea)
 		attendanceRouter.POST("cloneAttendance", attendanceApi.CloneAttendance)
+		attendanceRouter.POST("statsByAgencyCategory", attendanceApi.StatsByAgencyCategory)
+		attendanceRouter.POST("statsScatterPlot", attendanceApi.StatsScatterPlot)
+		attendanceRouter.POST("statsTrendLine", attendanceApi.StatsTrendLine)
+
 		attendanceRouter.DELETE("deleteAttendance", attendanceApi.DeleteAttendance)
 		attendanceRouter.DELETE("deleteAttendanceArea", attendanceApi.DeleteAttendanceArea)
 		attendanceRouter.DELETE("deleteAttendanceByIds", attendanceApi.DeleteAttendanceByIds)

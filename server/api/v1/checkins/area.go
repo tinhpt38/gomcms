@@ -170,3 +170,4 @@ func (areaApi *AreaApi) GetAreaPublic(c *gin.Context) {
 	   "info": "Thông tin API Khu vực điểm danh không cần xác thực",
 	}, "Thành công", c)
 }
+
