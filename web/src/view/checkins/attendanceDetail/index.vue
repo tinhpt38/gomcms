@@ -241,9 +241,8 @@ import {
 } from '@/api/checkins/group'
 
 import { useRoute } from 'vue-router';
-import QRCode from 'qrcode'
 import { ElForm, ElMessage } from 'element-plus'
-import { ref, reactive, nextTick } from 'vue'
+import { ref, reactive } from 'vue'
 import Partticipant from '@/view/checkins/components/participant/index.vue'
 import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
@@ -251,8 +250,6 @@ import Condition from '@/view/checkins/components/condition/index.vue'
 import ImportExcel from '@/components/importExcel/index.vue'
 import { formatDateTime, formatDate } from '@/utils/format'
 import base32 from 'hi-base32'
-import * as echarts from 'echarts'
-
 import {
   getAttendanceCategoryList
 } from '@/api/checkins/attendanceCategory'

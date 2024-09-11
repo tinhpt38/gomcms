@@ -10,17 +10,22 @@
                         </a>
                         <div class="hidden md:flex items-center gap-4 lg:gap-7" />
                         <button
-                            class="hidden md:block bg-[#79a227] text-white text-base lg:text-lg py-2 px-6 lg:py-3 lg:px-10 rounded-xl outline-none border-none cursor-pointer"
+                            class="hidden md:block bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
                             @click="redirectToLogin">
                             Đăng nhập
                         </button>
-                        <button class="md:hidden text-gray-500 hover:text-gray-700" @click="toggleMobileMenu">
+                        <button
+                            class="md:hidden bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
+                            @click="redirectToLogin">
+                            Đăng nhập
+                        </button>
+                        <!-- <button class="md:hidden text-gray-500 hover:text-gray-700" @click="toggleMobileMenu">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
-                        </button>
+                        </button> -->
                     </div>
                 </div>
             </header>
@@ -137,10 +142,32 @@
                             class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
                             <div class="relative overflow-hidden rounded-t-lg shadow-md">
                                 <!-- <div class="relative w-full h-80 bg-gradient-to-r from-blue-100 to-green-100"> -->
-                                <div class="relative w-full h-80 bg-white">
+                                <div class="relative w-full h-96 bg-white">
                                     <div class="absolute inset-0 flex items-center justify-center">
                                         <div class="bg-transparent p-4 rounded-lg">
-                                            <canvas :id="`qr-canvas-${index}`" class="w-full h-max aspect-square" />
+                                            <!-- <canvas :id="`qr-canvas-${index}`" class="w-full h-max aspect-square" /> -->
+                                            <div class="w-full h-max aspect-square">
+                                                <QRCodeVue3 :width="300" :height="300" :value="activity.clientUrl"
+                                                    :key="index" :qr-options="{
+                                                        errorCorrectionLevel: 'H'
+                                                    }" :image-options="{ hideBackgroundDots: true, imageSize: 0.4, margin: 10 }"
+                                                    :corners-square-options="{ type: 'dot', color: '#514C39' }"
+                                                    :corners-dot-options="{
+                                                        type: undefined,
+                                                        color: '#7BA227'
+                                                    }" :dots-options="{
+                                                    type: 'dots',
+                                                    color: '#7BA227',
+                                                    gradient: {
+                                                        type: 'linear',
+                                                        rotation: 0,
+                                                        colorStops: [
+                                                            { offset: 0, color: '#7BA227' },
+                                                            { offset: 1, color: '#E67F32' }
+                                                        ]
+                                                    }
+                                                }" :download="false" image="/dlu.png" />
+                                            </div>
                                         </div>
                                     </div>
                                     <div
@@ -206,6 +233,7 @@ import { getAttendancePublic } from '@/api/checkins/attendance';
 import { onMounted, ref, nextTick } from 'vue'
 import moment from 'moment';
 import QRCode from 'qrcode'
+import QRCodeVue3 from 'qrcode-vue3'
 
 const postData = ref([])
 const page = ref(1)
