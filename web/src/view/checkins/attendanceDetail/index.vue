@@ -16,7 +16,7 @@
                   <el-input v-model="formData.title" type="text" clearable />
                 </el-form-item>
                 <el-form-item label="URL Điểm danh" prop="formData.clientUrl" class="required">
-                  <el-input v-model="formData.clientUrl" type="text" clearable  disabled />
+                  <el-input v-model="formData.clientUrl" type="text" clearable disabled />
                 </el-form-item>
                 <div class=" flex justify-between">
                   <el-form-item label="Ngày bắt đầu" label-width="150px" prop="startDate" class="required">
@@ -82,16 +82,35 @@
               </el-col>
               <el-col :span="12" class="grid-cell flex-column px-4">
                 <div class="flex justify-end p-2">
-                  <el-button type="success" @click="downloadQRCode">
+                  <!-- <el-button type="success" @click="downloadQRCode">
                     Tải xuống QR Code
-                  </el-button>
+                  </el-button> -->
                   <el-button type="primary" @click="saveAttendance">
                     Lưu
                   </el-button>
                 </div>
                 <div class="flex flex-col items-center justify-center w-full">
-                  <canvas ref="qrcodeCanvas" class="border-2 rounded border-gray-500" />
-                  <div>Dùng QR Code này để quét điểm danh</div>
+                  <!-- <canvas ref="qrcodeCanvas" class="border-2 rounded border-gray-500" /> -->
+                  <QRCodeVue3 :width="512" :height="512" :value="targetClientURL" :key="targetClientURL" :qr-options="{
+                    errorCorrectionLevel: 'H'
+                  }" :image-options="{ hideBackgroundDots: true, imageSize: 0.4, margin: 10 }"
+                    :corners-square-options="{ type: 'dot', color: '#514C39' }" :corners-dot-options="{
+                      type: undefined,
+                      color: '#7BA227'
+                    }" :dots-options="{
+                      type: 'dots',
+                      color: '#7BA227',
+                      gradient: {
+                        type: 'linear',
+                        rotation: 0,
+                        colorStops: [
+                          { offset: 0, color: '#7BA227' },
+                          { offset: 1, color: '#E67F32' }
+                        ]
+                      }
+                    }" :download="true" image="/dlu.png" buttonName="Tải xuống" 
+                    :downloadOptions="downloadQrOptions" downloadButton="download-btn" />
+                  <!-- <div>Dùng QR Code này để quét điểm danh</div> -->
                 </div>
               </el-col>
             </el-row>
@@ -230,7 +249,7 @@ import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
 import ImportExcel from '@/components/importExcel/index.vue'
-import { formatDateTime } from '@/utils/format'
+import { formatDateTime, formatDate } from '@/utils/format'
 import base32 from 'hi-base32'
 import * as echarts from 'echarts'
 
@@ -241,6 +260,8 @@ import {
 import {
   getAttendanceAgencyList
 } from '@/api/checkins/attendanceAgency'
+
+import QRCodeVue3 from 'qrcode-vue3'
 
 defineOptions({
   name: 'AttendanceDetail'
@@ -307,7 +328,7 @@ const getDetailData = async () => {
     formData.value = res.data
   }
   generateQRCode();
-  console.log("getDetailData: ", formData.value)
+  // console.log("getDetailData: ", formData.value)
 
 }
 getDetailData();
@@ -343,18 +364,21 @@ const saveAttendance = async () => {
   })
 }
 
-const qrcodeCanvas = ref(null)
-
+const targetClientURL = ref("")
+const downloadQrOptions = ref({})
 const generateQRCode = async () => {
   var params = base32.encode($route.params.id)
   console.log('params-endcode' + params)
   console.log(clientURL.value)
   var url = clientURL.value + '/?c=' + params
-  console.log(url)
   formData.value.clientUrl = url
-  QRCode.toCanvas(qrcodeCanvas.value, url, { width: 300 }, (error) => {
-    if (error) console.error(error)
-  })
+  console.log('url', url)
+  targetClientURL.value = url
+  downloadQrOptions.value = {
+    name: 'QR Điểm danh - ' + formData.value.title + " ngày " + formatDate(formData.value.startDate),
+    extension: 'png'
+  }
+
 }
 
 const downloadQRCode = async () => {
@@ -427,7 +451,7 @@ const getTableData = async () => {
   }
   // console.log("Danh sách điểm danh")
   // console.log(table)
-  getTrendline()
+  generateQRCode()
 }
 
 getTableData()
@@ -526,34 +550,20 @@ const getGroupOptions = async () => {
 getGroupOptions();
 
 
-const getTrendline = () => {
-  const trendline = echarts.init(document.getElementById('trendline'))
-  var option = {
-    title: {
-      text: 'ECharts Getting Started Example'
-    },
-    tooltip: {},
-    legend: {
-      data: ['sales']
-    },
-    xAxis: {
-      data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks']
-    },
-    yAxis: {},
-    series: [
-      {
-        name: 'sales',
-        type: 'bar',
-        data: [5, 20, 36, 10, 10, 20]
-      }
-    ]
-  };
-  trendline.setOption(option);
-}
-
-
-
 
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+button.download-btn {
+    padding: 12px 32px;
+    border: none;
+    justify-content: center;
+    display: block;
+    width: 100%;
+    border-radius: 4px;
+    background-color: #67C239;
+    color: #fff;
+    font-weight: 400;
+    font-size: 14px;
+}
+</style>

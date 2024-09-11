@@ -35,6 +35,7 @@
         "path": "^0.12.7",
         "pinia": "^2.1.4",
         "qrcode": "^1.5.4",
+        "qrcode-vue3": "^1.7.1",
         "qs": "^6.11.2",
         "screenfull": "^6.0.2",
         "sortablejs": "^1.15.2",
