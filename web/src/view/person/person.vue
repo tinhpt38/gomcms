@@ -23,7 +23,7 @@
                   <close />
                 </el-icon>
               </p>
-              <p class="text-gray-500 mt-2 text-md">Người này lười biếng, không để lại gì cả</p>
+              <!-- <p class="text-gray-500 mt-2 text-md">Người này lười biếng, không để lại gì cả</p> -->
             </div>
             <div class="w-full h-full text-left">
               <ul class="inline-block h-full w-full">
@@ -33,28 +33,28 @@
                   </el-icon>
                   {{ userStore.userInfo.nickName }}
                 </li>
-                <el-tooltip class="item" effect="light" content="Công ty Công nghệ Phản chuyển Cực quang Bắc Kinh - Bộ phận Kỹ thuật - Nhóm Kỹ thuật Front-end" placement="top">
+                <el-tooltip class="item" effect="light" content="Trung tâm Công nghệ thông tin - Trường Đại học Đà Lạt" placement="top">
                   <li class="info-list">
                     <el-icon>
                       <data-analysis />
                     </el-icon>
-                    Công ty Công nghệ Phản chuyển Cực quang Bắc Kinh - Bộ phận Kỹ thuật - Nhóm Kỹ thuật Front-end
+                    Trung tâm Công nghệ thông tin - Trường Đại học Đà Lạt
                   </li>
                 </el-tooltip>
                 <li class="info-list">
                   <el-icon>
                     <video-camera />
                   </el-icon>
-                  Trung Quốc · Thành phố Bắc Kinh · Quận Triều Tiên
+                  Thành phố Đà Lạt - Lâm Đồng - Việt Nam
                 </li>
-                <el-tooltip class="item" effect="light" content="GoLang/JavaScript/Vue/Gorm" placement="top">
+                <!-- <el-tooltip class="item" effect="light" content="GoLang/JavaScript/Vue/Gorm" placement="top">
                   <li class="info-list">
                     <el-icon>
                       <medal />
                     </el-icon>
                     GoLang/JavaScript/Vue/Gorm
                   </li>
-                </el-tooltip>
+                </el-tooltip> -->
               </ul>
             </div>
           </div>

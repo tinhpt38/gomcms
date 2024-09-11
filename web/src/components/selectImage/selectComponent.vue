@@ -18,7 +18,7 @@
       <source :src="getUrl(model) + '#t=1'">
     </video>
 
-    <img v-if="model&&!isVideoExt(model)" class="w-full h-full" :src="getUrl(model)" alt="图片">
+    <img v-if="model&&!isVideoExt(model)" class="w-full h-full" :src="getUrl(model)" alt="Chọn ảnh">
     <div
       v-if="model"
       class="left-0 top-0 hidden text-gray-600 group-hover:bg-gray-600 group-hover:bg-opacity-30 w-full h-full group-hover:flex justify-center items-center absolute z-10"
@@ -27,7 +27,7 @@
       <el-icon>
         <delete />
       </el-icon>
-      删除
+      Xoá ảnh
     </div>
     <div
       v-else
@@ -35,9 +35,9 @@
       @click="chooseItem"
     >
       <el-icon>
-        <plus />
+      <plus />
       </el-icon>
-      上传
+      Tải lên
     </div>
   </div>
 </template>

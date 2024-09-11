@@ -8,7 +8,7 @@
       :before-upload="beforeImageUpload"
       :multiple="false"
     >
-      <el-button type="primary">压缩上传</el-button>
+      <el-button type="primary">Nén và tải lên</el-button>
     </el-upload>
   </div>
 </template>
@@ -48,7 +48,7 @@ const beforeImageUpload = (file) => {
   const isJPG = file.type === 'image/jpeg'
   const isPng = file.type === 'image/png'
   if (!isJPG && !isPng) {
-    ElMessage.error('上传头像图片只能是 jpg或png 格式!')
+    ElMessage.error('Ảnh đại diện chỉ được phép là định dạng jpg hoặc png!')
     return false
   }
 
