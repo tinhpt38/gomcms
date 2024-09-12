@@ -353,17 +353,17 @@ func isWithinRadius(lat, lon, radius, xLat, xLng, accuracy float64) bool {
 }
 
 func checkCondition(participant checkins.AttendanceGroupParticipant, condition checkins.Condition, req checkinsReq.CheckinsReq, ip string) (bool, error) {
-	// Trường hợp 1
+
 	lat := req.Lat
 	lng := req.Lng
-
+	// Trường hợp 1 -- Điều kiện không phân nhóm, có khu vực, có thời gian
 	if condition.GroupId == nil && condition.AreaId != nil && condition.StartAt != nil && condition.EndAt != nil {
 		inArea, err := checkMatchArea(ip, lat, lng, req.Accuracy, *condition.Area)
 		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
 		return inArea && matchTime, err
 	}
 
-	// Trường hợp 2
+	// Trường hợp 2 -- Điều kiện không phân nhóm, không khu vực, có thời gian
 	if condition.GroupId == nil && condition.AreaId == nil && condition.StartAt != nil && condition.EndAt != nil {
 		result := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
 		if !result {
@@ -372,16 +372,16 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 		return result, nil
 	}
 
-	// Trường hợp 3
-	if condition.GroupId == nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt != nil {
-		result := time.Now().UTC().Before(*condition.EndAt)
-		if !result {
-			return false, errors.New("Thời gian không khớp")
-		}
-		return result, nil
-	}
+	// // Trường hợp 3 -- Điều kiện không phân nhóm, không khu vực, không thời gian bắt đầu, có thời gian kết thúc -- NL
+	// if condition.GroupId == nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt != nil {
+	// 	result := time.Now().UTC().Before(*condition.EndAt)
+	// 	if !result {
+	// 		return false, errors.New("Thời gian không khớp")
+	// 	}
+	// 	return result, nil
+	// }
 
-	// Trường hợp 4
+	// Trường hợp 4 -- Điều kiện có phân nhóm, khu vực, có thời gian
 	if condition.GroupId != nil && condition.AreaId != nil && condition.StartAt != nil && condition.EndAt != nil {
 		// Kiểm tra xem có participant.GroupId không
 		if participant.GroupId == nil {
@@ -400,7 +400,7 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 
 	}
 
-	// Trường hợp 5
+	// Trường hợp 5 -- Điều kiện có phân nhóm, không khu vực, có thời gian
 	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt != nil && condition.EndAt != nil {
 		// Kiểm tra xem có participant.GroupId không
 		if participant.GroupId == nil {
@@ -415,22 +415,22 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 		return result, nil
 	}
 
-	// Trường hợp 6
-	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt != nil {
-		// Kiểm tra xem có participant.GroupId không
-		if participant.GroupId == nil {
-			return false, errors.New("Không tìm thấy thông tin nhóm")
-		}
+	// // Trường hợp 6 -- Điều kiện có phân nhóm, không khu vực, không thời gian bắt đầu, có thời gian kết thúc  -- NL
+	// if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt != nil {
+	// 	// Kiểm tra xem có participant.GroupId không
+	// 	if participant.GroupId == nil {
+	// 		return false, errors.New("Không tìm thấy thông tin nhóm")
+	// 	}
 
-		matchTime := time.Now().UTC().Before(*condition.EndAt)
-		result := (*condition.GroupId == *participant.GroupId) && matchTime
-		if !result {
-			return false, errors.New("Thông tin nhóm và thời gian không thoả điều kiện")
-		}
-		return result, nil
-	}
-
-	// Trường hợp 7
+	// 	matchTime := time.Now().UTC().Before(*condition.EndAt)
+	// 	result := (*condition.GroupId == *participant.GroupId) && matchTime
+	// 	if !result {
+	// 		return false, errors.New("Thông tin nhóm và thời gian không thoả điều kiện")
+	// 	}
+	// 	return result, nil
+	// }
+	// Có thể gộp giữ 7 và 6
+	// Trường hợp 7 - Điều kiện có phân nhóm, không khu vực, không thời gian bắt đầu, không thời gian kết thúc
 	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt == nil {
 		// Kiểm tra xem có participant.GroupId không
 		if participant.GroupId == nil {
@@ -444,7 +444,7 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 		return result, nil
 	}
 
-	// Trường hợp 8
+	// Trường hợp 8 -- Điều kiện không phân nhóm, không khu vực, có thời gian bắt đầu, không thời gian kết thúc -- NL
 	if condition.GroupId == nil && condition.AreaId == nil && condition.StartAt != nil && condition.EndAt == nil {
 		result := time.Now().UTC().After(*condition.StartAt)
 		if !result {
@@ -454,7 +454,7 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 
 	}
 
-	// Trường hợp 9
+	// Trường hợp 9 -- Điều kiện có phân nhóm, khu vực, không thời gian bắt đầu, không thời gian kết thúc
 	if condition.GroupId != nil && condition.AreaId != nil && condition.StartAt == nil && condition.EndAt == nil {
 		// Kiểm tra xem có participant.GroupId không
 		if participant.GroupId == nil {
@@ -471,13 +471,13 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 			return false, errors.New("Thông tin nhóm không thoả điều kiện")
 		}
 	}
-
+	// Trường hợp 10 -- Điều kiện không phân nhóm, có khu vực, không thời gian bắt đầu, không thời gian kết thúc
 	if condition.GroupId == nil && condition.AreaId != nil && condition.StartAt == nil && condition.EndAt == nil {
 		inArea, err := checkMatchArea(ip, lat, lng, req.Accuracy, *condition.Area)
 		return inArea, err
 	}
 
-	return false, errors.New("Không có điều kiện nào phù hợp")
+	return true, nil
 }
 
 func isIPAllowed(clientIP string, ipRanges []string) bool {

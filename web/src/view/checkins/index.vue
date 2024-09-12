@@ -234,7 +234,7 @@ const requestCheckin = async () => {
 
   console.log('res', res)
   if (res.code == 0) {
-    if (res.data.condition){
+    if (res.data.condition != null) {
       conditionData.value = res.data.conditions
     }
     attendance.value = res.data.attendance
