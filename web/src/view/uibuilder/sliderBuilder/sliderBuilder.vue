@@ -46,8 +46,8 @@
         <el-table-column type="selection" width="55" />
 
         <el-table-column label="Tiêu đề" prop="title" width="200"></el-table-column>
-        <el-table-column label="Hiển thị" prop="show" width="100">
-          <template #default="scope">{{ scope.row.show ? "Có" : "Không" }}</template>
+        <el-table-column label="Hiển thị" prop="isShow" width="100">
+          <template #default="scope">{{ scope.row.isShow ? "Có" : "Không" }}</template>
         </el-table-column>
         <el-table-column label="Hình ảnh" prop="images" width="200">
           <template #default="scope">
@@ -106,8 +106,8 @@
         <el-form-item label="Link:" prop="link">
           <el-input v-model="formData.link" placeholder="Nhập link"></el-input>
         </el-form-item>
-        <el-form-item label="Hiển thị" prop="show">
-          <el-switch v-model="formData.show" active-value="true" inactive-value="false" active-text="Có"
+        <el-form-item label="Hiển thị" prop="isShow">
+          <el-switch v-model="formData.isShow" active-value="true" inactive-value="false" active-text="Có"
             inactive-text="Không" />
         </el-form-item>
 
@@ -125,7 +125,7 @@
         <el-descriptions-item label="Sub Title">{{ detailFrom.subTitle }}</el-descriptions-item>
         <el-descriptions-item label="Content">{{ detailFrom.content }}</el-descriptions-item>
         <el-descriptions-item label="Link">{{ detailFrom.link }}</el-descriptions-item>
-        <el-descriptions-item label="Hiển thị">{{ formatBoolean(detailFrom.show) }}</el-descriptions-item>
+        <el-descriptions-item label="Hiển thị">{{ formatBoolean(detailFrom.isShow) }}</el-descriptions-item>
       </el-descriptions>
     </el-drawer>
 
@@ -348,10 +348,11 @@ const closeDialog = () => {
   formData.value = {
     images: [],
   }
+
 }
 // Xác nhận hộp thoại
 const enterDialog = async () => {
-  formData.value.show = formData.value.show === 'true' ? true : false
+  formData.value.isShow = formData.value.isShow === 'true' ? true : false
   elFormRef.value?.validate(async (valid) => {
     if (!valid) return
     let res

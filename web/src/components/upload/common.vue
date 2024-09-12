@@ -31,7 +31,7 @@ const fullscreenLoading = ref(false)
 
 const checkFile = (file) => {
   fullscreenLoading.value = true
-  const isLt500K = file.size / 1024 / 1024 < 0.5 // 500K, @todo should be configurable in the project
+  const isLt500K = file.size / 1024 / 1024 < 1.5 // 500K, @todo should be configurable in the project
   const isLt5M = file.size / 1024 / 1024 < 5 // 5MB, @todo should be configurable in the project
   const isVideo = isVideoMime(file.type)
   const isImage = isImageMime(file.type)

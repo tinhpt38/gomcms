@@ -182,11 +182,11 @@ const handleCurrentChange = (val) => {
   getImageList()
 }
 const editFileNameFunc = async(row) => {
-  ElMessageBox.prompt('请输入文件名或者备注', '编辑', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.prompt('Nhập tên tệp hoặc ghi chú', 'Chỉnh sửa', {
+    confirmButtonText: 'Xác nhận',
+    cancelButtonText: 'Hủy',
     inputPattern: /\S/,
-    inputErrorMessage: '不能为空',
+    inputErrorMessage: 'Không được để trống',
     inputValue: row.name
   }).then(async({ value }) => {
     row.name = value
@@ -194,14 +194,14 @@ const editFileNameFunc = async(row) => {
     if (res.code === 0) {
       ElMessage({
         type: 'success',
-        message: '编辑成功!',
+        message: 'Chỉnh sửa thành công!',
       })
       getImageList()
     }
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '取消修改'
+      message: 'Hủy chỉnh sửa'
     })
   })
 }
@@ -227,7 +227,7 @@ const chooseImg = (url) => {
     if (!typeSuccess) {
       ElMessage({
         type: 'error',
-        message: '当前类型不支持使用'
+        message: 'Loại hiện tại không được hỗ trợ'
       })
       return
     }
@@ -260,23 +260,23 @@ const getImageList = async() => {
 }
 
 const deleteCheck = (item)=>{
-  ElMessageBox.confirm('是否删除该文件', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm('Bạn có muốn xóa tệp này không?', 'Cảnh báo', {
+    confirmButtonText: 'Đồng ý',
+    cancelButtonText: 'Hủy',
     type: 'warning'
   }).then(async() => {
     const res = await deleteFile(item)
     if (res.code === 0) {
       ElMessage({
         type: 'success',
-        message: '删除成功!',
+        message: 'Xóa thành công!',
       })
       getImageList()
     }
   }).catch(() => {
     ElMessage({
       type: 'info',
-      message: '已取消删除'
+      message: 'Đã hủy xóa'
     })
   })
 }

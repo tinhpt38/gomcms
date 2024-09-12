@@ -95,3 +95,11 @@ export const getSliderBuilderList = (params) => {
     params
   })
 }
+
+export const getSliderBuilderPublic = (params) => {
+  return service({
+    url: '/sliderBuilder/getSliderBuilderPublic',
+    method: 'get',
+    params
+  })
+}

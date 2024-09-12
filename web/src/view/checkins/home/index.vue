@@ -1,27 +1,36 @@
 <template>
     <div class="bg-white">
         <main class="isolate bg-gradient-to-b from-white to-gray-100">
-            <header ref="header" class="sticky top-0 bg-white z-50 mx-auto px-4 sm:px-6 lg:px-52">
-                <div class="container mx-auto py-3">
-                    <div class="flex items-center justify-between">
-                        <a href="/" class="flex items-center">
-                            <img src="/logo-dlu-full.webp" alt="Trường Đại học Đà Lạt"
-                                class="h-14 sm:h-16 lg:h-20 w-auto">
-                        </a>
-                        <div class="hidden md:flex items-center gap-4 lg:gap-7" />
-                        <button
-                            class="hidden md:block bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
-                            @click="redirectToLogin">
-                            Đăng nhập
-                        </button>
-                        <button
-                            class="md:hidden bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
-                            @click="redirectToLogin">
-                            Đăng nhập
-                        </button>
+            <header ref="header" class="sticky top-0 z-50">
+                <div class="bg-white  mx-auto px-4 sm:px-6 lg:px-52">
+                    <div class="container mx-auto py-3">
+                        <div class="flex items-center justify-between">
+                            <a href="/" class="flex items-center">
+                                <img src="/logo-dlu-full.webp" alt="Trường Đại học Đà Lạt"
+                                    class="h-14 sm:h-16 lg:h-20 w-auto">
+                            </a>
+                            <div class="hidden md:flex items-center gap-4 lg:gap-7" />
+                            <button
+                                class="hidden md:block bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
+                                @click="redirectToLogin">
+                                Đăng nhập
+                            </button>
+                            <button
+                                class="md:hidden bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
+                                @click="redirectToLogin">
+                                Đăng nhập
+                            </button>
+                        </div>
                     </div>
                 </div>
+                <div class="flex w-full h-[3px]">
+                    <div class="w-[10%] bg-[#E67F32]"></div>
+                    <div class="w-[20%] bg-[#607F23]"></div>
+                    <div class="w-[30%] bg-[#98BE3B]"></div>
+                    <div class="w-[50%] bg-[#C2D88B]"></div>
+                </div>
             </header>
+
             <!-- Hero section -->
             <div class="relative isolate -z-10">
                 <svg class="absolute inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
@@ -101,8 +110,25 @@
                             </div>
                         </div>
                     </div> -->
+                    <div class="w-full max-w-7xl mx-auto text-center mt-8">
+                        <div class="transition-all duration-120 delay-350 ease-in-out px-4">
+                            <div class="relative flex flex-col">
+                                <template :key="index" v-for="(item, index) in slider.images">
+                                    <TransitionRoot :show="active === index"
+                                        enter="transition ease-in-out duration-500 delay-200 order-first"
+                                        enterFrom="opacity-0 scale-105" enterTo="opacity-100 scale-100"
+                                        leave="transition ease-in-out duration-300 absolute"
+                                        leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
+                                        <img class="rounded-xl lg:h[440px] sm:h-auto w-[100%]" :src="getUrl(item)" >
+                                    </TransitionRoot>
+                                </template>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
             <section class="py-8">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-800">
@@ -208,8 +234,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex justify-center mt-8">
-                        <el-pagination background layout="prev, pager, next" :total="total" :current-page="page"
+                    <div class="flex justify-center mt-8 text-[#7BA227]">
+                        <el-pagination  layout="prev, pager, next" :total="total" :current-page="page"
                             :page-size="pageSize" @current-change="handlePageChange" />
                     </div>
                 </div>
@@ -221,12 +247,15 @@
 
 <script setup>
 import { getAttendancePublic } from '@/api/checkins/attendance';
-import { onMounted, ref, nextTick } from 'vue'
+import { onMounted, ref, watch, onUnmounted } from 'vue'
 import moment from 'moment';
 import QRCodeVue3 from 'qrcode-vue3'
 import {
     getAttendanceAgencyPublic
 } from '@/api/checkins/attendanceAgency'
+import { getSliderBuilderPublic } from '@/api/uibuilder/sliderBuilder'
+import { getUrl } from '@/utils/image'
+import { TransitionRoot } from '@headlessui/vue'
 
 
 const postData = ref([])
@@ -256,50 +285,27 @@ const getPostData = async () => {
         total.value = res.data.total
         page.value = res.data.page
         pageSize.value = res.data.pageSize
-
-        // Generate QR codes after data is loaded
-        // await nextTick() // Ensure the DOM has updated with new postData
-        // postData.value.forEach((activity, index) => {
-        //     generateQRCode(index, activity.clientUrl)
-        // })
     }
-    console.log("postData")
-    console.log(postData.value)
+
 }
 
 const onSubmit = async () => {
-    console.log("onSubmit")
+    // console.log("onSubmit")
     await getPostData()
 }
 
 const agencyOptions = ref([])
 const getAgencyOptions = async () => {
-    console.log("agencyOptions")
+    // console.log("agencyOptions")
     const table = await getAttendanceAgencyPublic({ page: 0, pageSize: -1 })
-    console.log("after call await")
+    // console.log("after call await")
     if (table.code === 0) {
         agencyOptions.value = table.data.list
     }
-    console.log("agencyOptions")
-    console.log(agencyOptions.value)
+    // console.log("agencyOptions")
+    // console.log(agencyOptions.value)
 }
 getAgencyOptions()
-
-// const sliderOptions = ref([])
-
-// const getSliders = async () => {
-//     const res = await getDict('slider')
-//     if (res.code === 0) {
-//         sliderOptions.value = res.data
-//     }
-//     console.log("sliderOptions", sliderOptions.value)
-// }
-
-// getSliders()
-
-onMounted(async () => {
-    await getPostData()
-})
 
 const redirectToLogin = () => {
     window.location.href = '/login'
@@ -314,6 +320,55 @@ const handlePageChange = async (newPage) => {
     page.value = newPage
     await getPostData()
 }
+
+//Slider
+const slider = ref({})
+
+const getSlider = async () => {
+    const res = await getSliderBuilderPublic()
+    if (res.code === 0) {
+        slider.value = res.data
+    }
+    console.log("getSliderBuilderPublic", res)
+}
+
+getSlider()
+
+const duration = 5000
+const frame = ref(0)
+const firstFrameTime = ref(performance.now())
+const active = ref(0)
+
+
+const startAnimation = () => {
+    firstFrameTime.value = performance.now()
+    frame.value = requestAnimationFrame(animate)
+}
+
+const animate = (now) => {
+    let timeDifference = now - firstFrameTime.value
+    let timeFraction = Math.max(0, timeDifference) / duration
+    if (timeFraction <= 1) {
+        frame.value = requestAnimationFrame(animate)
+    } else {
+        timeFraction = 1
+        active.value = (active.value + 1) % slider.value.images.length
+    }
+}
+
+//System 
+onMounted(async () => {
+    startAnimation()
+    await getPostData()
+})
+
+
+onUnmounted(() => cancelAnimationFrame(frame.value))
+
+watch(active, () => {
+    cancelAnimationFrame(frame.value)
+    startAnimation()
+})
 
 </script>
 

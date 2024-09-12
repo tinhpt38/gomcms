@@ -1,13 +1,32 @@
 <template>
   <div class="bg-white relative">
     <main class="isolate">
-      <header ref="header" class="bg-transparent z-50 mx-auto px-4 sm:px-6 lg:px-52">
-        <div class="container mx-auto py-3">
-          <div class="flex items-center justify-between">
-            <a href="/" class="flex items-center">
-              <img src="/logo-dlu-full.webp" alt="Trường Đại học Đà Lạt" class="h-16 sm:h-20 lg:h-28 w-auto">
-            </a>
+      <header ref="header" class="sticky top-0 z-50">
+        <div class="bg-white  mx-auto px-4 sm:px-6 lg:px-52">
+          <div class="container mx-auto py-3">
+            <div class="flex items-center justify-between">
+              <a href="/" class="flex items-center">
+                <img src="/logo-dlu-full.webp" alt="Trường Đại học Đà Lạt" class="h-14 sm:h-16 lg:h-20 w-auto">
+              </a>
+              <div class="hidden md:flex items-center gap-4 lg:gap-7" />
+              <button
+                class="hidden md:block bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
+                @click="redirectToLogin">
+                Đăng nhập
+              </button>
+              <button
+                class="md:hidden bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
+                @click="redirectToLogin">
+                Đăng nhập
+              </button>
+            </div>
           </div>
+        </div>
+        <div class="flex w-full h-[3px]">
+          <div class="w-[10%] bg-[#E67F32]"></div>
+          <div class="w-[20%] bg-[#607F23]"></div>
+          <div class="w-[30%] bg-[#98BE3B]"></div>
+          <div class="w-[50%] bg-[#C2D88B]"></div>
         </div>
       </header>
 
