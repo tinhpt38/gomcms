@@ -480,6 +480,7 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 	return true, nil
 }
 
+// TODO: Allow 1 trong 2 dải IP trong ipRangs
 func isIPAllowed(clientIP string, ipRanges []string) bool {
 	for _, ipRange := range ipRanges {
 		_, ipNet, err := net.ParseCIDR(ipRange)

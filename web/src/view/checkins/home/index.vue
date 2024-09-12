@@ -134,9 +134,9 @@
                     <div>
 
                         <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
-                            :rules="searchRule" @keyup.enter="onSubmit">
+                            :rules="searchRule">
                             <el-form-item label="Đơn vị" prop="agencyId" >
-                                <el-select class="w-[300px]" v-model="searchInfo.agencyId" placeholder="Chọn đơn vị" clearable filterable>
+                                <el-select class="w-[300px]" v-model="searchInfo.agencyId" placeholder="Chọn đơn vị" clearable filterable @change="onSubmit">
                                     <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name"
                                         :value="item.ID" />
                                 </el-select>
@@ -299,6 +299,7 @@ const getPostData = async () => {
 }
 
 const onSubmit = async () => {
+    console.log("onSubmit")
     await getPostData()
 }
 

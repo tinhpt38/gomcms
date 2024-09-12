@@ -65,10 +65,10 @@
                           {{ conditionString(item) }}
                         </dd>
                         <el-tag v-if="item.isPass" effect="dark" type="success">
-                          Đã điểm danh
+                          Bạn đã điểm danh
                         </el-tag>
                         <el-tag v-if="!item.isPass" effect="dart" type="danger">
-                          Chưa điểm danh
+                          Bạn chưa điểm danh
                         </el-tag>
                       </div>
                     </dl>
