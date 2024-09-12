@@ -472,6 +472,11 @@ func checkCondition(participant checkins.AttendanceGroupParticipant, condition c
 		}
 	}
 
+	if condition.GroupId == nil && condition.AreaId != nil && condition.StartAt == nil && condition.EndAt == nil {
+		inArea, err := checkMatchArea(ip, lat, lng, req.Accuracy, *condition.Area)
+		return inArea, err
+	}
+
 	return false, errors.New("Không có điều kiện nào phù hợp")
 }
 

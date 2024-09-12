@@ -203,7 +203,7 @@
                 </template>
               </el-table-column>
               <el-table-column align="left" label="Client ID" prop="visitorId" width="200" />
-              <el-table-column class="overflow-hidden" label="Agent" prop="agent" />
+              <!-- <el-table-column class="overflow-hidden" label="Agent" prop="agent" /> -->
             </el-table>
             <div class="gva-pagination">
               <el-pagination layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
