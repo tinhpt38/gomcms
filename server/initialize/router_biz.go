@@ -28,8 +28,10 @@ func initBizRouter(routers ...*gin.RouterGroup) {
 		configRouter := router.RouterGroupApp.Config
 		configRouter.InitCfgFileProcessRouter(privateGroup, publicGroup)
 		configRouter.InitFileProcessErrorRouter(privateGroup, publicGroup)
+	} // 占位方法，保证文件可以正确加载，避免go空变量检测报错，请勿删除。
+	// 占位方法，保证文件可以正确加载，避免go空变量检测报错，请勿删除。
+	{
+		uibuilderRouter := router.RouterGroupApp.Uibuilder
+		uibuilderRouter.InitSliderBuilderRouter(privateGroup, publicGroup)
 	}
 }
-
-// 占位方法，保证文件可以正确加载，避免go空变量检测报错，请勿删除。
-// 占位方法，保证文件可以正确加载，避免go空变量检测报错，请勿删除。

@@ -46,8 +46,7 @@
                         style="clip-path: polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.7%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)" />
                 </div>
                 <div class="overflow-hidden">
-                    <!-- <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32"> -->
-                    <div class="mx-auto max-w-7xl px-6 pb-[32px] pt-[32px]">
+                    <!-- <div class="mx-auto max-w-7xl px-6 pb-[32px] pt-[32px]">
                         <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                             <div class="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
                                 <h1 class="text-4xl font-bold tracking-tight text-[#514C39] sm:text-6xl mb-6">
@@ -58,18 +57,6 @@
                                     Chào mừng bạn đến với hệ thống điểm danh hiện đại của Trường Đại học Đà Lạt.
                                     Hãy đăng nhập để bắt đầu quá trình điểm danh của bạn.
                                 </p>
-                                <!-- <div class="mt-10 flex items-center gap-x-6">
-                  <a
-                    href="#"
-                    class="rounded-md bg-[#7BA227] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#6B8F23] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7BA227]"
-                    @click="redirectToLogin"
-                  >
-                    Đăng nhập ngay
-                  </a>
-                  <a href="#" class="text-sm font-semibold leading-6 text-gray-900">
-                    Tìm hiểu thêm <span aria-hidden="true">→</span>
-                  </a>
-                </div> -->
                             </div>
 
                             <div
@@ -77,8 +64,7 @@
                                 <div
                                     class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                                     <div class="relative">
-                                        <img src="/dlu1.jpg"
-                                            alt=""
+                                        <img src="/dlu1.jpg" alt=""
                                             class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                                         <div
                                             class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -86,15 +72,13 @@
                                 </div>
                                 <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
                                     <div class="relative">
-                                        <img src="/dlu2.jpg"
-                                            alt=""
+                                        <img src="/dlu2.jpg" alt=""
                                             class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                                         <div
                                             class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
                                     </div>
                                     <div class="relative">
-                                        <img src="/dlu3.jpg"
-                                            alt=""
+                                        <img src="/dlu3.jpg" alt=""
                                             class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                                         <div
                                             class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -102,15 +86,13 @@
                                 </div>
                                 <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
                                     <div class="relative">
-                                        <img src="/dlu4.jpg"
-                                            alt=""
+                                        <img src="/dlu4.jpg" alt=""
                                             class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                                         <div
                                             class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
                                     </div>
                                     <div class="relative">
-                                        <img src="/dlu5.jpg"
-                                            alt=""
+                                        <img src="/dlu5.jpg" alt=""
                                             class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                                         <div
                                             class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
@@ -118,7 +100,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <section class="py-8">
@@ -135,8 +117,9 @@
 
                         <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
                             :rules="searchRule">
-                            <el-form-item label="Đơn vị" prop="agencyId" >
-                                <el-select class="w-[300px]" v-model="searchInfo.agencyId" placeholder="Chọn đơn vị" clearable filterable @change="onSubmit">
+                            <el-form-item label="Đơn vị" prop="agencyId">
+                                <el-select class="w-[300px]" v-model="searchInfo.agencyId" placeholder="Chọn đơn vị"
+                                    clearable filterable @change="onSubmit">
                                     <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name"
                                         :value="item.ID" />
                                 </el-select>
@@ -240,11 +223,11 @@
 import { getAttendancePublic } from '@/api/checkins/attendance';
 import { onMounted, ref, nextTick } from 'vue'
 import moment from 'moment';
-import QRCode from 'qrcode'
 import QRCodeVue3 from 'qrcode-vue3'
 import {
     getAttendanceAgencyPublic
 } from '@/api/checkins/attendanceAgency'
+
 
 const postData = ref([])
 const page = ref(1)
@@ -254,20 +237,6 @@ const backgroundQROptions = ref({
     color: '#FFFFFF00'
 })
 
-const generateQRCode = async (index, url) => {
-    await nextTick() // Ensure the DOM has updated
-    const canvas = document.getElementById(`qr-canvas-${index}`)
-    if (canvas) {
-        try {
-            await QRCode.toCanvas(canvas, url, { width: 300 })
-            console.log(`QR code generated for index: ${index}, url: ${url}`)
-        } catch (error) {
-            console.error(`QR code generation error for index ${index}:`, error)
-        }
-    } else {
-        console.error(`Canvas not found for index ${index}`)
-    }
-}
 
 const searchInfo = ref({
     agencyId: null,
@@ -315,6 +284,18 @@ const getAgencyOptions = async () => {
     console.log(agencyOptions.value)
 }
 getAgencyOptions()
+
+// const sliderOptions = ref([])
+
+// const getSliders = async () => {
+//     const res = await getDict('slider')
+//     if (res.code === 0) {
+//         sliderOptions.value = res.data
+//     }
+//     console.log("sliderOptions", sliderOptions.value)
+// }
+
+// getSliders()
 
 onMounted(async () => {
     await getPostData()
