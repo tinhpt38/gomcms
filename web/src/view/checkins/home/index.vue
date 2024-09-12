@@ -47,7 +47,7 @@
                 </div>
                 <div class="overflow-hidden">
                     <!-- <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32"> -->
-                        <div class="mx-auto max-w-7xl px-6 pb-[32px] pt-[32px]">
+                    <div class="mx-auto max-w-7xl px-6 pb-[32px] pt-[32px]">
                         <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                             <div class="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
                                 <h1 class="text-4xl font-bold tracking-tight text-[#514C39] sm:text-6xl mb-6">
@@ -144,23 +144,25 @@
                                                 <QRCodeVue3 :width="512" :height="512" :value="activity.clientUrl"
                                                     :key="index" :qr-options="{
                                                         errorCorrectionLevel: 'H'
-                                                    }" :image-options="{ hideBackgroundDots: true, imageSize: 0.4, margin: 10 }"
+                                                    }"
+                                                    :image-options="{ hideBackgroundDots: true, imageSize: 0.4, margin: 10 }"
                                                     :corners-square-options="{ type: 'extra-rounded', color: '#514C39' }"
                                                     :corners-dot-options="{
                                                         type: undefined,
                                                         color: '#7BA227'
                                                     }" :dots-options="{
-                                                    type: 'dots',
-                                                    color: '#7BA227',
-                                                    gradient: {
-                                                        type: 'linear',
-                                                        rotation: 45,
-                                                        colorStops: [
-                                                            { offset: 0, color: '#7BA227' },
-                                                            { offset: 1, color: '#E67F32' }
-                                                        ]
-                                                    }
-                                                }" :download="false" image="/dlu.svg" imgclass="qrcode-img" myclass="home-qrcode" />
+                                                        type: 'dots',
+                                                        color: '#7BA227',
+                                                        gradient: {
+                                                            type: 'linear',
+                                                            rotation: 45,
+                                                            colorStops: [
+                                                                { offset: 0, color: '#7BA227' },
+                                                                { offset: 1, color: '#E67F32' }
+                                                            ]
+                                                        }
+                                                    }" :backgroundOptions="backgroundQROptions" :download="false"
+                                                    image="/dlu.svg" imgclass="qrcode-img" myclass="home-qrcode" />
                                             </div>
                                         </div>
                                     </div>
@@ -233,7 +235,9 @@ const postData = ref([])
 const page = ref(1)
 const total = ref(0)
 const pageSize = ref(6)
-
+const backgroundQROptions = ref({
+    color: '#FFFFFF00'
+})
 const generateQRCode = async (index, url) => {
     await nextTick() // Ensure the DOM has updated
     const canvas = document.getElementById(`qr-canvas-${index}`)
@@ -307,8 +311,9 @@ main.isolate {
     height: 100%;
     overflow-y: auto;
 }
+
 img.qrcode-img {
-  width: 320px;
-  height: 320px;
+    width: 320px;
+    height: 320px;
 }
 </style>
