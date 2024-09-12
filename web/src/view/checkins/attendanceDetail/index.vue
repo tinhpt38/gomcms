@@ -82,19 +82,13 @@
               </el-col>
               <el-col :span="12" class="grid-cell flex-column px-4">
                 <div class="flex justify-end p-2">
-                  <!-- <el-button type="success" @click="downloadQRCode">
-                    Tải xuống QR Code
-                  </el-button> -->
-                  <el-button type="primary" @click="saveAttendance">
-                    Lưu
-                  </el-button>
+                  <el-button type="primary" @click="saveAttendance"> Lưu</el-button>
                 </div>
-                <div class="flex flex-col items-center justify-center w-full">
-                  <!-- <canvas ref="qrcodeCanvas" class="border-2 rounded border-gray-500" /> -->
-                  <QRCodeVue3 :width="512" :height="512" :value="targetClientURL" :key="targetClientURL" :qr-options="{
+                <div class="flex w-full p-4 justify-center">
+                  <QRCodeVue3 :width="1000" :height="1000" :value="targetClientURL" :key="targetClientURL" :qr-options="{
                     errorCorrectionLevel: 'H'
                   }" :image-options="{ hideBackgroundDots: true, imageSize: 0.4, margin: 10 }"
-                    :corners-square-options="{ type: 'dot', color: '#514C39' }" :corners-dot-options="{
+                    :corners-square-options="{ type: 'extra-rounded', color: '#514C39' }" :corners-dot-options="{
                       type: undefined,
                       color: '#7BA227'
                     }" :dots-options="{
@@ -102,15 +96,15 @@
                       color: '#7BA227',
                       gradient: {
                         type: 'linear',
-                        rotation: 0,
+                        rotation: 45,
                         colorStops: [
                           { offset: 0, color: '#7BA227' },
                           { offset: 1, color: '#E67F32' }
                         ]
                       }
-                    }" :download="true" image="/dlu.png" buttonName="Tải xuống" 
-                    :downloadOptions="downloadQrOptions" downloadButton="download-btn" />
-                  <!-- <div>Dùng QR Code này để quét điểm danh</div> -->
+                    }" :download="true" image="/dlu.svg" buttonName="Tải xuống" :downloadOptions="downloadQrOptions"
+                    downloadButton="download-btn" :backgroundOptions="backgroundQROptions" myclass="detail-qrcode"
+                    imgclass="qrcode-img" />
                 </div>
               </el-col>
             </el-row>
@@ -363,6 +357,9 @@ const saveAttendance = async () => {
 
 const targetClientURL = ref("")
 const downloadQrOptions = ref({})
+const backgroundQROptions = ref({
+  color: '#FFFFFF00'
+})
 const generateQRCode = async () => {
   var params = base32.encode($route.params.id)
   console.log('params-endcode' + params)
@@ -552,15 +549,35 @@ getGroupOptions();
 
 <style lang="scss">
 button.download-btn {
-    padding: 12px 32px;
-    border: none;
-    justify-content: center;
-    display: block;
-    width: 100%;
-    border-radius: 4px;
-    background-color: #67C239;
-    color: #fff;
-    font-weight: 400;
-    font-size: 14px;
+  padding: 12px 32px;
+  border: none;
+  justify-content: center;
+  display: block;
+  width: 90%;
+  border-radius: 4px;
+  background-color: #67C239;
+  color: #fff;
+  font-weight: 400;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+.detail-qrcode {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+
+}
+
+.detail-qrcode+div {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+
+}
+
+img.qrcode-img {
+  width: 80%;
+  height: 80%;
 }
 </style>

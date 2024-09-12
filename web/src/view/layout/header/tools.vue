@@ -18,8 +18,8 @@
               }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
-      </el-dropdown>
-    </el-tooltip> -->
+</el-dropdown>
+</el-tooltip> -->
 
     <el-tooltip class="" effect="dark" content="Tìm kiếm" placement="bottom">
       <el-icon @click="handleCommand"
@@ -28,7 +28,7 @@
       </el-icon>
     </el-tooltip>
 
-    <el-tooltip class="" effect="dark" content="Cấu hình" placement="bottom">
+    <el-tooltip v-if="isAdmin" class="" effect="dark" content="Cấu hình" placement="bottom">
       <el-icon
         class="w-8 h-8 shadow rounded-full border border-gray-200 dark:border-gray-600 cursor-pointer border-solid"
         @click="toggleSetting">
@@ -63,13 +63,18 @@
 <script setup>
 
 import { useAppStore } from "@/pinia"
+import { useUserStore } from '@/pinia/modules/user'
 import GvaSetting from "@/view/layout/setting/index.vue"
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import { emitter } from "@/utils/bus.js";
 import CommandMenu from "@/components/commandMenu/index.vue";
 import { toDoc } from "@/utils/doc";
+import { storeToRefs } from "pinia";
 
 const appStore = useAppStore()
+const userStore = useUserStore()
+const { userInfo } = storeToRefs(userStore)
+
 const showSettingDrawer = ref(false)
 const showRefreshAnmite = ref(false)
 const toggleRefresh = () => {
@@ -91,8 +96,16 @@ const command = ref();
 const handleCommand = () => {
   command.value.open();
 };
+
+const isAdmin = ref(false)
+
+
 const initPage = () => {
-  // 判断当前用户的操作系统
+  console.log(userInfo.value)
+  if (userInfo.value.authorityId == 888) {
+    isAdmin.value = true
+    console.log("in watch")
+  }
   if (window.localStorage.getItem("osType") === "WIN") {
     first.value = "Ctrl";
   } else {
@@ -171,6 +184,13 @@ const videoList = [
   }
 ]
 
+
+watch(() => userInfo.authorityId, async (val) => {
+  if (userInfo.authorityId == 888) {
+    isAdmin.value = true
+    console.log("in watch")
+  }
+})
 
 </script>
 

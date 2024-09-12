@@ -9,11 +9,11 @@
       class="flex items-center cursor-pointer flex-1"
     >
       <div class="flex items-center cursor-pointer min-w-48" @click="router.push({ path: '/' })">
-        <img
+        <!-- <img
           alt
           class="h-8 bg-white rounded-s"
           :src="$GIN_VUE_ADMIN.appLogo"
-        >
+        > -->
         <div
           v-if="!isMobile"
           class="inline-flex font-bold text-2xl ml-2"

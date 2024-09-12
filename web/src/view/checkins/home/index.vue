@@ -5,8 +5,8 @@
                 <div class="container mx-auto py-3">
                     <div class="flex items-center justify-between">
                         <a href="/" class="flex items-center">
-                            <img src="/logo-hoat-dong.webp" alt="Trường Đại học Đà Lạt"
-                                class="h-16 sm:h-20 lg:h-28 w-auto">
+                            <img src="/logo-dlu-full.webp" alt="Trường Đại học Đà Lạt"
+                                class="h-14 sm:h-16 lg:h-20 w-auto">
                         </a>
                         <div class="hidden md:flex items-center gap-4 lg:gap-7" />
                         <button
@@ -19,13 +19,6 @@
                             @click="redirectToLogin">
                             Đăng nhập
                         </button>
-                        <!-- <button class="md:hidden text-gray-500 hover:text-gray-700" @click="toggleMobileMenu">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button> -->
                     </div>
                 </div>
             </header>
@@ -53,7 +46,8 @@
                         style="clip-path: polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.7%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)" />
                 </div>
                 <div class="overflow-hidden">
-                    <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32">
+                    <!-- <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32"> -->
+                        <div class="mx-auto max-w-7xl px-6 pb-[32px] pt-[32px]">
                         <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                             <div class="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
                                 <h1 class="text-4xl font-bold tracking-tight text-[#514C39] sm:text-6xl mb-6">
@@ -127,7 +121,7 @@
                     </div>
                 </div>
             </div>
-            <section class="py-16">
+            <section class="py-8">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-800">
                         <span class="text-3xl font-bold text-gray-800">
@@ -147,11 +141,11 @@
                                         <div class="bg-transparent p-4 rounded-lg">
                                             <!-- <canvas :id="`qr-canvas-${index}`" class="w-full h-max aspect-square" /> -->
                                             <div class="w-full h-max aspect-square">
-                                                <QRCodeVue3 :width="300" :height="300" :value="activity.clientUrl"
+                                                <QRCodeVue3 :width="512" :height="512" :value="activity.clientUrl"
                                                     :key="index" :qr-options="{
                                                         errorCorrectionLevel: 'H'
                                                     }" :image-options="{ hideBackgroundDots: true, imageSize: 0.4, margin: 10 }"
-                                                    :corners-square-options="{ type: 'dot', color: '#514C39' }"
+                                                    :corners-square-options="{ type: 'extra-rounded', color: '#514C39' }"
                                                     :corners-dot-options="{
                                                         type: undefined,
                                                         color: '#7BA227'
@@ -160,13 +154,13 @@
                                                     color: '#7BA227',
                                                     gradient: {
                                                         type: 'linear',
-                                                        rotation: 0,
+                                                        rotation: 45,
                                                         colorStops: [
                                                             { offset: 0, color: '#7BA227' },
                                                             { offset: 1, color: '#E67F32' }
                                                         ]
                                                     }
-                                                }" :download="false" image="/dlu.png" />
+                                                }" :download="false" image="/dlu.svg" imgclass="qrcode-img" myclass="home-qrcode" />
                                             </div>
                                         </div>
                                     </div>
@@ -312,5 +306,9 @@ main.isolate {
 #app {
     height: 100%;
     overflow-y: auto;
+}
+img.qrcode-img {
+  width: 320px;
+  height: 320px;
 }
 </style>

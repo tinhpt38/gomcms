@@ -7,43 +7,33 @@
         <div class="z-[999] pt-12 pb-10 md:w-96 w-full  rounded-lg flex flex-col justify-between box-border">
           <div>
             <div class="flex items-center justify-center">
-              <img class="w-24" :src="$GIN_VUE_ADMIN.appLogo" alt>
+              <img class="w-[300px]" :src="$GIN_VUE_ADMIN.appLogo" alt>
             </div>
-            <div class="mb-9">
+            <div class="mb-9 mt-4">
               <p class="text-center text-4xl font-bold">
                 {{ $GIN_VUE_ADMIN.appName }}
               </p>
               <p class="text-center text-sm font-normal text-gray-500 mt-2.5">
-                Hệ thống điểm danh sự kiện - Trường Đại học Đà Lạt
+                Hệ thống điểm danh hoạt động - Trường Đại học Đà Lạt
               </p>
             </div>
-            <el-form
-              ref="loginForm" :model="loginFormData" :rules="rules" :validate-on-rule-change="false"
-              @keyup.enter="submitForm"
-            >
+            <el-form ref="loginForm" :model="loginFormData" :rules="rules" :validate-on-rule-change="false"
+              @keyup.enter="submitForm">
               <el-form-item prop="username" class="mb-6">
-                <el-input
-                  v-model="loginFormData.username" size="large" placeholder="Nhập tên người dùng"
-                  suffix-icon="user"
-                />
+                <el-input v-model="loginFormData.username" size="large" placeholder="Nhập tên người dùng"
+                  suffix-icon="user" />
               </el-form-item>
               <el-form-item prop="password" class="mb-6">
-                <el-input
-                  v-model="loginFormData.password" show-password size="large" type="password"
-                  placeholder="Nhập mật khẩu"
-                />
+                <el-input v-model="loginFormData.password" show-password size="large" type="password"
+                  placeholder="Nhập mật khẩu" />
               </el-form-item>
               <el-form-item v-if="loginFormData.openCaptcha" prop="captcha" class="mb-6">
                 <div class="flex w-full justify-between">
-                  <el-input
-                    v-model="loginFormData.captcha" placeholder="Nhập mã xác nhận" size="large"
-                    class="flex-1 mr-5"
-                  />
+                  <el-input v-model="loginFormData.captcha" placeholder="Nhập mã xác nhận" size="large"
+                    class="flex-1 mr-5" />
                   <div class="w-1/3 h-11 bg-[#c3d4f2] rounded">
-                    <img
-                      v-if="picPath" class="w-full h-full" :src="picPath" alt="Nhập mã xác nhận"
-                      @click="loginVerify()"
-                    >
+                    <img v-if="picPath" class="w-full h-full" :src="picPath" alt="Nhập mã xác nhận"
+                      @click="loginVerify()">
                   </div>
                 </div>
               </el-form-item>

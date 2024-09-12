@@ -4,8 +4,8 @@
 import chalk from "chalk";
 
 const config = {
-  appName: 'DLU Check-ins',
-  appLogo: 'logo.png',
+  appName: 'Hoạt động - DLU',
+  appLogo: 'logo-dlu-full.webp',
   showViteLogo: false,
   logs: [],
 }
