@@ -7,7 +7,7 @@
         <div class="z-[999] pt-12 pb-10 md:w-96 w-full  rounded-lg flex flex-col justify-between box-border">
           <div>
             <div class="flex items-center justify-center">
-              <img class="w-[300px]" :src="$GIN_VUE_ADMIN.appLogo" alt>
+              <a href="/"> <img class="w-[300px]" :src="$GIN_VUE_ADMIN.appLogo" alt> </a>
             </div>
             <div class="mb-9 mt-4">
               <p class="text-center text-4xl font-bold">

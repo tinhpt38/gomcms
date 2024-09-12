@@ -96,15 +96,15 @@ export const useUserStore = defineStore('user', () => {
   const LoginOut = async() => {
     const res = await jsonInBlacklist()
 
-    // 登出失败
+    
     if (res.code !== 0) {
       return
     }
 
     await ClearStorage()
 
-    // 把路由定向到登录页，无需等待直接reload
-    router.push({ name: 'Login', replace: true })
+
+    router.push({ name: 'Home', replace: true })
     window.location.reload()
   }
   /* 清理数据 */

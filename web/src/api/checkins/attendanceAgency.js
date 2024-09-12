@@ -95,3 +95,11 @@ export const getAttendanceAgencyList = (params) => {
     params
   })
 }
+export const getAttendanceAgencyPublic = (params) => {
+  return service({
+    url: '/attendanceAgency/getAttendanceAgencyPublic',
+    method: 'get',
+    params
+  })
+}
+

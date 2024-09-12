@@ -77,7 +77,7 @@
                                 <div
                                     class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                                     <div class="relative">
-                                        <img src="https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_3589-scaled-1.jpg"
+                                        <img src="/dlu1.jpg"
                                             alt=""
                                             class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                                         <div
@@ -86,14 +86,14 @@
                                 </div>
                                 <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
                                     <div class="relative">
-                                        <img src="https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_4601-scaled-1.jpg"
+                                        <img src="/dlu2.jpg"
                                             alt=""
                                             class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                                         <div
                                             class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
                                     </div>
                                     <div class="relative">
-                                        <img src="https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_9950-scaled-1.jpg"
+                                        <img src="/dlu3.jpg"
                                             alt=""
                                             class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                                         <div
@@ -102,14 +102,14 @@
                                 </div>
                                 <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
                                     <div class="relative">
-                                        <img src="https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/Thung-Lung-1.jpg"
+                                        <img src="/dlu4.jpg"
                                             alt=""
                                             class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                                         <div
                                             class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
                                     </div>
                                     <div class="relative">
-                                        <img src="https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_8452-1-scaled-1.jpg"
+                                        <img src="/dlu5.jpg"
                                             alt=""
                                             class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                                         <div
@@ -131,6 +131,18 @@
                             </span>
                         </span>
                     </h2>
+                    <div>
+
+                        <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
+                            :rules="searchRule" @keyup.enter="onSubmit">
+                            <el-form-item label="Đơn vị" prop="agencyId" >
+                                <el-select class="w-[300px]" v-model="searchInfo.agencyId" placeholder="Chọn đơn vị" clearable filterable>
+                                    <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name"
+                                        :value="item.ID" />
+                                </el-select>
+                            </el-form-item>
+                        </el-form>
+                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                         <div v-for="(activity, index) in postData" :key="index"
                             class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
@@ -230,6 +242,9 @@ import { onMounted, ref, nextTick } from 'vue'
 import moment from 'moment';
 import QRCode from 'qrcode'
 import QRCodeVue3 from 'qrcode-vue3'
+import {
+    getAttendanceAgencyPublic
+} from '@/api/checkins/attendanceAgency'
 
 const postData = ref([])
 const page = ref(1)
@@ -238,6 +253,7 @@ const pageSize = ref(6)
 const backgroundQROptions = ref({
     color: '#FFFFFF00'
 })
+
 const generateQRCode = async (index, url) => {
     await nextTick() // Ensure the DOM has updated
     const canvas = document.getElementById(`qr-canvas-${index}`)
@@ -253,14 +269,19 @@ const generateQRCode = async (index, url) => {
     }
 }
 
+const searchInfo = ref({
+    agencyId: null,
+    startDate: null,
+    endDate: null
+})
+
+
 const getPostData = async () => {
     var now = moment()
-    var searchInfo = {
-        startDate: now.format('YYYY-MM-DDTHH:mm:ssZ'),
-        endDate: now.add(30, 'days').format('YYYY-MM-DDTHH:mm:ssZ')
-    }
-    const res = await getAttendancePublic({ page: page.value, pageSize: pageSize.value, startDate: searchInfo.startDate, endDate: searchInfo.endDate })
-    console.log(res)
+    searchInfo.value.startDate = now.format('YYYY-MM-DDTHH:mm:ssZ')
+    searchInfo.value.endDate = now.add(30, 'days').format('YYYY-MM-DDTHH:mm:ssZ')
+    // const res = await getAttendancePublic({ page: page.value, pageSize: pageSize.value, startDate: searchInfo.value.startDate, endDate: searchInfo.value.endDate })
+    const res = await getAttendancePublic({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
     if (res.code == 0) {
         postData.value = res.data.list
         total.value = res.data.total
@@ -268,13 +289,31 @@ const getPostData = async () => {
         pageSize.value = res.data.pageSize
 
         // Generate QR codes after data is loaded
-        await nextTick() // Ensure the DOM has updated with new postData
-        postData.value.forEach((activity, index) => {
-            generateQRCode(index, activity.clientUrl)
-        })
+        // await nextTick() // Ensure the DOM has updated with new postData
+        // postData.value.forEach((activity, index) => {
+        //     generateQRCode(index, activity.clientUrl)
+        // })
     }
+    console.log("postData")
     console.log(postData.value)
 }
+
+const onSubmit = async () => {
+    await getPostData()
+}
+
+const agencyOptions = ref([])
+const getAgencyOptions = async () => {
+    console.log("agencyOptions")
+    const table = await getAttendanceAgencyPublic({ page: 0, pageSize: -1 })
+    console.log("after call await")
+    if (table.code === 0) {
+        agencyOptions.value = table.data.list
+    }
+    console.log("agencyOptions")
+    console.log(agencyOptions.value)
+}
+getAgencyOptions()
 
 onMounted(async () => {
     await getPostData()

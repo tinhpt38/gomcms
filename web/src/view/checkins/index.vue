@@ -81,31 +81,31 @@
                 <div
                   class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                   <div class="relative">
-                    <img src="https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_3589-scaled-1.jpg" alt=""
+                    <img src="/dlu1.jpg" alt=""
                       class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                     <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
                   </div>
                 </div>
                 <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
                   <div class="relative">
-                    <img src="https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_4601-scaled-1.jpg" alt=""
+                    <img src="/dlu2.jpg" alt=""
                       class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                     <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
                   </div>
                   <div class="relative">
-                    <img src="https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_9950-scaled-1.jpg" alt=""
+                    <img src="/dlu3.jpg" alt=""
                       class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                     <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
                   </div>
                 </div>
                 <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
                   <div class="relative">
-                    <img src="https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/Thung-Lung-1.jpg" alt=""
+                    <img src="/dlu4.jpg" alt=""
                       class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                     <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
                   </div>
                   <div class="relative">
-                    <img src="https://tansinhvien.dlu.edu.vn/wp-content/uploads/2024/08/IMG_8452-1-scaled-1.jpg" alt=""
+                    <img src="/dlu5.jpg" alt=""
                       class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
                     <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
                   </div>
