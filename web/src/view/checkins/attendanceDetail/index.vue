@@ -202,8 +202,16 @@
                       scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
                 </template>
               </el-table-column>
-              <el-table-column align="left" label="Client ID" prop="visitorId" width="200" />
-              <!-- <el-table-column class="overflow-hidden" label="Agent" prop="agent" /> -->
+              <el-table-column align="left" label="Client ID" prop="visitorId" width="150">
+                <template #default="scope">
+                  <span>{{ scope.row.visitorId?.substring(0,20) ?? '/'  }}...</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="Agent" prop="agent">
+                <template #default="scope">
+                  <span>{{ scope.row.agent?.substring(0,20) ?? '/'  }}...</span>
+                </template>
+              </el-table-column>
             </el-table>
             <div class="gva-pagination">
               <el-pagination layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
@@ -323,12 +331,6 @@ const getDetailData = async () => {
 
 }
 getDetailData();
-//TODO: thay đổi cấu trúc nhận props của các component 
-/**
- * Đưa các API lấy dữ liệu Option từ bên index
- * Truyền thông qua props của component
- * Emit event ra ngoài để bên index lấy dữ liệu
- */
 
 const saveAttendance = async () => {
   if (formData.value.limitCount) {

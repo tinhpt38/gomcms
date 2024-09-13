@@ -156,7 +156,7 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Preload("Areas").Preload(clause.Associations).Debug().Find(&attendanceClasss).Error
+	err = db.Preload("Areas").Preload(clause.Associations).Order("created_at DESC").Find(&attendanceClasss).Error
 	for i, attendance := range attendanceClasss {
 		var totalParticipants, totalCheckin int64
 
@@ -219,7 +219,7 @@ func (attendanceService *AttendanceService) GetPublicAttendanceInfoList(info che
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Debug().Preload(clause.Associations).Find(&attendanceClasss).Error
+	err = db.Order("created_at DESC").Preload(clause.Associations).Find(&attendanceClasss).Error
 	for i, attendance := range attendanceClasss {
 		var totalParticipants, totalCheckin int64
 
