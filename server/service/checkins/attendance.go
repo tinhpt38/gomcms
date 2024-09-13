@@ -497,3 +497,34 @@ func (attendanceService *AttendanceService) StatsTrendLine(req checkinsReq.Stats
 	result["data"] = resultRows
 	return result, err
 }
+
+func (attendanceService *AttendanceService) GetAttendanceHistory(info checkinsReq.AttendanceSearchHistory) (list []checkins.Attendance, total int64, err error) {
+	// var attendances []checkins.Attendance
+	participantService := new(ParticipantService)
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+
+	db := global.GVA_DB.Model(&checkins.Attendance{})
+
+	participant, err := participantService.GetParticipantByEmail(info.Email)
+	if err != nil {
+		return
+	}
+
+	// db = db.Joins("LEFT JOIN attendance_group_participants as agp on agp.attendance_id = attendances.id").Where("agp.participant_id = ?", participant.ID)
+
+	db = db.Joins("LEFT JOIN attendance_group_participants as agp on agp.attendance_id = attendances.id").
+		Where("agp.participant_id = ? and attendances.deleted_at is null", participant.ID)
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	if limit != 0 && limit != -1 {
+		db = db.Limit(limit).Offset(offset)
+	}
+
+	err = db.Preload(clause.Associations).Find(&list).Error
+	return
+}

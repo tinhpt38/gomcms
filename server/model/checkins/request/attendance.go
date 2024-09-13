@@ -32,3 +32,8 @@ type StatsByInfoRequest struct {
 	StartAt    *time.Time `json:"startAt" form:"startAt"`
 	EndAt      *time.Time `json:"endAt" form:"endAt"`
 }
+
+type AttendanceSearchHistory struct {
+	request.PageInfo
+	Email string `json:"email" form:"email"`
+}

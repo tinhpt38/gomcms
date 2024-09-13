@@ -15,6 +15,7 @@
   "/src/view/checkins/dashboard/index.vue": "CheckinDashboard",
   "/src/view/checkins/group/group.vue": "Group",
   "/src/view/checkins/group/groupForm.vue": "GroupForm",
+  "/src/view/checkins/home/history.vue": "Checkins",
   "/src/view/checkins/index.vue": "Checkins",
   "/src/view/checkins/participant/participant.vue": "Participant",
   "/src/view/checkins/participant/participantForm.vue": "ParticipantForm",
