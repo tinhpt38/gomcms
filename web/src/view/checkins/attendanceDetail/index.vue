@@ -1,6 +1,9 @@
 <template>
   <div class="p-2">
-    <div class="p-1 my-1 flex justify-end w-100">
+    <div class="p-1 my-1 flex w-full justify-between">
+      <div>
+        <span class="text-xl font-bold text-gray-500">{{ formData.title }}</span>
+      </div>
       <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="mb-2" />
       <el-button class="mx-4 hidden" type="danger" icon="download">
         Xuất Excel
@@ -204,12 +207,12 @@
               </el-table-column>
               <el-table-column align="left" label="Client ID" prop="visitorId" width="150">
                 <template #default="scope">
-                  <span>{{ scope.row.visitorId?.substring(0,20) ?? '/'  }}...</span>
+                  <span>{{ scope.row.visitorId?.substring(0, 20) ?? '/' }}...</span>
                 </template>
               </el-table-column>
               <el-table-column label="Agent" prop="agent">
                 <template #default="scope">
-                  <span>{{ scope.row.agent?.substring(0,20) ?? '/'  }}...</span>
+                  <span>{{ scope.row.agent?.substring(0, 20) ?? '/' }}...</span>
                 </template>
               </el-table-column>
             </el-table>
