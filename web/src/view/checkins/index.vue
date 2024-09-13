@@ -173,7 +173,7 @@ const header = ref(null)
 const callback = async (response) => {
   const userData = decodeCredential(response.credential)
   data.value.email = userData.email
-  data.value.fullName = userData?.given_name + ' ' + userData?.family_name
+  data.value.fullName = (userData?.given_name || "") + ' ' + (userData?.family_name || "")
 
   await requestCheckin()
 }

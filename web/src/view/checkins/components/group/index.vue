@@ -26,11 +26,9 @@
         </el-table-column>
       </el-table>
       <div class="flex justify-end">
-        <el-pagination
-          v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[20, 50, 100, 500]"
+        <el-pagination v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[20, 50, 100, 500]"
           :size="size" :background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
-          @size-change="handleSizeChange" @current-change="handleCurrentChange"
-        />
+          @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
     </div>
 
@@ -54,23 +52,17 @@
           <el-input v-model="formData.name" :clearable="true" placeholder="Vui lòng nhập Tên nhóm" />
         </el-form-item>
         <el-form-item label="Attendance Class:" prop="attendanceId" class="hidden">
-          <el-select
-            v-model="formData.attendanceId" placeholder="Vui lòng chọn Attendance Class" style="width:100%"
-            :clearable="true"
-          >
-            <el-option
-              v-for="(item, key) in dataSource.attendanceId" :key="key" :label="item.label"
-              :value="item.value"
-            />
+          <el-select v-model="formData.attendanceId" placeholder="Vui lòng chọn Attendance Class" style="width:100%"
+            :clearable="true">
+            <el-option v-for="(item, key) in dataSource.attendanceId" :key="key" :label="item.label"
+              :value="item.value" />
           </el-select>
         </el-form-item>
       </el-form>
     </el-drawer>
 
-    <el-drawer
-      v-model="autoGroupVisible" destroy-on-close size="800" :show-close="false"
-      :before-close="closeAutoGroup"
-    >
+    <el-drawer v-model="autoGroupVisible" destroy-on-close size="800" :show-close="false"
+      :before-close="closeAutoGroup">
       <template #header>
         <div class="flex justify-between items-center">
           <span class="text-lg">Phân nhóm</span>
@@ -87,21 +79,15 @@
       <div class="text-m py-4">
         Số thành viên sẽ được chia đều vào các nhóm
       </div>
-      <el-form
-        ref="autoGroupFormRef" :rules="groupRules" :model="autoGroupFormData" label-position="top"
-        label-width="80px"
-      >
+      <el-form ref="autoGroupFormRef" :rules="groupRules" :model="autoGroupFormData" label-position="top"
+        label-width="80px">
         <el-form-item label="Số nhóm:" prop="groupQty">
-          <el-input
-            v-model="autoGroupFormData.groupQty" :clearable="true" type="number"
-            placeholder="Vui lòng số nhóm"
-          />
+          <el-input v-model="autoGroupFormData.groupQty" :clearable="true" type="number"
+            placeholder="Vui lòng số nhóm" />
         </el-form-item>
         <el-form-item label="Cách tạo tên:" prop="groupNameType">
-          <el-select
-            v-model="autoGroupFormData.groupNameType" placeholder="Vui lòng chọn" style="width:100%"
-            :clearable="true"
-          >
+          <el-select v-model="autoGroupFormData.groupNameType" placeholder="Vui lòng chọn" style="width:100%"
+            :clearable="true">
             <el-option label="Số thứ tự" value="baseOnNumberic" />
             <el-option label="Bảng chữ cái" value="baseOnAlphabet" />
           </el-select>
@@ -145,7 +131,7 @@ const page = ref(1)
 const pageSize = ref(20)
 const size = ref(20)
 const total = ref(0)
-
+const emits = defineEmits(['onSuccess'])
 const getTableData = async () => {
   searchInfo.value.attendanceId = props.acId
   const table = await getGroupList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
@@ -214,6 +200,7 @@ const deleteRow = (row) => {
   }).then(() => {
     deleteGroupFunc(row)
   })
+  emits('onSuccess')
 }
 const dialogFormVisible = ref(false)
 
@@ -287,6 +274,7 @@ const enterDialog = async () => {
       closeDialog()
       getTableData()
     }
+    emits('onSuccess')
   })
 }
 
@@ -320,6 +308,7 @@ const onDelete = async () => {
       getTableData()
     }
   })
+  emits('onSuccess')
 }
 
 
@@ -335,6 +324,7 @@ const deleteGroupFunc = async (row) => {
     }
     getTableData()
   }
+  emits('onSuccess')
 }
 
 const updateGroupFunc = async (row) => {
@@ -344,6 +334,7 @@ const updateGroupFunc = async (row) => {
     formData.value = res.data
     dialogFormVisible.value = true
   }
+  emits('onSuccess')
 }
 
 

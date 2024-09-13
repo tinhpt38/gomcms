@@ -142,10 +142,9 @@ import {
   getSliderBuilderList
 } from '@/api/uibuilder/sliderBuilder'
 import { getUrl } from '@/utils/image'
-// 图片选择组件
+
 import SelectImage from '@/components/selectImage/selectImage.vue'
 
-// 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
@@ -154,17 +153,16 @@ defineOptions({
   name: 'SliderBuilder'
 })
 
-// 控制更多查询条件显示/隐藏状态
+
 const showAllQuery = ref(false)
 
-// 自动化生成的字典（可能为空）以及字段
+
 const formData = ref({
   images: [],
+  isShow: true
 })
 
 
-
-// 验证规则
 const rule = reactive({
   images: [{
     required: true,

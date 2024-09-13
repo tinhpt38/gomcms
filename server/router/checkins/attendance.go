@@ -23,6 +23,7 @@ func (s *AttendanceRouter) InitAttendanceRouter(Router *gin.RouterGroup, PublicR
 		attendanceRouter.DELETE("deleteAttendanceArea", attendanceApi.DeleteAttendanceArea)
 		attendanceRouter.DELETE("deleteAttendanceByIds", attendanceApi.DeleteAttendanceByIds)
 		attendanceRouter.PUT("updateAttendance", attendanceApi.UpdateAttendance)
+		attendanceRouter.PUT("updateAttendanceArea", attendanceApi.UpdateAttendanceArea)
 
 	}
 	{

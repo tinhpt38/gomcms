@@ -45,6 +45,22 @@ func (attendanceApi *AttendanceApi) CreateAttendanceArea(c *gin.Context) {
 	response.OkWithMessage("tạo thành công", c)
 }
 
+func (attendanceApi *AttendanceApi) UpdateAttendanceArea(c *gin.Context) {
+	var attendanceArea checkins.AttendanceArea
+	err := c.ShouldBindJSON(&attendanceArea)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = attendanceService.UpdateAttendanceArea(&attendanceArea)
+	if err != nil {
+		global.GVA_LOG.Error("tạo thất bại!", zap.Error(err))
+		response.FailWithMessage("tạo thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithMessage("tạo thành công", c)
+}
+
 func (attendanceApi *AttendanceApi) DeleteAttendance(c *gin.Context) {
 	ID := c.Query("ID")
 	userID := utils.GetUserID(c)

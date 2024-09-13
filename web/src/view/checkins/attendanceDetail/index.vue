@@ -120,12 +120,12 @@
       </el-tab-pane>
       <el-tab-pane name="groupTab" label="Nhóm">
         <div class="table-container">
-          <Group :ac-id="currentId" />
+          <Group :ac-id="currentId" @on-success="reGetOptions" />
         </div>
       </el-tab-pane>
       <el-tab-pane name="areaTab" label="Khu vực">
         <div class="table-container">
-          <Area :ac-id="currentId" />
+          <Area :ac-id="currentId" @on-success="reGetOptions" />
         </div>
       </el-tab-pane>
       <el-tab-pane name="conditionTab" label="Điều kiện">
@@ -375,14 +375,9 @@ const generateQRCode = async () => {
 
 }
 
-const downloadQRCode = async () => {
-  const canvas = qrcodeCanvas.value
-  const url = canvas.toDataURL('image/png')
-  const link = document.createElement('a')
-  link.href = url
-  link.download = 'QR Điểm danh - ' + formData.value.title + '.png'
-  link.click()
-  await saveAttendance()
+const reGetOptions = async () => {
+  await getAreaListData()
+  await getGroupOptions()
 }
 
 const rule = reactive({

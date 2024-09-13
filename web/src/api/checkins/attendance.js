@@ -56,6 +56,13 @@ export const updateAttendance = (data) => {
     data
   })
 }
+export const updateAttendanceArea = (data) => {
+  return service({
+    url: '/attendance/updateAttendanceArea',
+    method: 'put',
+    data
+  })
+}
 
 export const findAttendance = (params) => {
   return service({

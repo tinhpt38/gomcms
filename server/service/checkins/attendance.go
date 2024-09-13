@@ -20,6 +20,11 @@ func (attendanceService *AttendanceService) CreateAttendanceArea(attendanceArea 
 	return err
 }
 
+func (attendanceService *AttendanceService) UpdateAttendanceArea(attendanceArea *checkins.AttendanceArea) (err error) {
+	err = global.GVA_DB.Model(&checkins.AttendanceArea{}).Where("id = ?", attendanceArea.ID).Save(&attendanceArea).Error
+	return err
+}
+
 func (attendanceService *AttendanceService) DeleteAttendanceArea(id string) (err error) {
 	// err = global.GVA_DB.Delete(&checkins.AttendanceArea{}, "id = ? ", id).Error
 	// Xoá luôn tham chiếu tới điều kiện

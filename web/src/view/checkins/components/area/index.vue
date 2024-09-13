@@ -22,6 +22,9 @@
       </el-table-column>
       <el-table-column label="Hành động">
         <template #default="scope">
+          <el-button type="primary" plain round @click="updateArea(scope.row)">
+            Chỉnh sửa
+          </el-button>
           <el-button type="danger" plain round @click="onDeleteArea(scope.row.ID)">
             Xoá
           </el-button>
@@ -73,6 +76,7 @@ import {
 import {
   createAttendanceArea,
   deleteAttendanceArea,
+  updateAttendanceArea,
   findAttendanceArea
 } from '@/api/checkins/attendance'
 import { ref } from 'vue'
@@ -117,7 +121,6 @@ const searchInfo = ref({
 const getAreaListData = async () => {
   searchInfo.value.attendanceId = props.acId
   const table = await findAttendanceArea({ id: props.acId })
-  console.log('getAreaListData', table)
   if (table.code === 0) {
     tableData.value = table.data
     total.value = table.data.total
@@ -149,7 +152,7 @@ const onDeleteArea = async (id) => {
       message: 'Đã hủy'
     })
   })
-
+  emits('onSuccess')
 }
 
 const addNewArea = () => {
@@ -157,6 +160,18 @@ const addNewArea = () => {
   dialogFormVisible.value = true
 }
 
+const updateArea = async (row) => {
+  type.value = 'update'
+  await updateAreaFunc(row)
+  dialogFormVisible.value = true
+}
+
+const updateAreaFunc = async (row) => {
+  formData.value = row
+  dialogFormVisible.value = true
+
+}
+const emits = defineEmits(['onSuccess'])
 const enterDialog = () => {
   elFormRef.value?.validate(async (valid) => {
     if (!valid) return
@@ -165,6 +180,9 @@ const enterDialog = () => {
     switch (type.value) {
       case 'create':
         res = await createAttendanceArea(formData.value)
+        break
+      case 'update':
+        res = await updateAttendanceArea(formData.value)
         break
       default:
         break
@@ -178,6 +196,7 @@ const enterDialog = () => {
       getAreaListData();
     }
   })
+  emits('onSuccess')
 }
 
 const onSelectChange = (val) => {
