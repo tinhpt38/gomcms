@@ -65,10 +65,13 @@ router.beforeEach(async(to, from) => {
         // Đăng xuất người dùng một cách bắt buộc
         userStore.ClearStorage()
         return {
-          name: 'Login',
-          query: {
-            redirect: document.location.hash
-          }
+          name: 'Home',
+          // query: {
+          //   redirect: document.location.hash
+          // }
+          // query: {
+          //   redirect: document.location
+          // }
         }
       }
     } else {
@@ -93,8 +96,8 @@ router.beforeEach(async(to, from) => {
           }
         } else {
           return {
-            name: 'Login',
-            query: { redirect: to.href }
+            name: 'Home',
+            // query: { redirect: to.href }
           }
         }
       } else {
@@ -108,10 +111,10 @@ router.beforeEach(async(to, from) => {
     // 不在白名单中并且未登录的时候
     if (!token) {
       return {
-        name: 'Login',
-        query: {
-          redirect: document.location.hash
-        }
+        name: 'Home',
+        // query: {
+        //   redirect: document.location.hash
+        // }
       }
     }
   }

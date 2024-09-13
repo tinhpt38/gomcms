@@ -11,13 +11,13 @@
               <div class="hidden md:flex items-center gap-4 lg:gap-7" />
               <button
                 class="hidden md:block bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
-                @click="redirectToLogin">
-                Đăng nhập
+                @click="redirectToHistory">
+                Lịch sử
               </button>
               <button
                 class="md:hidden bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
-                @click="redirectToLogin">
-                Đăng nhập
+                @click="redirectToHistory">
+                Lịch sử
               </button>
             </div>
           </div>
@@ -197,6 +197,11 @@ const fingerPrint = () => {
 }
 
 fingerPrint()
+
+
+const redirectToHistory = () => {
+  window.location.href = '/history'
+}
 
 
 

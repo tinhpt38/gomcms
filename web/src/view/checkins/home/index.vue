@@ -7,19 +7,32 @@
                         <div class="flex items-center justify-between">
                             <a href="/" class="flex items-center">
                                 <img src="/logo-dlu-full.webp" alt="Trường Đại học Đà Lạt"
-                                    class="h-14 sm:h-16 lg:h-20 w-auto">
+                                    class="h-14 sm:h-16 lg:h-20 md:w-auto w-40 object-contain">
                             </a>
-                            <div class="hidden md:flex items-center gap-4 lg:gap-7" />
-                            <button
-                                class="hidden md:block bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
-                                @click="redirectToLogin">
-                                Đăng nhập
-                            </button>
-                            <button
-                                class="md:hidden bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
-                                @click="redirectToLogin">
-                                Đăng nhập
-                            </button>
+                            <div class="md:flex hidden items-end justify-end gap-4 lg:gap-7">
+                            </div>
+                            <div class="flex flex-row justify-end">
+                                <button
+                                    class="hidden md:block hover:text-[#79a227] text-[#E67F32] font-medium   bg-transparent text-medium lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
+                                    @click="redirectToHistory">
+                                    Lịch sử
+                                </button>
+                                <button
+                                    class="md:hidden hover:text-[#79a227] text-[#E67F32] font-medium   bg-transparent text-medium lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
+                                    @click="redirectToHistory">
+                                    Lịch sử
+                                </button>
+                                <button
+                                    class="hidden md:block bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
+                                    @click="redirectToLogin">
+                                    Đăng nhập
+                                </button>
+                                <button
+                                    class="md:hidden bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
+                                    @click="redirectToLogin">
+                                    Đăng nhập
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -320,6 +333,9 @@ getAgencyOptions()
 
 const redirectToLogin = () => {
     window.location.href = '/login'
+}
+const redirectToHistory = () => {
+    window.location.href = '/history'
 }
 
 const calProgress = (totalCheckin, total) => {
