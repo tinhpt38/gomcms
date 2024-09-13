@@ -119,7 +119,7 @@
                                         enterFrom="opacity-0 scale-105" enterTo="opacity-100 scale-100"
                                         leave="transition ease-in-out duration-300 absolute"
                                         leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-                                        <img class="rounded-xl lg:h[440px] sm:h-auto w-[100%]" :src="getUrl(item)" >
+                                        <img class="rounded-xl lg:h[440px] sm:h-auto w-[100%]" :src="getUrl(item)">
                                     </TransitionRoot>
                                 </template>
 
@@ -216,6 +216,16 @@
                                             class="bg-green-100 text-green-800 px-2 py-1 rounded">{{
                                                 activity.weight }}</span>
                                     </p>
+                                    <p class="p-1">
+                                        <span class="font-medium">Ngày bắt đầu:</span> <span
+                                            class="bg-green-100 text-green-800 px-2 py-1 rounded">{{
+                                                formatDateTime(activity.startDate) }}</span>
+                                    </p>
+                                    <p class="p-1">
+                                        <span class="font-medium">Ngày kết thúc:</span> <span
+                                            class="bg-red-100 text-red-800 px-2 py-1 rounded">{{
+                                                formatDateTime(activity.endDate) }}</span>
+                                    </p>
                                 </div>
                             </div>
                             <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-blue-50">
@@ -235,7 +245,7 @@
                         </div>
                     </div>
                     <div class="flex justify-center mt-8 text-[#7BA227]">
-                        <el-pagination  layout="prev, pager, next" :total="total" :current-page="page"
+                        <el-pagination layout="prev, pager, next" :total="total" :current-page="page"
                             :page-size="pageSize" @current-change="handlePageChange" />
                     </div>
                 </div>
@@ -256,6 +266,7 @@ import {
 import { getSliderBuilderPublic } from '@/api/uibuilder/sliderBuilder'
 import { getUrl } from '@/utils/image'
 import { TransitionRoot } from '@headlessui/vue'
+import { formatDateTime } from '@/utils/format';
 
 
 const postData = ref([])

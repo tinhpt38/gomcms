@@ -122,3 +122,11 @@ export const statsTrendLine = (data) => {
 }
 
 
+
+export const getAttendanceHistory = (params) => {
+  return service({
+    url: '/attendance/getAttendanceHistory',
+    method: 'get',
+    params
+  })
+}
