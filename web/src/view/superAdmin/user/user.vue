@@ -3,221 +3,89 @@
     <warning-bar title="Chú ý: Nhấp vào biểu tượng hình đại diện ở góc trên bên phải để chuyển đổi vai trò" />
     <div class="gva-table-box">
       <div class="gva-btn-list">
-        <el-button
-          type="primary"
-          icon="plus"
-          @click="addUser"
-        >Thêm người dùng</el-button>
+        <el-button type="primary" icon="plus" @click="addUser">Thêm người dùng</el-button>
       </div>
-      <el-table
-        :data="tableData"
-        row-key="ID"
-      >
-        <el-table-column
-          align="left"
-          label="Hình đại diện"
-          min-width="75"
-        >
+      <el-table :data="tableData" row-key="ID">
+        <el-table-column align="left" label="#" min-width="75">
           <template #default="scope">
-            <CustomPic
-              style="margin-top:8px"
-              :pic-src="scope.row.headerImg"
-            />
+            <CustomPic style="margin-top:8px" :pic-src="scope.row.headerImg" />
           </template>
         </el-table-column>
-        <el-table-column
-          align="left"
-          label="ID"
-          min-width="50"
-          prop="ID"
-        />
-        <el-table-column
-          align="left"
-          label="Tên người dùng"
-          min-width="150"
-          prop="userName"
-        />
-        <el-table-column
-          align="left"
-          label="Biệt danh"
-          min-width="150"
-          prop="nickName"
-        />
-        <el-table-column
-          align="left"
-          label="Số điện thoại"
-          min-width="180"
-          prop="phone"
-        />
-        <el-table-column
-          align="left"
-          label="Email"
-          min-width="180"
-          prop="email"
-        />
-        <el-table-column
-          align="left"
-          label="Vai trò người dùng"
-          min-width="200"
-        >
+        <el-table-column align="left" label="ID" min-width="50" prop="ID" />
+        <el-table-column align="left" label="Tên người dùng" min-width="150" prop="userName" />
+        <el-table-column align="left" label="Biệt danh" min-width="150" prop="nickName" />
+        <!-- <el-table-column align="left" label="Số điện thoại" min-width="180" prop="phone" /> -->
+        <el-table-column align="left" label="Email" min-width="200" prop="email" />
+        <el-table-column align="left" label="Vai trò" min-width="200">
           <template #default="scope">
-            <el-cascader
-              v-model="scope.row.authorityIds"
-              :options="authOptions"
-              :show-all-levels="false"
-              collapse-tags
-              :props="{ multiple:true,checkStrictly: true,label:'authorityName',value:'authorityId',disabled:'disabled',emitPath:false}"
-              :clearable="false"
-              @visible-change="(flag)=>{changeAuthority(scope.row,flag,0)}"
-              @remove-tag="(removeAuth)=>{changeAuthority(scope.row,false,removeAuth)}"
-            />
+            <el-cascader v-model="scope.row.authorityIds" :options="authOptions" :show-all-levels="false" collapse-tags
+              :props="{ multiple: true, checkStrictly: true, label: 'authorityName', value: 'authorityId', disabled: 'disabled', emitPath: false }"
+              :clearable="false" @visible-change="(flag) => { changeAuthority(scope.row, flag, 0) }"
+              @remove-tag="(removeAuth) => { changeAuthority(scope.row, false, removeAuth) }" />
           </template>
         </el-table-column>
-        <el-table-column
-          align="left"
-          label="Kích hoạt"
-          min-width="150"
-        >
+        <el-table-column align="left" label="Kích hoạt" min-width="150">
           <template #default="scope">
-            <el-switch
-              v-model="scope.row.enable"
-              inline-prompt
-              :active-value="1"
-              :inactive-value="2"
-              @change="()=>{switchEnable(scope.row)}"
-            />
+            <el-switch v-model="scope.row.enable" inline-prompt :active-value="1" :inactive-value="2"
+              @change="() => { switchEnable(scope.row) }" />
           </template>
         </el-table-column>
 
-        <el-table-column
-          label="Hành động"
-          min-width="250"
-          fixed="right"
-        >
+        <el-table-column label="Hành động" min-width="250" fixed="right">
           <template #default="scope">
-            <el-button
-              type="primary"
-              link
-              icon="delete"
-              @click="deleteUserFunc(scope.row)"
-            >Xóa</el-button>
-            <el-button
-              type="primary"
-              link
-              icon="edit"
-              @click="openEdit(scope.row)"
-            >Chỉnh sửa</el-button>
-            <el-button
-              type="primary"
-              link
-              icon="magic-stick"
-              @click="resetPasswordFunc(scope.row)"
-            >Đặt lại mật khẩu</el-button>
+            <el-button type="primary" link icon="delete" @click="deleteUserFunc(scope.row)">Xóa</el-button>
+            <el-button type="primary" link icon="edit" @click="openEdit(scope.row)">Chỉnh sửa</el-button>
+            <el-button type="primary" link icon="magic-stick" @click="resetPasswordFunc(scope.row)">Đặt lại mật
+              khẩu</el-button>
           </template>
         </el-table-column>
 
       </el-table>
       <div class="gva-pagination">
-        <el-pagination
-          :current-page="page"
-          :page-size="pageSize"
-          :page-sizes="[10, 30, 50, 100]"
-          :total="total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @current-change="handleCurrentChange"
-          @size-change="handleSizeChange"
-        />
+        <el-pagination :current-page="page" :page-size="pageSize" :page-sizes="[10, 30, 50, 100]" :total="total"
+          layout="total, sizes, prev, pager, next, jumper" @current-change="handleCurrentChange"
+          @size-change="handleSizeChange" />
       </div>
     </div>
-    <el-drawer
-      v-model="addUserDialog"
-      size="60%"
-      :show-close="false"
-      :close-on-press-escape="false"
-      :close-on-click-modal="false"
-    >
+    <el-drawer v-model="addUserDialog" size="60%" :show-close="false" :close-on-press-escape="false"
+      :close-on-click-modal="false">
       <template #header>
         <div class="flex justify-between items-center">
           <span class="text-lg">Người dùng</span>
           <div>
             <el-button @click="closeAddUserDialog">Hủy</el-button>
-            <el-button
-              type="primary"
-              @click="enterAddUserDialog"
-            >Xác nhận</el-button>
+            <el-button type="primary" @click="enterAddUserDialog">Xác nhận</el-button>
           </div>
         </div>
       </template>
 
-      <el-form
-        ref="userForm"
-        :rules="rules"
-        :model="userInfo"
-        label-width="80px"
-      >
-        <el-form-item
-          v-if="dialogFlag === 'add'"
-          label="Tên người dùng"
-          prop="userName"
-        >
+      <el-form ref="userForm" :rules="rules" :model="userInfo" label-width="80px">
+        <el-form-item v-if="dialogFlag === 'add'" label="Tên người dùng" prop="userName">
           <el-input v-model="userInfo.userName" />
         </el-form-item>
-        <el-form-item
-          v-if="dialogFlag === 'add'"
-          label="Mật khẩu"
-          prop="password"
-        >
+        <el-form-item v-if="dialogFlag === 'add'" label="Mật khẩu" prop="password">
           <el-input v-model="userInfo.password" />
         </el-form-item>
-        <el-form-item
-          label="Biệt danh"
-          prop="nickName"
-        >
+        <el-form-item label="Biệt danh" prop="nickName">
           <el-input v-model="userInfo.nickName" />
         </el-form-item>
-        <el-form-item
-          label="Số điện thoại"
-          prop="phone"
-        >
+        <el-form-item label="Số điện thoại" prop="phone">
           <el-input v-model="userInfo.phone" />
         </el-form-item>
-        <el-form-item
-          label="Email"
-          prop="email"
-        >
+        <el-form-item label="Email" prop="email">
           <el-input v-model="userInfo.email" />
         </el-form-item>
-        <el-form-item
-          label="Vai trò người dùng"
-          prop="authorityId"
-        >
-          <el-cascader
-            v-model="userInfo.authorityIds"
-            style="width:100%"
-            :options="authOptions"
+        <el-form-item label="Vai trò người dùng" prop="authorityId">
+          <el-cascader v-model="userInfo.authorityIds" style="width:100%" :options="authOptions"
             :show-all-levels="false"
-            :props="{ multiple:true,checkStrictly: true,label:'authorityName',value:'authorityId',disabled:'disabled',emitPath:false}"
-            :clearable="false"
-          />
+            :props="{ multiple: true, checkStrictly: true, label: 'authorityName', value: 'authorityId', disabled: 'disabled', emitPath: false }"
+            :clearable="false" />
         </el-form-item>
-        <el-form-item
-          label="Kích hoạt"
-          prop="disabled"
-        >
-          <el-switch
-            v-model="userInfo.enable"
-            inline-prompt
-            :active-value="1"
-            :inactive-value="2"
-          />
+        <el-form-item label="Kích hoạt" prop="disabled">
+          <el-switch v-model="userInfo.enable" inline-prompt :active-value="1" :inactive-value="2" />
         </el-form-item>
-        <el-form-item
-          label="Hình đại diện"
-          label-width="80px"
-        >
-          <SelectImage
-            v-model="userInfo.headerImg"
-          />
+        <el-form-item label="Hình đại diện" label-width="80px">
+          <SelectImage v-model="userInfo.headerImg" />
         </el-form-item>
       </el-form>
     </el-drawer>
@@ -250,23 +118,23 @@ const path = ref(import.meta.env.VITE_BASE_API + '/')
 // Khởi tạo
 const setAuthorityOptions = (AuthorityData, optionsData) => {
   AuthorityData &&
-        AuthorityData.forEach(item => {
-          if (item.children && item.children.length) {
-            const option = {
-              authorityId: item.authorityId,
-              authorityName: item.authorityName,
-              children: []
-            }
-            setAuthorityOptions(item.children, option.children)
-            optionsData.push(option)
-          } else {
-            const option = {
-              authorityId: item.authorityId,
-              authorityName: item.authorityName
-            }
-            optionsData.push(option)
-          }
-        })
+    AuthorityData.forEach(item => {
+      if (item.children && item.children.length) {
+        const option = {
+          authorityId: item.authorityId,
+          authorityName: item.authorityName,
+          children: []
+        }
+        setAuthorityOptions(item.children, option.children)
+        optionsData.push(option)
+      } else {
+        const option = {
+          authorityId: item.authorityId,
+          authorityName: item.authorityName
+        }
+        optionsData.push(option)
+      }
+    })
 }
 
 const page = ref(1)
@@ -285,7 +153,7 @@ const handleCurrentChange = (val) => {
 }
 
 // Truy vấn
-const getTableData = async() => {
+const getTableData = async () => {
   const table = await getUserList({ page: page.value, pageSize: pageSize.value })
   if (table.code === 0) {
     tableData.value = table.data.list
@@ -299,7 +167,7 @@ watch(() => tableData.value, () => {
   setAuthorityIds()
 })
 
-const initPage = async() => {
+const initPage = async () => {
   getTableData()
   const res = await getAuthorityList({ page: 1, pageSize: 999 })
   setOptions(res.data.list)
@@ -316,7 +184,7 @@ const resetPasswordFunc = (row) => {
       cancelButtonText: 'Hủy',
       type: 'warning',
     }
-  ).then(async() => {
+  ).then(async () => {
     const res = await resetPassword({
       ID: row.ID,
     })
@@ -352,12 +220,12 @@ const setOptions = (authData) => {
   setAuthorityOptions(authData, authOptions.value)
 }
 
-const deleteUserFunc = async(row) => {
+const deleteUserFunc = async (row) => {
   ElMessageBox.confirm('Bạn có chắc muốn xóa không?', 'Thông báo', {
     confirmButtonText: 'Đồng ý',
     cancelButtonText: 'Hủy',
     type: 'warning'
-  }).then(async() => {
+  }).then(async () => {
     const res = await deleteUser({ id: row.ID })
     if (res.code === 0) {
       ElMessage.success('Xóa thành công')
@@ -400,7 +268,7 @@ const rules = ref({
   ]
 })
 const userForm = ref(null)
-const enterAddUserDialog = async() => {
+const enterAddUserDialog = async () => {
   userInfo.value.authorityId = userInfo.value.authorityIds[0]
   userForm.value.validate(async valid => {
     if (valid) {
@@ -443,7 +311,7 @@ const addUser = () => {
 }
 
 const tempAuth = {}
-const changeAuthority = async(row, flag, removeAuth) => {
+const changeAuthority = async (row, flag, removeAuth) => {
   if (flag) {
     if (!removeAuth) {
       tempAuth[row.ID] = [...row.authorityIds]
@@ -473,7 +341,7 @@ const openEdit = (row) => {
   addUserDialog.value = true
 }
 
-const switchEnable = async(row) => {
+const switchEnable = async (row) => {
   userInfo.value = JSON.parse(JSON.stringify(row))
   await nextTick()
   const req = {
@@ -491,7 +359,7 @@ const switchEnable = async(row) => {
 </script>
 
 <style lang="scss">
-  .header-img-box {
-    @apply w-52 h-52 border border-solid border-gray-300 rounded-xl flex justify-center items-center cursor-pointer;
- }
+.header-img-box {
+  @apply w-52 h-52 border border-solid border-gray-300 rounded-xl flex justify-center items-center cursor-pointer;
+}
 </style>

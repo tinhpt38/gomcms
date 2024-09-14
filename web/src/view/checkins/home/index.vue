@@ -152,6 +152,9 @@
                             </span>
                         </span>
                     </h2>
+                    <p class="mt-6 text-lg leading-8 text-center text-gray-600 px-2 mb-6">
+                        Bạn hãy Sử dụng 1 trong 2 WiFi: DLU Student hoặc DLU Teacher để thực hiện điểm danh
+                    </p>
                     <div>
 
                         <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
@@ -245,9 +248,16 @@
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-gray-700 font-medium">Đã điểm danh:</span>
                                     <div class="bg-white rounded-full px-4 py-2 shadow-md">
-                                        <span class="text-green-600 font-bold">{{ activity.totalCheckin }}</span>
+                                        <!-- <span class="text-red-600 font-bold">{{ formatMordenNumber(activity.total - active.totalCheckin) }}</span>
                                         <span class="text-gray-400 mx-1">/</span>
-                                        <span class="text-gray-600 font-bold">{{ activity.total }}</span>
+                                        <span class="text-green-600 font-bold">{{ formatMordenNumber(activity.totalCheckin) }}</span>
+                                        <span class="text-gray-400 mx-1">/</span>
+                                        <span class="text-gray-600 font-bold">{{ formatMordenNumber(activity.total) }}</span> -->
+                                        <span class="text-red-600 font-bold">{{ formatMordenNumber(980) }}</span>
+                                        <span class="text-gray-400 mx-1">/</span>
+                                        <span class="text-green-600 font-bold">{{ formatMordenNumber(1000) }}</span>
+                                        <span class="text-gray-400 mx-1">/</span>
+                                        <span class="text-gray-600 font-bold">{{ formatMordenNumber(40507) }}</span>
                                     </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
@@ -279,7 +289,7 @@ import {
 import { getSliderBuilderPublic } from '@/api/uibuilder/sliderBuilder'
 import { getUrl } from '@/utils/image'
 import { TransitionRoot } from '@headlessui/vue'
-import { formatDateTime } from '@/utils/format';
+import { formatDateTime, formatMordenNumber } from '@/utils/format';
 
 
 const postData = ref([])
@@ -296,6 +306,7 @@ const searchInfo = ref({
     startDate: null,
     endDate: null
 })
+
 
 
 const getPostData = async () => {
