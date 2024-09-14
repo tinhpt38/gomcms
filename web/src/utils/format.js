@@ -32,7 +32,7 @@ export const formatMordenNumber = (val) => {
   if (val === null || val === '' || typeof val === 'undefined' || isNaN(val)) {
     return 0;
   }
-  if (val >= 1e12) {
+  if (val >= 1e12) { 
     return (val / 1e12).toFixed(1) + 'T';
   } else if (val >= 1e9) {
     return (val / 1e9).toFixed(1) + 'B';

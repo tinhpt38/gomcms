@@ -102,7 +102,7 @@
       </div>
     </div>
 
-    <el-dialog v-model="showPassword" title="Thay đổi mật khẩu" width="360px" @close="clearPassword">
+    <el-dialog v-model="showPassword" title="Thay đổi mật khẩu" width="500px" @close="clearPassword">
       <el-form ref="modifyPwdForm" :model="pwdModify" :rules="rules" label-width="80px">
         <el-form-item :minlength="6" label="Mật khẩu cũ" prop="password">
           <el-input v-model="pwdModify.password" show-password />

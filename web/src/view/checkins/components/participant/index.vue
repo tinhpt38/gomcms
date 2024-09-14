@@ -93,9 +93,10 @@
       </template>
 
       <el-form :model="bulkFormData" ref="bulkFormRef" :rules="bulkRules" label-position="top" label-width="80px">
-        <div class="font-bold py-2">Copy và dán danh sách mã số của thành viên vào đây. Mỗi mã số một dòng</div>
-        <el-form-item label="Danh sách thành viên:" prop="list">
-          <el-input type="textarea" :rows="20" v-model="bulkFormData.list" :clearable="true" placeholder="Nhập mã số" />
+        <div class="font-bold py-2">Copy và dán danh sách email của thành viên vào đây. Mỗi email một dòng, tối đa 1000
+          email/ lần</div>
+        <el-form-item label="Nhập danh sách thành viên:" prop="list">
+          <el-input type="textarea" :rows="20" v-model="bulkFormData.list" :clearable="true" placeholder="Nhập mã số email thành viên"/>
         </el-form-item>
       </el-form>
     </el-drawer>
@@ -164,7 +165,6 @@ const getTableData = async () => {
 }
 
 getTableData()
-
 
 
 const multipleSelection = ref([])
@@ -317,8 +317,8 @@ const bulkRules = reactive({
       validator: (rule, value, callback) => {
         if (!value) {
           callback(new Error('Không được để trống'))
-        } else if (value.includes("@")) {
-          callback(new Error('Chỉ nhập mã số thành viên (MSSV)'))
+        } else if (value.split("\n").length > 1000) {
+          callback(new Error('Giới hạn tối đa 1000 thành viên / lần'))
         } else {
           callback()
         }

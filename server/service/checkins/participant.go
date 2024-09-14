@@ -34,12 +34,11 @@ func (participantService *ParticipantService) CreateParticipant(participant *che
 func (participantService *ParticipantService) BulkCreateParticipants(req checkinsReq.ListEmailParticipantRequest) (err error) {
 
 	for _, email := range req.List {
-		fullEmail := email + "@dlu.edu.vn"
 		participant := checkins.Participant{
-			Email: fullEmail,
+			Email: email,
 		}
 		err = global.GVA_DB.Model(&checkins.Participant{}).Where(&checkins.Participant{
-			Email: fullEmail,
+			Email: email,
 		}).FirstOrCreate(&participant).Error
 		if err != nil {
 			return err
@@ -61,7 +60,7 @@ func (participantService *ParticipantService) BulkCreateParticipants(req checkin
 	// 	Email: participant.Email,
 	// }).FirstOrCreate(participant).Error
 
-	return err
+	
 }
 
 // DeleteParticipant 删除Sinh viên (Người tham dự phiên điểm danh)记录
