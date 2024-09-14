@@ -211,7 +211,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 	if attendance.LimitClientCount > 0 {
 		var limitClientCount int64
-		global.GVA_DB.Where("visitor_id = ?", req.VisitorId).Model(&checkins.AttendanceCheckIn{}).Count(&limitClientCount)
+		global.GVA_DB.Where("visitor_id = ? and attendance_id = ?", req.VisitorId, attendance.ID).Model(&checkins.AttendanceCheckIn{}).Count(&limitClientCount)
 		if limitClientCount >= int64(attendance.LimitClientCount) {
 			return nil, errors.New("Thiết bị đã điểm danh đủ số lần cho phép")
 		}
