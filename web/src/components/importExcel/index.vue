@@ -66,7 +66,7 @@ import { ref, onMounted } from 'vue'
 import { createCfgFileProcess } from '@/api/config/cfg_file_process'
 import { ElNotification } from 'element-plus'
 
-// Use pinia
+// Use piniaclear
 // Import strore
 import { useFileProcessStore } from '@/pinia/bl'
 

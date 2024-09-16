@@ -192,12 +192,22 @@ async function getFingerprint() {
 
 const fingerPrint = () => {
   getFingerprint().then(visitorId => {
-    data.value.visitorId = visitorId
+    data.value.visitorId = visitorTemplate(visitorId)
   });
 }
 
 fingerPrint()
 
+const visitorTemplate = (val) => {
+  return "dlu_activities_20422_5BS:W`A8nF<J6Y{V4Nv.r!Je_" + val
+}
+
+const keyRandom = 'E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5'
+const encodeVal = (data) => {
+  const jsonString = JSON.stringify(data);
+  const encodedData = btoa(jsonString);
+  return keyRandom + "_" + encodedData
+}
 
 const redirectToHistory = () => {
   window.location.href = '/history'
@@ -253,10 +263,10 @@ const requestCheckin = async () => {
   data.value.accuracy = coords.value.accuracy
   data.value.code = route.query.c
 
+  var encodedData = encodeVal(data.value)
+  var res = await publicAttendanceCheckIn({ data: encodedData })
 
-  var res = await publicAttendanceCheckIn(data.value)
 
-  console.log('res', res)
   if (res.code == 0) {
     if (res.data.conditions != null) {
       conditionData.value = res.data.conditions
@@ -281,7 +291,6 @@ const requestCheckin = async () => {
 
 
 const handleScroll = () => {
-  console.log('header', header.value)
   if (!header.value) return;
   const value = window.scrollY;
 

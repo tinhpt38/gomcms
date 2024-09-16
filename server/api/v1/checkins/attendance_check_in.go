@@ -1,6 +1,10 @@
 package checkins
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"strings"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
@@ -109,18 +113,47 @@ func (attendanceCheckInApi *AttendanceCheckInApi) GetAttendanceCheckInPublic(c *
 }
 
 func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Context) {
-	var checkinReq checkinsReq.CheckinsReq
-	err := c.ShouldBindJSON(&checkinReq)
+	var checkinReqEncode checkinsReq.CheckinReqEncode
+	err := c.ShouldBindJSON(&checkinReqEncode)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+
+	endodePrefix := "E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5_"
+	if !strings.HasPrefix(checkinReqEncode.Data, endodePrefix) {
+		response.FailWithMessage("Dữ liệu gửi lên của bạn không toàn vẹn", c)
+		return
+	}
+	checkinReqEncode.Data = strings.TrimPrefix(checkinReqEncode.Data, endodePrefix)
+
+	var checkinReq checkinsReq.CheckinsReq
+	decodeData, err := base64.StdEncoding.DecodeString(checkinReqEncode.Data)
+	if err != nil {
+		response.FailWithMessage("Dữ liệu gửi lên của bạn không toàn vẹn", c)
+		return
+	}
+	// var data map[string]interface{}
+	err = json.Unmarshal(decodeData, &checkinReq)
+	if err != nil {
+		response.FailWithMessage("Dữ liệu gửi lên của bạn không toàn vẹn", c)
+		return
+	}
+
 	ip := c.ClientIP()
 	userAgent := c.GetHeader("User-Agent")
 	if (checkinReq.Lat == nil || checkinReq.Lng == nil) || (*checkinReq.Lat == 0 || *checkinReq.Lng == 0) {
-		response.FailWithMessage("Vui lòng cho phép truy cập vị trí của thiết bị", c)
+
 		return
 	}
+	// dlu_activities_20422
+	prefix := "dlu_activities_20422_5BS:W`A8nF<J6Y{V4Nv.r!Je_"
+	if !strings.HasPrefix(checkinReq.VisitorId, prefix) {
+		response.FailWithMessage("Từ chối điểm danh. Bạn đang điểm danh từ một thiết bị không được phép", c)
+		return
+	}
+	checkinReq.VisitorId = strings.TrimPrefix(checkinReq.VisitorId, prefix)
+
 	result, err := attendanceCheckInService.CheckinAttendance(checkinReq, ip, userAgent)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))

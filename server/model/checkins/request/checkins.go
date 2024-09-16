@@ -10,4 +10,6 @@ type CheckinsReq struct {
 	FullName  *string  `json:"fullName" form:"fullName"`
 }
 
-
+type CheckinReqEncode struct {
+	Data string `json:"data"`
+}
