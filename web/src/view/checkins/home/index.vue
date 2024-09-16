@@ -248,7 +248,7 @@
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-gray-700 font-medium">Đã điểm danh:</span>
                                     <div class="bg-white rounded-full px-4 py-2 shadow-md">
-                                        <span class="text-red-600 font-bold">{{ formatMordenNumber(activity.total - active.totalCheckin) }}</span>
+                                        <span class="text-red-600 font-bold">{{ formatMordenNumber(activity.total- activity.totalCheckin) }}</span>
                                         <span class="text-gray-400 mx-1">/</span>
                                         <span class="text-green-600 font-bold">{{ formatMordenNumber(activity.totalCheckin) }}</span>
                                         <span class="text-gray-400 mx-1">/</span>
@@ -301,8 +301,6 @@ const searchInfo = ref({
     startDate: null,
     endDate: null
 })
-
-
 
 const getPostData = async () => {
     var now = moment()
