@@ -218,7 +218,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 	}
 
-	conditions, cerr := conditionService.GetConditionsByAttendanceId(attendance.ID, participant.ID)
+	conditions, cerr := conditionService.GetConditionOfPartparticipant(attendance.ID, participant.ID)
 	if cerr != nil {
 		return nil, errors.New("Không tìm thấy điều kiện điểm danh")
 	}

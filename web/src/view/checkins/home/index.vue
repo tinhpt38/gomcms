@@ -248,16 +248,11 @@
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-gray-700 font-medium">Đã điểm danh:</span>
                                     <div class="bg-white rounded-full px-4 py-2 shadow-md">
-                                        <!-- <span class="text-red-600 font-bold">{{ formatMordenNumber(activity.total - active.totalCheckin) }}</span>
+                                        <span class="text-red-600 font-bold">{{ formatMordenNumber(activity.total - active.totalCheckin) }}</span>
                                         <span class="text-gray-400 mx-1">/</span>
                                         <span class="text-green-600 font-bold">{{ formatMordenNumber(activity.totalCheckin) }}</span>
                                         <span class="text-gray-400 mx-1">/</span>
-                                        <span class="text-gray-600 font-bold">{{ formatMordenNumber(activity.total) }}</span> -->
-                                        <span class="text-red-600 font-bold">{{ formatMordenNumber(980) }}</span>
-                                        <span class="text-gray-400 mx-1">/</span>
-                                        <span class="text-green-600 font-bold">{{ formatMordenNumber(1000) }}</span>
-                                        <span class="text-gray-400 mx-1">/</span>
-                                        <span class="text-gray-600 font-bold">{{ formatMordenNumber(40507) }}</span>
+                                        <span class="text-gray-600 font-bold">{{ formatMordenNumber(activity.total) }}</span>
                                     </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">

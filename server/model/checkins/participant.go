@@ -8,11 +8,14 @@ import (
 // Sinh viên (Người tham dự phiên điểm danh) 结构体  Participant
 type Participant struct {
 	global.GVA_MODEL
-	Email        string  `json:"email" form:"email" gorm:"column:email;comment:Email;" binding:"required"` //Email
-	FullName     *string `json:"fullName" form:"fullName" gorm:"column:full_name;comment:Họ và tên;"`      //Họ và tên
-	GroupId      *uint   `json:"groupId" form:"groupId"`
-	AttendanceId *uint   `json:"attendanceId" form:"attendanceId"`
-	Groups       []Group `json:"groups" gorm:"many2many:attendance_group_participants;"`
+	Email          string  `json:"email" form:"email" gorm:"column:email;comment:Email;" binding:"required"` //Email
+	FullName       *string `json:"fullName" form:"fullName" gorm:"column:full_name;comment:Họ và tên;"`      //Họ và tên
+	GroupId        *uint   `json:"groupId" form:"groupId"`
+	AttendanceId   *uint   `json:"attendanceId" form:"attendanceId"`
+	ConditionCount int     `json:"conditionCount" form:"conditionCount"`
+	PassCount      int     `json:"passCount" form:"passCount"`
+	RequestCount   int     `json:"requestCount" form:"requestCount"`
+	Groups         []Group `json:"groups" gorm:"many2many:attendance_group_participants;"`
 }
 
 // TableName Sinh viên (Người tham dự phiên điểm danh) Participant自定义表名 participant
@@ -28,6 +31,7 @@ type AttendanceGroupParticipant struct {
 	Participant   *Participant `gorm:"foreignKey:ParticipantId"` // Thiết lập khóa ngoại đến struct Participant
 	Attendance    *Attendance  `gorm:"foreignKey:AttendanceId"`  // Thiết lập khóa ngoại đến struct Attendance
 	Group         *Group       `gorm:"foreignKey:GroupId"`       // Thiết lập khóa ngoại đến struct Group
+
 }
 
 func (AttendanceGroupParticipant) TableName() string {

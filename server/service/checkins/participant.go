@@ -60,7 +60,6 @@ func (participantService *ParticipantService) BulkCreateParticipants(req checkin
 	// 	Email: participant.Email,
 	// }).FirstOrCreate(participant).Error
 
-	
 }
 
 // DeleteParticipant 删除Sinh viên (Người tham dự phiên điểm danh)记录
@@ -151,9 +150,9 @@ func (participantService *ParticipantService) GetParticipantInfoList(info checki
 }
 
 func (participantService *ParticipantService) GetParticipantInfoListByAttendance(info checkinsReq.ParticipantSearch) (list []checkins.Participant, total int64, err error) {
+
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	// 创建db
 	db := global.GVA_DB.Model(&checkins.Participant{})
 	var participants []checkins.Participant
 	err = db.Joins("JOIN attendance_group_participants ON participants.id = attendance_group_participants.participant_id").
@@ -174,10 +173,10 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	// err = db.Joins("JOIN participant_attendances ON participants.id = participant_attendances.participant_id").Debug().
-	// 	Find(&participants, "participant_attendances.attendance_id = ?", info.AttendanceId).Error
 	err = db.Preload("Groups", "attendance_id = ?", info.AttendanceId).Find(&participants).Error
-	return participants, total, err
+	// Xử lý lấy thông tin điều kiện điểm danh
+	newList := participantService.GetMetadata(participants, *info.AttendanceId)
+	return newList, total, err
 }
 
 func (participantService *ParticipantService) ImportExcel(info config.CfgFileProcess) (err error) {
@@ -546,4 +545,36 @@ func (participantService *ParticipantService) ImportExcel(info config.CfgFilePro
 	})
 
 	return nil
+}
+
+func (participantService *ParticipantService) GetMetadata(list []checkins.Participant, attId uint) (newList []checkins.Participant) {
+	conditionService := new(ConditionService)
+
+	conditions, _ := conditionService.GetConditionsByAttendanceId(attId)
+	flagSub := 0
+	for index, participant := range list {
+		newList = append(newList, participant)
+		if len(conditions) > 0 {
+			for _, condition := range conditions {
+				if condition.GroupId == nil && participant.GroupId != condition.GroupId {
+					flagSub += 1
+				}
+			}
+		}
+		newList[index].ConditionCount = len(conditions) - flagSub
+		// participant.PassCount = 0
+
+		db := global.GVA_DB.Model(&checkins.AttendanceCheckIn{})
+		var totalRequest int64
+		db.Where("partpaticipant_id = ? AND attendance_id = ? AND deleted_at IS NULL", participant.ID, attId).Count(&totalRequest)
+		newList[index].RequestCount = int(totalRequest)
+
+		pdb := global.GVA_DB.Model(&checkins.AttendanceCheckIn{})
+		var totalPass int64
+		pdb.Where("partpaticipant_id = ? AND attendance_id = ? AND deleted_at IS NULL AND condition_id != 0", participant.ID, attId).Count(&totalPass)
+		newList[index].PassCount = int(totalPass)
+
+	}
+	return newList
+
 }

@@ -61,7 +61,7 @@ func (conditionService *ConditionService) GetCondition(ID string) (condition che
 	return
 }
 
-func (conditionService *ConditionService) GetConditionsByAttendanceId(aId uint, pId uint) (list []checkins.Condition, err error) {
+func (conditionService *ConditionService) GetConditionOfPartparticipant(aId uint, pId uint) (list []checkins.Condition, err error) {
 	// err = global.GVA_DB.Where("attendance_id = ?", ID).Preload(clause.Associations).Preload("Group").Preload("Area.Area").Find(&list).Error
 	query := `
 		SELECT
@@ -122,4 +122,14 @@ func (conditionService *ConditionService) GetConditionInfoList(info checkinsReq.
 
 	err = db.Preload(clause.Associations).Preload("Area.Area").Find(&conditions).Error
 	return conditions, total, err
+}
+
+func (conditionService *ConditionService) GetConditionsByAttendanceId(attId uint) (list []checkins.Condition, err error) {
+
+	db := global.GVA_DB.Model(&checkins.Condition{})
+	var conditions []checkins.Condition
+
+	db = db.Where("attendance_id = ?", attId)
+	err = db.Preload(clause.Associations).Preload("Area.Area").Find(&conditions).Error
+	return conditions, err
 }
