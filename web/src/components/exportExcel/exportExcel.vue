@@ -1,9 +1,5 @@
 <template>
-  <el-button
-    type="primary"
-    icon="download"
-    @click="exportExcelFunc"
-  >Tải xuống</el-button>
+  <el-button type="primary" icon="download" @click="exportExcelFunc">Tải xuống</el-button>
 </template>
 
 <script setup>
@@ -32,9 +28,9 @@ const props = defineProps({
 
 import { ElMessage } from 'element-plus'
 
-const exportExcelFunc = async() => {
+const exportExcelFunc = async () => {
   if (props.templateId === '') {
-    ElMessage.error('组件未设置模板ID')
+    ElMessage.error('Chưa thiết lập ID mẫu cho thành phần')
     return
   }
   const baseUrl = import.meta.env.VITE_BASE_API

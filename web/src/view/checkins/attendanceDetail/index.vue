@@ -4,7 +4,10 @@
       <div>
         <span class="text-xl font-bold text-gray-500">{{ formData.title }}</span>
       </div>
-      <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="mb-2" />
+      <div class="flex mb-2">
+        <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
+        <!-- <ExportExcel :form-data="{ action: 'EXPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" /> -->
+      </div>
       <el-button class="mx-4 hidden" type="danger" icon="download">
         Xuất Excel
       </el-button>
@@ -264,6 +267,7 @@ import {
 } from '@/api/checkins/attendanceAgency'
 
 import QRCodeVue3 from 'qrcode-vue3'
+import ExportExcel from '@/components/exportExcel/exportExcel.vue';
 
 defineOptions({
   name: 'AttendanceDetail'

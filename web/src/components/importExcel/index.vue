@@ -86,9 +86,9 @@ const props = defineProps({
 })
 
 onMounted(() => {
-  if (props.formData.action === 'import_environment_entry') {
-    isShow.value = true
-  }
+  // if (props.formData.action === 'import_environment_entry') {
+  //   isShow.value = true
+  // }
 })
 
 // Data
