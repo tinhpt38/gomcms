@@ -571,7 +571,7 @@ func (participantService *ParticipantService) GetMetadata(list []checkins.Partic
 
 		pdb := global.GVA_DB.Model(&checkins.AttendanceCheckIn{})
 		var totalPass int64
-		pdb.Where("partpaticipant_id = ? AND attendance_id = ? AND deleted_at IS NULL AND condition_id != 0", participant.ID, attId).Count(&totalPass)
+		pdb.Where("partpaticipant_id = ? AND attendance_id = ? AND deleted_at IS NULL AND condition_id != 0", participant.ID, attId).Debug().Count(&totalPass)
 		newList[index].PassCount = int(totalPass)
 
 	}

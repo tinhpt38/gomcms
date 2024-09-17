@@ -188,7 +188,11 @@
                   {{ formatDateTime(scope.row.checkinDate) }}
                 </template>
               </el-table-column>
-              <el-table-column align="left" label="Thành viên" prop="participant.fullName" width="200" />
+              <el-table-column align="left" label="Thành viên" prop="participant.fullName" width="200">
+                <template #default="scope">
+                  <span>{{ scope.row.participant?.fullName.replace("undefined", "") ?? '/' }}</span>
+                </template>
+              </el-table-column>
               <el-table-column align="left" label="Khu vực" width="120">
                 <template #default="scope">
                   <span>{{ scope.row.area?.name ?? '/' }}</span>
@@ -200,7 +204,7 @@
                 </template>
               </el-table-column>
 
-              <el-table-column align="left" label="IP" prop="iP" width="90" />
+              <el-table-column align="left" label="IP" prop="iP" width="140" />
               <el-table-column align="left" label="Vị trí" width="170">
                 <template #default="scope">
                   <a target="_blank"
@@ -208,14 +212,14 @@
                       scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
                 </template>
               </el-table-column>
-              <el-table-column align="left" label="Client ID" prop="visitorId" width="150">
+              <el-table-column align="left" label="Client ID" prop="visitorId" width="160">
                 <template #default="scope">
-                  <span>{{ scope.row.visitorId?.substring(0, 20) ?? '/' }}...</span>
+                  <span>{{ scope.row.visitorId?.substring(0, 15) ?? '/' }}...</span>
                 </template>
               </el-table-column>
               <el-table-column label="Agent" prop="agent">
                 <template #default="scope">
-                  <span>{{ scope.row.agent?.substring(0, 20) ?? '/' }}...</span>
+                  {{formatUserAgent(scope.row.agent)}}
                 </template>
               </el-table-column>
             </el-table>
@@ -257,6 +261,7 @@ import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
 import ImportExcel from '@/components/importExcel/index.vue'
 import { formatDateTime, formatDate } from '@/utils/format'
+import { formatUserAgent } from '@/utils/userAgent'
 import base32 from 'hi-base32'
 import {
   getAttendanceCategoryList

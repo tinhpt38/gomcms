@@ -65,8 +65,8 @@
                   Bạn hãy đăng nhập bằng tài khoản Email của bạn với Google để đăng nhập.
                 </p>
                 <p class="mt-6 text-lg leading-8 text-gray-600 px-2 mb-6">
-                        Bạn hãy Sử dụng 1 trong 2 WiFi: DLU Student hoặc DLU Teacher để thực hiện điểm danh
-                    </p>
+                  Bạn hãy Sử dụng 1 trong 2 WiFi: DLU Student hoặc DLU Teacher để thực hiện điểm danh
+                </p>
                 <p class="relative mt-1 text-sm sm:text-base italic leading-8 text-gray-500 sm:max-w-md lg:max-w-none">
                   {{ isSupported ? "Trình duyệt hỗ trợ lấy vị trí: " : "Trình duyệt không hỗ trợ lấy vị trí" }}
                   {{ coords.latitude + ", " + coords.longitude }}
@@ -266,8 +266,8 @@ const requestCheckin = async () => {
   data.value.accuracy = coords.value.accuracy
   data.value.code = route.query.c
 
-  var encodedData = encodeVal(data.value)
-  var res = await publicAttendanceCheckIn({ data: encodedData })
+  // var encodedData = encodeVal(data.value)
+  var res = await publicAttendanceCheckIn({ ...data.value })
 
 
   if (res.code == 0) {

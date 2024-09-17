@@ -8,7 +8,7 @@
 
     <div class="gva-search-box">
       <el-form ref="searchForm" :inline="true" :model="searchInfo">
-        <el-form-item label="Họ và tên">
+        <el-form-item label="Họ và tên" >
           <el-input v-model="searchInfo.fullName" placeholder="Họ và tên" />
         </el-form-item>
         <el-form-item label="Email">
@@ -34,14 +34,18 @@
         nghĩa là đã có <strong>(pass - total)</strong> điều kiện bị xoá bởi người tạo.</span>
     </div>
     <el-table :data="tableData" style="width: 100%" border>
-      <el-table-column prop="fullName" label="Họ và tên" />
-      <el-table-column prop="email" label="Email" />
+      <el-table-column prop="fullName" label="Họ và tên" width="250">
+        <template #default="scope">
+          <span>{{ scope.row?.fullName?.replace("undefined", "") }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="email" label="Email" width="300"/>
       <el-table-column label="Nhóm">
         <template #default="scope">
           <span>{{ scope.row.groups.map((e) => e.name).join(", ") }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="passCount" label="Điểm danh thành công" />
+      <el-table-column prop="passCount" label="Thành công" />
       <el-table-column prop="conditionCount" label="Tổng điều kiện cần" />
       <el-table-column prop="requestCount" label="Tổng truy cập" />
       <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
@@ -115,7 +119,6 @@ import {
   bulkParticipants,
   getParticipantListByAttendance
 } from '@/api/checkins/participant'
-import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
