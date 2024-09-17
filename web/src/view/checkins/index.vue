@@ -9,16 +9,16 @@
                 <img src="/logo-dlu-full.webp" alt="Trường Đại học Đà Lạt" class="h-14 sm:h-16 lg:h-20 w-auto">
               </a>
               <div class="hidden md:flex items-center gap-4 lg:gap-7" />
-              <button
+              <!-- <button
                 class="hidden md:block bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
                 @click="redirectToHistory">
                 Lịch sử
-              </button>
-              <button
+              </button> -->
+              <!-- <button
                 class="md:hidden bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
                 @click="redirectToHistory">
                 Lịch sử
-              </button>
+              </button> -->
             </div>
           </div>
         </div>
@@ -62,8 +62,11 @@
                 </h1>
                 <p
                   class="relative mt-6 text-base sm:text-lg font-bold leading-8 text-[#E67F32] sm:max-w-md lg:max-w-none">
-                  Hãy đăng nhập bằng tài khoản Email của bạn với Google để đăng nhập.
+                  Bạn hãy đăng nhập bằng tài khoản Email của bạn với Google để đăng nhập.
                 </p>
+                <p class="mt-6 text-lg leading-8 text-gray-600 px-2 mb-6">
+                        Bạn hãy Sử dụng 1 trong 2 WiFi: DLU Student hoặc DLU Teacher để thực hiện điểm danh
+                    </p>
                 <p class="relative mt-1 text-sm sm:text-base italic leading-8 text-gray-500 sm:max-w-md lg:max-w-none">
                   {{ isSupported ? "Trình duyệt hỗ trợ lấy vị trí: " : "Trình duyệt không hỗ trợ lấy vị trí" }}
                   {{ coords.latitude + ", " + coords.longitude }}

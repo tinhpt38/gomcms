@@ -526,5 +526,8 @@ func (attendanceService *AttendanceService) GetAttendanceHistory(info checkinsRe
 	}
 
 	err = db.Preload(clause.Associations).Find(&list).Error
+	if total == 0 {
+		return list, total, nil
+	}
 	return
 }

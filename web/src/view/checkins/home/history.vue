@@ -63,7 +63,7 @@
                                 </h1>
                                 <p
                                     class="relative mt-6 text-base sm:text-lg font-bold leading-8 text-[#E67F32] sm:max-w-md lg:max-w-none">
-                                    Đăng nhập bằng tài khoảng Gmail của bạn để xem lịch sử điểm danh.
+                                    Đăng nhập bằng tài khoản Gmail của bạn để xem lịch sử điểm danh.
                                 </p>
                                 <GoogleLogin class="my-4" :callback="callback" :error="gError" prompt />
                             </div>
@@ -203,13 +203,7 @@ defineOptions({
 
 
 const scrollToHistory = () => {
-    // const historyElement = document.getElementById('history');
-    // if (historyElement) {
-    //     historyElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-    // }
-
     historySectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
-
 };
 
 const getHistories = async () => {
@@ -219,7 +213,15 @@ const getHistories = async () => {
         total.value = res.data.total
         page.value = res.data.page
         pageSize.value = res.data.pageSize
+        if (res.data.list.length == 0) {
+            ElNotification({
+                title: 'Thông báo',
+                message: 'Không có dữ liệu điểm danh nào được tìm thấy',
+                type: 'info'
+            });
+        }
     }
+
     scrollToHistory()
 }
 
