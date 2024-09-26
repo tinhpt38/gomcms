@@ -178,11 +178,21 @@ const callback = async (response) => {
   data.value.email = userData.email
   data.value.fullName = (userData?.given_name || "") + ' ' + (userData?.family_name || "")
 
+  // data.value.fullName = "Mắc Biếc"
+
   await requestCheckin()
 }
 
 const gError = (error) => {
   console.log("Handle the error", error)
+}
+
+function toBinaryStr(str) {
+  const encoder = new TextEncoder();
+  // 1: split the UTF-16 string into an array of bytes
+  const charCodes = encoder.encode(str);
+  // 2: concatenate byte data to create a binary string
+  return String.fromCharCode(...charCodes);
 }
 
 
@@ -208,7 +218,9 @@ const visitorTemplate = (val) => {
 const keyRandom = 'E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5'
 const encodeVal = (data) => {
   const jsonString = JSON.stringify(data);
-  const encodedData = btoa(jsonString);
+  // console.log("jsonString: ", jsonString)
+  const encodedData = btoa(toBinaryStr(jsonString));
+  // console.log("encodedData: ", encodedData)
   return keyRandom + "_" + encodedData
 }
 
@@ -266,9 +278,10 @@ const requestCheckin = async () => {
   data.value.accuracy = coords.value.accuracy
   data.value.code = route.query.c
 
-  // var encodedData = encodeVal(data.value)
-  var res = await publicAttendanceCheckIn({ ...data.value })
+  var encodedData = encodeVal(data.value)
+  // var res = await publicAttendanceCheckIn({ ...data.value })
 
+  var res = await publicAttendanceCheckIn({ data: encodedData })
 
   if (res.code == 0) {
     if (res.data.conditions != null) {

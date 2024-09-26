@@ -1,6 +1,8 @@
 package checkins
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"strings"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -111,39 +113,39 @@ func (attendanceCheckInApi *AttendanceCheckInApi) GetAttendanceCheckInPublic(c *
 }
 
 func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Context) {
-	// var checkinReqEncode checkinsReq.CheckinReqEncode
-	// err := c.ShouldBindJSON(&checkinReqEncode)
-	// if err != nil {
-	// 	response.FailWithMessage(err.Error(), c)
-	// 	return
-	// }
-
-	// endodePrefix := "E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5_"
-	// if !strings.HasPrefix(checkinReqEncode.Data, endodePrefix) {
-	// 	response.FailWithMessage("Dữ liệu gửi lên của bạn không toàn vẹn", c)
-	// 	return
-	// }
-	// checkinReqEncode.Data = strings.TrimPrefix(checkinReqEncode.Data, endodePrefix)
-
-	// var checkinReq checkinsReq.CheckinsReq
-	// decodeData, err := base64.StdEncoding.DecodeString(checkinReqEncode.Data)
-	// if err != nil {
-	// 	response.FailWithMessage("Dữ liệu gửi lên của bạn không toàn vẹn", c)
-	// 	return
-	// }
-	// // var data map[string]interface{}
-	// err = json.Unmarshal(decodeData, &checkinReq)
-	// if err != nil {
-	// 	response.FailWithMessage("Dữ liệu gửi lên của bạn không toàn vẹn", c)
-	// 	return
-	// }
-
-	var checkinReq checkinsReq.CheckinsReq
-	err := c.ShouldBindJSON(&checkinReq)
+	var checkinReqEncode checkinsReq.CheckinReqEncode
+	err := c.ShouldBindJSON(&checkinReqEncode)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+
+	endodePrefix := "E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5_"
+	if !strings.HasPrefix(checkinReqEncode.Data, endodePrefix) {
+		response.FailWithMessage("Dữ liệu gửi lên của bạn không toàn vẹn", c)
+		return
+	}
+	checkinReqEncode.Data = strings.TrimPrefix(checkinReqEncode.Data, endodePrefix)
+
+	var checkinReq checkinsReq.CheckinsReq
+	decodeData, err := base64.StdEncoding.DecodeString(checkinReqEncode.Data)
+	if err != nil {
+		response.FailWithMessage("Dữ liệu gửi lên của bạn không toàn vẹn", c)
+		return
+	}
+	// var data map[string]interface{}
+	err = json.Unmarshal(decodeData, &checkinReq)
+	if err != nil {
+		response.FailWithMessage("Dữ liệu gửi lên của bạn không toàn vẹn", c)
+		return
+	}
+
+	// var checkinReq checkinsReq.CheckinsReq
+	// err := c.ShouldBindJSON(&checkinReq)
+	// if err != nil {
+	// 	response.FailWithMessage(err.Error(), c)
+	// 	return
+	// }
 
 	ip := c.ClientIP()
 	userAgent := c.GetHeader("User-Agent")
