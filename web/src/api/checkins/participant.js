@@ -88,6 +88,14 @@ export const findParticipant = (params) => {
   })
 }
 
+export const findLuckyParticipant = (params) => {
+  return service({
+    url: '/participant/findLuckyParticipant',
+    method: 'get',
+    params
+  })
+}
+
 // @Tags Participant
 // @Summary 分页获取Sinh viên (Người tham dự phiên điểm danh)列表
 // @Security ApiKeyAuth

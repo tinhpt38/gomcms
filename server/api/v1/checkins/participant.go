@@ -92,6 +92,17 @@ func (participantApi *ParticipantApi) FindParticipant(c *gin.Context) {
 	response.OkWithData(reparticipant, c)
 }
 
+func (participantApi *ParticipantApi) FindLuckyParticipant(c *gin.Context) {
+	acId := c.Query("attendanceId")
+	reparticipant, err := participantService.GetLuckyParticipant(acId)
+	if err != nil {
+		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithData(reparticipant, c)
+}
+
 func (participantApi *ParticipantApi) GetParticipantList(c *gin.Context) {
 	var pageInfo checkinsReq.ParticipantSearch
 	err := c.ShouldBindQuery(&pageInfo)

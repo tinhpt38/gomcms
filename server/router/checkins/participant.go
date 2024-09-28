@@ -20,8 +20,9 @@ func (s *ParticipantRouter) InitParticipantRouter(Router *gin.RouterGroup, Publi
 		participantRouter.PUT("updateParticipant", participantApi.UpdateParticipant)              // 更新Sinh viên (Người tham dự phiên điểm danh)
 	}
 	{
-		participantRouterWithoutRecord.GET("findParticipant", participantApi.FindParticipant)       // 根据ID获取Sinh viên (Người tham dự phiên điểm danh)
-		participantRouterWithoutRecord.GET("getParticipantList", participantApi.GetParticipantList) // 获取Sinh viên (Người tham dự phiên điểm danh)列表
+		participantRouterWithoutRecord.GET("findParticipant", participantApi.FindParticipant)           // 根据ID获取Sinh viên (Người tham dự phiên điểm danh)
+		participantRouterWithoutRecord.GET("findLuckyParticipant", participantApi.FindLuckyParticipant) // 根据ID获取Sinh viên (Người tham dự phiên điểm danh)
+		participantRouterWithoutRecord.GET("getParticipantList", participantApi.GetParticipantList)     // 获取Sinh viên (Người tham dự phiên điểm danh)列表
 		participantRouterWithoutRecord.GET("getParticipantListByAttendance", participantApi.GetParticipantListByAttendance)
 	}
 	{

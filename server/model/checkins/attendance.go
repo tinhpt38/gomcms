@@ -9,11 +9,12 @@ import (
 
 type Attendance struct {
 	global.GVA_MODEL
-	Title            string     `json:"title" form:"title" gorm:"column:title;comment:;" binding:"required"`              //Tiêu đề
-	StartDate        *time.Time `json:"startDate" form:"startDate" gorm:"column:start_date;comment:;" binding:"required"` //Ngày bắt đầu
-	EndDate          *time.Time `json:"endDate" form:"endDate" gorm:"column:end_date;comment:;" binding:"required"`       //Ngày kết thúc
-	IsLocked         bool       `json:"isLocked" form:"isLocked" gorm:"column:is_locked;comment:;"`                       //Khoá
-	AllowGuest       bool       `json:"allowGuest" form:"allowGuest" gorm:"column:allow_guest;comment:Cho phép khách"`    //Cho phép khách
+	Title            string     `json:"title" form:"title" gorm:"column:title;comment:;" binding:"required"`                                         //Tiêu đề
+	StartDate        *time.Time `json:"startDate" form:"startDate" gorm:"column:start_date;comment:;" binding:"required"`                            //Ngày bắt đầu
+	EndDate          *time.Time `json:"endDate" form:"endDate" gorm:"column:end_date;comment:;" binding:"required"`                                  //Ngày kết thúc
+	IsLocked         bool       `json:"isLocked" form:"isLocked" gorm:"column:is_locked;comment:;"`                                                  //Khoá
+	EveryoneCanEdit  bool       `json:"everyoneCanEdit" form:"everyoneCanEdit" gorm:"column:everyone_can_edit;comment:Cho phép mọi người chỉnh sửa"` //Cho phép mọi người chỉnh sửa
+	AllowGuest       bool       `json:"allowGuest" form:"allowGuest" gorm:"column:allow_guest;comment:Cho phép khách"`                               //Cho phép khách
 	Weight           int        `json:"weight" form:"weight" gorm:"column:weight;comment:Hệ số"`
 	ClientUrl        string     `json:"clientUrl" form:"clientUrl" gorm:"column:client_url;default=\"https://checkins.dlu.edu.vn\";comment:URL truy cập"` //URL của khách hàng
 	RestrictIp       *string    `json:"restrictIp" form:"restrictIp" gorm:"column:restrict_ip;comment:IP giới hạn"`                                       //IPs giới hạn

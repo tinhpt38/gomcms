@@ -99,6 +99,19 @@ func (participantService *ParticipantService) GetParticipant(ID string) (partici
 	return
 }
 
+func (participantService *ParticipantService) GetLuckyParticipant(acId string) (participant checkins.Participant, err error) {
+	// 	SELECT *
+	// FROM table_name
+	// ORDER BY RAND()
+	db := global.GVA_DB.Model(&checkins.Participant{})
+	err = db.Joins("JOIN attendance_group_participants ON participants.id = attendance_group_participants.participant_id").
+		Where("attendance_group_participants.attendance_id = ?", acId).
+		Order("RAND()").
+		First(&participant).Error
+
+	return
+}
+
 func (participantService *ParticipantService) GetParticipantByEmail(email string) (participant checkins.Participant, err error) {
 	err = global.GVA_DB.Where("email = ?", email).First(&participant).Error
 	return

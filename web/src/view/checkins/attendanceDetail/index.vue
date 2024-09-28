@@ -28,7 +28,7 @@
                   <el-form-item label="Ngày bắt đầu" label-width="150px" prop="startDate" class="required">
                     <el-date-picker v-model="formData.startDate" type="datetime" class="full-width-input" clearable />
                   </el-form-item>
-                  <el-form-item class=" required" label="Ngày kết thúc" label-width="150px" prop="endDate">
+                  <el-form-item class="required" label="Ngày kết thúc" label-width="150px" prop="endDate">
                     <el-date-picker v-model="formData.endDate" type="datetime" class="full-width-input" clearable />
                   </el-form-item>
                 </div>
@@ -46,6 +46,9 @@
                   <el-input type="text" v-model="formData.description"></el-input>
                 </el-form-item>
                 <div class="flex justify-between">
+                  <el-form-item label="Cho phép mọi người chỉnh sửa" label-width="150px" prop="everyoneCanEdit">
+                    <el-switch v-model="formData.everyoneCanEdit" />
+                  </el-form-item>
                   <el-form-item label="Đóng điểm danh" label-width="150px" prop="isLocked">
                     <el-switch v-model="formData.isLocked" />
                   </el-form-item>
@@ -231,6 +234,11 @@
           </div>
         </div>
       </el-tab-pane>
+      <el-tab-pane name="random" label="Ngẫu nhiên">
+        <div class="table-container">
+          <RandomWheel :ac-id="currentId" />
+        </div>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -259,6 +267,7 @@ import Partticipant from '@/view/checkins/components/participant/index.vue'
 import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
+import RandomWheel from '@/view/checkins/components/randomWheel/index.vue'
 import ImportExcel from '@/components/importExcel/index.vue'
 import { formatDateTime, formatDate } from '@/utils/format'
 import { formatUserAgent } from '@/utils/userAgent'
@@ -272,7 +281,6 @@ import {
 } from '@/api/checkins/attendanceAgency'
 
 import QRCodeVue3 from 'qrcode-vue3'
-import ExportExcel from '@/components/exportExcel/exportExcel.vue';
 
 defineOptions({
   name: 'AttendanceDetail'
@@ -290,6 +298,7 @@ const formData = ref({
   title: '',
   categoryId: null,
   agencyId: null,
+  everyoneCanEdit: false,
 
 })
 
