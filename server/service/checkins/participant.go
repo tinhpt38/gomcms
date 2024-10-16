@@ -50,6 +50,7 @@ func (participantService *ParticipantService) BulkCreateParticipants(req checkin
 		}
 		err = global.GVA_DB.Model(&checkins.AttendanceGroupParticipant{}).Where(&checkins.AttendanceGroupParticipant{
 			ParticipantId: &participant.ID,
+			GroupId:       req.GroupId,
 			AttendanceId:  req.AttendanceId,
 		}).FirstOrCreate(&agp).Error
 	}
@@ -118,15 +119,26 @@ func (participantService *ParticipantService) GetParticipantByEmail(email string
 	return
 }
 
-func (participantService *ParticipantService) GetParticipantInAttendance(participantId uint, attendanceId uint) (memberOfAttendance checkins.AttendanceGroupParticipant, err error) {
+// func (participantService *ParticipantService) GetParticipantInAttendance(participantId uint, attendanceId uint) (memberOfAttendance checkins.AttendanceGroupParticipant, err error) {
+// 	db := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
+// 	err = db.Joins("left join `groups` on groups.id = attendance_group_participants.group_id").
+// 		Where("attendance_group_participants.participant_id = ? AND attendance_group_participants.attendance_id = ? AND groups.attendance_id = ?", participantId, attendanceId, attendanceId).
+// 		Where("attendance_group_participants.deleted_at IS NULL").
+// 		Order("attendance_group_participants.id").
+// 		Preload(clause.Associations).
+// 		First(&memberOfAttendance).
+// 		Error
+// 	return
+// }
+
+func (participantService *ParticipantService) GetParticipantInAttendance(participantId uint, attendanceId uint) (memberOfAttendance []checkins.AttendanceGroupParticipant, err error) {
 	db := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
 	err = db.Joins("left join `groups` on groups.id = attendance_group_participants.group_id").
 		Where("attendance_group_participants.participant_id = ? AND attendance_group_participants.attendance_id = ? AND groups.attendance_id = ?", participantId, attendanceId, attendanceId).
 		Where("attendance_group_participants.deleted_at IS NULL").
 		Order("attendance_group_participants.id").
 		Preload(clause.Associations).
-		Debug().
-		First(&memberOfAttendance).
+		Find(&memberOfAttendance).
 		Error
 	return
 }
@@ -189,7 +201,7 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Preload("Groups", "attendance_id = ?", info.AttendanceId).Find(&participants).Error
+	err = db.Preload("Groups", "attendance_id = ?", info.AttendanceId).Debug().Find(&participants).Error
 	// Xử lý lấy thông tin điều kiện điểm danh
 	newList := participantService.GetMetadata(participants, *info.AttendanceId)
 	return newList, total, err

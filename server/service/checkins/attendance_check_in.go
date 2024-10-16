@@ -172,8 +172,8 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			return nil, errors.New("email của bạn không phải là thành viên của hệ thống")
 		}
 	}
-
-	agp, gerr := participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
+	var listAgps []checkins.AttendanceGroupParticipant
+	listAgps, gerr := participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
 	if gerr != nil {
 		if attendance.AllowGuest {
 			agpDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
@@ -192,7 +192,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 				msg := fmt.Sprintln(`không thể thêm thông tin điểm danh của bạn: %s`, err.Error())
 				return nil, errors.New(msg)
 			}
-			agp = *newagp
+			listAgps = append(listAgps, *newagp)
 		} else {
 			return nil, errors.New("không tìm thấy thông tin điểm danh của bạn")
 		}
@@ -228,22 +228,26 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	var conditionsStatus []checkins.Condition
 	var listErr []error
 	if len(conditions) > 0 {
+
 		satisfiedConditions, conditionsStatus, listErr = func() ([]checkins.Condition, []checkins.Condition, []error) {
+
 			var usedConditon []checkins.Condition
 			// var unUsedConditon []checkins.Condition
 			var conditionsStatus []checkins.Condition
 			var listErr []error
-			for _, condition := range conditions {
-				result, cerr := checkCondition(agp, condition, req, ip)
-				if result {
-					condition.IsPass = true
-					usedConditon = append(usedConditon, condition)
-				} else {
-					condition.IsPass = false
-					// unUsedConditon = append(unUsedConditon, condition)
-					listErr = append(listErr, cerr)
+			for _, agp := range listAgps {
+				for _, condition := range conditions {
+					result, cerr := checkCondition(agp, condition, req, ip)
+					if result {
+						condition.IsPass = true
+						usedConditon = append(usedConditon, condition)
+					} else {
+						condition.IsPass = false
+						// unUsedConditon = append(unUsedConditon, condition)
+						listErr = append(listErr, cerr)
+					}
+					conditionsStatus = append(conditionsStatus, condition)
 				}
-				conditionsStatus = append(conditionsStatus, condition)
 			}
 			return usedConditon, conditionsStatus, listErr
 		}()
@@ -266,24 +270,25 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			result["message"] = []string{"Điểm danh thành công"}
 		}
 	}
-
-	attendanceCheckIn := checkins.AttendanceCheckIn{
-		CheckinDate:      time.Now().UTC(),
-		AttendanceId:     &attendance.ID,
-		PartpaticipantId: &participant.ID,
-		AreaId:           firstCondition.AreaId,
-		GroupId:          agp.GroupId,
-		ConditionId:      &firstCondition.ID,
-		IP:               ip,
-		Lattidue:         req.Lat,
-		Longtidue:        req.Lng,
-		Agent:            userAgent,
-		Accuracy:         req.Accuracy,
-		VisitorId:        req.VisitorId,
-	}
-	aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
-	if aciErr != nil {
-		return nil, errors.New("điểm danh thất bại")
+	for _, agp := range listAgps {
+		attendanceCheckIn := checkins.AttendanceCheckIn{
+			CheckinDate:      time.Now().UTC(),
+			AttendanceId:     &attendance.ID,
+			PartpaticipantId: &participant.ID,
+			AreaId:           firstCondition.AreaId,
+			GroupId:          agp.GroupId,
+			ConditionId:      &firstCondition.ID,
+			IP:               ip,
+			Lattidue:         req.Lat,
+			Longtidue:        req.Lng,
+			Agent:            userAgent,
+			Accuracy:         req.Accuracy,
+			VisitorId:        req.VisitorId,
+		}
+		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
+		if aciErr != nil {
+			return nil, errors.New("điểm danh thất bại")
+		}
 	}
 
 	//update parrticiant

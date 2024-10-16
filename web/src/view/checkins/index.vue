@@ -302,12 +302,17 @@ const requestCheckin = async () => {
 
   if (res.code == 0) {
     if (res.data.conditions != null) {
-      conditionData.value = res.data.conditions
+      // conditionData.value = res.data.conditions
+      // console.log("res.data.conditions: ", res.data.conditions)
+      conditionData.value = res.data.conditions.filter((condition, index, self) =>
+        index === self.findIndex((c) => c.ID === condition.ID)
+      )
     }
     attendance.value = res.data.attendance
     var msg = "Điểm danh thành công"
     if (res.data.message) {
-      msg = res.data.message.join(', ')
+      // msg = res.data.message.join(', ')
+      msg = [...new Set(res.data.message)].join(', ')
     }
     ElMessageBox.alert(msg, 'Thông báo', {
       confirmButtonText: 'OK',
