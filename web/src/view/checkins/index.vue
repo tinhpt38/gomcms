@@ -177,9 +177,6 @@ const callback = async (response) => {
   const userData = decodeCredential(response.credential)
   data.value.email = userData.email
   data.value.fullName = (userData?.given_name || "") + ' ' + (userData?.family_name || "")
-
-  // data.value.fullName = "Mắc Biếc"
-
   await requestCheckin()
 }
 
@@ -268,10 +265,29 @@ const requestCheckin = async () => {
     ElNotification("Không có điểm danh nào đang hiện hành")
     return
   }
+
+  if (typeof (coords.value.latitude) == "undefined" || typeof (coords.value.longitude) == "undefined") {
+    ElMessage.error("Không thể lấy vị trí của bạn")
+    return
+  }
+
   if (!coords.value.latitude || !coords.value.longitude) {
     ElMessage.error("Không thể lấy vị trí của bạn")
     return
   }
+
+  if (coords.value.latitude === 0 || coords.value.longitude === 0) {
+    ElMessage.error("Không thể lấy vị trí của bạn")
+    return
+  }
+
+
+  if (coords.value.latitude === null || coords.value.longitude === null) {
+    ElMessage.error("Không thể lấy vị trí của bạn")
+    return
+  }
+
+
 
   data.value.lat = coords.value.latitude
   data.value.lng = coords.value.longitude
