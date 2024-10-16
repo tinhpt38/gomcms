@@ -182,7 +182,7 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 	}
 
 	if info.GroupId != nil && *info.GroupId != 0 {
-		db = db.Joins("JOIN groups ON groups.id = attendance_group_participants.group_id").Where("groups.id = ?", info.GroupId)
+		db = db.Joins("JOIN `groups` ON groups.id = attendance_group_participants.group_id").Where("groups.id = ?", info.GroupId)
 	}
 
 	if limit != 0 {
