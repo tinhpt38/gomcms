@@ -8,7 +8,7 @@
 
     <div class="gva-search-box">
       <el-form ref="searchForm" :inline="true" :model="searchInfo">
-        <el-form-item label="Họ và tên" >
+        <el-form-item label="Họ và tên">
           <el-input v-model="searchInfo.fullName" placeholder="Họ và tên" />
         </el-form-item>
         <el-form-item label="Email">
@@ -39,7 +39,7 @@
           <span>{{ scope.row?.fullName?.replace("undefined", "") }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="email" label="Email" width="300"/>
+      <el-table-column prop="email" label="Email" width="300" />
       <el-table-column label="Nhóm">
         <template #default="scope">
           <span>{{ scope.row.groups.map((e) => e.name).join(", ") }}</span>
@@ -104,6 +104,11 @@
           <el-input type="textarea" :rows="20" v-model="bulkFormData.list" :clearable="true"
             placeholder="Nhập mã số email thành viên" />
         </el-form-item>
+        <el-form-item label="Nhóm:" prop="groupId">
+          <el-select v-model="bulkFormData.groupId" placeholder="Chọn nhóm" filterable clearable>
+            <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
+          </el-select>
+        </el-form-item>
       </el-form>
     </el-drawer>
   </div>
@@ -119,7 +124,9 @@ import {
   bulkParticipants,
   getParticipantListByAttendance
 } from '@/api/checkins/participant'
+
 import { ElMessage, ElMessageBox } from 'element-plus'
+
 import { ref, reactive } from 'vue'
 
 const props = defineProps({
@@ -342,7 +349,7 @@ const bulkAddParticipantsFunc = async () => {
   bulkFormRef.value?.validate(async (valid) => {
     if (!valid) return
     var list = bulkFormData.value.list.split("\n")
-    var res = await bulkParticipants({ list, attendanceId: Number(props.acId) })
+    var res = await bulkParticipants({ list, attendanceId: Number(props.acId), groupId: Number(bulkFormData.value.groupId) })
     if (res.code === 0) {
       ElMessage({
         type: 'success',

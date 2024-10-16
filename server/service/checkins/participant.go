@@ -46,6 +46,7 @@ func (participantService *ParticipantService) BulkCreateParticipants(req checkin
 		agp := checkins.AttendanceGroupParticipant{
 			ParticipantId: &participant.ID,
 			AttendanceId:  req.AttendanceId,
+			GroupId:       req.GroupId,
 		}
 		err = global.GVA_DB.Model(&checkins.AttendanceGroupParticipant{}).Where(&checkins.AttendanceGroupParticipant{
 			ParticipantId: &participant.ID,

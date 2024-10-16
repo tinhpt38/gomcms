@@ -19,4 +19,5 @@ type ParticipantSearch struct {
 type ListEmailParticipantRequest struct {
 	List         []string `json:"list" form:"list"`
 	AttendanceId *uint    `json:"attendanceId" form:"attendanceId"`
+	GroupId      *uint    `json:"groupId" form:"groupId"`
 }
