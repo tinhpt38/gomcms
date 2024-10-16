@@ -12,9 +12,9 @@ type Participant struct {
 	FullName       *string `json:"fullName" form:"fullName" gorm:"column:full_name;comment:Họ và tên;"`      //Họ và tên
 	GroupId        *uint   `json:"groupId" form:"groupId"`
 	AttendanceId   *uint   `json:"attendanceId" form:"attendanceId"`
-	ConditionCount int     `json:"conditionCount" form:"conditionCount"`
-	PassCount      int     `json:"passCount" form:"passCount"`
-	RequestCount   int     `json:"requestCount" form:"requestCount"`
+	ConditionCount int     `json:"conditionCount" form:"conditionCount" gorm:"column:condition_count;comment:Số lần điều kiện;"` //Số lần điều kiện
+	PassCount      int     `json:"passCount" form:"passCount" gorm:"column:pass_count;comment:Số lần điều kiện;"`                //Số lần điều kiện
+	RequestCount   int     `json:"requestCount" form:"requestCount" gorm:"column:request_count;comment:Số lần yêu cầu;"`         //Số lần yêu cầu
 	Groups         []Group `json:"groups" gorm:"many2many:attendance_group_participants;"`
 }
 

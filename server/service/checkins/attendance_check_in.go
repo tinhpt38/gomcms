@@ -118,17 +118,17 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 	atId, derr := attendanceCheckInService.DecodeBase32(req.Code)
 	if derr != nil {
-		return nil, errors.New("Mã QR không hợp lệ")
+		return nil, errors.New("mã QR không hợp lệ")
 	}
 
 	//Attendance is _
 	attendance, grr := attendanceService.GetAttendance(atId)
 	if grr != nil {
-		return nil, errors.New("Không tìm thấy thông tin điểm danh")
+		return nil, errors.New("không tìm thấy thông tin điểm danh")
 	}
 
 	if attendance.IsLocked {
-		return nil, errors.New("Phiên điểm danh đã bị khóa")
+		return nil, errors.New("phiên điểm danh đã bị khóa")
 	}
 
 	if attendance.RestrictIp != nil && *attendance.RestrictIp != "" {
@@ -136,7 +136,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		ipRanges := strings.Split(*ipString, ",")
 		if len(ipRanges) > 0 {
 			if !isIPAllowed(ip, ipRanges) {
-				return nil, errors.New("Địa chỉ IP không được phép")
+				return nil, errors.New("địa chỉ IP không được phép")
 			}
 		}
 	}
@@ -144,12 +144,12 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	var now = time.Now()
 	if attendance.StartDate != nil {
 		if now.Before(*attendance.StartDate) {
-			return nil, errors.New("Chưa đến thời gian điểm danh")
+			return nil, errors.New("chưa đến thời gian điểm danh")
 		}
 	}
 	if attendance.EndDate != nil {
 		if now.After(*attendance.EndDate) {
-			return nil, errors.New("Đã hết thời gian điểm danh")
+			return nil, errors.New("đã hết thời gian điểm danh")
 		}
 	}
 
@@ -165,10 +165,10 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			}
 			perr = participantService.CreateParticipant(&participant)
 			if perr != nil {
-				return nil, errors.New("Tạo mới thông tin thất bại")
+				return nil, errors.New("tạo mới thông tin thất bại")
 			}
 		} else {
-			return nil, errors.New("Email của bạn không phải là thành viên của hệ thống")
+			return nil, errors.New("email của bạn không phải là thành viên của hệ thống")
 		}
 	}
 
@@ -193,7 +193,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			}
 			agp = *newagp
 		} else {
-			return nil, errors.New("Không tìm thấy thông tin điểm danh của bạn")
+			return nil, errors.New("không tìm thấy thông tin điểm danh của bạn")
 		}
 	}
 
@@ -203,7 +203,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		var list []checkins.AttendanceCheckIn
 		global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&list)
 		if len(list) >= attendance.LimitCount {
-			return nil, errors.New("Bạn đã điểm danh đủ số lần cho phép")
+			return nil, errors.New("bạn đã điểm danh đủ số lần cho phép")
 		}
 	}
 
@@ -213,14 +213,14 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		var limitClientCount int64
 		global.GVA_DB.Where("visitor_id = ? and attendance_id = ?", req.VisitorId, attendance.ID).Model(&checkins.AttendanceCheckIn{}).Count(&limitClientCount)
 		if limitClientCount >= int64(attendance.LimitClientCount) {
-			return nil, errors.New("Thiết bị đã điểm danh đủ số lần cho phép")
+			return nil, errors.New("thiết bị đã điểm danh đủ số lần cho phép")
 		}
 
 	}
 
 	conditions, cerr := conditionService.GetConditionOfPartparticipant(attendance.ID, participant.ID)
 	if cerr != nil {
-		return nil, errors.New("Không tìm thấy điều kiện điểm danh")
+		return nil, errors.New("không tìm thấy điều kiện điểm danh")
 	}
 
 	var satisfiedConditions []checkins.Condition
@@ -247,6 +247,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			return usedConditon, conditionsStatus, listErr
 		}()
 	}
+
 	result = make(map[string]interface{})
 	result["conditions"] = conditionsStatus
 	result["attendance"] = attendance
@@ -281,8 +282,23 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	}
 	aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
 	if aciErr != nil {
-		return nil, errors.New("Điểm danh thất bại")
+		return nil, errors.New("điểm danh thất bại")
 	}
+
+	//update parrticiant
+	// passCount := participant.PassCount
+	// if firstCondition.ID > 0 || len(conditions) == 0 {
+	// 	passCount = passCount + 1
+	// }
+
+	// participant.ConditionCount = participant.ConditionCount + 1
+	// participant.PassCount = passCount
+	// participant.RequestCount = participant.RequestCount + 1
+
+	// pErr := global.GVA_DB.Model(&checkins.Participant{}).Where("id = ?", participant.ID).Save(&participant).Error
+	// if pErr != nil {
+	// 	return nil, errors.New("cập nhật thông tin thất bại")
+	// }
 	return
 }
 
@@ -296,7 +312,7 @@ func (attendanceCheckInService *AttendanceCheckInService) DecodeBase32(encoded s
 
 func checkMatchArea(ip string, lat *float64, lng *float64, accuracy *float64, area checkins.AttendanceArea) (bool, error) {
 	if lat == nil || lng == nil {
-		return false, errors.New("Không tìm thấy vị trí")
+		return false, errors.New("không tìm thấy vị trí")
 	}
 	latArea := area.Area.Latitude
 	lngArea := area.Area.Longitude

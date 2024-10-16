@@ -6,7 +6,7 @@
       </div>
       <div class="flex mb-2">
         <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
-        <!-- <ExportExcel :form-data="{ action: 'EXPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" /> -->
+        <ExportExcel :form-data="{ action: 'EXPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
       </div>
       <el-button class="mx-4 hidden" type="danger" icon="download">
         Xuất Excel
@@ -269,6 +269,7 @@ import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
 import RandomWheel from '@/view/checkins/components/randomWheel/index.vue'
 import ImportExcel from '@/components/importExcel/index.vue'
+import ExportExcel from '@/components/exportExcel/exportExcel.vue'
 import { formatDateTime, formatDate } from '@/utils/format'
 import { formatUserAgent } from '@/utils/userAgent'
 import base32 from 'hi-base32'

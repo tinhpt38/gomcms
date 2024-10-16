@@ -2,12 +2,14 @@
   <div>
     <div>
       <div class="p-1 my-1">
-        <!-- <el-button type="primary" icon="plus" @click="openDialog()">
+        <el-button type="primary" icon="plus" @click="openDialog()">
           Thêm nhóm
-        </el-button> -->
-        <el-button type="success" icon="loading" @click="openAutoGroup()">
-          Phân nhóm
         </el-button>
+        <el-tooltip class="box-item" effect="dark" content="Chức năng này sẽ xoá toàn bộ nhóm, tạo lại nhóm và tự động phân bổ thành viên vào nhóm" placement="top-start">
+          <el-button type="success" icon="loading" @click="openAutoGroup()">
+            Xoá và tạo lại nhóm Phân nhóm
+          </el-button>
+        </el-tooltip>
       </div>
 
       <el-table :data="tableData" style="width: 100%" border>
