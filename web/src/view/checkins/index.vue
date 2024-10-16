@@ -71,7 +71,7 @@
                   {{ isSupported ? "Trình duyệt hỗ trợ lấy vị trí: " : "Trình duyệt không hỗ trợ lấy vị trí" }}
                   {{ coords.latitude + ", " + coords.longitude }}
                 </p>
-                <div v-if="attendance.title != null" class="mt-4 bg-slate-50 p-2 rounded shadow-slate-400">
+                <div v-if="attendance.title != null" class="mt-4 p-2 rounded shadow-slate-400">
                   <h3>{{ attendance.title }}</h3>
                   <div v-if="conditionData.length > 0">
                     <div class="text-base text-gray-900">
@@ -79,11 +79,11 @@
                     </div>
                     <dl class="divide-y divide-gray-100 mt-2 mb-2">
                       <div v-for="(item, key) in conditionData" :key="key"
-                        class="px-2 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0 ">
-                        <dt class="text-sm font-medium leading-6 text-gray-900">
+                        class="px-2 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-2  bg-slate-50 mt-2">
+                        <dt class="text-sm font-medium text-base text-gray-900">
                           Lần thứ {{ key + 1 }}
                         </dt>
-                        <dd class="my-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+                        <dd class="my-1 text-sm text-base text-gray-700 sm:col-span-2 sm:mt-0">
                           {{ conditionString(item) }}
                         </dd>
                         <el-tag v-if="item.isPass" effect="dark" type="success">

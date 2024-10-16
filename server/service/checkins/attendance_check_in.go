@@ -3,6 +3,7 @@ package checkins
 import (
 	"encoding/base32"
 	"errors"
+	"fmt"
 	"math"
 	"net"
 	"strings"
@@ -188,8 +189,8 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 				AttendanceId:  &attendance.ID,
 			}).FirstOrCreate(&newagp).Error
 			if err != nil {
-				// return nil, errors.New("Không thể thêm thông tin điểm danh")
-				return nil, err
+				msg := fmt.Sprintln(`không thể thêm thông tin điểm danh của bạn: %s`, err.Error())
+				return nil, errors.New(msg)
 			}
 			agp = *newagp
 		} else {
