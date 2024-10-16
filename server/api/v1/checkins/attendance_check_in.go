@@ -150,7 +150,7 @@ func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Conte
 	ip := c.ClientIP()
 	userAgent := c.GetHeader("User-Agent")
 	if (checkinReq.Lat == nil || checkinReq.Lng == nil) || (*checkinReq.Lat == 0 || *checkinReq.Lng == 0) {
-
+		response.FailWithMessage("Bạn chưa cho phép thiết bị lấy vị trí", c)
 		return
 	}
 	// dlu_activities_20422

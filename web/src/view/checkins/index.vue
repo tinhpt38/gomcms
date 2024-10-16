@@ -77,9 +77,9 @@
                     <div class="text-base text-gray-900">
                       Danh sách điều kiện điểm danh
                     </div>
-                    <dl class="divide-y divide-gray-100">
+                    <dl class="divide-y divide-gray-100 mt-2 mb-2">
                       <div v-for="(item, key) in conditionData" :key="key"
-                        class="px-2 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        class="px-2 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0 ">
                         <dt class="text-sm font-medium leading-6 text-gray-900">
                           Lần thứ {{ key + 1 }}
                         </dt>
@@ -261,12 +261,13 @@ const conditionString = (item) => {
 const conditionData = ref([])
 const attendance = ref({})
 const requestCheckin = async () => {
+  debugger
   if (route.query?.c == null) {
     ElNotification("Không có điểm danh nào đang hiện hành")
     return
   }
 
-  if (typeof (coords.value.latitude) == "undefined" || typeof (coords.value.longitude) == "undefined") {
+  if (typeof (coords.value.latitude) == "Infinity" || typeof (coords.value.longitude) == "Infinity") {
     ElMessage.error("Không thể lấy vị trí của bạn")
     return
   }
