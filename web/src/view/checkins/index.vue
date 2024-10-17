@@ -299,7 +299,7 @@ const requestCheckin = async () => {
   // var res = await publicAttendanceCheckIn({ ...data.value })
 
   var res = await publicAttendanceCheckIn({ data: encodedData })
-
+  debugger
   if (res.code == 0) {
     if (res.data.conditions != null) {
       // conditionData.value = res.data.conditions
@@ -309,11 +309,19 @@ const requestCheckin = async () => {
       )
     }
     attendance.value = res.data.attendance
-    var msg = "Điểm danh thành công"
-    if (res.data.message) {
-      // msg = res.data.message.join(', ')
-      msg = [...new Set(res.data.message)].join(', ')
+
+    // if (res.data.message) {
+    //   // msg = [...new Set(res.data.message)].join(', ')
+    // }
+
+    var msg = "Bạn điểm danh không thành công. Vui lòng thao tác lại."
+    var passcount = conditionData?.value.reduce((count, item) => {
+      return item.isPass ? count + 1 : count;
+    }, 0);
+    if (passcount >0){
+      msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} lần`
     }
+
     ElMessageBox.alert(msg, 'Thông báo', {
       confirmButtonText: 'OK',
       type: 'success'
@@ -323,7 +331,7 @@ const requestCheckin = async () => {
       }
     });
   } else {
-    ElMessage(res.msg)
+    ElMessage(res.data?.msg ?? res.msg)
   }
 }
 

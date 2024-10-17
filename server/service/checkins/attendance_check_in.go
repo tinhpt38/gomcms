@@ -223,6 +223,14 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	for _, agp := range listAgps {
 		listAgpIDs = append(listAgpIDs, int(agp.ID))
 	}
+	var conditionCheckedIn []uint
+	err = global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+		Where("partpaticipant_id = ? and attendance_id = ?", participant.ID, attendance.ID).Debug().
+		Pluck("condition_id", &conditionCheckedIn).Error
+
+	if err != nil {
+		return nil, errors.New("không thể kiểm tra điều kiện điểm danh")
+	}
 
 	rConditions, cerr := conditionService.GetConditionOfPartparticipant(attendance.ID, listAgpIDs)
 	if cerr != nil || len(rConditions) == 0 {
@@ -231,16 +239,18 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 	var agpCheckins []checkins.AttendanceCheckIn
 	var coreConditions []checkins.Condition
+	globalMsg := "Điểm danh không thành công"
 	for _, condition := range rConditions {
 		var tempCon checkins.Condition
 
 		for _, agp := range listAgps {
 			// tempCon = *rConditions[i].Condition
 			tempCon = *condition.Condition
-			if condition.AttendanceGroupParticipantId == int(agp.ID) {
+			if condition.AttendanceGroupParticipantId == int(agp.ID) && !arrayContains(conditionCheckedIn, tempCon.ID) {
 				result, cerr := checkCondition(agp, tempCon, req, ip)
 				if result {
 					tempCon.IsPass = true
+					globalMsg = "Điểm danh thành công"
 					attendanceCheckIn := checkins.AttendanceCheckIn{
 						CheckinDate:      time.Now().UTC(),
 						AttendanceId:     &attendance.ID,
@@ -263,61 +273,21 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 				coreConditions = append(coreConditions, tempCon)
 			}
 
+			if arrayContains(conditionCheckedIn, tempCon.ID) {
+				tempCon.IsPass = true
+				coreConditions = append(coreConditions, tempCon)
+			}
+
 		}
-
 	}
-
-	// Code cũ ở dưới
-
-	// var satisfiedConditions []checkins.Condition
-	// var conditionsStatus []checkins.Condition
-	// var listErr []error
-	// if len(conditions) > 0 {
-
-	// 	satisfiedConditions, conditionsStatus, listErr = func() ([]checkins.Condition, []checkins.Condition, []error) {
-
-	// 		var usedConditon []checkins.Condition
-	// 		// var unUsedConditon []checkins.Condition
-	// 		var conditionsStatus []checkins.Condition
-	// 		var listErr []error
-	// 		for _, agp := range listAgps {
-	// 			for _, condition := range conditions {
-	// 				result, cerr := checkCondition(agp, condition, req, ip)
-	// 				if result {
-	// 					condition.IsPass = true
-	// 					usedConditon = append(usedConditon, condition)
-	// 				} else {
-	// 					condition.IsPass = false
-	// 					// unUsedConditon = append(unUsedConditon, condition)
-	// 					listErr = append(listErr, cerr)
-	// 				}
-	// 				conditionsStatus = append(conditionsStatus, condition)
-	// 			}
-	// 		}
-	// 		return usedConditon, conditionsStatus, listErr
-	// 	}()
-	// }
 
 	result = make(map[string]interface{})
 	result["conditions"] = coreConditions
 	result["attendance"] = attendance
+	result["message"] = globalMsg
 	if len(coreConditions) == 0 {
 		result["message"] = "Không có điều kiện điểm danh nào thoả mãn"
 	}
-	// // xử lý những thằng nào đã pass
-	// firstCondition := &checkins.Condition{}
-	// if len(conditions) > 0 {
-	// 	if len(satisfiedConditions) == 0 {
-	// 		var msgs []string
-	// 		for _, err := range listErr {
-	// 			msgs = append(msgs, err.Error())
-	// 		}
-	// 		result["message"] = msgs
-	// 	} else {
-	// 		firstCondition = &satisfiedConditions[0]
-	// 		result["message"] = []string{"Điểm danh thành công"}
-	// 	}
-	// }
 
 	for _, agp := range agpCheckins {
 		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&agp)
@@ -327,6 +297,15 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	}
 
 	return
+}
+
+func arrayContains(arr []uint, element uint) bool {
+	for _, e := range arr {
+		if e == element {
+			return true
+		}
+	}
+	return false
 }
 
 func (attendanceCheckInService *AttendanceCheckInService) DecodeBase32(encoded string) (string, error) {
