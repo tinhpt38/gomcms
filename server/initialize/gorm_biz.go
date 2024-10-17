@@ -9,7 +9,12 @@ import (
 
 func bizModel() error {
 	db := global.GVA_DB
-	err := db.AutoMigrate(checkins.Attendance{}, checkins.Group{}, checkins.Area{}, checkins.AttendanceArea{}, config.CfgFileProcess{}, checkins.Participant{}, config.FileProcessError{}, checkins.Condition{}, checkins.AttendanceCheckIn{}, checkins.AttendanceGroupParticipant{}, checkins.AttendanceCategory{}, checkins.AttendanceAgency{}, uibuilder.SliderBuilder{})
+	err := db.AutoMigrate(checkins.Attendance{}, checkins.Group{},
+		checkins.Area{}, checkins.AttendanceArea{}, config.CfgFileProcess{},
+		checkins.Participant{}, config.FileProcessError{}, checkins.Condition{},
+		checkins.AttendanceCheckIn{}, checkins.AttendanceGroupParticipant{},
+		checkins.AttendanceCategory{}, checkins.AttendanceAgency{},
+		uibuilder.SliderBuilder{}, checkins.AGPCondition{})
 	if err != nil {
 		return err
 	}

@@ -95,3 +95,11 @@ export const getConditionList = (params) => {
     params
   })
 }
+
+export const syncCondition = (data) => {
+  return service({
+    url: '/condition/syncCondition',
+    method: 'post',
+    data
+  })
+}

@@ -2,15 +2,15 @@ package checkins
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-    "github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-    "github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
-    checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
-    "github.com/gin-gonic/gin"
-    "go.uber.org/zap"
-    "github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
+	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
-type ConditionApi struct {}
+type ConditionApi struct{}
 
 // CreateCondition 创建Điều kiện để checkins
 // @Tags Condition
@@ -28,14 +28,14 @@ func (conditionApi *ConditionApi) CreateCondition(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-    condition.CreatedBy = utils.GetUserID(c)
+	condition.CreatedBy = utils.GetUserID(c)
 	err = conditionService.CreateCondition(&condition)
 	if err != nil {
-        global.GVA_LOG.Error("thất bại!", zap.Error(err))
-		response.FailWithMessage("thất bại:" + err.Error(), c)
+		global.GVA_LOG.Error("thất bại!", zap.Error(err))
+		response.FailWithMessage("thất bại:"+err.Error(), c)
 		return
 	}
-    response.OkWithMessage("thành công", c)
+	response.OkWithMessage("thành công", c)
 }
 
 // DeleteCondition 删除Điều kiện để checkins
@@ -49,11 +49,11 @@ func (conditionApi *ConditionApi) CreateCondition(c *gin.Context) {
 // @Router /condition/deleteCondition [delete]
 func (conditionApi *ConditionApi) DeleteCondition(c *gin.Context) {
 	ID := c.Query("ID")
-    userID := utils.GetUserID(c)
-	err := conditionService.DeleteCondition(ID,userID)
+	userID := utils.GetUserID(c)
+	err := conditionService.DeleteCondition(ID, userID)
 	if err != nil {
-        global.GVA_LOG.Error("thất bại!", zap.Error(err))
-		response.FailWithMessage("thất bại:" + err.Error(), c)
+		global.GVA_LOG.Error("thất bại!", zap.Error(err))
+		response.FailWithMessage("thất bại:"+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("thành công", c)
@@ -69,11 +69,11 @@ func (conditionApi *ConditionApi) DeleteCondition(c *gin.Context) {
 // @Router /condition/deleteConditionByIds [delete]
 func (conditionApi *ConditionApi) DeleteConditionByIds(c *gin.Context) {
 	IDs := c.QueryArray("IDs[]")
-    userID := utils.GetUserID(c)
-	err := conditionService.DeleteConditionByIds(IDs,userID)
+	userID := utils.GetUserID(c)
+	err := conditionService.DeleteConditionByIds(IDs, userID)
 	if err != nil {
-        global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:" + err.Error(), c)
+		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("Thành công", c)
@@ -95,11 +95,11 @@ func (conditionApi *ConditionApi) UpdateCondition(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-    condition.UpdatedBy = utils.GetUserID(c)
+	condition.UpdatedBy = utils.GetUserID(c)
 	err = conditionService.UpdateCondition(condition)
 	if err != nil {
-        global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:" + err.Error(), c)
+		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("Thành công", c)
@@ -118,8 +118,8 @@ func (conditionApi *ConditionApi) FindCondition(c *gin.Context) {
 	ID := c.Query("ID")
 	recondition, err := conditionService.GetCondition(ID)
 	if err != nil {
-        global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:" + err.Error(), c)
+		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
 	response.OkWithData(recondition, c)
@@ -143,16 +143,16 @@ func (conditionApi *ConditionApi) GetConditionList(c *gin.Context) {
 	}
 	list, total, err := conditionService.GetConditionInfoList(pageInfo)
 	if err != nil {
-	    global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-        response.FailWithMessage("Thất bại:" + err.Error(), c)
-        return
-    }
-    response.OkWithDetailed(response.PageResult{
-        List:     list,
-        Total:    total,
-        Page:     pageInfo.Page,
-        PageSize: pageInfo.PageSize,
-    }, "Thành công", c)
+		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithDetailed(response.PageResult{
+		List:     list,
+		Total:    total,
+		Page:     pageInfo.Page,
+		PageSize: pageInfo.PageSize,
+	}, "Thành công", c)
 }
 
 // GetConditionPublic 不需要鉴权的Điều kiện để checkins接口
@@ -164,9 +164,30 @@ func (conditionApi *ConditionApi) GetConditionList(c *gin.Context) {
 // @Success 200 {object} response.Response{data=object,msg=string} "获取成功"
 // @Router /condition/getConditionPublic [get]
 func (conditionApi *ConditionApi) GetConditionPublic(c *gin.Context) {
-    // 此接口不需要鉴权
-    // 示例为返回了一个固定的消息接口，一般本接口用于C端服务，需要自己实现业务逻辑
-    response.OkWithDetailed(gin.H{
-       "info": "不需要鉴权的Điều kiện để checkins接口信息",
-    }, "Thành công", c)
+	// 此接口不需要鉴权
+	// 示例为返回了一个固定的消息接口，一般本接口用于C端服务，需要自己实现业务逻辑
+	response.OkWithDetailed(gin.H{
+		"info": "不需要鉴权的Điều kiện để checkins接口信息",
+	}, "Thành công", c)
+}
+
+func (conditionApi *ConditionApi) SyncCondition(c *gin.Context) {
+	var condition checkinsReq.ConditionSearch
+	err := c.ShouldBindJSON(&condition)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if *condition.AttendanceId <= 0 {
+		response.FailWithMessage("Phiên điểm danh không hợp lệ", c)
+		return
+	}
+
+	err = conditionService.SyncCondtionForAllMember(*condition.AttendanceId)
+	if err != nil {
+		global.GVA_LOG.Error("thất bại!", zap.Error(err))
+		response.FailWithMessage("thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithMessage("thành công", c)
 }

@@ -193,7 +193,7 @@
               </el-table-column>
               <el-table-column align="left" label="Thành viên" prop="participant.fullName" width="200">
                 <template #default="scope">
-                  <span>{{ scope.row.participant?.fullName.replace("undefined", "") ?? '/' }}</span>
+                  <span>{{ scope.row.participant?.fullName?.replace("undefined", "") ?? '/' }}</span>
                 </template>
               </el-table-column>
               <el-table-column align="left" label="Khu vực" width="120">
@@ -462,8 +462,8 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  // console.log("Danh sách điểm danh")
-  // console.log(table)
+  console.log("Danh sách điểm danh")
+  console.log(table)
   generateQRCode()
 }
 

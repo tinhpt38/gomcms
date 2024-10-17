@@ -5,6 +5,9 @@
         <el-button type="primary" icon="plus" @click="openDialog">
           Thêm mới
         </el-button>
+        <el-button type="danger" icon="loading" @click="syncConditionFun">
+          Đồng bộ điều kiện
+        </el-button>
         <!-- <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length"
                     @click="onDelete">Xóa</el-button> -->
       </div>
@@ -118,7 +121,9 @@ import {
   deleteConditionByIds,
   updateCondition,
   findCondition,
-  getConditionList
+  getConditionList,
+  syncCondition
+
 } from '@/api/checkins/condition'
 
 import {
@@ -423,13 +428,27 @@ const getDetails = async (row) => {
   }
 }
 
-
-// 关闭详情弹窗
 const closeDetailShow = () => {
   detailShow.value = false
   detailFrom.value = {}
 }
 
+const syncConditionFun = async() =>{
+  ElMessageBox.confirm('Thao tác này sẽ đồng bộ tất cả điều kiện cho các thành viên', 'Cảnh báo', {
+    confirmButtonText: 'Đồng ý',
+    cancelButtonText: 'Hủy',
+    type: 'warning'
+  }).then(async () => {
+    const res = await syncCondition({attendanceId: Number(props.acId)})
+    if (res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: 'Đồng bộ thành công'
+      })
+      getTableData()
+    }
+  })
+}
 </script>
 
 <style scoped>

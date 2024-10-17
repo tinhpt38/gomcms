@@ -133,3 +133,36 @@ func (conditionService *ConditionService) GetConditionsByAttendanceId(attId uint
 	err = db.Preload(clause.Associations).Preload("Area.Area").Find(&conditions).Error
 	return conditions, err
 }
+
+func (conditionService *ConditionService) SyncCondtionForAllMember(attId int) (err error) {
+	conditions, err := conditionService.GetConditionsByAttendanceId(uint(attId))
+	if err != nil {
+		return err
+	}
+	if len(conditions) == 0 {
+		return nil
+	}
+
+	// err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	// Xoá hết các đồng bộ trước đó
+	err = global.GVA_DB.Model(checkins.AGPCondition{}).Where("attendance_id = ?", attId).Delete(&checkins.AGPCondition{}).Error
+	if err != nil {
+		return err
+	}
+
+	rawQuery := `
+		INSERT INTO agp_conditions (agp_id, condition_id, attendance_id)
+		SELECT agp.id, c.id, agp.attendance_id
+		FROM attendance_group_participants agp
+		LEFT JOIN conditions c 
+		ON (c.group_id = agp.group_id OR c.group_id IS NULL AND c.attendance_id = ?)
+		WHERE agp.attendance_id = ?`
+	err = global.GVA_DB.Exec(rawQuery, attId, attId).Debug().Error
+	if err != nil {
+		return err
+	}
+	return nil
+
+	// })
+
+}
