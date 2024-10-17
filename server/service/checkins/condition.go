@@ -145,7 +145,7 @@ func (conditionService *ConditionService) SyncCondtionForAllMember(attId int) (e
 
 	// err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 	// Xoá hết các đồng bộ trước đó
-	err = global.GVA_DB.Model(checkins.AGPCondition{}).Where("attendance_id = ?", attId).Delete(&checkins.AGPCondition{}).Error
+	err = global.GVA_DB.Model(checkins.AGPCondition{}).Where("attendance_id = ?", attId).Unscoped().Delete(&checkins.AGPCondition{}).Error
 	if err != nil {
 		return err
 	}
