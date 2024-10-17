@@ -21,6 +21,7 @@ type Condition struct {
 	Group        *Group          `json:"group" gorm:"foreignKey:GroupId;references:ID;comment:Nhóm;"`  //Nhóm
 	Area         *AttendanceArea `json:"area" gorm:"foreignKey:AreaId;references:ID;comment:Khu vực;"` //Khu vực
 	IsPass       bool            `json:"isPass" form:"isPass" gorm:"-"`                                //是否通过
+	Message      string          `json:"msg" form:"msg" gorm:"-"`                                      //是否通过
 }
 
 // TableName Điều kiện để checkins Condition自定义表名 conditions

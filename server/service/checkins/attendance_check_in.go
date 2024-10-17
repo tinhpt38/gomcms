@@ -193,9 +193,9 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 				return nil, errors.New(msg)
 			}
 			listAgps = append(listAgps, *newagp)
-		} else {
-			return nil, errors.New("không tìm thấy thông tin điểm danh của bạn")
 		}
+	} else {
+		return nil, errors.New("không tìm thấy thông tin điểm danh của bạn")
 	}
 
 	// Kiểm tra số lần điểm danh của thành viên đó
@@ -216,95 +216,116 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		if limitClientCount >= int64(attendance.LimitClientCount) {
 			return nil, errors.New("thiết bị đã điểm danh đủ số lần cho phép")
 		}
-
 	}
 
-	conditions, cerr := conditionService.GetConditionOfPartparticipant(attendance.ID, participant.ID)
-	if cerr != nil {
+	// Kiểm tra điều kiện điểm danh
+	var listAgpIDs []int
+	for _, agp := range listAgps {
+		listAgpIDs = append(listAgpIDs, int(agp.ID))
+	}
+
+	rConditions, cerr := conditionService.GetConditionOfPartparticipant(attendance.ID, listAgpIDs)
+	if cerr != nil || len(rConditions) == 0 {
 		return nil, errors.New("không tìm thấy điều kiện điểm danh")
 	}
 
-	var satisfiedConditions []checkins.Condition
-	var conditionsStatus []checkins.Condition
-	var listErr []error
-	if len(conditions) > 0 {
+	var agpCheckins []checkins.AttendanceCheckIn
+	var coreConditions []checkins.Condition
+	for _, condition := range rConditions {
+		var tempCon checkins.Condition
 
-		satisfiedConditions, conditionsStatus, listErr = func() ([]checkins.Condition, []checkins.Condition, []error) {
-
-			var usedConditon []checkins.Condition
-			// var unUsedConditon []checkins.Condition
-			var conditionsStatus []checkins.Condition
-			var listErr []error
-			for _, agp := range listAgps {
-				for _, condition := range conditions {
-					result, cerr := checkCondition(agp, condition, req, ip)
-					if result {
-						condition.IsPass = true
-						usedConditon = append(usedConditon, condition)
-					} else {
-						condition.IsPass = false
-						// unUsedConditon = append(unUsedConditon, condition)
-						listErr = append(listErr, cerr)
+		for _, agp := range listAgps {
+			// tempCon = *rConditions[i].Condition
+			tempCon = *condition.Condition
+			if condition.AttendanceGroupParticipantId == int(agp.ID) {
+				result, cerr := checkCondition(agp, tempCon, req, ip)
+				if result {
+					tempCon.IsPass = true
+					attendanceCheckIn := checkins.AttendanceCheckIn{
+						CheckinDate:      time.Now().UTC(),
+						AttendanceId:     &attendance.ID,
+						PartpaticipantId: &participant.ID,
+						AreaId:           tempCon.AreaId,
+						GroupId:          agp.GroupId,
+						ConditionId:      &tempCon.ID,
+						IP:               ip,
+						Lattidue:         req.Lat,
+						Longtidue:        req.Lng,
+						Agent:            userAgent,
+						Accuracy:         req.Accuracy,
+						VisitorId:        req.VisitorId,
 					}
-					conditionsStatus = append(conditionsStatus, condition)
+					agpCheckins = append(agpCheckins, attendanceCheckIn)
+				} else {
+					tempCon.IsPass = false
+					tempCon.Message = cerr.Error()
 				}
+				coreConditions = append(coreConditions, tempCon)
 			}
-			return usedConditon, conditionsStatus, listErr
-		}()
+
+		}
+
 	}
+
+	// Code cũ ở dưới
+
+	// var satisfiedConditions []checkins.Condition
+	// var conditionsStatus []checkins.Condition
+	// var listErr []error
+	// if len(conditions) > 0 {
+
+	// 	satisfiedConditions, conditionsStatus, listErr = func() ([]checkins.Condition, []checkins.Condition, []error) {
+
+	// 		var usedConditon []checkins.Condition
+	// 		// var unUsedConditon []checkins.Condition
+	// 		var conditionsStatus []checkins.Condition
+	// 		var listErr []error
+	// 		for _, agp := range listAgps {
+	// 			for _, condition := range conditions {
+	// 				result, cerr := checkCondition(agp, condition, req, ip)
+	// 				if result {
+	// 					condition.IsPass = true
+	// 					usedConditon = append(usedConditon, condition)
+	// 				} else {
+	// 					condition.IsPass = false
+	// 					// unUsedConditon = append(unUsedConditon, condition)
+	// 					listErr = append(listErr, cerr)
+	// 				}
+	// 				conditionsStatus = append(conditionsStatus, condition)
+	// 			}
+	// 		}
+	// 		return usedConditon, conditionsStatus, listErr
+	// 	}()
+	// }
 
 	result = make(map[string]interface{})
-	result["conditions"] = conditionsStatus
+	result["conditions"] = coreConditions
 	result["attendance"] = attendance
-	// xử lý những thằng nào đã pass
-	firstCondition := &checkins.Condition{}
-	if len(conditions) > 0 {
-		if len(satisfiedConditions) == 0 {
-			var msgs []string
-			for _, err := range listErr {
-				msgs = append(msgs, err.Error())
-			}
-			result["message"] = msgs
-		} else {
-			firstCondition = &satisfiedConditions[0]
-			result["message"] = []string{"Điểm danh thành công"}
-		}
+	if len(coreConditions) == 0 {
+		result["message"] = "Không có điều kiện điểm danh nào thoả mãn"
 	}
-	for _, agp := range listAgps {
-		attendanceCheckIn := checkins.AttendanceCheckIn{
-			CheckinDate:      time.Now().UTC(),
-			AttendanceId:     &attendance.ID,
-			PartpaticipantId: &participant.ID,
-			AreaId:           firstCondition.AreaId,
-			GroupId:          agp.GroupId,
-			ConditionId:      &firstCondition.ID,
-			IP:               ip,
-			Lattidue:         req.Lat,
-			Longtidue:        req.Lng,
-			Agent:            userAgent,
-			Accuracy:         req.Accuracy,
-			VisitorId:        req.VisitorId,
-		}
-		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&attendanceCheckIn)
+	// // xử lý những thằng nào đã pass
+	// firstCondition := &checkins.Condition{}
+	// if len(conditions) > 0 {
+	// 	if len(satisfiedConditions) == 0 {
+	// 		var msgs []string
+	// 		for _, err := range listErr {
+	// 			msgs = append(msgs, err.Error())
+	// 		}
+	// 		result["message"] = msgs
+	// 	} else {
+	// 		firstCondition = &satisfiedConditions[0]
+	// 		result["message"] = []string{"Điểm danh thành công"}
+	// 	}
+	// }
+
+	for _, agp := range agpCheckins {
+		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&agp)
 		if aciErr != nil {
 			return nil, errors.New("điểm danh thất bại")
 		}
 	}
 
-	//update parrticiant
-	// passCount := participant.PassCount
-	// if firstCondition.ID > 0 || len(conditions) == 0 {
-	// 	passCount = passCount + 1
-	// }
-
-	// participant.ConditionCount = participant.ConditionCount + 1
-	// participant.PassCount = passCount
-	// participant.RequestCount = participant.RequestCount + 1
-
-	// pErr := global.GVA_DB.Model(&checkins.Participant{}).Where("id = ?", participant.ID).Save(&participant).Error
-	// if pErr != nil {
-	// 	return nil, errors.New("cập nhật thông tin thất bại")
-	// }
 	return
 }
 

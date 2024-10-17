@@ -37,9 +37,11 @@ func (AttendanceGroupParticipant) TableName() string {
 
 type AGPCondition struct {
 	global.GVA_MODEL
-	AttendanceGroupParticipantId *uint `json:"attendanceGroupParticipantId" form:"attendanceGroupParticipantId" gorm:"column:agp_id;comment:Phiên điểm danh"`
-	ConditionId                  *int  `json:"conditionId" form:"conditionId" gorm:"column:condition_id;comment:Điều kiện"`
-	AttendanceId                 *int  `json:"attendanceId" form:"attendanceId" gorm:"column:attendance_id;comment:Phiên điểm danh"`
+	AttendanceGroupParticipantId int        `json:"attendanceGroupParticipantId" form:"attendanceGroupParticipantId" gorm:"column:agp_id;comment:Phiên điểm danh"`
+	ConditionId                  int        `json:"conditionId" form:"conditionId" gorm:"column:condition_id;comment:Điều kiện"`
+	AttendanceId                 int        `json:"attendanceId" form:"attendanceId" gorm:"column:attendance_id;comment:Phiên điểm danh"`
+	Condition                    *Condition `json:"condition" gorm:"foreignKey:ConditionId"`
+	// AttendanceGroupParticipant   *AttendanceGroupParticipant `gorm:"foreignKey:AttendanceGroupParticipantId"`
 }
 
 func (AGPCondition) TableName() string {

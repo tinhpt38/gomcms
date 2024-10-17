@@ -61,32 +61,40 @@ func (conditionService *ConditionService) GetCondition(ID string) (condition che
 	return
 }
 
-func (conditionService *ConditionService) GetConditionOfPartparticipant(aId uint, pId uint) (list []checkins.Condition, err error) {
-	// err = global.GVA_DB.Where("attendance_id = ?", ID).Preload(clause.Associations).Preload("Group").Preload("Area.Area").Find(&list).Error
-	query := `
-		SELECT
-	c.*
-FROM
-	conditions c
-LEFT JOIN (
-	SELECT
-		ac.condition_id as conid
-	FROM
-		attendance_checkins ac
-	WHERE
-		ac.partpaticipant_id = ?
-		AND ac.attendance_id = ?
-		AND ac.deleted_at IS NULL
-		AND ac.condition_id != 0
-) as ak
-ON
-	c.id = ak.conid
-WHERE
-	c.attendance_id = ?
-	AND ak.conid IS NULL
-	AND c.deleted_at IS NULL;
-`
-	err = global.GVA_DB.Raw(query, pId, aId, aId).Preload(clause.Associations).Preload("Area.Area").Debug().Find(&list).Error
+// func (conditionService *ConditionService) GetConditionOfPartparticipant(aId uint, pId uint) (list []checkins.Condition, err error) {
+// 	// err = global.GVA_DB.Where("attendance_id = ?", ID).Preload(clause.Associations).Preload("Group").Preload("Area.Area").Find(&list).Error
+// 	query := `
+// 		SELECT
+// 	c.*
+// FROM
+// 	conditions c
+// LEFT JOIN (
+// 	SELECT
+// 		ac.condition_id as conid
+// 	FROM
+// 		attendance_checkins ac
+// 	WHERE
+// 		ac.partpaticipant_id = ?
+// 		AND ac.attendance_id = ?
+// 		AND ac.deleted_at IS NULL
+// 		AND ac.condition_id != 0
+// ) as ak
+// ON
+// 	c.id = ak.conid
+// WHERE
+// 	c.attendance_id = ?
+// 	AND ak.conid IS NULL
+// 	AND c.deleted_at IS NULL;
+// `
+// 	err = global.GVA_DB.Raw(query, pId, aId, aId).Preload(clause.Associations).Preload("Area.Area").Debug().Find(&list).Error
+// 	return
+// }
+
+func (conditionService *ConditionService) GetConditionOfPartparticipant(aId uint, agpIds []int) (list []checkins.AGPCondition, err error) {
+	newdb := global.GVA_DB.Model(&checkins.AGPCondition{})
+	err = newdb.Where("attendance_id = ? AND  agp_id IN (?)", aId, agpIds).
+		Preload(clause.Associations).Preload("Condition.Group").
+		Preload("Condition.Area.Area").Find(&list).Error
 	return
 }
 
