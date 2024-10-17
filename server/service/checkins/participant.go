@@ -81,19 +81,62 @@ func (participantService *ParticipantService) DeleteParticipantByIds(IDs []strin
 // UpdateParticipant 更新Sinh viên (Người tham dự phiên điểm danh)记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (participantService *ParticipantService) UpdateParticipant(participant checkins.Participant) (err error) {
-	err = global.GVA_DB.Model(&checkins.Participant{}).Where("id = ?", participant.ID).Save(&participant).Error
-	agbDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
-	agp := checkins.AttendanceGroupParticipant{}
-	rerr := agbDb.Where("participant_id = ? AND attendance_id = ?", participant.ID, participant.AttendanceId).First(&agp).Error
-	if rerr != nil {
-		return rerr
+
+	global.GVA_DB.Model(&checkins.Participant{}).Where("id = ?", participant.ID).Save(&participant)
+	agpDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
+	var existingGroupIds []uint
+	if err := agpDb.Where("participant_id = ? AND attendance_id = ?", participant.ID, participant.AttendanceId).
+		Pluck("group_id", &existingGroupIds).Error; err != nil {
+		return err
 	}
-	agp.GroupId = participant.GroupId
-	rerr = agbDb.Save(&agp).Error
-	if rerr != nil {
-		return rerr
+
+	newGroupIds := *participant.GroupId
+
+	toAdd := difference(newGroupIds, existingGroupIds)
+
+	// Tìm những GroupId cần xóa
+	toDelete := difference(existingGroupIds, newGroupIds)
+
+	if len(toDelete) > 0 {
+		if err := agpDb.Where("attendance_id = ? AND group_id IN (?)", participant.AttendanceId, toDelete).
+			Unscoped().
+			Delete(&checkins.AttendanceGroupParticipant{}).Error; err != nil {
+			return err
+		}
 	}
+	// Tạo mới theo danh sách
+	for _, grId := range toAdd {
+		agbDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
+		agp := checkins.AttendanceGroupParticipant{
+			ParticipantId: &participant.ID,
+			AttendanceId:  participant.AttendanceId,
+			GroupId:       &grId,
+		}
+		rerr := agbDb.Create(&agp).Error
+		if rerr != nil {
+			return rerr
+		}
+	}
+
 	return err
+}
+
+func difference(slice1, slice2 []uint) []uint {
+	diff := []uint{}
+	// Tạo một map để tra cứu nhanh
+	lookup := make(map[uint]struct{}, len(slice2))
+	for _, v := range slice2 {
+		lookup[v] = struct{}{}
+	}
+
+	// Tìm những phần tử không có trong map
+	for _, v := range slice1 {
+		if _, found := lookup[v]; !found {
+			diff = append(diff, v)
+		}
+	}
+
+	return diff
 }
 
 func (participantService *ParticipantService) GetParticipant(ID string) (participant checkins.Participant, err error) {

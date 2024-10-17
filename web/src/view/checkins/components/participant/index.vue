@@ -79,7 +79,7 @@
           <el-input v-model="formData.email" :clearable="true" placeholder="Nhập Email" />
         </el-form-item>
         <el-form-item label="Nhóm:" prop="groupId">
-          <el-select v-model="formData.groupId" placeholder="Chọn nhóm" filterable clearable>
+          <el-select v-model="formData.groupId" placeholder="Chọn nhóm" filterable clearable multiple>
             <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
@@ -151,7 +151,7 @@ const searchInfo = ref({
   fullName: '',
   email: '',
   attendanceId: props.acId,
-  groupId: null,
+  groupId: [],
 })
 
 
@@ -169,13 +169,17 @@ const getTableData = async () => {
   searchInfo.value.attendanceId = props.acId
   const table = await getParticipantListByAttendance({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
-    tableData.value = table.data.list
+    tableData.value = table.data.list.map((e) => {
+      var groupIds = e.groups?.map(k => k.ID)
+      e.groupId = groupIds
+      return e
+    })
     total.value = table.data.total
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  console.log("participant components")
-  console.log(tableData.value)
+  // console.log("participant components")
+  // console.log(tableData.value)
 }
 
 getTableData()
@@ -234,12 +238,13 @@ const type = ref('')
 
 
 const updateParticipantFunc = async (row) => {
-  const res = await findParticipant({ ID: row.ID })
+  // const res = await findParticipant({ ID: row.ID })
   type.value = 'update'
-  if (res.code === 0) {
-    formData.value = res.data
+  // if (res.code === 0) {
+    formData.value = row
+    // formData.value.groupId = res.data.groups.map((e) => e.ID)
     dialogFormVisible.value = true
-  }
+  // }
 }
 
 
@@ -277,9 +282,11 @@ const closeDialog = () => {
 
 const elFormRef = ref()
 const enterDialog = async () => {
-  if (formData.value.groupId) {
-    formData.value.groupId = Number(formData.value.groupId)
-  }
+  // if (formData.value.groupId) {
+  //   formData.value.groupId = Number(formData.value.groupId)
+  // }
+  // console.log(formData.value)
+  // return
   formData.value.attendanceId = Number(props.acId)
   elFormRef.value?.validate(async (valid) => {
     if (!valid) return

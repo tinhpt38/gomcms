@@ -10,7 +10,7 @@ type Participant struct {
 	global.GVA_MODEL
 	Email        string  `json:"email" form:"email" gorm:"column:email;comment:Email;" binding:"required"` //Email
 	FullName     *string `json:"fullName" form:"fullName" gorm:"column:full_name;comment:Họ và tên;"`      //Họ và tên
-	GroupId      *uint   `json:"groupId" form:"groupId" gorm:"-"`
+	GroupId      *[]uint `json:"groupId" form:"groupId" gorm:"-"`
 	AttendanceId *uint   `json:"attendanceId" form:"attendanceId" gorm:"-"`
 	Groups       []Group `json:"groups" gorm:"many2many:attendance_group_participants;"`
 }
