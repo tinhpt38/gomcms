@@ -30,8 +30,8 @@
       </el-form>
     </div>
     <div class="p-2 my-2">
-      <span>Nếu <strong> số Tổng thành công (pass) </strong> lớn hơn <strong> số Tổng điều kiện (total) </strong> có
-        nghĩa là đã có <strong>(pass - total)</strong> điều kiện bị xoá bởi người tạo.</span>
+      <!-- <span>Nếu <strong> số Tổng thành công (pass) </strong> lớn hơn <strong> số Tổng điều kiện (total) </strong> có
+        nghĩa là đã có <strong>(pass - total)</strong> điều kiện bị xoá bởi người tạo.</span> -->
     </div>
     <el-table :data="tableData" style="width: 100%" border>
       <el-table-column prop="fullName" label="Họ và tên" width="250">
@@ -40,15 +40,15 @@
         </template>
       </el-table-column>
       <el-table-column prop="email" label="Email" width="300" />
-      <el-table-column label="Nhóm">
+      <el-table-column label="Nhóm" min-width="300">
         <template #default="scope">
           <span>{{ scope.row.groups.map((e) => e.name).join(", ") }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="passCount" label="Thành công" />
+      <!-- <el-table-column prop="passCount" label="Thành công" />
       <el-table-column prop="conditionCount" label="Tổng điều kiện cần" />
-      <el-table-column prop="requestCount" label="Tổng truy cập" />
-      <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
+      <el-table-column prop="requestCount" label="Tổng truy cập" /> -->
+      <el-table-column align="right" label="Hành động" fixed="right" min-width="240">
         <template #default="scope">
           <el-button type="primary" link icon="edit" class="table-button"
             @click="updateParticipantFunc(scope.row)">Chỉnh sửa</el-button>
