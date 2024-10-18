@@ -68,61 +68,6 @@
                         style="clip-path: polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.7%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)" />
                 </div>
                 <div class="overflow-hidden">
-                    <!-- <div class="mx-auto max-w-7xl px-6 pb-[32px] pt-[32px]">
-                        <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-                            <div class="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
-                                <h1 class="text-4xl font-bold tracking-tight text-[#514C39] sm:text-6xl mb-6">
-                                    Hệ thống điểm danh
-                                    <br><span class="text-[#7BA227]">Trường Đại học Đà Lạt</span>
-                                </h1>
-                                <p class="mt-6 text-lg leading-8 text-gray-600">
-                                    Chào mừng bạn đến với hệ thống điểm danh hiện đại của Trường Đại học Đà Lạt.
-                                    Hãy đăng nhập để bắt đầu quá trình điểm danh của bạn.
-                                </p>
-                            </div>
-
-                            <div
-                                class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
-                                <div
-                                    class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
-                                    <div class="relative">
-                                        <img src="/dlu1.jpg" alt=""
-                                            class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                                        <div
-                                            class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
-                                    </div>
-                                </div>
-                                <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
-                                    <div class="relative">
-                                        <img src="/dlu2.jpg" alt=""
-                                            class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                                        <div
-                                            class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
-                                    </div>
-                                    <div class="relative">
-                                        <img src="/dlu3.jpg" alt=""
-                                            class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                                        <div
-                                            class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
-                                    </div>
-                                </div>
-                                <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
-                                    <div class="relative">
-                                        <img src="/dlu4.jpg" alt=""
-                                            class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                                        <div
-                                            class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
-                                    </div>
-                                    <div class="relative">
-                                        <img src="/dlu5.jpg" alt=""
-                                            class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                                        <div
-                                            class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
                     <div class="w-full max-w-7xl mx-auto text-center mt-8">
                         <div class="transition-all duration-120 delay-350 ease-in-out px-4">
                             <div class="relative flex flex-col">
@@ -174,10 +119,11 @@
                         </div>
                         </el-form>
                     </div>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                         <div v-for="(activity, index) in postData" :key="index"
-                            class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
-                            <div class="relative overflow-hidden rounded-t-lg shadow-md">
+                            class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer">
+                            <div v-on:click="onAttendanceClick(activity)" class="relative overflow-hidden rounded-t-lg shadow-md">
                                 <!-- <div class="relative w-full h-80 bg-gradient-to-r from-blue-100 to-green-100"> -->
                                 <!-- Điều kiện hiển thị overlay khi item.islocked === true -->
                                 <div v-if="activity.isLocked"
@@ -279,6 +225,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="flex justify-center mt-8 text-[#7BA227]">
                         <el-pagination layout="prev, pager, next" :total="total" :current-page="page"
                             :page-size="pageSize" @current-change="handlePageChange" />
@@ -339,6 +286,13 @@ const getPostData = async () => {
         pageSize.value = res.data.pageSize
     }
 
+}
+
+const onAttendanceClick = (item) =>{
+    // console.log(item.clientUrl)
+    if(!item.isLocked){
+        window.location.href = item.clientUrl
+    }
 }
 
 const onSubmit = async () => {
