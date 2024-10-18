@@ -27,6 +27,16 @@ export const formatDateTime = (time) => {
   }
 }
 
+export const formatDateTimeNoSecond = (time) => {
+  if (time !== null && time !== '') {
+    var date = new Date(time)
+    return formatTimeToStr(date, 'dd/MM/yyyy hh:mm')
+  } else {
+    return ''
+  }
+}
+
+
 
 export const formatMordenNumber = (val) => {
   if (val === null || val === '' || typeof val === 'undefined' || isNaN(val)) {

@@ -95,3 +95,12 @@ export const getAttendanceCategoryList = (params) => {
     params
   })
 }
+
+
+export const getAttendanceCategoryPublic = (params) => {
+  return service({
+    url: '/attendanceCategory/getAttendanceCategoryPublic',
+    method: 'get',
+    params
+  })
+}

@@ -211,7 +211,7 @@ func (attendanceService *AttendanceService) GetPublicAttendanceInfoList(info che
 		db = db.Where("category_id = ?", info.CategoryId)
 	}
 
-	db = db.Where("is_locked = 0")
+	// db = db.Where("is_locked = 0")
 
 	err = db.Count(&total).Error
 	if err != nil {

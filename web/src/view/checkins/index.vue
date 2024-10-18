@@ -324,6 +324,10 @@ const requestCheckin = async () => {
     if (passcount >0){
       msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} lần`
     }
+    
+    if (conditionData.value.length == 0) {
+      msg = "Bạn đã điểm danh thành công"
+    }
 
     ElMessageBox.alert(msg, 'Thông báo', {
       confirmButtonText: 'OK',

@@ -90,9 +90,19 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInIn
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
 	}
+
 	if info.AttendanceId != nil {
 		db = db.Where("attendance_id = ?", *info.AttendanceId)
 	}
+
+	if info.GroupId != nil {
+		db = db.Where("group_id = ?", *info.GroupId)
+	}
+
+	if info.Agent != nil {
+		db = db.Where("agent LIKE ?", "%"+*info.Agent+"%")
+	}
+
 	if info.Email != nil {
 		partSer := new(ParticipantService)
 		participant, _ := partSer.GetParticipantByEmail(*info.Email)
@@ -173,28 +183,28 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		}
 	}
 	var listAgps []checkins.AttendanceGroupParticipant
-	listAgps, gerr := participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
-	if gerr != nil {
-		if attendance.AllowGuest {
-			agpDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
-			newagp := &checkins.AttendanceGroupParticipant{
-				ParticipantId: &participant.ID,
-				GroupId:       nil,
-				AttendanceId:  &attendance.ID,
-			}
-
-			err := agpDb.Where(checkins.AttendanceGroupParticipant{
-				ParticipantId: &participant.ID,
-				GroupId:       nil,
-				AttendanceId:  &attendance.ID,
-			}).FirstOrCreate(&newagp).Error
-			if err != nil {
-				msg := fmt.Sprintln(`không thể thêm thông tin điểm danh của bạn: %s`, err.Error())
-				return nil, errors.New(msg)
-			}
-			listAgps = append(listAgps, *newagp)
+	listAgps, _ = participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
+	if attendance.AllowGuest {
+		agpDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
+		newagp := &checkins.AttendanceGroupParticipant{
+			ParticipantId: &participant.ID,
+			GroupId:       nil,
+			AttendanceId:  &attendance.ID,
 		}
-	} else {
+
+		err := agpDb.Where(checkins.AttendanceGroupParticipant{
+			ParticipantId: &participant.ID,
+			GroupId:       nil,
+			AttendanceId:  &attendance.ID,
+		}).FirstOrCreate(&newagp).Error
+		if err != nil {
+			msg := fmt.Sprintln("không thể thêm thông tin điểm danh của bạn: %s", err.Error())
+			return nil, errors.New(msg)
+		}
+		listAgps = append(listAgps, *newagp)
+	}
+
+	if len(listAgps) == 0 {
 		return nil, errors.New("không tìm thấy thông tin điểm danh của bạn")
 	}
 
@@ -223,61 +233,80 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	for _, agp := range listAgps {
 		listAgpIDs = append(listAgpIDs, int(agp.ID))
 	}
+
 	var conditionCheckedIn []uint
-	err = global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+	_ = global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
 		Where("partpaticipant_id = ? and attendance_id = ?", participant.ID, attendance.ID).Debug().
 		Pluck("condition_id", &conditionCheckedIn).Error
 
-	if err != nil {
-		return nil, errors.New("không thể kiểm tra điều kiện điểm danh")
-	}
-
 	rConditions, cerr := conditionService.GetConditionOfPartparticipant(attendance.ID, listAgpIDs)
-	if cerr != nil || len(rConditions) == 0 {
+
+	if cerr != nil {
 		return nil, errors.New("không tìm thấy điều kiện điểm danh")
 	}
 
 	var agpCheckins []checkins.AttendanceCheckIn
-	var coreConditions []checkins.Condition
 	globalMsg := "Điểm danh không thành công"
-	for _, condition := range rConditions {
-		var tempCon checkins.Condition
+	var coreConditions []checkins.Condition
 
+	if len(rConditions) == 0 {
 		for _, agp := range listAgps {
-			// tempCon = *rConditions[i].Condition
-			tempCon = *condition.Condition
-			if condition.AttendanceGroupParticipantId == int(agp.ID) && !arrayContains(conditionCheckedIn, tempCon.ID) {
-				result, cerr := checkCondition(agp, tempCon, req, ip)
-				if result {
-					tempCon.IsPass = true
-					globalMsg = "Điểm danh thành công"
-					attendanceCheckIn := checkins.AttendanceCheckIn{
-						CheckinDate:      time.Now().UTC(),
-						AttendanceId:     &attendance.ID,
-						PartpaticipantId: &participant.ID,
-						AreaId:           tempCon.AreaId,
-						GroupId:          agp.GroupId,
-						ConditionId:      &tempCon.ID,
-						IP:               ip,
-						Lattidue:         req.Lat,
-						Longtidue:        req.Lng,
-						Agent:            userAgent,
-						Accuracy:         req.Accuracy,
-						VisitorId:        req.VisitorId,
+			globalMsg = "Điểm danh thành công"
+			attendanceCheckIn := checkins.AttendanceCheckIn{
+				CheckinDate:      time.Now().UTC(),
+				AttendanceId:     &attendance.ID,
+				PartpaticipantId: &participant.ID,
+				AreaId:           nil,
+				GroupId:          agp.GroupId,
+				ConditionId:      nil,
+				IP:               ip,
+				Lattidue:         req.Lat,
+				Longtidue:        req.Lng,
+				Agent:            userAgent,
+				Accuracy:         req.Accuracy,
+				VisitorId:        req.VisitorId,
+			}
+			agpCheckins = append(agpCheckins, attendanceCheckIn)
+		}
+	} else {
+		for _, condition := range rConditions {
+			var tempCon checkins.Condition
+			for _, agp := range listAgps {
+				// tempCon = *rConditions[i].Condition
+				tempCon = *condition.Condition
+				if condition.AttendanceGroupParticipantId == int(agp.ID) && !arrayContains(conditionCheckedIn, tempCon.ID) {
+					result, cerr := checkCondition(agp, tempCon, req, ip)
+					if result {
+						tempCon.IsPass = true
+						globalMsg = "Điểm danh thành công"
+						attendanceCheckIn := checkins.AttendanceCheckIn{
+							CheckinDate:      time.Now().UTC(),
+							AttendanceId:     &attendance.ID,
+							PartpaticipantId: &participant.ID,
+							AreaId:           tempCon.AreaId,
+							GroupId:          agp.GroupId,
+							ConditionId:      &tempCon.ID,
+							IP:               ip,
+							Lattidue:         req.Lat,
+							Longtidue:        req.Lng,
+							Agent:            userAgent,
+							Accuracy:         req.Accuracy,
+							VisitorId:        req.VisitorId,
+						}
+						agpCheckins = append(agpCheckins, attendanceCheckIn)
+					} else {
+						tempCon.IsPass = false
+						tempCon.Message = cerr.Error()
 					}
-					agpCheckins = append(agpCheckins, attendanceCheckIn)
-				} else {
-					tempCon.IsPass = false
-					tempCon.Message = cerr.Error()
+					coreConditions = append(coreConditions, tempCon)
 				}
-				coreConditions = append(coreConditions, tempCon)
-			}
 
-			if arrayContains(conditionCheckedIn, tempCon.ID) {
-				tempCon.IsPass = true
-				coreConditions = append(coreConditions, tempCon)
-			}
+				if arrayContains(conditionCheckedIn, tempCon.ID) {
+					tempCon.IsPass = true
+					coreConditions = append(coreConditions, tempCon)
+				}
 
+			}
 		}
 	}
 
@@ -285,9 +314,9 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	result["conditions"] = coreConditions
 	result["attendance"] = attendance
 	result["message"] = globalMsg
-	if len(coreConditions) == 0 {
-		result["message"] = "Không có điều kiện điểm danh nào thoả mãn"
-	}
+	// if len(coreConditions) == 0 {
+	// 	result["message"] = "Không có điều kiện điểm danh nào thoả mãn"
+	// }
 
 	for _, agp := range agpCheckins {
 		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&agp)
@@ -295,6 +324,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			return nil, errors.New("điểm danh thất bại" + aciErr.Error())
 		}
 	}
+	result["message"] = "Điểm danh thành công"
 
 	return
 }

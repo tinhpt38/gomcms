@@ -159,6 +159,7 @@
 
                         <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
                             :rules="searchRule">
+                            <div class="flex justify-between">
                             <el-form-item label="Đơn vị" prop="agencyId">
                                 <el-select class="w-[300px]" v-model="searchInfo.agencyId" placeholder="Chọn đơn vị"
                                     clearable filterable @change="onSubmit">
@@ -166,6 +167,11 @@
                                         :value="item.ID" />
                                 </el-select>
                             </el-form-item>
+                            <el-form-item label="Danh mục" prop="categoryId" class=" mr-0">
+                                <el-tree-select  class="w-[300px]" v-model="searchInfo.categoryId" :data="categoryOptions"
+                                    check-on-click-node :render-after-expand="false" style="width: 300px" />
+                            </el-form-item>
+                        </div>
                         </el-form>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -173,6 +179,13 @@
                             class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
                             <div class="relative overflow-hidden rounded-t-lg shadow-md">
                                 <!-- <div class="relative w-full h-80 bg-gradient-to-r from-blue-100 to-green-100"> -->
+                                <!-- Điều kiện hiển thị overlay khi item.islocked === true -->
+                                <div v-if="activity.isLocked"
+                                    class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+                                    <div class="bg-white p-4 rounded-lg text-center">
+                                        <p class="text-gray-700">Điểm danh đã khoá</p>
+                                    </div>
+                                </div>
                                 <div class="relative w-full h-96 bg-white">
                                     <div class="absolute inset-0 flex items-center justify-center">
                                         <div class="bg-transparent p-4 rounded-lg">
@@ -235,12 +248,12 @@
                                     <p class="p-1">
                                         <span class="font-medium">Ngày bắt đầu:</span> <span
                                             class="bg-green-100 text-green-800 px-2 py-1 rounded">{{
-                                                formatDateTime(activity.startDate) }}</span>
+                                                formatDateTimeNoSecond(activity.startDate) }}</span>
                                     </p>
                                     <p class="p-1">
                                         <span class="font-medium">Ngày kết thúc:</span> <span
                                             class="bg-red-100 text-red-800 px-2 py-1 rounded">{{
-                                                formatDateTime(activity.endDate) }}</span>
+                                                formatDateTimeNoSecond(activity.endDate) }}</span>
                                     </p>
                                 </div>
                             </div>
@@ -248,11 +261,15 @@
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-gray-700 font-medium">Đã điểm danh:</span>
                                     <div class="bg-white rounded-full px-4 py-2 shadow-md">
-                                        <span class="text-red-600 font-bold">{{ formatMordenNumber(activity.total- activity.totalCheckin) }}</span>
+                                        <span class="text-red-600 font-bold">{{ formatMordenNumber(activity.total -
+                                            activity.totalCheckin) }}</span>
                                         <span class="text-gray-400 mx-1">/</span>
-                                        <span class="text-green-600 font-bold">{{ formatMordenNumber(activity.totalCheckin) }}</span>
+                                        <span class="text-green-600 font-bold">{{
+                                            formatMordenNumber(activity.totalCheckin)
+                                        }}</span>
                                         <span class="text-gray-400 mx-1">/</span>
-                                        <span class="text-gray-600 font-bold">{{ formatMordenNumber(activity.total) }}</span>
+                                        <span class="text-gray-600 font-bold">{{ formatMordenNumber(activity.total)
+                                            }}</span>
                                     </div>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
@@ -278,13 +295,19 @@ import { getAttendancePublic } from '@/api/checkins/attendance';
 import { onMounted, ref, watch, onUnmounted } from 'vue'
 import moment from 'moment';
 import QRCodeVue3 from 'qrcode-vue3'
+
 import {
     getAttendanceAgencyPublic
 } from '@/api/checkins/attendanceAgency'
+import {
+    getAttendanceCategoryPublic
+} from '@/api/checkins/attendanceCategory'
+
+
 import { getSliderBuilderPublic } from '@/api/uibuilder/sliderBuilder'
 import { getUrl } from '@/utils/image'
 import { TransitionRoot } from '@headlessui/vue'
-import { formatDateTime, formatMordenNumber } from '@/utils/format';
+import { formatDateTime, formatMordenNumber, formatDateTimeNoSecond } from '@/utils/format';
 
 
 const postData = ref([])
@@ -298,14 +321,15 @@ const backgroundQROptions = ref({
 
 const searchInfo = ref({
     agencyId: null,
+    categoryId: null,
     startDate: null,
     endDate: null
 })
 
 const getPostData = async () => {
-    var now = moment()
-    searchInfo.value.startDate = now.format('YYYY-MM-DDTHH:mm:ssZ')
-    searchInfo.value.endDate = now.add(30, 'days').format('YYYY-MM-DDTHH:mm:ssZ')
+    // var now = moment()
+    // searchInfo.value.startDate = now.format('YYYY-MM-DDTHH:mm:ssZ')
+    // searchInfo.value.endDate = now.add(30, 'days').format('YYYY-MM-DDTHH:mm:ssZ')
     // const res = await getAttendancePublic({ page: page.value, pageSize: pageSize.value, startDate: searchInfo.value.startDate, endDate: searchInfo.value.endDate })
     const res = await getAttendancePublic({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
     if (res.code == 0) {
@@ -334,6 +358,43 @@ const getAgencyOptions = async () => {
     // console.log(agencyOptions.value)
 }
 getAgencyOptions()
+
+
+
+const convertToTree = (data) => {
+    const map = {}
+    const roots = []
+
+    // Create a map of nodes using their ID as the key
+    data.forEach((node) => {
+        map[node.ID] = { ...node, value: node.ID, label: node.name, children: [] }
+    })
+
+    // Iterate over the nodes and assign children to their parent
+    data.forEach((node) => {
+        const parent = map[node.parentId]
+
+        if (parent) {
+            parent.children.push(map[node.ID])
+        } else {
+            roots.push(map[node.ID])
+        }
+    })
+    console.log('roots', roots)
+    return roots
+}
+const categoryOptions = ref([])
+const getCategoryOptions = async () => {
+    const table = await getAttendanceCategoryPublic({ page: 0, pageSize: -1 })
+    if (table.code === 0) {
+        categoryOptions.value = convertToTree(table.data.list)
+        var selectCurrent = table.data.list.filter((e) => e.isCurrent)
+        searchInfo.value.categoryId = selectCurrent[0].ID
+    }
+
+}
+
+getCategoryOptions()
 
 const redirectToLogin = () => {
     window.location.href = '/login'

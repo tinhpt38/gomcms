@@ -156,17 +156,17 @@
               <p class="text-5xl font-bold text-center py-3">{{ formData.totalCheckin }}</p>
               <p class="text-slate-700">Đã điểm danh</p>
             </div>
-            <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
+            <!-- <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
               <p class="text-5xl font-bold text-center py-3">{{ formData.total - formData.totalCheckin }}</p>
               <p class="text-slate-700">Chưa điểm danh</p>
-            </div>
+            </div> -->
             <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
               <p class="text-5xl font-bold text-center py-3">{{ total }}</p>
               <p class="text-slate-700">Tổng lượt truy cập</p>
             </div>
           </div>
           <div class="my-4">
-            <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
+            <el-form label-position="top"ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
               :rules="searchRules" @keyup.enter="onSubmit">
               <el-form-item label="Ngày tạo" prop="createdAt">
                 <el-date-picker v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu" />
@@ -174,7 +174,15 @@
               <el-form-item label="Email" prop="email">
                 <el-input v-model="searchInfo.email" type="text" placeholder="Email" />
               </el-form-item>
-              <el-form-item>
+              <el-form-item label="Nhóm" prop="groupId">
+                <el-select v-model="searchInfo.groupId" placeholder="Chọn nhóm" clearable filterable>
+                  <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
+                </el-select>
+              </el-form-item>
+            <el-form-item label="Agent" prop="agent">
+              <el-input v-model="searchInfo.agent" type="text" placeholder="Agent"></el-input>
+            </el-form-item>
+              <el-form-item label="Hành động">
                 <el-button type="primary" icon="search" @click="onSubmit">
                   Tìm kiếm
                 </el-button>
