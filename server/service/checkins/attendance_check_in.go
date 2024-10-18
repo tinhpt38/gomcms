@@ -292,7 +292,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	for _, agp := range agpCheckins {
 		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&agp)
 		if aciErr != nil {
-			return nil, errors.New("điểm danh thất bại")
+			return nil, errors.New("điểm danh thất bại" + aciErr.Error())
 		}
 	}
 

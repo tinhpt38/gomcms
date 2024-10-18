@@ -1,6 +1,8 @@
 package checkins
 
 import (
+	"strconv"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
@@ -45,12 +47,25 @@ func (participantApi *ParticipantApi) BulkCreateParticipants(c *gin.Context) {
 
 func (participantApi *ParticipantApi) DeleteParticipant(c *gin.Context) {
 	ID := c.Query("ID")
-	err := participantService.DeleteParticipant(ID)
-	if err != nil {
-		global.GVA_LOG.Error("thất bại!", zap.Error(err))
-		response.FailWithMessage("thất bại:"+err.Error(), c)
-		return
+	attIdSting := c.Query("attendanceId")
+	attId, _ := strconv.Atoi(attIdSting)
+	if attId > 0 {
+		err := participantService.DeleteParticipantInAttendance(ID, uint(attId))
+		if err != nil {
+			global.GVA_LOG.Error("thất bại!", zap.Error(err))
+			response.FailWithMessage("thất bại:"+err.Error(), c)
+			return
+		}
+
+	} else {
+		err := participantService.DeleteParticipant(ID)
+		if err != nil {
+			global.GVA_LOG.Error("thất bại!", zap.Error(err))
+			response.FailWithMessage("thất bại:"+err.Error(), c)
+			return
+		}
 	}
+
 	response.OkWithMessage("thành công", c)
 }
 

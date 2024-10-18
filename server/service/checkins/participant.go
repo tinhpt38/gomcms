@@ -71,6 +71,11 @@ func (participantService *ParticipantService) DeleteParticipant(ID string) (err 
 	return err
 }
 
+func (participantService *ParticipantService) DeleteParticipantInAttendance(ID string, attId uint) (err error) {
+	err = global.GVA_DB.Delete(&checkins.AttendanceGroupParticipant{}, "participant_id = ? AND attendance_id = ?", ID, attId).Error
+	return err
+}
+
 // DeleteParticipantByIds 批量删除Sinh viên (Người tham dự phiên điểm danh)记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (participantService *ParticipantService) DeleteParticipantByIds(IDs []string) (err error) {

@@ -418,7 +418,7 @@ const handleSelectionChange = (val) => {
 
 // Xóa hàng
 const deleteRow = (row) => {
-  ElMessageBox.confirm('Bạn có chắc muốn xóa không?', 'Cảnh báo', {
+  ElMessageBox.confirm('Khi xoá, sẽ mất hết toàn bộ dữ liệu và không thể phục hồi. Bạn có chắc muốn xóa không?', 'Cảnh báo', {
     confirmButtonText: 'Đồng ý',
     cancelButtonText: 'Hủy',
     type: 'warning'

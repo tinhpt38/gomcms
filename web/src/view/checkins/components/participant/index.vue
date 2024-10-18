@@ -52,6 +52,8 @@
         <template #default="scope">
           <el-button type="primary" link icon="edit" class="table-button"
             @click="updateParticipantFunc(scope.row)">Chỉnh sửa</el-button>
+            <el-button type="danger" link icon="delete" class="table-button"
+            @click="deleteParticipantRow(scope.row)">Xoá</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -191,8 +193,8 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val
 }
 
-const deleteRow = (row) => {
-  ElMessageBox.confirm('Bạn có chắc muốn xóa không?', 'Cảnh báo', {
+const deleteParticipantRow = (row) => {
+  ElMessageBox.confirm('Bạn có chắc muốn xóa thành viên này không?', 'Cảnh báo', {
     confirmButtonText: 'Đồng ý',
     cancelButtonText: 'Hủy',
     type: 'warning'
@@ -241,16 +243,16 @@ const updateParticipantFunc = async (row) => {
   // const res = await findParticipant({ ID: row.ID })
   type.value = 'update'
   // if (res.code === 0) {
-    formData.value = row
-    // formData.value.groupId = res.data.groups.map((e) => e.ID)
-    dialogFormVisible.value = true
+  formData.value = row
+  // formData.value.groupId = res.data.groups.map((e) => e.ID)
+  dialogFormVisible.value = true
   // }
 }
 
 
 
 const deleteParticipantFunc = async (row) => {
-  const res = await deleteParticipant({ ID: row.ID })
+  const res = await deleteParticipant({ ID: row.ID, attendanceId: Number(props.acId) })
   if (res.code === 0) {
     ElMessage({
       type: 'success',
