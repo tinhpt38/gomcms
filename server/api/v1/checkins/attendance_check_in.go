@@ -106,6 +106,27 @@ func (attendanceCheckInApi *AttendanceCheckInApi) GetAttendanceCheckInList(c *gi
 	}, "Thành công", c)
 }
 
+func (attendanceCheckInApi *AttendanceCheckInApi) GetAttendanceCheckInLogList(c *gin.Context) {
+	var pageInfo checkinsReq.AttendanceCheckInSearch
+	err := c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	list, total, err := attendanceCheckInService.GetAttendanceCheckInLogInfoList(pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithDetailed(response.PageResult{
+		List:     list,
+		Total:    total,
+		Page:     pageInfo.Page,
+		PageSize: pageInfo.PageSize,
+	}, "Thành công", c)
+}
+
 func (attendanceCheckInApi *AttendanceCheckInApi) GetAttendanceCheckInPublic(c *gin.Context) {
 	response.OkWithDetailed(gin.H{
 		"info": "Thông tin API checkins của thành viên không cần xác thực",
@@ -149,10 +170,10 @@ func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Conte
 
 	ip := c.ClientIP()
 	userAgent := c.GetHeader("User-Agent")
-	if (checkinReq.Lat == nil || checkinReq.Lng == nil) || (*checkinReq.Lat == 0 || *checkinReq.Lng == 0) {
-		response.FailWithMessage("Bạn chưa cho phép thiết bị lấy vị trí", c)
-		return
-	}
+	// if (checkinReq.Lat == nil || checkinReq.Lng == nil) || (*checkinReq.Lat == 0 || *checkinReq.Lng == 0) {
+	// 	response.FailWithMessage("Bạn chưa cho phép thiết bị lấy vị trí", c)
+	// 	return
+	// }
 	// dlu_activities_20422
 	prefix := "dlu_activities_20422_5BS:W`A8nF<J6Y{V4Nv.r!Je_"
 	if !strings.HasPrefix(checkinReq.VisitorId, prefix) {

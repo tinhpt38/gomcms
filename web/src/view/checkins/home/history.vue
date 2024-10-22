@@ -237,11 +237,11 @@ const callback = async (response) => {
 }
 
 const gError = (error) => {
-    console.log("Handle the error", error)
+    //console.log("Handle the error", error)
 }
 
 const handleScroll = () => {
-    console.log('header', header.value)
+    //console.log('header', header.value)
     if (!header.value) return;
     const value = window.scrollY;
 

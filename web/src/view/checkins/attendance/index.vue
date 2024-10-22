@@ -347,7 +347,7 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  console.log('table, ', table.data.list)
+  //console.log('table, ', table.data.list)
 }
 
 getTableData()
@@ -393,7 +393,7 @@ const convertToTree = (data) => {
       roots.push(map[node.ID])
     }
   })
-  console.log('roots', roots)
+  //console.log('roots', roots)
   return roots
 }
 
@@ -451,7 +451,7 @@ const cloneAttendanceFun = async (withData) => {
       message: res.message
     })
   }
-  console.log('res', res)
+  //console.log('res', res)
 }
 
 // Xóa nhiều hàng

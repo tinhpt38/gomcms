@@ -14,7 +14,8 @@ func bizModel() error {
 		checkins.Participant{}, config.FileProcessError{}, checkins.Condition{},
 		checkins.AttendanceCheckIn{}, checkins.AttendanceGroupParticipant{},
 		checkins.AttendanceCategory{}, checkins.AttendanceAgency{},
-		uibuilder.SliderBuilder{}, checkins.AGPCondition{})
+		uibuilder.SliderBuilder{}, checkins.AGPCondition{},
+		checkins.CheckinLog{})
 	if err != nil {
 		return err
 	}

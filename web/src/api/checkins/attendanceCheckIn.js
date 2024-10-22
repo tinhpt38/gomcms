@@ -103,3 +103,12 @@ export const getAttendanceCheckInList = (params) => {
     params
   })
 }
+
+
+export const getAttendanceCheckInLogList = (params) => {
+  return service({
+    url: '/attendanceCheckIn/getAttendanceCheckInLogList',
+    method: 'get',
+    params
+  })
+}

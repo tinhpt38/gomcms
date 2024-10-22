@@ -252,7 +252,7 @@ const getParentOptions = async () => {
   if (table.code === 0) {
     parentOptions.value = table.data.list
   }
-  console.log("parent Options", parentOptions.value)
+  //console.log("parent Options", parentOptions.value)
 }
 
 getParentOptions()

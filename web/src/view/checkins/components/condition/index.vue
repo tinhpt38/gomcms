@@ -189,7 +189,7 @@ const getGroupOptions = async () => {
   if (table.code === 0) {
     groupOptions.value = table.data.list
   }
-  console.log('groupOptions', groupOptions.value)
+  //console.log('groupOptions', groupOptions.value)
 }
 getGroupOptions();
 
@@ -265,7 +265,7 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  console.log("condition data", tableData.value)
+  //console.log("condition data", tableData.value)
 }
 
 getTableData()

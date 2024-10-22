@@ -289,27 +289,27 @@ const getPostData = async () => {
 }
 
 const onAttendanceClick = (item) =>{
-    // console.log(item.clientUrl)
+    // //console.log(item.clientUrl)
     if(!item.isLocked){
         window.location.href = item.clientUrl
     }
 }
 
 const onSubmit = async () => {
-    // console.log("onSubmit")
+    // //console.log("onSubmit")
     await getPostData()
 }
 
 const agencyOptions = ref([])
 const getAgencyOptions = async () => {
-    // console.log("agencyOptions")
+    // //console.log("agencyOptions")
     const table = await getAttendanceAgencyPublic({ page: 0, pageSize: -1 })
-    // console.log("after call await")
+    // //console.log("after call await")
     if (table.code === 0) {
         agencyOptions.value = table.data.list
     }
-    // console.log("agencyOptions")
-    // console.log(agencyOptions.value)
+    // //console.log("agencyOptions")
+    // //console.log(agencyOptions.value)
 }
 getAgencyOptions()
 
@@ -334,7 +334,7 @@ const convertToTree = (data) => {
             roots.push(map[node.ID])
         }
     })
-    console.log('roots', roots)
+    //console.log('roots', roots)
     return roots
 }
 const categoryOptions = ref([])
@@ -375,7 +375,7 @@ const getSlider = async () => {
     if (res.code === 0) {
         slider.value = res.data
     }
-    console.log("getSliderBuilderPublic", res)
+    //console.log("getSliderBuilderPublic", res)
 }
 
 getSlider()

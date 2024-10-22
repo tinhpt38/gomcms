@@ -141,6 +141,7 @@ const props = defineProps({
     required: false
   }
 })
+
 const page = ref(0)
 const total = ref(0)
 const pageSize = ref(10)
@@ -180,8 +181,8 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  // console.log("participant components")
-  // console.log(tableData.value)
+  // //console.log("participant components")
+  // //console.log(tableData.value)
 }
 
 getTableData()
@@ -287,7 +288,7 @@ const enterDialog = async () => {
   // if (formData.value.groupId) {
   //   formData.value.groupId = Number(formData.value.groupId)
   // }
-  // console.log(formData.value)
+  // //console.log(formData.value)
   // return
   formData.value.attendanceId = Number(props.acId)
   elFormRef.value?.validate(async (valid) => {

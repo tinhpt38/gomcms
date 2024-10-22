@@ -242,6 +242,11 @@
           </div>
         </div>
       </el-tab-pane>
+      <el-tab-pane name="logs" label="Nhật ký">
+        <div class="table-container">
+          <CheckinLogs :ac-id="currentId" />
+        </div>
+      </el-tab-pane>
       <el-tab-pane name="random" label="Ngẫu nhiên">
         <div class="table-container">
           <RandomWheel :ac-id="currentId" />
@@ -276,6 +281,7 @@ import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
 import RandomWheel from '@/view/checkins/components/randomWheel/index.vue'
+import CheckinLogs from '@/view/checkins/components/logs/index.vue'
 import ImportExcel from '@/components/importExcel/index.vue'
 import ExportExcel from '@/components/exportExcel/exportExcel.vue'
 import { formatDateTime, formatDate } from '@/utils/format'
@@ -351,13 +357,13 @@ const searchRules = reactive({
 
 const getDetailData = async () => {
   var id = $route.params.id
-  console.log('client URL', clientURL.value)
+  //console.log('client URL', clientURL.value)
   const res = await findAttendance({ id: $route.params.id })
   if (res.code == 0) {
     formData.value = res.data
   }
   generateQRCode();
-  // console.log("getDetailData: ", formData.value)
+  // //console.log("getDetailData: ", formData.value)
 
 }
 getDetailData();
@@ -394,11 +400,11 @@ const backgroundQROptions = ref({
 })
 const generateQRCode = async () => {
   var params = base32.encode($route.params.id)
-  console.log('params-endcode' + params)
-  console.log(clientURL.value)
+  //console.log('params-endcode' + params)
+  //console.log(clientURL.value)
   var url = clientURL.value + '/?c=' + params
   formData.value.clientUrl = url
-  console.log('url', url)
+  //console.log('url', url)
   targetClientURL.value = url
   downloadQrOptions.value = {
     name: 'QR Điểm danh - ' + formData.value.title + " ngày " + formatDate(formData.value.startDate),
@@ -470,8 +476,8 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  // console.log("Danh sách điểm danh")
-  // console.log(table)
+  // //console.log("Danh sách điểm danh")
+  // //console.log(table)
   generateQRCode()
 }
 
@@ -500,7 +506,7 @@ const getCategoryOptions = async () => {
   if (table.code === 0) {
     categoryOptions.value = convertToTree(table.data.list)
   }
-  // console.log("parent Options", categoryOptions.value)
+  // //console.log("parent Options", categoryOptions.value)
 }
 
 getCategoryOptions()
@@ -533,7 +539,7 @@ const convertToTree = (data) => {
       roots.push(map[node.ID])
     }
   })
-  console.log('roots', roots)
+  //console.log('roots', roots)
   return roots
 }
 
@@ -566,7 +572,7 @@ const getGroupOptions = async () => {
   if (table.code === 0) {
     groupOptions.value = table.data.list
   }
-  console.log('groupOptions', groupOptions.value)
+  //console.log('groupOptions', groupOptions.value)
 }
 getGroupOptions();
 

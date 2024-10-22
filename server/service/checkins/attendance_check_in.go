@@ -142,16 +142,6 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		return nil, errors.New("phiên điểm danh đã bị khóa")
 	}
 
-	if attendance.RestrictIp != nil && *attendance.RestrictIp != "" {
-		ipString := attendance.RestrictIp
-		ipRanges := strings.Split(*ipString, ",")
-		if len(ipRanges) > 0 {
-			if !isIPAllowed(ip, ipRanges) {
-				return nil, errors.New("địa chỉ IP không được phép")
-			}
-		}
-	}
-
 	var now = time.Now()
 	if attendance.StartDate != nil {
 		if now.Before(*attendance.StartDate) {
@@ -182,6 +172,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			return nil, errors.New("email của bạn không phải là thành viên của hệ thống")
 		}
 	}
+
 	var listAgps []checkins.AttendanceGroupParticipant
 	listAgps, _ = participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
 	if attendance.AllowGuest {
@@ -209,22 +200,73 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	}
 
 	// Kiểm tra số lần điểm danh của thành viên đó
+	checkinLog := checkins.CheckinLog{
+		Email:        email,
+		Code:         req.Code,
+		AttendanceId: attendance.ID,
+		VisitorId:    req.VisitorId,
+		Lat:          req.Lat,
+		Lng:          req.Lng,
+		Accuracy:     req.Accuracy,
+		Ip:           ip,
+		Agent:        userAgent,
+		FullName:     req.FullName,
+	}
+
+	if err := global.GVA_DB.Where(checkins.CheckinLog{
+		Email:        email,
+		Code:         req.Code,
+		AttendanceId: attendance.ID,
+		VisitorId:    req.VisitorId,
+	}).Create(&checkinLog).Error; err != nil {
+		return nil, err
+	}
+
+	if attendance.RestrictIp != nil && *attendance.RestrictIp != "" {
+		ipString := attendance.RestrictIp
+		ipRanges := strings.Split(*ipString, ",")
+		if len(ipRanges) > 0 {
+			if !isIPAllowed(ip, ipRanges) {
+				// return nil, errors.New("địa chỉ IP không được phép")
+				msg := fmt.Sprintf("địa chỉ ip của bạn không được phép điểm danh %s ", ip)
+				checkinLog.MessageList += msg + "$$"
+				global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
+				return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
+			}
+		}
+	}
+
+	if (req.Lat == nil || req.Lng == nil) || (*req.Lat == 0 || *req.Lng == 0) {
+		msg := "bạn chưa cho phép truy cập vị trí trên thiết bị "
+		checkinLog.MessageList += msg + "$$"
+		global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
+		return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
+	}
 
 	if attendance.LimitCount > 0 {
 		var list []checkins.AttendanceCheckIn
 		global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&list)
 		if len(list) >= attendance.LimitCount {
-			return nil, errors.New("bạn đã điểm danh đủ số lần cho phép")
+			// checkinLog.MessageList += `Bạn đã điểm danh đủ số lần cho phép: ` + len(list) + " $"
+			msg := fmt.Sprintf("bạn đã điểm danh đủ số lần cho phép %d ", len(list))
+			checkinLog.MessageList += msg + "$$"
+			global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
+			return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
+			// return nil, errors.New("bạn đã điểm danh đủ số lần cho phép")
+
 		}
 	}
 
 	// Kiểm tra số lần điểm danh của thiết bị đó
-
 	if attendance.LimitClientCount > 0 {
 		var limitClientCount int64
 		global.GVA_DB.Where("visitor_id = ? and attendance_id = ?", req.VisitorId, attendance.ID).Model(&checkins.AttendanceCheckIn{}).Count(&limitClientCount)
 		if limitClientCount >= int64(attendance.LimitClientCount) {
-			return nil, errors.New("thiết bị đã điểm danh đủ số lần cho phép")
+			msg := fmt.Sprintf("thiết bị của bạn đã điểm danh đủ số lần cho phép %d ", limitClientCount)
+			checkinLog.MessageList += msg + "$$"
+			global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
+			return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
+			// return nil, errors.New("thiết bị đã điểm danh đủ số lần cho phép")
 		}
 	}
 
@@ -242,7 +284,11 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	rConditions, cerr := conditionService.GetConditionOfPartparticipant(attendance.ID, listAgpIDs)
 
 	if cerr != nil {
-		return nil, errors.New("không tìm thấy điều kiện điểm danh")
+		// return nil, errors.New("không tìm thấy điều kiện điểm danh")
+		msg := "không tìm thấy điều kiện điểm danh"
+		checkinLog.MessageList += msg + "$$"
+		global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
+		return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
 	}
 
 	var agpCheckins []checkins.AttendanceCheckIn
@@ -321,11 +367,14 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	for _, agp := range agpCheckins {
 		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&agp)
 		if aciErr != nil {
-			return nil, errors.New("điểm danh thất bại" + aciErr.Error())
+			msg := fmt.Sprintf("thiết bị của bạn đã điểm danh đủ số lần cho phép %s ", aciErr.Error())
+			checkinLog.MessageList += msg + "$$"
+			global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
+			return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
+			// return nil, errors.New("điểm danh thất bại" + aciErr.Error())
 		}
 	}
 	result["message"] = "Điểm danh thành công"
-
 	return
 }
 
@@ -546,4 +595,40 @@ func isIPAllowed(clientIP string, ipRanges []string) bool {
 		}
 	}
 	return false
+}
+
+func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInLogInfoList(info checkinsReq.AttendanceCheckInSearch) (list []checkins.CheckinLog, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+
+	db := global.GVA_DB.Model(&checkins.CheckinLog{})
+	var checkinsLog []checkins.CheckinLog
+
+	// if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+	// 	db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
+	// }
+
+	if info.AttendanceId != nil {
+		db = db.Where("attendance_id = ?", *info.AttendanceId)
+	}
+
+	if info.Email != nil {
+		db = db.Where("email = ?", *info.Email)
+	}
+
+	// if info.Agent != nil {
+	// 	db = db.Where("agent LIKE ?", "%"+*info.Agent+"%")
+	// }
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	if limit != 0 {
+		db = db.Limit(limit).Offset(offset)
+	}
+
+	err = db.Order("created_at desc").Debug().Find(&checkinsLog).Error
+	return checkinsLog, total, err
 }

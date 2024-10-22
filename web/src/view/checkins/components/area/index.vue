@@ -212,7 +212,7 @@ const getAreaOptions = async () => {
   if (table.code === 0) {
     areaOptions.value = table.data.list
   }
-  console.log('areaOptions', areaOptions)
+  //console.log('areaOptions', areaOptions)
 }
 
 getAreaOptions();
@@ -220,11 +220,11 @@ getAreaOptions();
 
 
 const handleCurrentChange = (val) => {
-  console.log('handleCurrentChange', val)
+  //console.log('handleCurrentChange', val)
 }
 
 const handleSizeChange = (val) => {
-  console.log('partsHahandleSizeChangendleSizeChange', val)
+  //console.log('partsHahandleSizeChangendleSizeChange', val)
 }
 
 

@@ -261,9 +261,9 @@ const updateStatsTrendLineOptions = (data) => {
 // Data
 
 const statsByAgencyCategoryFun = async () => {
-    console.log('statsByAgencyCategory', searchInfo.value)
+    //console.log('statsByAgencyCategory', searchInfo.value)
     const table = await statsByAgencyCategory(searchInfo.value)
-    console.log('statsByAgencyCategory', table)
+    //console.log('statsByAgencyCategory', table)
     if (table.code === 0) {
         createStatsByAgencyCategory(table.data.data)
     }
@@ -272,7 +272,7 @@ const statsByAgencyCategoryFun = async () => {
 
 const statsScatterPlotFun = async () => {
     const table = await statsScatterPlot(searchInfo.value)
-    console.log('statsScatterPlot', table)
+    //console.log('statsScatterPlot', table)
     if (table.code === 0) {
         updateScatterPlotOptions(table.data.data)
     }
@@ -281,7 +281,7 @@ const statsScatterPlotFun = async () => {
 
 const statsTrendLineFun = async () => {
     const table = await statsTrendLine(searchInfo.value)
-    console.log('statsTrendLine', table)
+    //console.log('statsTrendLine', table)
     if (table.code === 0) {
         updateStatsTrendLineOptions(table.data.data)
     }
@@ -340,7 +340,7 @@ const convertToTree = (data) => {
             roots.push(map[node.ID])
         }
     })
-    console.log('roots', roots)
+    //console.log('roots', roots)
     return roots
 }
 

@@ -184,7 +184,7 @@ const callback = async (response) => {
 }
 
 const gError = (error) => {
-  console.log("Handle the error", error)
+  //console.log("Handle the error", error)
 }
 
 function toBinaryStr(str) {
@@ -218,9 +218,9 @@ const visitorTemplate = (val) => {
 const keyRandom = 'E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5'
 const encodeVal = (data) => {
   const jsonString = JSON.stringify(data);
-  // console.log("jsonString: ", jsonString)
+  // //console.log("jsonString: ", jsonString)
   const encodedData = btoa(toBinaryStr(jsonString));
-  // console.log("encodedData: ", encodedData)
+  // //console.log("encodedData: ", encodedData)
   return keyRandom + "_" + encodedData
 }
 
@@ -306,7 +306,7 @@ const requestCheckin = async () => {
   if (res.code == 0) {
     if (res.data.conditions != null) {
       // conditionData.value = res.data.conditions
-      // console.log("res.data.conditions: ", res.data.conditions)
+      // //console.log("res.data.conditions: ", res.data.conditions)
       conditionData.value = res.data.conditions.filter((condition, index, self) =>
         index === self.findIndex((c) => c.ID === condition.ID)
       )
