@@ -72,7 +72,7 @@ func (participantService *ParticipantService) DeleteParticipant(ID string) (err 
 }
 
 func (participantService *ParticipantService) DeleteParticipantInAttendance(ID string, attId uint) (err error) {
-	err = global.GVA_DB.Delete(&checkins.AttendanceGroupParticipant{}, "participant_id = ? AND attendance_id = ?", ID, attId).Error
+	err = global.GVA_DB.Delete(&checkins.AttendanceGroupParticipant{}, "participant_id = ? AND attendance_id = ?", ID, attId).Debug().Error
 	return err
 }
 
@@ -230,7 +230,7 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 	db := global.GVA_DB.Model(&checkins.Participant{})
 	var participants []checkins.Participant
 	err = db.Joins("JOIN attendance_group_participants ON participants.id = attendance_group_participants.participant_id").
-		Where("attendance_group_participants.attendance_id = ?", info.AttendanceId).Count(&total).Error
+		Where("attendance_group_participants.attendance_id = ? and attendance_group_participants.deleted_at is null", info.AttendanceId ).Count(&total).Error
 	if err != nil {
 		return
 	}

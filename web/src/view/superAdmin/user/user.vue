@@ -169,7 +169,7 @@ watch(() => tableData.value, () => {
 
 const initPage = async () => {
   getTableData()
-  const res = await getAuthorityList({ page: 1, pageSize: 999 })
+  const res = await getAuthorityList({ page: 1, pageSize: -1 })
   setOptions(res.data.list)
 }
 

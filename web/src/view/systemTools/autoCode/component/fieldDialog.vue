@@ -352,7 +352,7 @@ const init = async() => {
   middleDate.value = props.dialogMiddle
   const dictRes = await getSysDictionaryList({
     page: 1,
-    pageSize: 999999
+    pageSize: -1
   })
 
   dictOptions.value = dictRes.data

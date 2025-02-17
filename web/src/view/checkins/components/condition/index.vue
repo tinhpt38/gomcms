@@ -185,7 +185,7 @@ getAreaListData();
 const groupOptions = ref([])
 const getGroupOptions = async () => {
   searchInfo.value.attendanceId = props.acId
-  const table = await getGroupList({ page: 1, pageSize: 99999, ...searchInfo.value })
+  const table = await getGroupList({ page: 1, pageSize: -1, ...searchInfo.value })
   if (table.code === 0) {
     groupOptions.value = table.data.list
   }

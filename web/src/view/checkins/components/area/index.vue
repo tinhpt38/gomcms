@@ -208,7 +208,7 @@ const onSelectChange = (val) => {
 const areaOptions = ref([])
 
 const getAreaOptions = async () => {
-  const table = await getAreaList({ page: 1, pageSize: 9999 })
+  const table = await getAreaList({ page: 1, pageSize: -1 })
   if (table.code === 0) {
     areaOptions.value = table.data.list
   }
