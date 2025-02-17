@@ -283,6 +283,14 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 	rConditions, cerr := conditionService.GetConditionOfPartparticipant(attendance.ID, listAgpIDs)
 
+	var validConditions []checkins.AGPCondition
+	for _, condition := range rConditions {
+		if condition.Condition != nil {
+			validConditions = append(validConditions, condition)
+		}
+	}
+	rConditions = validConditions
+
 	if cerr != nil {
 		// return nil, errors.New("không tìm thấy điều kiện điểm danh")
 		msg := "không tìm thấy điều kiện điểm danh"
