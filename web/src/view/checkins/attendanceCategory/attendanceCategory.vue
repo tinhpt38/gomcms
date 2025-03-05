@@ -40,6 +40,7 @@
         </el-form-item>
       </el-form>
     </div>
+    
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button type="primary" icon="plus" @click="openDialog">Thêm mới</el-button>
