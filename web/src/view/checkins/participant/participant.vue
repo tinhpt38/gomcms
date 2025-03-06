@@ -9,6 +9,7 @@
 
         <template v-if="showAllQuery" class="hidden">
           <!-- Thêm các điều kiện tìm kiếm cần điều khiển hiển thị vào đây -->
+          
         </template>
 
         <el-form-item>
@@ -102,7 +103,7 @@ import {
 } from '@/api/checkins/participant'
 
 // 全量引入格式化工具 请按需保留
-//import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
+import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 

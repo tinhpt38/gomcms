@@ -15,7 +15,6 @@
             <el-option v-for="item in tableData" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
-
         <template v-if="showAllQuery">
           <el-form-item label="Ngày tạo" prop="createdAt">
             <template #label>
@@ -42,9 +41,9 @@
           </el-form-item>        
         </template>
 
-        <el-form-item>
+        <!-- <el-form-item>
           <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button> 
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
     </div>
     <!-- DỮ LIỆU -->
