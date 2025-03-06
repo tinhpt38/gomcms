@@ -13,11 +13,11 @@ import fullImportPlugin from './vitePlugin/fullImport/fullImport.js'
 import VueFilePathPlugin from './vitePlugin/componentName/index.js'
 import { svgBuilder } from 'vite-auto-import-svg'
 import { AddSecret } from './vitePlugin/secret'
-import vue from '@vitejs/plugin-vue';
+//import vue from '@vitejs/plugin-vue';
 
 // @see https://cn.vitejs.dev/config/
 export default ({
-  command,
+  //command,
   mode
 }) => {
   AddSecret("")
@@ -81,6 +81,9 @@ export default ({
         }
       },
     },
+
+
+    
     build: {
       minify: 'terser', // 是否进行压缩,boolean | 'terser' | 'esbuild',默认使用terser
       manifest: false, // 是否产出manifest.json

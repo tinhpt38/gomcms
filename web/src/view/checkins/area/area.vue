@@ -1,50 +1,77 @@
 <template>
   <div>
     <!-- TÌM KIẾM -->
-    <div class="gva-search-box hidden">
-      <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule"
-        @keyup.enter="onSubmit">
-        <el-form-item label="Ngày tạo" prop="createdAt">
-          <template #label>
-            <span>
-              Ngày tạo
-              <el-tooltip content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
-                <el-icon>
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="Ngày bắt đầu"
-            :disabled-date="time => searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false"></el-date-picker>
-          —
-          <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc"
-            :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false"></el-date-picker>
+    <div class="gva-search-box">
+      <el-form 
+        ref="elSearchFormRef" 
+        :inline="true" 
+        :model="searchInfo" 
+        class="demo-form-inline"
+        :rules="searchRule"
+        @keyup.enter="onSubmit"
+      >
+        <el-form-item label="Khu vực" prop="areaId">
+          <el-select v-model="searchInfo.areaId" placeholder="Chọn khu vực" clearable filterable>
+            <el-option v-for="item in tableData" :key="item.ID" :label="item.name" :value="item.ID" />
+          </el-select>
         </el-form-item>
 
-
         <template v-if="showAllQuery">
-          <!-- Thêm các điều kiện tìm kiếm cần điều khiển hiển thị vào đây -->
+          <el-form-item label="Ngày tạo" prop="createdAt">
+            <template #label>
+              <span>
+                Ngày tạo
+                <el-tooltip content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
+                  <el-icon><QuestionFilled /></el-icon>
+                </el-tooltip>
+              </span>
+            </template>
+            <el-date-picker 
+              v-model="searchInfo.startCreatedAt" 
+              type="datetime" 
+              placeholder="Ngày bắt đầu"
+              :disabled-date="time => searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false" 
+            />
+            —
+            <el-date-picker 
+              v-model="searchInfo.endCreatedAt" 
+              type="datetime" 
+              placeholder="Ngày kết thúc"
+              :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false" 
+            />
+          </el-form-item>        
         </template>
 
         <el-form-item>
-          <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
-          <el-button icon="refresh" @click="onReset">Đặt lại</el-button>
-          <el-button link type="primary" icon="arrow-down" @click="showAllQuery = true" v-if="!showAllQuery">Mở
-            rộng</el-button>
-          <el-button link type="primary" icon="arrow-up" @click="showAllQuery = false" v-else>Thu gọn</el-button>
+          <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button> 
         </el-form-item>
       </el-form>
     </div>
     <!-- DỮ LIỆU -->
     <div class="gva-table-box">
       <div class="gva-btn-list">
-        <el-button type="primary" icon="plus" @click="openDialog">Thêm mới</el-button>
-        <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length"
-          @click="onDelete">Xóa</el-button>
+        <el-button 
+          type="primary" 
+          icon="plus" 
+          @click="openDialog"
+        >
+          Thêm mới
+        </el-button>
+        <el-button 
+          icon="delete" 
+          style="margin-left: 10px;" 
+          :disabled="!multipleSelection.length"
+          @click="onDelete"
+        />
       </div>
-      <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
-        @selection-change="handleSelectionChange">
+      <el-table 
+        ref="multipleTable" 
+        style="width: 100%" 
+        tooltip-effect="dark" 
+        :data="filteredData" 
+        row-key="ID"
+        @selection-change="handleSelectionChange"
+      >
         <el-table-column type="selection" width="55" />
 
         <!-- <el-table-column align="left" label="Ngày" prop="createdAt" width="180">
@@ -57,34 +84,80 @@
         <el-table-column align="left" label="Bán kính" prop="radius" width="120" />
         <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
           <template #default="scope">
-            <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon
-                style="margin-right: 5px">
+            <el-button 
+              type="primary" 
+              link class="table-button"
+              @click="getDetails(scope.row)"
+            >
+              <el-icon
+                style="margin-right: 5px"
+              >
                 <InfoFilled />
-              </el-icon>Xem chi tiết</el-button>
-            <el-button type="primary" link icon="edit" class="table-button" @click="updateAreaFunc(scope.row)">Chỉnh
-              sửa</el-button>
-            <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">Xóa</el-button>
+              </el-icon>
+              Xem chi tiết
+            </el-button>
+            <el-button 
+              type="primary" 
+              link icon="edit" 
+              class="table-button" 
+              @click="updateAreaFunc(scope.row)"
+            >
+              Chỉnh sửa
+            </el-button>
+            <el-button 
+              type="primary" 
+              link icon="delete" 
+              @click="deleteRow(scope.row)"
+            >
+              Xóa
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
       <div class="gva-pagination">
-        <el-pagination layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
-          :page-sizes="[10, 30, 50, 100]" :total="total" @current-change="handleCurrentChange"
-          @size-change="handleSizeChange" />
+        <el-pagination 
+          layout="total, sizes, prev, pager, next, jumper" 
+          :current-page="page" 
+          :page-size="pageSize"
+          :page-sizes="[10, 30, 50, 100]" 
+          :total="total" 
+          @current-change="handleCurrentChange"
+          @size-change="handleSizeChange"
+        />
       </div>
     </div>
-    <el-drawer destroy-on-close size="800" v-model="dialogFormVisible" :show-close="false" :before-close="closeDialog">
+    <el-drawer 
+      v-model="dialogFormVisible" 
+      destroy-on-close size="800"  
+      :show-close="false" 
+      :before-close="closeDialog"
+    >
       <template #header>
         <div class="flex justify-between items-center">
           <span class="text-lg">{{ type === 'create' ? 'Thêm mới' : 'Chỉnh sửa' }}</span>
           <div>
-            <el-button type="primary" @click="enterDialog">Đồng ý</el-button>
-            <el-button @click="closeDialog">Hủy</el-button>
+            <el-button 
+              type="primary" 
+              @click="enterDialog"
+            >
+              Đồng ý
+            </el-button>
+            <el-button 
+              @click="closeDialog"
+            >
+              Hủy
+            </el-button>
           </div>
         </div>
       </template>
 
-      <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
+      <el-form 
+        ref="elFormRef"  
+        :model="formData" 
+        label-position="top" 
+        :rules="rule" 
+        label-width="80px"
+      >
         <el-form-item label="Tên khu vực:" prop="name">
           <el-input v-model="formData.name" :clearable="true" placeholder="Nhập tên khu vực" />
         </el-form-item>
@@ -100,13 +173,12 @@
         <el-form-item label="Giới hạn địa chỉ IP">
           <span class="text-sm my-1 italic font-normal">Để giới hạn các IP điểm danh, nhập các IP được cho
             phép vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
-          <el-input v-model="formData.restrictIp" tyle="width:100%"></el-input>
+          <el-input v-model="formData.restrictIp" tyle="width:100%" />
         </el-form-item>
       </el-form>
-
     </el-drawer>
 
-    <el-drawer destroy-on-close size="800" v-model="detailShow" :show-close="true" :before-close="closeDetailShow">
+    <el-drawer v-model="detailShow" destroy-on-close size="800" :show-close="true" :before-close="closeDetailShow">
       <el-descriptions column="1" border>
         <el-descriptions-item label="Tên khu vực">
           {{ detailFrom.name }}
@@ -125,7 +197,6 @@
         </el-descriptions-item>
       </el-descriptions>
     </el-drawer>
-
   </div>
 </template>
 
@@ -142,14 +213,13 @@ import {
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 
 defineOptions({
-  name: 'Area'
+  name: 'AreaArea'
 })
 
 // 控制更多查询条件显示/隐藏状态
-const showAllQuery = ref(false)
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
@@ -203,22 +273,23 @@ const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
-const searchInfo = ref({})
+const searchInfo = ref({ areaId: null, startCreatedAt: null, endCreatedAt: null })
+const showAllQuery = ref(false)
+
 
 // Đặt lại
-const onReset = () => {
-  searchInfo.value = {}
-  getTableData()
-}
+// const onReset = () => {
+//   searchInfo.value = {}
+//   getTableData()
+// }
 
 // Tìm kiếm
+watch(searchInfo, () => {
+  getTableData()
+}, { deep: true })
+
 const onSubmit = () => {
-  elSearchFormRef.value?.validate(async (valid) => {
-    if (!valid) return
-    page.value = 1
-    pageSize.value = 10
-    getTableData()
-  })
+  getTableData()
 }
 
 // Trang
@@ -233,18 +304,24 @@ const handleCurrentChange = (val) => {
   getTableData()
 }
 
-// Tìm kiếm
 const getTableData = async () => {
-  const table = await getAreaList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
-  if (table.code === 0) {
-    tableData.value = table.data.list
-    total.value = table.data.total
-    page.value = table.data.page
-    pageSize.value = table.data.pageSize
+  const response = await getAreaList({ page: page.value, pageSize: pageSize.value })
+  if (response.code === 0) {
+    tableData.value = response.data.list
+    total.value = response.data.total
   }
 }
-
 getTableData()
+
+const filteredData = computed(() => {
+  return tableData.value.filter(item => {
+    return (
+      (!searchInfo.value.areaId || item.ID === searchInfo.value.areaId) &&
+      (!searchInfo.value.startCreatedAt || new Date(item.createdAt) >= new Date(searchInfo.value.startCreatedAt)) &&
+      (!searchInfo.value.endCreatedAt || new Date(item.createdAt) < new Date(searchInfo.value.endCreatedAt))
+    )
+  })
+})
 
 // ============== Kết thúc điều khiển bảng ===============
 

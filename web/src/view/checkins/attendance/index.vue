@@ -1,16 +1,27 @@
 <template>
   <div>
     <div class="gva-search-box">
-      <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule"
-        @keyup.enter="onSubmit">
+      <el-form 
+        ref="elSearchFormRef" 
+        :inline="true" :model="searchInfo" 
+        class="demo-form-inline" 
+        :rules="searchRule"
+        @keyup.enter="onSubmit"
+      >
         <el-form-item label="Đơn vị" prop="agencyId" class="">
           <el-select v-model="searchInfo.agencyId" placeholder="Chọn đơn vị" clearable filterable>
             <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
         <el-form-item label="Danh mục" prop="categoryId" class="w-[300px]">
-          <el-tree-select class="w-full" v-model="searchInfo.categoryId" :data="categoryOptions" check-on-click-node
-            :render-after-expand="false" style="width: 240px" />
+          <el-tree-select 
+            v-model="searchInfo.categoryId" 
+            class="w-full" 
+            :data="categoryOptions" 
+            check-on-click-node
+            :render-after-expand="false" 
+            style="width: 240px" 
+          />
         </el-form-item>
 
 
@@ -26,11 +37,19 @@
                 </el-tooltip>
               </span>
             </template>
-            <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="Ngày bắt đầu"
-              :disabled-date="time => searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false" />
+            <el-date-picker 
+              v-model="searchInfo.startCreatedAt" 
+              type="datetime" 
+              placeholder="Ngày bắt đầu"
+              :disabled-date="time => searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false" 
+            />
             —
-            <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc"
-              :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false" />
+            <el-date-picker 
+              v-model="searchInfo.endCreatedAt" 
+              type="datetime" 
+              placeholder="Ngày kết thúc"
+              :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false" 
+            />
           </el-form-item>
         </template>
 
@@ -59,8 +78,14 @@
           Xóa
         </el-button> -->
       </div>
-      <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
-        @selection-change="handleSelectionChange">
+      <el-table 
+        ref="multipleTable" 
+        style="width: 100%" 
+        tooltip-effect="dark" 
+        :data="tableData" 
+        row-key="ID"
+        @selection-change="handleSelectionChange"
+      >
         <!-- <el-table-column type="selection" width="55" /> -->
 
         <el-table-column align="left" label="Tiêu đề" prop="title" width="250" />
@@ -94,22 +119,48 @@
         </el-table-column> -->
         <el-table-column align="left" label="Thao tác" fixed="right" min-width="240">
           <template #default="scope">
-            <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon
-                style="margin-right: 5px">
+            <el-button 
+              type="primary" 
+              link class="table-button" 
+              @click="getDetails(scope.row)"
+            >
+              <el-icon
+                style="margin-right: 5px"
+              >
                 <InfoFilled />
-              </el-icon>Xem chi tiết</el-button>
+              </el-icon>
+              Xem chi tiết
+            </el-button>
             <!-- <el-button type="primary" link icon="edit" class="table-button"
               @click="updateAttendanceFunc(scope.row)">Chỉnh sửa</el-button> -->
-            <el-button type="primary" link icon="documentCopy" class="table-button" @click="cloneRow(scope.row)">Nhân
-              bản</el-button>
-            <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">Xóa</el-button>
+            <el-button 
+              type="primary" 
+              link icon="documentCopy" 
+              class="table-button" 
+              @click="cloneRow(scope.row)"
+            >
+              Nhân bản
+            </el-button>
+            <el-button 
+              type="primary" 
+              link icon="delete" 
+              @click="deleteRow(scope.row)"
+            >
+              Xóa
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
       <div class="gva-pagination">
-        <el-pagination layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
-          :page-sizes="[10, 30, 50, 100]" :total="total" @current-change="handleCurrentChange"
-          @size-change="handleSizeChange" />
+        <el-pagination 
+          layout="total, sizes, prev, pager, next, jumper" 
+          :current-page="page" 
+          :page-size="pageSize"
+          :page-sizes="[10, 30, 50, 100]" 
+          :total="total" 
+          @current-change="handleCurrentChange"
+          @size-change="handleSizeChange" 
+        />
       </div>
     </div>
     <el-drawer v-model="dialogFormVisible" destroy-on-close size="800" :show-close="false" :before-close="closeDialog">
@@ -135,12 +186,22 @@
           <el-input v-model="formData.weight" :clearable="true" type="number" placeholder="Nhập hệ số" />
         </el-form-item>
         <el-form-item label="Ngày bắt đầu:" prop="startDate">
-          <el-date-picker v-model="formData.startDate" type="datetime" style="width:100%" placeholder="Chọn ngày"
-            :clearable="true" />
+          <el-date-picker 
+            v-model="formData.startDate" 
+            type="datetime" 
+            style="width:100%" 
+            placeholder="Chọn ngày"
+            :clearable="true" 
+          />
         </el-form-item>
         <el-form-item label="Ngày kết thúc:" prop="endDate">
-          <el-date-picker v-model="formData.endDate" type="datetime" style="width:100%" placeholder="Chọn ngày"
-            :clearable="true" />
+          <el-date-picker 
+            v-model="formData.endDate" 
+            type="datetime" 
+            style="width:100%" 
+            placeholder="Chọn ngày"
+            :clearable="true" 
+          />
         </el-form-item>
         <el-form-item label="Đơn vị" prop="agencyId" class="w-full required">
           <el-select v-model="formData.agencyId" placeholder="Chọn đơn vị" clearable filterable>
@@ -148,19 +209,32 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Danh mục" prop="categoryId" class="w-full required">
-          <el-tree-select class="w-full" v-model="formData.categoryId" :data="categoryOptions" check-on-click-node
-            :render-after-expand="false" style="width: 240px" />
+          <el-tree-select 
+            v-model="formData.categoryId" 
+            class="w-full" 
+            :data="categoryOptions" 
+            check-on-click-node:render-after-expand="false" 
+            style="width: 240px"
+          />
         </el-form-item>
         <el-form-item prop="description" label="Mô tả" class="w-full">
-          <el-input type="text" v-model="formData.description"></el-input>
+          <el-input 
+            v-model="formData.description" 
+            type="text"
+          />     
         </el-form-item>
-        <el-form-item label="Cho phép khách:" prop="allowGuest">
-          <el-switch v-model="formData.allowGuest" active-color="#13ce66" inactive-color="#ff4949" active-text="Có"
-            inactive-text="Không" clearable />
+        <el-form-item v-model="formData.allowGuest" label="Cho phép khách:" prop="allowGuest">
+          <el-switch active-color="#13ce66" inactive-color="#ff4949" active-text="Có" inactive-text="Không" clearable />
         </el-form-item>
         <el-form-item label="Khoá:" prop="isLocked">
-          <el-switch v-model="formData.isLocked" active-color="#13ce66" inactive-color="#ff4949" active-text="Có"
-            inactive-text="Không" clearable />
+          <el-switch 
+            v-model="formData.isLocked" 
+            active-color="#13ce66" 
+            inactive-color="#ff4949" 
+            active-text="Có"
+            inactive-text="Không" 
+            clearable 
+          />
         </el-form-item>
       </el-form>
     </el-drawer>
@@ -218,7 +292,7 @@ import {
 } from '@/api/checkins/attendanceAgency'
 
 
-import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile, formatDateTime } from '@/utils/format'
+//import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile, formatDateTime } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
@@ -308,7 +382,7 @@ const tableData = ref([])
 const searchInfo = ref({})
 const categoryOptions = ref([])
 const agencyOptions = ref([])
-const clientURL = ref(import.meta.env.VITE_CLIENT_URL)
+//const clientURL = ref(import.meta.env.VITE_CLIENT_URL)
 
 // Đặt lại
 const onReset = () => {
