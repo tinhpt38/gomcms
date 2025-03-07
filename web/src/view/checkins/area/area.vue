@@ -174,6 +174,9 @@
             phép vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
           <el-input v-model="formData.restrictIp" tyle="width:100%" />
         </el-form-item>
+        <el-form-item label="Vẽ khu vực:">
+          <div id="draw-map" style="width: 100%; height: 400px;"></div>
+        </el-form-item>
       </el-form>
     </el-drawer>
 
@@ -195,6 +198,7 @@
           {{ detailFrom.restrictIp }}
         </el-descriptions-item>
       </el-descriptions>
+      <div id="openlayers-map" style="width: 100%; height: 400px; margin-top: 20px;"></div>
     </el-drawer>
   </div>
 </template>
@@ -212,7 +216,7 @@ import {
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, nextTick, computed, watch } from 'vue'
 
 defineOptions({
   name: 'AreaArea'
@@ -487,7 +491,107 @@ const closeDetailShow = () => {
   detailShow.value = false
   detailFrom.value = {}
 }
+// --- OpenLayers tích hợp cho Drawer xem chi tiết ---
+import 'ol/ol.css'
+import Map from 'ol/Map'
+import View from 'ol/View'
+import TileLayer from 'ol/layer/Tile'
+import OSM from 'ol/source/OSM'
+import { fromLonLat } from 'ol/proj'
+import { Circle as CircleGeom } from 'ol/geom'
+import { Feature } from 'ol'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import { Style, Stroke, Fill } from 'ol/style'
 
+let detailMapInstance = null
+const initOpenLayersMap = () => {
+  const mapContainer = document.getElementById('openlayers-map')
+  if (!mapContainer) return
+  const lat = Number(detailFrom.value.latitude)
+  const lng = Number(detailFrom.value.longitude)
+  const radius = Number(detailFrom.value.radius)
+  if (isNaN(lat) || isNaN(lng)) return
+  const center = fromLonLat([lng, lat])
+  const circle = new CircleGeom(center, radius)
+  const circleFeature = new Feature(circle)
+  const vectorSource = new VectorSource({ features: [circleFeature] })
+  const vectorLayer = new VectorLayer({
+    source: vectorSource,
+    style: new Style({
+      stroke: new Stroke({ color: 'red', width: 2 }),
+      fill: new Fill({ color: 'rgba(255, 0, 0, 0.3)' })
+    })
+  })
+  if (detailMapInstance) {
+    detailMapInstance.setTarget(null)
+  }
+  detailMapInstance = new Map({
+    target: 'openlayers-map',
+    layers: [new TileLayer({ source: new OSM() }), vectorLayer],
+    view: new View({ center: center, zoom: 15 })
+  })
+  detailMapInstance.getView().fit(circle.getExtent(), { duration: 1000, padding: [20, 20, 20, 20] })
+}
+watch(detailShow, (newVal) => {
+  if (newVal) {
+    nextTick(() => {
+      initOpenLayersMap()
+    })
+  }
+})
+
+// --- OpenLayers tích hợp cho map vẽ trong Dialog chỉnh sửa ---
+import { Draw } from 'ol/interaction'
+import { toLonLat } from 'ol/proj'
+
+let drawingMapInstance = null
+const initDrawingMap = () => {
+  const drawMapContainer = document.getElementById('draw-map')
+  if (!drawMapContainer) return
+  // Tạo vector source và layer để chứa đối tượng vẽ
+  const vectorSource = new VectorSource()
+  const vectorLayer = new VectorLayer({
+    source: vectorSource,
+    style: new Style({
+      stroke: new Stroke({ color: 'blue', width: 2 }),
+      fill: new Fill({ color: 'rgba(0, 0, 255, 0.3)' })
+    })
+  })
+  drawingMapInstance = new Map({
+    target: 'draw-map',
+    layers: [new TileLayer({ source: new OSM() }), vectorLayer],
+    view: new View({
+      center: formData.value.longitude && formData.value.latitude
+        ? fromLonLat([formData.value.longitude, formData.value.latitude])
+        : fromLonLat([105.83416, 21.027764]),
+      zoom: 12
+    })
+  })
+  const draw = new Draw({ source: vectorSource, type: 'Circle' })
+  drawingMapInstance.addInteraction(draw)
+  // Khi bắt đầu vẽ, xoá feature cũ để không tồn tại nhiều hình cùng lúc
+  draw.on('drawstart', function() {
+    vectorSource.clear();
+  })
+  // Khi vẽ xong, cập nhật formData với tọa độ và bán kính
+  draw.on('drawend', function(event) {
+    const circleGeom = event.feature.getGeometry()
+    const center = circleGeom.getCenter()
+    const radius = circleGeom.getRadius()
+    const centerLonLat = toLonLat(center)
+    formData.value.latitude = centerLonLat[1]
+    formData.value.longitude = centerLonLat[0]
+    formData.value.radius = radius
+  })
+}
+watch(dialogFormVisible, (newVal) => {
+  if (newVal) {
+    nextTick(() => {
+      initDrawingMap()
+    })
+  }
+})
 
 </script>
 
