@@ -193,6 +193,18 @@ func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.
 	return nil
 }
 
+func (groupService *GroupService) AddMemberToGroup(memberReq checkinsReq.GroupMember) (err error) {
+	// Chuyển đổi dữ liệu từ request sang model GroupMember
+	newMember := checkins.GroupMember{
+		GroupId: uint(memberReq.GroupId),
+		Email:   memberReq.Email,
+		Name:    memberReq.Name,
+	}
+	// Tạo bản ghi mới trong bảng group_members
+	err = global.GVA_DB.Create(&newMember).Error
+	return err
+}
+
 // func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.GroupAuto) (err error) {
 // 	// Xem thử hiện tại có bao nhiêu nhóm trong DB rồi từ đó tính toán số nhóm cần tạo
 // 	var count int64

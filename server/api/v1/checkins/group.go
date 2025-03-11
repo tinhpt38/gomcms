@@ -1,6 +1,8 @@
 package checkins
 
 import (
+	"strconv"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
@@ -134,4 +136,55 @@ func (groupApi *GroupApi) GetGroupPublic(c *gin.Context) {
 	response.OkWithDetailed(gin.H{
 		"info": "Thông tin API của Nhóm không cần xác thực",
 	}, "lấy thành công", c)
+}
+
+func (groupApi *GroupApi) AddMemberToGroup(c *gin.Context) {
+	var member checkinsReq.GroupMember
+	err := c.ShouldBindJSON(&member)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = groupService.AddMemberToGroup(member)
+	if err != nil {
+		global.GVA_LOG.Error("Thêm thành viên thất bại!", zap.Error(err))
+		response.FailWithMessage("Thêm thành viên thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithMessage("Thêm thành viên thành công", c)
+}
+
+// GetParticipantsForGroup lấy danh sách sinh viên chưa có nhóm theo attendanceId và query
+func (groupApi *GroupApi) GetParticipantsForGroup(c *gin.Context) {
+	attendanceIdStr := c.Query("attendanceId")
+	query := c.Query("query")
+
+	if attendanceIdStr == "" {
+		response.FailWithMessage("attendanceId không được để trống", c)
+		return
+	}
+
+	attendanceId, err := strconv.Atoi(attendanceIdStr)
+	if err != nil {
+		response.FailWithMessage("attendanceId không hợp lệ", c)
+		return
+	}
+
+	// Khai báo slice để chứa kết quả
+	var participants []checkins.AttendanceGroupParticipant
+
+	// Truy vấn danh sách sinh viên chưa được phân nhóm (group_id IS NULL)
+	db := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName()).Where("attendance_id = ? AND group_id IS NULL", attendanceId)
+
+	// Nếu có query, lọc theo full_name hoặc email (giả sử các cột này tồn tại trong bảng)
+	if query != "" {
+		db = db.Where("full_name LIKE ? OR email LIKE ?", "%"+query+"%", "%"+query+"%")
+	}
+
+	if err := db.Find(&participants).Error; err != nil {
+		response.FailWithMessage("Lấy danh sách thất bại: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithData(participants, c)
 }
