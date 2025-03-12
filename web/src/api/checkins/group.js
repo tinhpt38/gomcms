@@ -127,7 +127,7 @@ export const assignParticipantToGroupAuto = (data) => {
 // @Router /group/addMember [post]
 export const addMemberToGroupApi = (data) => {
   return service({
-    url: '/group/addMember',
+    url: '/group/addMemberToGroup',
     method: 'post',
     data
   })

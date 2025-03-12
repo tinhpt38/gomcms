@@ -18,9 +18,6 @@ func (s *GroupRouter) InitGroupRouter(Router *gin.RouterGroup, PublicRouter *gin
 		groupRouter.DELETE("deleteGroupByIds", groupApi.DeleteGroupByIds)                       // 批量删除Nhóm
 		groupRouter.PUT("updateGroup", groupApi.UpdateGroup)                                    // 更新Nhóm
 		groupRouter.POST("assignParticipantToGroupAuto", groupApi.AssignParticipantToGroupAuto) // Tạo nhóm và gắn nhóm tự động cho người tham gia
-
-		groupRouter.POST("addMember", groupApi.AddMemberToGroup)
-		groupRouter.GET("getParticipantsForGroup", groupApi.GetParticipantsForGroup)
 	}
 	{
 		groupRouterWithoutRecord.GET("findGroup", groupApi.FindGroup)       // 根据ID获取Nhóm
@@ -29,5 +26,8 @@ func (s *GroupRouter) InitGroupRouter(Router *gin.RouterGroup, PublicRouter *gin
 	{
 		groupRouterWithoutAuth.GET("getGroupDataSource", groupApi.GetGroupDataSource) // 获取Nhóm数据源
 		groupRouterWithoutAuth.GET("getGroupPublic", groupApi.GetGroupPublic)         // 获取Nhóm列表
+
+		groupRouterWithoutAuth.POST("addMemberToGroup", groupApi.AddMemberToGroup)
+		groupRouterWithoutAuth.GET("getParticipantsForGroup", groupApi.GetParticipantsForGroup)
 	}
 }

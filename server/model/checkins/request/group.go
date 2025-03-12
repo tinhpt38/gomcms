@@ -20,7 +20,7 @@ type GroupAuto struct {
 }
 
 type GroupMember struct {
-	GroupId int    `json:"groupId" form:"groupId"`
-	Email   string `json:"email" form:"email"`
-	Name    string `json:"name" form:"name"`
+	GroupId       int    `json:"groupId" form:"groupId"`
+	ParticipantId int    `json:"participantId" form:"participantId"`
+	Name          string `json:"name" form:"name"`
 }

@@ -194,13 +194,10 @@ func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.
 }
 
 func (groupService *GroupService) AddMemberToGroup(memberReq checkinsReq.GroupMember) (err error) {
-	// Chuyển đổi dữ liệu từ request sang model GroupMember
 	newMember := checkins.GroupMember{
-		GroupId: uint(memberReq.GroupId),
-		Email:   memberReq.Email,
-		Name:    memberReq.Name,
+		ParticipantId: uint(memberReq.ParticipantId),
+		GroupId:       uint(memberReq.GroupId),
 	}
-	// Tạo bản ghi mới trong bảng group_members
 	err = global.GVA_DB.Create(&newMember).Error
 	return err
 }

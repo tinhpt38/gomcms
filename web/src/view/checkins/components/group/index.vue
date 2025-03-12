@@ -87,34 +87,40 @@
       </el-form>
     </el-drawer>
 
-    <!-- Dialog Thêm thành viên vào nhóm (Bảng danh sách sinh viên chưa tham gia nhóm) -->
     <el-dialog title="Thêm thành viên vào nhóm" v-model="addMemberDialogVisible" width="600px">
-      <!-- Ô tìm kiếm -->
+      <!-- Ô tìm kiếm theo email -->
       <div style="margin-bottom: 10px;">
         <el-input 
           v-model="participantSearch" 
-          placeholder="Tìm kiếm theo tên hoặc email" 
+          placeholder="Tìm kiếm theo email" 
           clearable
           @input="fetchParticipants">
         </el-input>
       </div>
-      <!-- Bảng danh sách sinh viên -->
-      <el-table 
-        ref="participantTable"
-        :data="participantList" 
-        style="width: 100%" 
-        border 
-        @selection-change="handleSelectionChange"
-        row-key="ID">
-        <el-table-column type="selection" width="55"></el-table-column>
-        <el-table-column prop="fullName" label="Họ và tên" />
-        <el-table-column prop="email" label="Email" />
-      </el-table>
+      <!-- Bọc bảng trong container có chiều cao cố định và thanh cuộn -->
+      <div style="max-height: 400px; overflow-y: auto;">
+        <el-table 
+          ref="participantTable"
+          :data="participantList" 
+          style="width: 100%" 
+          border  
+          @selection-change="handleSelectionChange"
+          row-key="participantId">
+          <el-table-column type="selection" width="55"></el-table-column>
+          <el-table-column label="Email">
+            <template #default="scope">
+              {{scope.row.email }}
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <!-- Nút hành động -->
       <template #footer>
         <el-button @click="addMemberDialogVisible = false">Huỷ</el-button>
-        <el-button type="primary" @click="handleBulkAdd">Thêm hàng loạt</el-button>
+        <el-button type="primary" @click="handleBulkAdd">Thêm</el-button>
       </template>
     </el-dialog>
+
   </div>
 </template>
 
@@ -231,21 +237,22 @@ const enterGroupDialog = async () => {
 
 const enterDialog = async () => {
   elFormRef.value?.validate(async (valid) => {
-    if (!valid) return
-    let res
+    if (!valid) return;
+    formData.value.attendanceId = Number(formData.value.attendanceId);
+    let res;
     if (type.value === 'create') {
-      res = await createGroup(formData.value)
+      res = await createGroup(formData.value);
     } else if (type.value === 'update') {
-      res = await updateGroup(formData.value)
+      res = await updateGroup(formData.value);
     }
     if (res.code === 0) {
-      ElMessage({ type: 'success', message: 'Tạo/cập nhật thành công' })
-      closeDialog()
-      getTableData()
+      ElMessage({ type: 'success', message: 'Tạo/cập nhật thành công' });
+      closeDialog();
+      getTableData();
     }
-    emits('onSuccess')
-  })
-}
+    emits('onSuccess');
+  });
+};
 
 const onDelete = async () => {
   ElMessageBox.confirm('Bạn có chắc muốn xoá không?', 'Cảnh báo', {
@@ -293,74 +300,88 @@ const updateGroupFunc = async (row) => {
 // Phần thêm thành viên vào nhóm
 // ---------------------------
 const addMemberDialogVisible = ref(false)
-const participantSearch = ref('')          // Giá trị tìm kiếm
-const participantList = ref([])            // Danh sách sinh viên chưa được phân nhóm
-const selectedParticipants = ref([])         // Danh sách sinh viên được chọn
-const currentGroupId = ref(null)             // Lưu ID của nhóm được chọn từ tag nhóm
+const participantSearch = ref('')
+const participantList = ref([])
+const selectedParticipants = ref([])
+const currentGroupId = ref(null)      
 
-// --- Hàm mở dialog thêm thành viên ---
+// Hàm mở dialog "Thêm thành viên vào nhóm"
+// group là đối tượng nhóm được truyền vào từ bảng danh sách nhóm
 const openAddMemberDialog = (group) => {
   console.log("openAddMemberDialog:", group)
-  currentGroupId.value = group.ID
+  currentGroupId.value = group.ID  // Sử dụng group.ID (hoặc group.id tùy cấu trúc)
   addMemberDialogVisible.value = true
   participantSearch.value = ''
   selectedParticipants.value = []
-  fetchParticipants()  // Tải danh sách sinh viên ban đầu
+  fetchParticipants()  // Tải danh sách sinh viên chưa có nhóm
 }
 
-// --- Hàm gọi API lấy danh sách sinh viên chưa tham gia nhóm ---  
+// Hàm lấy danh sách sinh viên chưa có nhóm từ API
 const fetchParticipants = async () => {
+  const attendanceId = props.acId; // sử dụng giá trị từ props
+  if (!attendanceId) {
+    ElMessage.error("attendanceId không hợp lệ");
+    return;
+  }
   try {
-    const res = await service({
+    const response = await service({
       url: '/group/getParticipantsForGroup',
       method: 'get',
-      params: { attendanceId: props.acId, query: participantSearch.value }
-    })
-    if (res.code === 0 && res.data) {
-      participantList.value = res.data
+      params: { attendanceId, query: participantSearch.value }
+    });
+    console.log("Response from API:", response);
+    // Nếu interceptor unwrap response thì response.data là mảng trực tiếp
+    const payload = response && response.data ? response.data : response;
+    console.log("Payload:", payload);
+    
+    if (Array.isArray(payload)) {
+      // Nếu payload là mảng, gán luôn
+      participantList.value = payload;
+    } else if (payload.code === 0) {
+      participantList.value = payload.data || [];
     } else {
-      participantList.value = []
+      participantList.value = [];
+      ElMessage.error(payload.msg || "Không lấy được danh sách sinh viên chưa có nhóm");
     }
   } catch (error) {
-    console.error('Lỗi khi lấy danh sách sinh viên:', error)
-    participantList.value = []
+    console.error("Lỗi khi lấy danh sách sinh viên:", error);
+    participantList.value = [];
+    ElMessage.error("Lỗi khi lấy danh sách sinh viên từ API");
   }
 }
 
-// --- Hàm xử lý khi người dùng chọn sinh viên trong bảng ---
+
+// Hàm xử lý khi người dùng chọn dòng trong bảng
 const handleSelectionChange = (val) => {
   selectedParticipants.value = val
 }
 
-// --- Hàm xử lý thêm hàng loạt sinh viên vào nhóm ---
+// Hàm xử lý thêm hàng loạt thành viên vào nhóm
 const handleBulkAdd = async () => {
-  if (selectedParticipants.value.length === 0) {
+  if (!selectedParticipants.value.length) {
     ElMessage.warning("Vui lòng chọn ít nhất 1 sinh viên")
     return
   }
   try {
-    // Lặp qua danh sách sinh viên được chọn và gọi API thêm
     for (const participant of selectedParticipants.value) {
-      const res = await service({
-        url: '/group/AddMember',
-        method: 'post',
-        data: {
-          groupId: currentGroupId.value,
-          email: participant.email,
-          name: participant.fullName
-        }
-      })
+      // Nếu fullName rỗng, sử dụng email làm tên tạm thời
+      const payload = {
+        groupId: currentGroupId.value,
+        participantId: participant.participantId,
+      }
+      const res = await addMemberToGroupApi(payload)
       if (res.code !== 0) {
-        ElMessage.error(`Lỗi khi thêm ${participant.fullName}`)
+        ElMessage.error(`Lỗi khi thêm ${payload.participantId}: ${res.msg}`)
       }
     }
     ElMessage.success("Thêm thành viên thành công")
     addMemberDialogVisible.value = false
-    // Nếu cần, bạn có thể gọi lại hàm cập nhật dữ liệu nhóm
   } catch (error) {
+    console.error("Lỗi khi thêm thành viên:", error)
     ElMessage.error("Có lỗi xảy ra khi thêm thành viên")
   }
 }
+
 </script>
 
 <style scoped>
