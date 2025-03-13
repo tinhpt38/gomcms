@@ -1,51 +1,33 @@
 <template>
   <div>
-    <div class="gva-search-box hidden">
+    <div class="gva-search-box">
       <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule"
-        @keyup.enter="onSubmit">
-        <el-form-item label="Ngày tạo" prop="createdAt">
-          <template #label>
-            <span>
-              Ngày tạo
-              <el-tooltip content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
-                <el-icon>
-                  <QuestionFilled />
-                </el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="Ngày bắt đầu"
-            :disabled-date="time => searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false"></el-date-picker>
-          —
-          <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc"
-            :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false"></el-date-picker>
-        </el-form-item>
+      @keyup.enter="onSubmit">
+      
+      <el-form-item label="Tên phân loại" prop="name">
+        <el-select v-model="searchInfo.name" placeholder="Chọn phân loại" multiple clearable filterable>
+          <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="Ngày tạo" prop="createdAt">
+        <el-date-picker v-model="searchInfo.createdAt" type="daterange" start-placeholder="Ngày bắt đầu"
+          end-placeholder="Ngày kết thúc" format="YYYY-MM-DD" clearable />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
+        <el-button icon="refresh" @click="onReset">Làm mới</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
 
-        <el-form-item label="Tên phân loại" prop="name">
-
-          <el-input v-model.number="searchInfo.name" placeholder="Điều kiện tìm kiếm" />
-
-        </el-form-item>
-
-        <template v-if="showAllQuery">
-          <!-- Thêm các điều kiện tìm kiếm cần điều khiển hiển thị vào đây -->
-        </template>
-
-        <el-form-item>
-          <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
-          <el-button icon="refresh" @click="onReset">Làm mới</el-button>
-          <el-button link type="primary" icon="arrow-down" @click="showAllQuery = true" v-if="!showAllQuery">Mở
-            rộng</el-button>
-          <el-button link type="primary" icon="arrow-up" @click="showAllQuery = false" v-else>Thu gọn</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
+          
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button type="primary" icon="plus" @click="openDialog">Thêm mới</el-button>
         <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length"
           @click="onDelete">Xóa</el-button>
       </div>
+
       <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
         @selection-change="handleSelectionChange" :tree-props="treeProps">
         <!-- <el-table-column type="selection" width="55" /> -->
@@ -127,8 +109,10 @@ import {
 
 import { getDictFunc, formatDate, formatBoolean, filterDict, filterDataSource, returnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
+import { debounce } from 'lodash';
 
+import { Search, Refresh } from "@element-plus/icons-vue";
 defineOptions({
   name: 'AttendanceCategory'
 })
@@ -179,23 +163,94 @@ const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
-const searchInfo = ref({})
+const searchInfo = ref({ name: [], createdAt: null });
+//const searchResults = ref([]);
+const loading = ref(false);
 
 // Đặt lại
 const onReset = () => {
-  searchInfo.value = {}
-  getTableData()
-}
-
+  searchInfo.value = { name: [], createdAt: null };
+  page.value = 1;
+  onSubmit();
+};
 // Tìm kiếm
-const onSubmit = () => {
-  elSearchFormRef.value?.validate(async (valid) => {
-    if (!valid) return
-    page.value = 1
-    pageSize.value = 10
-    getTableData()
-  })
-}
+
+// const onSubmit = () => {
+//   console.log("Tìm kiếm với:", searchInfo.value);
+// };
+
+// const onSubmit = () => {
+//   elSearchFormRef.value?.validate(async (valid) => {
+//     if (!valid) return
+//     page.value = 1
+//     pageSize.value = 10
+//     getTableData()
+//   })
+// }
+// Tìm kiếm
+const onSubmit = async () => {
+  loading.value = true;
+  try {
+    const params = {
+      ...searchInfo.value,
+      page: page.value,
+      pageSize: pageSize.value,
+    };
+    
+    console.log("Dữ liệu gửi lên API:", params); // Kiểm tra dữ liệu đầu vào
+
+    const response = await getAttendanceCategoryList(params);
+
+    if (response.code === 0) {
+      tableData.value = response.data.list;
+      total.value = response.data.total;
+      console.log("Dữ liệu nhận được từ API:", response.data.list); // Kiểm tra dữ liệu trả về
+    } else {
+      tableData.value = [];
+      ElMessage.warning("Không tìm thấy kết quả phù hợp");
+    }
+  } catch (error) {
+    ElMessage.error("Có lỗi xảy ra khi tìm kiếm");
+  } finally {
+    loading.value = false;
+  }
+};
+
+
+
+
+// khi không có từ khóa tìm kiếm thì lấy tất cả
+watch(() => searchInfo.value.keyword, (newValue) => {
+  if (!newValue.trim()) {
+    tableData.value = []; // Xóa danh sách hiển thị
+    total.value = 0;
+  } else {
+    debouncedFetchData();
+  }
+});
+// Hàm gọi API
+const fetchData = async () => {
+  try {
+    loading.value = true;
+    const response = await getAttendanceCategoryList({ 
+      ...searchInfo.value, 
+      page: page.value, 
+      pageSize: pageSize.value // Đảm bảo lấy đủ dữ liệu
+    });
+    if (response.code === 0) {
+      tableData.value = response.data.list;
+      total.value = response.data.total;
+    } else {
+      ElMessage.error('Có lỗi xảy ra khi tìm kiếm');
+    }
+  } catch (error) {
+    ElMessage.error('Có lỗi xảy ra khi tìm kiếm');
+  } finally {
+    loading.value = false;
+  }
+};
+
+
 
 // Phân trang
 const handleSizeChange = (val) => {
@@ -222,6 +277,7 @@ const getTableData = async () => {
   tableData.value = convertToTree(tableData.value)
 }
 
+
 const convertToTree = (data) => {
   const map = {}
   const roots = []
@@ -244,7 +300,7 @@ const convertToTree = (data) => {
   return roots
 }
 
-
+console.log("searchInfo:", searchInfo.value);
 getTableData()
 
 const getParentOptions = async () => {
@@ -254,6 +310,15 @@ const getParentOptions = async () => {
   }
   //console.log("parent Options", parentOptions.value)
 }
+// watch(searchInfo, () => {
+//   console.log("Updated searchInfo:", searchInfo.value);
+// });
+watch(tableData, (newData) => {
+  console.log("Dữ liệu hiển thị trên bảng:", newData);
+});
+watch(() => searchInfo.value.createdAt, (newDate) => {
+  console.log("Ngày lọc:", newDate);
+});
 
 getParentOptions()
 
@@ -420,6 +485,7 @@ const closeDetailShow = () => {
   detailShow.value = false
   detailFrom.value = {}
 }
+
 
 
 

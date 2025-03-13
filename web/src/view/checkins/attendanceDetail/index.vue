@@ -32,7 +32,6 @@
                     <el-date-picker v-model="formData.endDate" type="datetime" class="full-width-input" clearable />
                   </el-form-item>
                 </div>
-
                 <el-form-item label="Danh mục" prop="categoryId" class="w-full required">
                   <el-tree-select class="w-full" v-model="formData.categoryId" :data="categoryOptions"
                     check-on-click-node :render-after-expand="false" style="width: 240px" />
@@ -42,6 +41,7 @@
                     <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
                   </el-select>
                 </el-form-item>
+                  
                 <el-form-item prop="description" label="Mô tả" class="w-full">
                   <el-input type="text" v-model="formData.description"></el-input>
                 </el-form-item>
@@ -171,9 +171,14 @@
               <el-form-item label="Ngày tạo" prop="createdAt">
                 <el-date-picker v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu" />
               </el-form-item>
-              <el-form-item label="Email" prop="email">
-                <el-input v-model="searchInfo.email" type="text" placeholder="Email" />
-              </el-form-item>
+              <!-- <el-form-item label="Email" prop="email">
+                <el-input v-model="searchInfo.email" type="text" placeholder="Email"clearable />
+              </el-form-item>               -->
+              <el-form-item label="Thành viên" prop="fullName">
+              <el-select v-model="searchInfo.fullName" placeholder="Chọn thành viên" multiple clearable filterable>
+                <el-option v-for="item in participantOptions" :key="item.id" :label="item.fullName" :value="item.fullName" />
+              </el-select>
+            </el-form-item>
               <el-form-item label="Nhóm" prop="groupId">
                 <el-select v-model="searchInfo.groupId" placeholder="Chọn nhóm" clearable filterable>
                   <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
@@ -252,6 +257,11 @@
           <RandomWheel :ac-id="currentId" />
         </div>
       </el-tab-pane>
+      <el-tab-pane name="questionTab" label="Trả lời câu hỏi">
+        <div class="table-container">
+          <Questionnaire :ac-id="currentId" />
+        </div>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -282,6 +292,7 @@ import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
 import RandomWheel from '@/view/checkins/components/randomWheel/index.vue'
 import CheckinLogs from '@/view/checkins/components/logs/index.vue'
+import Questionnaire from '@/view/checkins/components/Questionnaire/index.vue'
 import ImportExcel from '@/components/importExcel/index.vue'
 import ExportExcel from '@/components/exportExcel/exportExcel.vue'
 import { formatDateTime, formatDate } from '@/utils/format'
@@ -487,6 +498,7 @@ const onSubmit = () => {
   page.value = 1
   pageSize.value = 10
   getTableData()
+
   // elSearchFormRef.value?.validate(async (valid) => {
   //   if (!valid) return
   //   page.value = 1
