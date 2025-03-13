@@ -8,9 +8,11 @@ import (
 // Nhóm 结构体  Group
 type Group struct {
 	global.GVA_MODEL
-	Name         string `json:"name" form:"name" gorm:"column:name;comment:;" binding:"required"`       //Tên nhóm
-	AttendanceId uint   `json:"attendanceId" form:"attendanceId" gorm:"column:attendance_id;comment:;"` //Attendance Class
-	Total        int    `json:"total" gorm:"-"`                                                         //Tổng số người tham gia
+	Name           string        `json:"name" form:"name" gorm:"column:name;comment:;" binding:"required"`       //Tên nhóm
+	AttendanceId   uint          `json:"attendanceId" form:"attendanceId" gorm:"column:attendance_id;comment:;"` //Attendance Class
+	Total          int           `json:"total" gorm:"-"`                                                         //Tổng số người tham gia
+	Participants   []Participant `json:"participants" gorm:"many2many:attendance_group_participants;"`           // Danh sách thành viên trong nhóm
+	ParticipantIDs []uint        `json:"participantIds" form:"participantIds" gorm:"-"`                          // Danh sách ID thành viên được tag từ giao diện (không lưu DB)
 }
 
 // TableName Nhóm Group自定义表名 groups

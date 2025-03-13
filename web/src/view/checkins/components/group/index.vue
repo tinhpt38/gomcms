@@ -109,7 +109,7 @@
           <el-table-column type="selection" width="55"></el-table-column>
           <el-table-column label="Email">
             <template #default="scope">
-              {{scope.row.email }}
+              {{ scope.row.email }}
             </template>
           </el-table-column>
         </el-table>
@@ -120,7 +120,6 @@
         <el-button type="primary" @click="handleBulkAdd">Thêm</el-button>
       </template>
     </el-dialog>
-
   </div>
 </template>
 
@@ -303,60 +302,50 @@ const addMemberDialogVisible = ref(false)
 const participantSearch = ref('')
 const participantList = ref([])
 const selectedParticipants = ref([])
-const currentGroupId = ref(null)      
+const currentGroupId = ref(null)
+const participantTable = ref(null)
 
-// Hàm mở dialog "Thêm thành viên vào nhóm"
-// group là đối tượng nhóm được truyền vào từ bảng danh sách nhóm
 const openAddMemberDialog = (group) => {
-  console.log("openAddMemberDialog:", group)
-  currentGroupId.value = group.ID  // Sử dụng group.ID (hoặc group.id tùy cấu trúc)
-  addMemberDialogVisible.value = true
-  participantSearch.value = ''
-  selectedParticipants.value = []
-  fetchParticipants()  // Tải danh sách sinh viên chưa có nhóm
+  currentGroupId.value = group.id || group.ID;
+  addMemberDialogVisible.value = true;
+  participantSearch.value = '';
+  selectedParticipants.value = [];
+  fetchParticipants();
 }
-
-// Hàm lấy danh sách sinh viên chưa có nhóm từ API
+// Hàm hiện thi danh sách thành viên chưa có nhóm
 const fetchParticipants = async () => {
-  const attendanceId = props.acId; // sử dụng giá trị từ props
+  const attendanceId = props.acId
   if (!attendanceId) {
-    ElMessage.error("attendanceId không hợp lệ");
-    return;
+    ElMessage.error("attendanceId không hợp lệ")
+    return
   }
   try {
     const response = await service({
       url: '/group/getParticipantsForGroup',
       method: 'get',
       params: { attendanceId, query: participantSearch.value }
-    });
-    console.log("Response from API:", response);
-    // Nếu interceptor unwrap response thì response.data là mảng trực tiếp
-    const payload = response && response.data ? response.data : response;
-    console.log("Payload:", payload);
-    
+    })
+    const payload = response && response.data ? response.data : response
+    // console.log("payload", payload)
     if (Array.isArray(payload)) {
-      // Nếu payload là mảng, gán luôn
-      participantList.value = payload;
+      participantList.value = payload
     } else if (payload.code === 0) {
-      participantList.value = payload.data || [];
+      participantList.value = payload.data || []
     } else {
-      participantList.value = [];
-      ElMessage.error(payload.msg || "Không lấy được danh sách sinh viên chưa có nhóm");
+      participantList.value = []
+      ElMessage.error(payload.msg || "Không lấy được danh sách sinh viên chưa có nhóm")
     }
   } catch (error) {
-    console.error("Lỗi khi lấy danh sách sinh viên:", error);
-    participantList.value = [];
-    ElMessage.error("Lỗi khi lấy danh sách sinh viên từ API");
+    console.error("Lỗi khi lấy danh sách sinh viên:", error)
+    participantList.value = []
+    ElMessage.error("Lỗi khi lấy danh sách sinh viên từ API")
   }
 }
-
-
-// Hàm xử lý khi người dùng chọn dòng trong bảng
-const handleSelectionChange = (val) => {
-  selectedParticipants.value = val
+// Cập nhật danh sách các dòng được chọn
+const handleSelectionChange = (selection) => {
+  selectedParticipants.value = selection
 }
-
-// Hàm xử lý thêm hàng loạt thành viên vào nhóm
+// Hàm xử lý thêm thành viên hàng loạt
 const handleBulkAdd = async () => {
   if (!selectedParticipants.value.length) {
     ElMessage.warning("Vui lòng chọn ít nhất 1 sinh viên")
@@ -364,17 +353,19 @@ const handleBulkAdd = async () => {
   }
   try {
     for (const participant of selectedParticipants.value) {
-      // Nếu fullName rỗng, sử dụng email làm tên tạm thời
       const payload = {
         groupId: currentGroupId.value,
         participantId: participant.participantId,
+        attendanceId: props.acId
       }
       const res = await addMemberToGroupApi(payload)
       if (res.code !== 0) {
-        ElMessage.error(`Lỗi khi thêm ${payload.participantId}: ${res.msg}`)
+        ElMessage.error(`Lỗi khi thêm thành viên ID ${participant.participantId}: ${res.msg}`)
       }
     }
     ElMessage.success("Thêm thành viên thành công")
+    await fetchParticipants()
+    await getTableData()
     addMemberDialogVisible.value = false
   } catch (error) {
     console.error("Lỗi khi thêm thành viên:", error)

@@ -140,15 +140,15 @@ func (groupApi *GroupApi) GetGroupPublic(c *gin.Context) {
 
 func (groupApi *GroupApi) AddMemberToGroup(c *gin.Context) {
 	var member checkinsReq.GroupMember
-	err := c.ShouldBindJSON(&member)
-	if err != nil {
+	// Bind dữ liệu JSON từ request vào biến member
+	if err := c.ShouldBindJSON(&member); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = groupService.AddMemberToGroup(member)
-	if err != nil {
-		global.GVA_LOG.Error("Thêm thành viên thất bại!", zap.Error(err))
-		response.FailWithMessage("Thêm thành viên thất bại:"+err.Error(), c)
+	// Gọi service để thêm thành viên vào nhóm
+	if err := groupService.AddMemberToGroup(member); err != nil {
+		global.GVA_LOG.Error("Thêm thành viên thất bại", zap.Error(err))
+		response.FailWithMessage("Thêm thành viên thất bại: "+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("Thêm thành viên thành công", c)
@@ -156,7 +156,7 @@ func (groupApi *GroupApi) AddMemberToGroup(c *gin.Context) {
 
 func (groupApi *GroupApi) GetParticipantsForGroup(c *gin.Context) {
 	attendanceIdStr := c.Query("attendanceId")
-	query := c.Query("query")
+	queryParam := c.Query("query")
 
 	if attendanceIdStr == "" {
 		response.FailWithMessage("attendanceId không được để trống", c)
@@ -169,23 +169,22 @@ func (groupApi *GroupApi) GetParticipantsForGroup(c *gin.Context) {
 		return
 	}
 
-	var results []struct {
-		ID    uint   `json:"participantId"`
-		Email string `json:"email"`
+	type ParticipantResult struct {
+		ParticipantId uint   `json:"participantId" gorm:"column:participantId"`
+		Email         string `json:"email" gorm:"column:email"`
 	}
+	var results []ParticipantResult
 
-	// Sử dụng LEFT JOIN để lấy các sinh viên chưa được gán nhóm cho attendanceId đó
 	db := global.GVA_DB.Table("participants as p").
-		Joins("LEFT JOIN attendance_group_participants as agp ON p.id = agp.participant_id AND agp.attendance_id = ?", attendanceId).
-		Where("agp.participant_id IS NULL")
+		Joins("JOIN attendance_group_participants as agp ON p.id = agp.participant_id").
+		Where("agp.attendance_id = ? AND agp.group_id IS NULL", attendanceId)
 
-	// Nếu có query, chỉ filter theo email (vì chúng ta bỏ fullName)
-	if query != "" {
-		db = db.Where("p.email LIKE ?", "%"+query+"%")
+	if queryParam != "" {
+		db = db.Where("p.email LIKE ?", "%"+queryParam+"%")
 	}
 
-	// Chỉ select id và email để tối ưu tốc độ truy vấn
-	if err := db.Select("p.id as id, p.email").Find(&results).Error; err != nil {
+	// Sử dụng Scan để chỉ lấy các cột được chọn
+	if err := db.Limit(-1).Select("p.id as participantId, p.email as email").Scan(&results).Error; err != nil {
 		response.FailWithMessage("Lấy danh sách thất bại: "+err.Error(), c)
 		return
 	}

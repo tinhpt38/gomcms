@@ -20,7 +20,8 @@ type GroupAuto struct {
 }
 
 type GroupMember struct {
-	GroupId       int    `json:"groupId" form:"groupId"`
-	ParticipantId int    `json:"participantId" form:"participantId"`
+	GroupId       uint   `json:"groupId" form:"groupId" gorm:"column:group_id;comment:'ID của nhóm';"`
+	ParticipantId uint   `json:"participantId" form:"participantId" gorm:"column:participant_id;comment:'ID của sinh viên';" binding:"required"`
+	AttendanceId  uint   `json:"attendanceId,string" form:"attendanceId" gorm:"column:attendance_id;comment:'ID của phiên điểm danh';"`
 	Name          string `json:"name" form:"name"`
 }
