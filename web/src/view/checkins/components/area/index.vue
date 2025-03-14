@@ -5,7 +5,6 @@
         Thêm khu vực
       </el-button>
     </div>
-
     <el-table :data="tableData" style="width: 100%" border>
       <el-table-column prop="area.name" label="Nhóm" />
       <el-table-column prop="area.latitude" label="Kinh độ" />

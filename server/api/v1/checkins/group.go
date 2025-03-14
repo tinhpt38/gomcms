@@ -1,6 +1,8 @@
 package checkins
 
 import (
+	"strconv"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
@@ -134,4 +136,58 @@ func (groupApi *GroupApi) GetGroupPublic(c *gin.Context) {
 	response.OkWithDetailed(gin.H{
 		"info": "Thông tin API của Nhóm không cần xác thực",
 	}, "lấy thành công", c)
+}
+
+func (groupApi *GroupApi) AddMemberToGroup(c *gin.Context) {
+	var member checkinsReq.GroupMember
+	// Bind dữ liệu JSON từ request vào biến member
+	if err := c.ShouldBindJSON(&member); err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	// Gọi service để thêm thành viên vào nhóm
+	if err := groupService.AddMemberToGroup(member); err != nil {
+		global.GVA_LOG.Error("Thêm thành viên thất bại", zap.Error(err))
+		response.FailWithMessage("Thêm thành viên thất bại: "+err.Error(), c)
+		return
+	}
+	response.OkWithMessage("Thêm thành viên thành công", c)
+}
+
+func (groupApi *GroupApi) GetParticipantsForGroup(c *gin.Context) {
+	attendanceIdStr := c.Query("attendanceId")
+	queryParam := c.Query("query")
+
+	if attendanceIdStr == "" {
+		response.FailWithMessage("attendanceId không được để trống", c)
+		return
+	}
+
+	attendanceId, err := strconv.Atoi(attendanceIdStr)
+	if err != nil {
+		response.FailWithMessage("attendanceId không hợp lệ", c)
+		return
+	}
+
+	type ParticipantResult struct {
+		ParticipantId uint   `json:"participantId" gorm:"column:participantId"`
+		Email         string `json:"email" gorm:"column:email"`
+	}
+	var results []ParticipantResult
+
+	db := global.GVA_DB.Table("participants as p").
+		Joins("JOIN attendance_group_participants as agp ON p.id = agp.participant_id").
+		Where("agp.attendance_id = ? AND agp.group_id IS NULL", attendanceId)
+
+	if queryParam != "" {
+		db = db.Where("p.email LIKE ?", "%"+queryParam+"%")
+	}
+
+	// Sử dụng Scan để chỉ lấy các cột được chọn
+	if err := db.Limit(-1).Select("p.id as participantId, p.email as email").Scan(&results).Error; err != nil {
+		response.FailWithMessage("Lấy danh sách thất bại: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithData(results, c)
 }

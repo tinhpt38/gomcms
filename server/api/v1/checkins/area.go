@@ -2,15 +2,15 @@ package checkins
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
-    "github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
-    "github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
-    checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
-    "github.com/gin-gonic/gin"
-    "go.uber.org/zap"
-    "github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
+	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
-type AreaApi struct {}
+type AreaApi struct{}
 
 // CreateArea tạo Khu vực điểm danh
 // @Tags Area
@@ -32,7 +32,7 @@ func (areaApi *AreaApi) CreateArea(c *gin.Context) {
 	err = areaService.CreateArea(&area)
 	if err != nil {
 		global.GVA_LOG.Error("thất bại!", zap.Error(err))
-		response.FailWithMessage("thất bại:" + err.Error(), c)
+		response.FailWithMessage("thất bại:"+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("thành công", c)
@@ -50,10 +50,10 @@ func (areaApi *AreaApi) CreateArea(c *gin.Context) {
 func (areaApi *AreaApi) DeleteArea(c *gin.Context) {
 	ID := c.Query("ID")
 	userID := utils.GetUserID(c)
-	err := areaService.DeleteArea(ID,userID)
+	err := areaService.DeleteArea(ID, userID)
 	if err != nil {
 		global.GVA_LOG.Error("thất bại!", zap.Error(err))
-		response.FailWithMessage("thất bại:" + err.Error(), c)
+		response.FailWithMessage("thất bại:"+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("thành công", c)
@@ -70,10 +70,10 @@ func (areaApi *AreaApi) DeleteArea(c *gin.Context) {
 func (areaApi *AreaApi) DeleteAreaByIds(c *gin.Context) {
 	IDs := c.QueryArray("IDs[]")
 	userID := utils.GetUserID(c)
-	err := areaService.DeleteAreaByIds(IDs,userID)
+	err := areaService.DeleteAreaByIds(IDs, userID)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:" + err.Error(), c)
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("Thành công", c)
@@ -99,7 +99,7 @@ func (areaApi *AreaApi) UpdateArea(c *gin.Context) {
 	err = areaService.UpdateArea(area)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:" + err.Error(), c)
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("Thành công", c)
@@ -119,7 +119,7 @@ func (areaApi *AreaApi) FindArea(c *gin.Context) {
 	rearea, err := areaService.GetArea(ID)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:" + err.Error(), c)
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
 	response.OkWithData(rearea, c)
@@ -144,7 +144,7 @@ func (areaApi *AreaApi) GetAreaList(c *gin.Context) {
 	list, total, err := areaService.GetAreaInfoList(pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:" + err.Error(), c)
+		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
 	response.OkWithDetailed(response.PageResult{
@@ -167,7 +167,6 @@ func (areaApi *AreaApi) GetAreaPublic(c *gin.Context) {
 	// API này không cần xác thực
 	// Ví dụ trả về một thông điệp cố định, thường được sử dụng cho dịch vụ C端, cần tự triển khai logic kinh doanh của riêng mình
 	response.OkWithDetailed(gin.H{
-	   "info": "Thông tin API Khu vực điểm danh không cần xác thực",
+		"info": "Thông tin API Khu vực điểm danh không cần xác thực",
 	}, "Thành công", c)
 }
-

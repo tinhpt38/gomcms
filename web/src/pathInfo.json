@@ -1,6 +1,6 @@
 {
   "/src/view/about/index.vue": "About",
-  "/src/view/checkins/area/area.vue": "Area",
+  "/src/view/checkins/area/area.vue": "AreaArea",
   "/src/view/checkins/area/areaForm.vue": "AreaForm",
   "/src/view/checkins/attendance/attendanceForm.vue": "AttendanceClassForm",
   "/src/view/checkins/attendance/index.vue": "Attendance",

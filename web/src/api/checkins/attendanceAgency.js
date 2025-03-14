@@ -104,3 +104,30 @@ export const getAttendanceAgencyPublic = (params) => {
   })
 }
 
+// Lấy danh sách đơn vị theo từ khóa nhập vào
+export const querySearchAgency = async (queryString, cb) => {
+  if (!queryString || queryString.length < 2) return cb([]); // Tránh gọi API khi chưa đủ ký tự
+
+  const removeAccents = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  try {
+    const response = await getAttendanceAgencyList({});
+    if (response.code === 0 && Array.isArray(response.data.list)) {
+      const query = removeAccents(queryString).replace(/\s+/g, ".*"); // Chuyển khoảng trắng thành `.*` để tìm kiếm linh hoạt
+      const regex = new RegExp(query, "i"); // Tạo regex không phân biệt hoa thường
+
+      const filteredData = response.data.list
+        .filter(item => regex.test(removeAccents(item.name))) // Kiểm tra với regex
+        .map(item => ({ value: item.name, id: item.id }));
+
+      cb(filteredData);
+    } else {
+      cb([]);
+    }
+  } catch (error) {
+    console.error("Lỗi khi tải danh sách đơn vị:", error);
+    cb([]);
+  }
+};
+
+

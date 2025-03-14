@@ -116,3 +116,19 @@ export const assignParticipantToGroupAuto = (data) => {
     data
   })
 }
+
+// @Tags Group
+// @Summary Thêm thành viên vào Nhóm
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.GroupMember true "Thêm thành viên vào Nhóm"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"Thêm thành viên thành công"}"
+// @Router /group/addMember [post]
+export const addMemberToGroupApi = (data) => {
+  return service({
+    url: '/group/addMemberToGroup',
+    method: 'post',
+    data
+  })
+}

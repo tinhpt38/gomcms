@@ -13,14 +13,24 @@
         <el-date-picker v-model="searchInfo.createdAt" type="daterange" start-placeholder="Ngày bắt đầu"
           end-placeholder="Ngày kết thúc" format="YYYY-MM-DD" clearable />
       </el-form-item>
+      
+      <el-form-item label="Tên phân loại" prop="name">
+        <el-input v-model.number="searchInfo.name" placeholder="Điều kiện tìm kiếm" />
+      </el-form-item>
+      
+      <template v-if="showAllQuery">
+        <!-- Thêm các điều kiện tìm kiếm cần điều khiển hiển thị vào đây -->
+      </template>
+      
       <el-form-item>
         <el-button type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
         <el-button icon="refresh" @click="onReset">Làm mới</el-button>
+        <el-button link type="primary" icon="arrow-down" @click="showAllQuery = true" v-if="!showAllQuery">Mở rộng</el-button>
+        <el-button link type="primary" icon="arrow-up" @click="showAllQuery = false" v-else>Thu gọn</el-button>
       </el-form-item>
     </el-form>
-  </div>
-
-          
+    </div>
+    
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button type="primary" icon="plus" @click="openDialog">Thêm mới</el-button>
@@ -30,7 +40,6 @@
 
       <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
         @selection-change="handleSelectionChange" :tree-props="treeProps">
-        <!-- <el-table-column type="selection" width="55" /> -->
         <el-table-column align="left" label="Tên phân loại" prop="name" width="300" />
         <el-table-column align="left" label="Mặc định" prop="isCurrent" width="120">
           <template #default="scope">
@@ -39,10 +48,6 @@
         </el-table-column>
         <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
           <template #default="scope">
-            <!-- <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon
-                style="margin-right: 5px">
-                <InfoFilled />
-              </el-icon>Xem chi tiết</el-button> -->
             <el-button type="primary" link icon="edit" class="table-button"
               @click="updateAttendanceCategoryFunc(scope.row)">Chỉnh sửa</el-button>
             <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">Xóa</el-button>
@@ -55,6 +60,7 @@
           @size-change="handleSizeChange" />
       </div>
     </div>
+    
     <el-drawer destroy-on-close size="800" v-model="dialogFormVisible" :show-close="false" :before-close="closeDialog">
       <template #header>
         <div class="flex justify-between items-center">
@@ -74,7 +80,6 @@
           <el-switch v-model="formData.isCurrent" />
         </el-form-item>
         <el-form-item label="Danh mục cha:" prop="parentId">
-          <!-- <el-input v-model.number="formData.parentId" :clearable="true" placeholder="Nhập danh mục cha" /> -->
           <el-select v-model="formData.parentId" clearable filterable placeholder="Chọn danh mục cha">
             <el-option v-for="item in parentOptions" :key="item.ID" :value="item.ID" :label="item.name"></el-option>
           </el-select>
@@ -92,9 +97,9 @@
         </el-descriptions-item>
       </el-descriptions>
     </el-drawer>
-
   </div>
 </template>
+
 
 <script setup>
 import { deleteApisByIds } from '@/api/api';
@@ -185,7 +190,7 @@ const onReset = () => {
 //     page.value = 1
 //     pageSize.value = 10
 //     getTableData()
-//   })
+//   }) 
 // }
 // Tìm kiếm
 const onSubmit = async () => {

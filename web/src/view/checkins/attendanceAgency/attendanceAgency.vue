@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="gva-search-box hidden">
+    <div class="gva-search-box">
       <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule"
         @keyup.enter="onSubmit">
-        <el-form-item label="Ngày tạo" prop="createdAt">
+        <!-- <el-form-item label="Ngày tạo" prop="createdAt">
           <template #label>
             <span>
               Ngày tạo
@@ -19,15 +19,41 @@
           —
           <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc"
             :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false"></el-date-picker>
-        </el-form-item>
+        </el-form-item> -->
 
-        <el-form-item label="Đơn vị" prop="name">
+        <!-- <el-form-item label="Đơn vị" prop="name">
           <el-input v-model="searchInfo.name" placeholder="Điều kiện tìm kiếm" />
-
+        </el-form-item> -->
+        <el-form-item label="Đơn vị" prop="name">          
+            <el-autocomplete
+              v-model="searchInfo.name"
+              :fetch-suggestions="querySearchAgency"
+              placeholder="Điều kiện tìm kiếm"
+              clearable
+              filterable
+              @select="handleSelectAgency"
+            />        
         </el-form-item>
-
+        
         <template v-if="showAllQuery">
           <!-- Thêm các điều kiện tìm kiếm cần điều khiển hiển thị vào đây -->
+          <el-form-item label="Ngày tạo" prop="createdAt">
+            <template #label>
+              <span>
+                Ngày tạo˝
+                <el-tooltip content="Phạm vi tìm kiếm từ ngày bắt đầu (bao gồm) đến ngày kết thúc (không bao gồm)">
+                  <el-icon>
+                    <QuestionFilled />
+                  </el-icon>
+                </el-tooltip>
+              </span>
+            </template>
+            <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="Ngày bắt đầu"
+              :disabled-date="time => searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false" />
+            —
+            <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="Ngày kết thúc"
+              :disabled-date="time => searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false" />
+          </el-form-item>
         </template>
 
         <el-form-item>
@@ -115,7 +141,8 @@ import {
   deleteAttendanceAgencyByIds,
   updateAttendanceAgency,
   findAttendanceAgency,
-  getAttendanceAgencyList
+  getAttendanceAgencyList,
+  querySearchAgency
 } from '@/api/checkins/attendanceAgency'
 
 // 全量引入格式化工具 请按需保留
@@ -194,7 +221,15 @@ const onSubmit = () => {
     page.value = 1
     pageSize.value = 10
     getTableData()
+
+    searchInfo.value.name = ""
   })
+}
+
+// Xử lý khi chọn đơn vị từ danh sách gợi ý
+const handleSelectAgency = (item) => {
+  searchInfo.value.name  = item.value;
+  onSubmit();
 }
 
 // Trang
@@ -384,6 +419,7 @@ const closeDetailShow = () => {
   detailFrom.value = {}
 }
 
+const agencyList = ref([])
 
 </script>
 

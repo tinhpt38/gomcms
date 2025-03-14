@@ -1,6 +1,7 @@
 package checkins
 
 import (
+	"errors"
 	"math/rand"
 	"strconv"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
+	"gorm.io/gorm"
 )
 
 type GroupService struct{}
@@ -191,6 +193,26 @@ func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.
 	}
 
 	return nil
+}
+
+func (groupService *GroupService) AddMemberToGroup(memberReq checkinsReq.GroupMember) error {
+	var agp checkins.AttendanceGroupParticipant
+	err := global.GVA_DB.
+		Where("participant_id = ? AND attendance_id = ?", memberReq.ParticipantId, memberReq.AttendanceId).
+		First(&agp).Error
+	if err == nil {
+		tempGroupID := uint(memberReq.GroupId)
+		agp.GroupId = &tempGroupID
+		return global.GVA_DB.Save(&agp).Error
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	// Nếu không tìm thấy record, tạo record mới
+	newMember := checkins.GroupMember{
+		ParticipantId: uint(memberReq.ParticipantId),
+		GroupId:       uint(memberReq.GroupId),
+	}
+	return global.GVA_DB.Create(&newMember).Error
 }
 
 // func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.GroupAuto) (err error) {

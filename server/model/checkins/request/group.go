@@ -18,3 +18,10 @@ type GroupAuto struct {
 	GroupNameType string `json:"groupNameType" form:"groupNameType"`
 	AttendanceId  int    `json:"attendanceId" form:"attendanceId"`
 }
+
+type GroupMember struct {
+	GroupId       uint   `json:"groupId" form:"groupId" gorm:"column:group_id;comment:'ID của nhóm';"`
+	ParticipantId uint   `json:"participantId" form:"participantId" gorm:"column:participant_id;comment:'ID của sinh viên';" binding:"required"`
+	AttendanceId  uint   `json:"attendanceId,string" form:"attendanceId" gorm:"column:attendance_id;comment:'ID của phiên điểm danh';"`
+	Name          string `json:"name" form:"name"`
+}

@@ -26,5 +26,8 @@ func (s *GroupRouter) InitGroupRouter(Router *gin.RouterGroup, PublicRouter *gin
 	{
 		groupRouterWithoutAuth.GET("getGroupDataSource", groupApi.GetGroupDataSource) // 获取Nhóm数据源
 		groupRouterWithoutAuth.GET("getGroupPublic", groupApi.GetGroupPublic)         // 获取Nhóm列表
+
+		groupRouterWithoutAuth.POST("addMemberToGroup", groupApi.AddMemberToGroup)
+		groupRouterWithoutAuth.GET("getParticipantsForGroup", groupApi.GetParticipantsForGroup)
 	}
 }
