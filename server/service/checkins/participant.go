@@ -179,81 +179,96 @@ func (participantService *ParticipantService) GetParticipantByEmail(email string
 // 	return
 // }
 
+//	func (participantService *ParticipantService) GetParticipantInAttendance(participantId uint, attendanceId uint) (memberOfAttendance []checkins.AttendanceGroupParticipant, err error) {
+//		db := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
+//		err = db.Joins("left join `groups` on groups.id = attendance_group_participants.group_id").
+//			Where("attendance_group_participants.participant_id = ? AND attendance_group_participants.attendance_id = ? AND groups.attendance_id = ?", participantId, attendanceId, attendanceId).
+//			Where("attendance_group_participants.deleted_at IS NULL").
+//			Order("attendance_group_participants.id").
+//			Preload(clause.Associations).
+//			Find(&memberOfAttendance).
+//			Error
+//		return
+//	}
+func AttendanceGroupFilters(participantId uint, attendanceId uint) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.
+			Joins("LEFT JOIN `groups` ON groups.id = attendance_group_participants.group_id").
+			Where("attendance_group_participants.participant_id = ? AND attendance_group_participants.attendance_id = ? AND groups.attendance_id = ?", participantId, attendanceId, attendanceId).
+			Where("attendance_group_participants.deleted_at IS NULL").
+			Order("attendance_group_participants.id")
+	}
+}
 func (participantService *ParticipantService) GetParticipantInAttendance(participantId uint, attendanceId uint) (memberOfAttendance []checkins.AttendanceGroupParticipant, err error) {
-	db := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
-	err = db.Joins("left join `groups` on groups.id = attendance_group_participants.group_id").
-		Where("attendance_group_participants.participant_id = ? AND attendance_group_participants.attendance_id = ? AND groups.attendance_id = ?", participantId, attendanceId, attendanceId).
-		Where("attendance_group_participants.deleted_at IS NULL").
-		Order("attendance_group_participants.id").
-		Preload(clause.Associations).
-		Find(&memberOfAttendance).
-		Error
+	db := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName()).
+		Scopes(AttendanceGroupFilters(participantId, attendanceId))
+	err = db.Preload(clause.Associations).Find(&memberOfAttendance).Error
 	return
 }
 
 // GetParticipantInfoList 分页获取Sinh viên (Người tham dự phiên điểm danh)记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (participantService *ParticipantService) GetParticipantInfoList(info checkinsReq.ParticipantSearch) (list []checkins.Participant, total int64, err error) {
-	limit := info.PageSize
-	offset := info.PageSize * (info.Page - 1)
-	// 创建db
-	db := global.GVA_DB.Model(&checkins.Participant{})
-	var participants []checkins.Participant
-	// Nếu có điều kiện tìm kiếm, câu lệnh tìm kiếm sẽ được tạo tự động ở dưới đây
-	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
-		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
-	}
-	if info.FullName != "" {
-		db = db.Where("full_name LIKE ?", "%"+info.FullName+"%")
-	}
-	if info.Email != "" {
-		db = db.Where("email LIKE ?", "%"+info.Email+"%")
-	}
+// func (participantService *ParticipantService) GetParticipantInfoList(info checkinsReq.ParticipantSearch) (list []checkins.Participant, total int64, err error) {
+// 	limit := info.PageSize
+// 	offset := info.PageSize * (info.Page - 1)
+// 	// 创建db
+// 	db := global.GVA_DB.Model(&checkins.Participant{})
+// 	var participants []checkins.Participant
+// 	// Nếu có điều kiện tìm kiếm, câu lệnh tìm kiếm sẽ được tạo tự động ở dưới đây
+// 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+// 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
+// 	}
+// 	if info.FullName != "" {
+// 		db = db.Where("full_name LIKE ?", "%"+info.FullName+"%")
+// 	}
+// 	if info.Email != "" {
+// 		db = db.Where("email LIKE ?", "%"+info.Email+"%")
+// 	}
 
-	err = db.Count(&total).Error
-	if err != nil {
-		return
-	}
+// 	err = db.Count(&total).Error
+// 	if err != nil {
+// 		return
+// 	}
 
-	if limit != 0 {
-		db = db.Limit(limit).Offset(offset)
-	}
+// 	if limit != 0 {
+// 		db = db.Limit(limit).Offset(offset)
+// 	}
 
-	err = db.Find(&participants).Error
-	return participants, total, err
-}
+// 	err = db.Find(&participants).Error
+// 	return participants, total, err
+// }
 
-func (participantService *ParticipantService) GetParticipantInfoListByAttendance(info checkinsReq.ParticipantSearch) (list []checkins.Participant, total int64, err error) {
+// func (participantService *ParticipantService) GetParticipantInfoListByAttendance(info checkinsReq.ParticipantSearch) (list []checkins.Participant, total int64, err error) {
 
-	limit := info.PageSize
-	offset := info.PageSize * (info.Page - 1)
-	db := global.GVA_DB.Model(&checkins.Participant{})
-	var participants []checkins.Participant
-	err = db.Joins("JOIN attendance_group_participants ON participants.id = attendance_group_participants.participant_id").
-		Where("attendance_group_participants.attendance_id = ? and attendance_group_participants.deleted_at is null", info.AttendanceId ).Count(&total).Error
-	if err != nil {
-		return
-	}
-	if info.FullName != "" {
-		db = db.Where("full_name LIKE ?", "%"+info.FullName+"%")
-	}
-	if info.Email != "" {
-		db = db.Where("email LIKE ?", "%"+info.Email+"%")
-	}
+// 	limit := info.PageSize
+// 	offset := info.PageSize * (info.Page - 1)
+// 	db := global.GVA_DB.Model(&checkins.Participant{})
+// 	var participants []checkins.Participant
+// 	err = db.Joins("JOIN attendance_group_participants ON participants.id = attendance_group_participants.participant_id").
+// 		Where("attendance_group_participants.attendance_id = ? and attendance_group_participants.deleted_at is null", info.AttendanceId).Count(&total).Error
+// 	if err != nil {
+// 		return
+// 	}
+// 	if info.FullName != "" {
+// 		db = db.Where("full_name LIKE ?", "%"+info.FullName+"%")
+// 	}
+// 	if info.Email != "" {
+// 		db = db.Where("email LIKE ?", "%"+info.Email+"%")
+// 	}
 
-	if info.GroupId != nil && *info.GroupId != 0 {
-		db = db.Joins("JOIN `groups` ON groups.id = attendance_group_participants.group_id").Where("groups.id = ?", info.GroupId)
-	}
+// 	if info.GroupId != nil && *info.GroupId != 0 {
+// 		db = db.Joins("JOIN `groups` ON groups.id = attendance_group_participants.group_id").Where("groups.id = ?", info.GroupId)
+// 	}
 
-	if limit != 0 {
-		db = db.Limit(limit).Offset(offset)
-	}
+// 	if limit != 0 {
+// 		db = db.Limit(limit).Offset(offset)
+// 	}
 
-	err = db.Preload("Groups", "attendance_id = ?", info.AttendanceId).Debug().Find(&participants).Error
-	// Xử lý lấy thông tin điều kiện điểm danh
-	// newList := participantService.GetMetadata(participants, *info.AttendanceId)
-	return participants, total, err
-}
+// 	err = db.Preload("Groups", "attendance_id = ?", info.AttendanceId).Debug().Find(&participants).Error
+// 	// Xử lý lấy thông tin điều kiện điểm danh
+// 	// newList := participantService.GetMetadata(participants, *info.AttendanceId)
+// 	return participants, total, err
+// }
 
 func (participantService *ParticipantService) ImportExcel(info config.CfgFileProcess) (err error) {
 	path := global.GVA_CONFIG.Local.Path + "/" + info.UniqueFileName
@@ -654,3 +669,74 @@ func (participantService *ParticipantService) ImportExcel(info config.CfgFilePro
 // 	return newList
 
 // }
+
+// Scope áp dụng các bộ lọc tìm kiếm chung
+func ParticipantFilters(info checkinsReq.ParticipantSearch) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+			db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
+		}
+		if info.FullName != "" {
+			db = db.Where("full_name LIKE ?", info.FullName+"%")
+		}
+		if info.Email != "" {
+			db = db.Where("email LIKE ?", info.Email+"%")
+		}
+		// Chỉ JOIN nếu AttendanceId được cung cấp
+		if info.AttendanceId != nil {
+			db = db.Joins("JOIN attendance_group_participants ON participants.id = attendance_group_participants.participant_id").
+				Where("attendance_group_participants.attendance_id = ? AND attendance_group_participants.deleted_at IS NULL", info.AttendanceId)
+		}
+		// Chỉ JOIN thêm bảng groups nếu cần thiết cho GroupId
+		if info.GroupId != nil && *info.GroupId != 0 {
+			db = db.Joins("JOIN `groups` ON groups.id = attendance_group_participants.group_id").
+				Where("groups.id = ?", info.GroupId)
+		}
+		return db
+	}
+}
+
+func (participantService *ParticipantService) GetParticipantInfoList(info checkinsReq.ParticipantSearch) (list []checkins.Participant, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+
+	// Sử dụng scope để áp dụng các điều kiện tìm kiếm đồng nhất
+	db := global.GVA_DB.Model(&checkins.Participant{}).Scopes(ParticipantFilters(info))
+
+	// Đếm tổng số kết quả
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	// Áp dụng phân trang nếu cần
+	if limit != 0 {
+		db = db.Limit(limit).Offset(offset)
+	}
+
+	// Truy xuất dữ liệu với preload cho quan hệ Groups nếu cần
+	err = db.Preload("Groups", "attendance_id = ?", info.AttendanceId).Find(&list).Error
+	return list, total, err
+}
+func (participantService *ParticipantService) GetParticipantInfoListByAttendance(info checkinsReq.ParticipantSearch) (list []checkins.Participant, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+
+	// Áp dụng scope ParticipantFilters để gộp các điều kiện tìm kiếm chung
+	db := global.GVA_DB.Model(&checkins.Participant{}).Scopes(ParticipantFilters(info))
+
+	// Đếm tổng số kết quả dựa trên cùng bộ lọc
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	// Áp dụng phân trang
+	if limit != 0 {
+		db = db.Limit(limit).Offset(offset)
+	}
+
+	// Truy xuất dữ liệu và preload quan hệ Groups (với điều kiện attendance_id)
+	err = db.Preload("Groups", "attendance_id = ?", info.AttendanceId).Debug().Find(&list).Error
+	return list, total, err
+}

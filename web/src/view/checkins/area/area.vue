@@ -64,7 +64,7 @@
         />
       </div>
       <el-table 
-        ref="multipleTable" 
+        ref="multipleTable"
         style="width: 100%" 
         tooltip-effect="dark" 
         :data="filteredData" 
@@ -492,7 +492,7 @@ const closeDetailShow = () => {
   detailFrom.value = {}
 }
 // --- OpenLayers tích hợp cho Drawer xem chi tiết ---
-//import 'ol/dist/ol.css';
+import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
