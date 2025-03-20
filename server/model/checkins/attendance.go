@@ -28,6 +28,9 @@ type Attendance struct {
 	UpdatedBy        uint       `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy        uint       `gorm:"column:deleted_by;comment:删除者"`
 
+	// THÊM: Thuộc tính để bật/tắt yêu cầu chụp ảnh khi điểm danh
+	RequirePhoto bool `json:"requirePhoto" form:"requirePhoto" gorm:"column:require_photo;comment:Cho phép chụp ảnh khi điểm danh"`
+
 	Category     *AttendanceCategory `json:"category" form:"category" gorm:"foreignKey:CategoryId;references:ID"`
 	Agency       *AttendanceAgency   `json:"agency" form:"agency" gorm:"foreignKey:AgencyId;references:ID"` //Đơn vị
 	Areas        []Area              `gorm:"many2many:attendance_areas;"`                                   // Quan hệ nhiều-nhiều với Area thông qua bảng trung gian AttendanceArea

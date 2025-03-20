@@ -55,6 +55,9 @@
                   <el-form-item label="Cho phép khách" label-width="150px" prop="allowGuest">
                     <el-switch v-model="formData.allowGuest" />
                   </el-form-item>
+                  <el-form-item label="Yêu cầu chụp ảnh" label-width="150px" prop="requirePhoto">
+                  <el-switch v-model="formData.requirePhoto" />
+                </el-form-item>
                 </div>
                 <el-button link type="primary" icon="arrow-down" @click="showAllOptionConfig = true"
                   v-if="!showAllOptionConfig">Mở
@@ -325,7 +328,7 @@ const formData = ref({
   categoryId: null,
   agencyId: null,
   everyoneCanEdit: false,
-
+  requirePhoto: false
 })
 
 const elFormRef = ref();
@@ -348,7 +351,7 @@ const searchRules = reactive({
         if (!searchInfo.value.startCreatedAt) {
           callback(new Error('Vui lòng nhập ngày kết thúc'))
         } else {
-          callback()
+          callback()  
         }
       }, trigger: 'change'
     }

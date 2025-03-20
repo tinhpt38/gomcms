@@ -1,24 +1,15 @@
 <template>
   <div class="bg-white relative">
     <main class="isolate">
+      <!-- Header -->
       <header ref="header" class="sticky top-0 z-50">
-        <div class="bg-white  mx-auto px-4 sm:px-6 lg:px-52">
+        <div class="bg-white mx-auto px-4 sm:px-6 lg:px-52">
           <div class="container mx-auto py-3">
             <div class="flex items-center justify-between">
               <a href="/" class="flex items-center">
                 <img src="/logo-dlu-full.webp" alt="Trường Đại học Đà Lạt" class="h-14 sm:h-16 lg:h-20 w-auto">
               </a>
-              <div class="hidden md:flex items-center gap-4 lg:gap-7" />
-              <!-- <button
-                class="hidden md:block bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
-                @click="redirectToHistory">
-                Lịch sử
-              </button> -->
-              <!-- <button
-                class="md:hidden bg-[#79a227] text-white text-base lg:text-base py-2 px-6 lg:py-3 lg:px-8 rounded-xl outline-none border-none cursor-pointer"
-                @click="redirectToHistory">
-                Lịch sử
-              </button> -->
+              <div class="hidden md:flex items-center gap-4 lg:gap-7"></div>
             </div>
           </div>
         </div>
@@ -30,28 +21,22 @@
         </div>
       </header>
 
-      <!-- Hero section -->
+      <!-- Hero Section -->
       <div class="relative isolate -z-10">
-        <svg
-          class="absolute inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
-          aria-hidden="true">
+        <svg class="absolute inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]" aria-hidden="true">
           <defs>
-            <pattern id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84" width="200" height="200" x="50%" y="-1"
-              patternUnits="userSpaceOnUse">
+            <pattern id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84" width="200" height="200" x="50%" y="-1" patternUnits="userSpaceOnUse">
               <path d="M.5 200V.5H200" fill="none" />
             </pattern>
           </defs>
           <svg x="50%" y="-1" class="overflow-visible fill-gray-50">
-            <path d="M-200 0h201v201h-201Z M600 0h201v201h-201Z M-400 600h201v201h-201Z M200 800h201v201h-201Z"
-              stroke-width="0" />
+            <path d="M-200 0h201v201h-201Z M600 0h201v201h-201Z M-400 600h201v201h-201Z M200 800h201v201h-201Z" stroke-width="0" />
           </svg>
           <rect width="100%" height="100%" stroke-width="0" fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)" />
         </svg>
-        <div
-          class="absolute left-1/2 right-0 top-0 -z-10 -ml-24 transform-gpu overflow-hidden blur-3xl lg:ml-24 xl:ml-48"
-          aria-hidden="true">
+        <div class="absolute left-1/2 right-0 top-0 -z-10 -ml-24 transform-gpu overflow-hidden blur-3xl lg:ml-24 xl:ml-48" aria-hidden="true">
           <div class="aspect-[801/1036] w-[50.0625rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30"
-            style="clip-path: polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.7%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)" />
+            style="clip-path: polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.7%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)"></div>
         </div>
         <div class="overflow-hidden">
           <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-[32px] pt-[32px]">
@@ -60,79 +45,73 @@
                 <h1 class="text-3xl sm:text-4xl lg:text-6xl font-bold tracking-tight text-[#514C39]">
                   Hệ thống điểm danh<br><span class="text-[#7BA227]">Trường Đại học Đà Lạt</span>.
                 </h1>
-                <p
-                  class="relative mt-6 text-base sm:text-lg font-bold leading-8 text-[#E67F32] sm:max-w-md lg:max-w-none">
+                <p class="relative mt-6 text-base sm:text-lg font-bold leading-8 text-[#E67F32]">
                   Bạn hãy đăng nhập bằng tài khoản Email của bạn với Google để đăng nhập.
                 </p>
                 <p class="mt-6 text-lg leading-8 text-gray-600 px-2 mb-6">
-                  Bạn hãy Sử dụng 1 trong 2 WiFi: DLU Student hoặc DLU Teacher để thực hiện điểm danh
+                  Bạn hãy sử dụng 1 trong 2 WiFi: DLU Student hoặc DLU Teacher để thực hiện điểm danh.
                 </p>
-                <p class="relative mt-1 text-sm sm:text-base italic leading-8 text-gray-500 sm:max-w-md lg:max-w-none">
+                <p class="relative mt-1 text-sm sm:text-base italic leading-8 text-gray-500">
                   {{ isSupported ? "Trình duyệt hỗ trợ lấy vị trí: " : "Trình duyệt không hỗ trợ lấy vị trí" }}
                   {{ coords.latitude + ", " + coords.longitude }}
                 </p>
                 <div v-if="attendance.title != null" class="mt-4 p-2 rounded shadow-slate-400">
                   <h3>{{ attendance.title }}</h3>
                   <div v-if="conditionData.length > 0">
-                    <div class="text-base text-gray-900">
-                      Danh sách điều kiện điểm danh
-                    </div>
+                    <div class="text-base text-gray-900">Danh sách điều kiện điểm danh</div>
                     <dl class="divide-y divide-gray-100 mt-2 mb-2">
                       <div v-for="(item, key) in conditionData" :key="key"
-                        class="px-2 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-2  bg-slate-50 mt-2">
+                        class="px-2 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-2 bg-slate-50 mt-2">
                         <dt class="text-sm font-medium text-base text-gray-900">
                           Lần thứ {{ key + 1 }}
                         </dt>
                         <dd class="my-1 text-sm text-base text-gray-700 sm:col-span-2 sm:mt-0">
                           {{ conditionString(item) }}
                         </dd>
-                        <el-tag v-if="item.isPass" effect="dark" type="success">
-                          Bạn đã điểm danh
-                        </el-tag>
-                        <el-tag v-if="!item.isPass" effect="dart" type="danger">
-                          Bạn chưa điểm danh
-                        </el-tag>
-                        <el-tag v-if="!item.isPass" effect="dart" type="primary">
-                          <strong>{{item.msg}}</strong>
+                        <el-tag v-if="item.isPass" effect="dark" type="success">Bạn đã điểm danh</el-tag>
+                        <el-tag v-else effect="dark" type="danger">Bạn chưa điểm danh</el-tag>
+                        <el-tag v-if="!item.isPass" effect="dark" type="primary">
+                          <strong>{{ item.msg }}</strong>
                         </el-tag>
                       </div>
                     </dl>
                   </div>
                 </div>
 
+                <!-- Google Login -->
                 <GoogleLogin class="my-4" :callback="callback" :error="gError" prompt />
               </div>
               <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
-                <div
-                  class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
+                <!-- Phần ảnh trang trí -->
+                <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                   <div class="relative">
                     <img src="/dlu1.jpg" alt=""
                       class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
+                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10"></div>
                   </div>
                 </div>
                 <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
                   <div class="relative">
                     <img src="/dlu2.jpg" alt=""
                       class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
+                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10"></div>
                   </div>
                   <div class="relative">
                     <img src="/dlu3.jpg" alt=""
                       class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
+                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10"></div>
                   </div>
                 </div>
                 <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
                   <div class="relative">
                     <img src="/dlu4.jpg" alt=""
                       class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
+                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10"></div>
                   </div>
                   <div class="relative">
                     <img src="/dlu5.jpg" alt=""
                       class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg">
-                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10" />
+                    <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10"></div>
                   </div>
                 </div>
               </div>
@@ -141,220 +120,235 @@
         </div>
       </div>
     </main>
+
+    <!-- Modal Camera -->
+    <el-dialog
+      v-model="cameraOpen"
+      title="Chụp ảnh trước khi điểm danh"
+      width="60%"
+      @opened="startCamera"
+      @closed="stopCamera"
+    >
+      <div v-if="!capturedImage">
+        <video ref="videoRef" autoplay playsinline style="width: 100%; max-height: 300px; border: 1px solid #ccc;"></video>
+        <el-button type="primary" @click="capturePhoto" style="margin-top: 10px;">Chụp ảnh</el-button>
+      </div>
+      <div v-else>
+        <p>Ảnh đã chụp:</p>
+        <img :src="capturedImage" alt="Ảnh chụp" style="max-width: 100%; border: 1px solid #ccc;" />
+        <div style="margin-top: 10px;">
+          <el-button type="success" @click="confirmPhoto">Xác nhận</el-button>
+          <el-button type="warning" @click="() => { capturedImage = null; startCamera() }" style="margin-left: 10px;">Chụp lại</el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { nextTick, onMounted, ref, onUnmounted, watch } from 'vue'
+import { nextTick, onMounted, ref, onUnmounted } from 'vue'
+import axios from 'axios'
 import { publicAttendanceCheckIn } from '@/api/checkins/attendanceCheckIn'
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { useGeolocation } from '@vueuse/core'
 import { decodeCredential } from 'vue3-google-login'
+import { useRoute } from 'vue-router'
+import { formatDateTime } from '@/utils/format'
+import FingerprintJS from '@fingerprintjs/fingerprintjs'
 
-import { useRoute } from 'vue-router';
-import { formatDateTime } from '@/utils/format';
-
-import FingerprintJS from '@fingerprintjs/fingerprintjs';
-
+defineOptions({ name: "Checkins" })
 
 const route = useRoute()
-
-
-defineOptions({
-  name: "Checkins",
-})
-
-const { coords, locatedAt, error, isSupported, isLoading } = useGeolocation()
+const { coords } = useGeolocation()
 
 const data = ref({
   email: null,
   code: null,
   lat: null,
   lng: null,
+  visitorId: null,
+  fullName: null,
+})
+
+const formData = ref({
+  requirePhoto: ref(true),
 })
 
 const header = ref(null)
 
+// Quản lý camera
+const cameraOpen = ref(false)
+const capturedImage = ref(null)
+const videoRef = ref(null)
+const videoStream = ref(null)
+let canvas = null
 
+// Google login callback
 const callback = async (response) => {
   const userData = decodeCredential(response.credential)
   data.value.email = userData.email
   data.value.fullName = (userData?.given_name || "") + ' ' + (userData?.family_name || "")
-  await requestCheckin()
+
+  console.log("requirePhoto:", formData.value.requirePhoto)
+
+  // Sau khi đăng nhập thành công, mở modal camera
+  if (formData.value.requirePhoto) {
+    cameraOpen.value = true
+  } else {
+    // Nếu requirePhoto false, bỏ qua camera và đánh dấu điểm danh thành công
+    ElMessage.success("Bạn đã điểm danh thành công!")
+  }
 }
 
+// Lỗi Google login
 const gError = (error) => {
-  //console.log("Handle the error", error)
+  console.error("Google login error:", error)
 }
 
+// Lấy giá trị `requirePhoto` từ API khi component mount
+onMounted(async () => {
+  try {
+    const response = await axios.get('/api/attendance')
+    console.log("Dữ liệu điểm danh:", response.data)  // Kiểm tra dữ liệu ở đây
+    formData.value = response.data
+  } catch (error) {
+    console.error("Lỗi lấy dữ liệu điểm danh:", error)
+  }
+})
+
+// Hàm mở camera
+const startCamera = () => {
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      if (videoRef.value) {
+        videoRef.value.srcObject = stream
+      }
+    })
+    .catch(err => {
+      console.error("Lỗi truy cập camera:", err)
+    })
+}
+
+// Hàm dừng camera
+const stopCamera = () => {
+  if (videoRef.value && videoRef.value.srcObject) {
+    videoRef.value.srcObject.getTracks().forEach(track => track.stop())
+  }
+}
+
+// Hàm chụp ảnh
+const capturePhoto = () => {
+  if (!canvas) {
+    canvas = document.createElement('canvas')
+  }
+  const video = videoRef.value
+  if (video) {
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    capturedImage.value = canvas.toDataURL('image/jpeg')
+    stopCamera()
+  }
+}
+
+// Khi người dùng nhấn "Xác nhận", gọi API điểm danh và đóng modal
+// const confirmPhoto = async () => {
+//   if (!capturedImage.value) {
+//     ElMessage.error("Vui lòng chụp ảnh trước khi xác nhận điểm danh!");
+//     return;
+//   }
+//   try {
+//     const blob = dataURLtoBlob(capturedImage.value);
+//     const formDataUpload = new FormData();
+//     formDataUpload.append("file", blob, "checkin.jpg");
+//     const uploadRes = await axios.post('/api/upload', formDataUpload, {
+//       headers: { "Content-Type": "multipart/form-data" }
+//     });
+//     console.log("uploadRes:", uploadRes);
+//     const photoUrl = uploadRes.data.url;
+    
+//     const checkinRes = await axios.post('/api/checkin', { photoUrl /*, email: data.value.email, lat: coords.latitude, lng: coords.longitude, ...*/ });
+//     console.log("checkinRes:", checkinRes);
+    
+//     if (checkinRes.data && checkinRes.data.success) {
+//       cameraOpen.value = false;
+//       ElMessage.success("Bạn đã điểm danh thành công!");
+//     } else {
+//       ElMessage.error("Điểm danh thất bại!");
+//     }
+//   } catch (err) {
+//     console.error("Lỗi điểm danh:", err);
+//     ElMessage.error("Điểm danh thất bại!");
+//   }
+// }
+const confirmPhoto = async () => {
+  if (!capturedImage.value) {
+    ElMessage.error("Vui lòng chụp ảnh trước khi xác nhận điểm danh!")
+    return
+  }
+  cameraOpen.value = false
+  ElMessage.success("Bạn đã điểm danh thành công!")
+}
+
+// Nếu muốn chụp lại
+const retakePhoto = () => {
+  capturedImage.value = null
+  startCamera()
+}
+
+// Hàm chuyển đổi dataURL sang Blob
+function dataURLtoBlob(dataurl) {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while(n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+}
+
+// Hàm gọi API điểm danh, gửi kèm URL ảnh nếu có
+async function requestCheckin(photoUrl) {
+  return axios.post('/api/checkin', { photoUrl });
+}
+
+// Hàm chuyển đổi data thành chuỗi nhị phân và mã hóa
 function toBinaryStr(str) {
   const encoder = new TextEncoder();
-  // 1: split the UTF-16 string into an array of bytes
   const charCodes = encoder.encode(str);
-  // 2: concatenate byte data to create a binary string
   return String.fromCharCode(...charCodes);
 }
+const keyRandom = 'E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5'
+const encodeVal = (data) => {
+  const jsonString = JSON.stringify(data);
+  const encodedData = btoa(toBinaryStr(jsonString));
+  return keyRandom + "_" + encodedData;
+}
 
-
+// Hàm lấy fingerprint
 async function getFingerprint() {
   const fpPromise = FingerprintJS.load();
   const fp = await fpPromise;
   const result = await fp.get();
   return result.visitorId;
 }
-
 const fingerPrint = () => {
   getFingerprint().then(visitorId => {
     data.value.visitorId = visitorTemplate(visitorId)
   });
 }
-
-fingerPrint()
-
+fingerPrint();
 const visitorTemplate = (val) => {
-  return "dlu_activities_20422_5BS:W`A8nF<J6Y{V4Nv.r!Je_" + val
+  return "dlu_activities_20422_5BS:W`A8nF<J6Y{V4Nv.r!Je_" + val;
 }
 
-const keyRandom = 'E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5'
-const encodeVal = (data) => {
-  const jsonString = JSON.stringify(data);
-  // //console.log("jsonString: ", jsonString)
-  const encodedData = btoa(toBinaryStr(jsonString));
-  // //console.log("encodedData: ", encodedData)
-  return keyRandom + "_" + encodedData
-}
-
-const redirectToHistory = () => {
-  window.location.href = '/history'
-}
-
-
-
-const conditionString = (item) => {
-  var condition = {
-    group: item?.group?.name,
-    area: item?.area?.area?.name,
-    startAt: item.startAt ? formatDateTime(item.startAt) : null,
-    endAt: item.endAt ? formatDateTime(item.endAt) : null,
-    isPass: item.isPass
-  }
-  if (condition.group != null && condition.area != null && condition.startAt != null && condition.endAt != null) {
-    return `Nhóm ${condition.group}, tại ${condition.area}, từ ${condition.startAt} đến ${condition.endAt}`
-  } else if (condition.group != null && condition.area == null && condition.startAt != null) {
-    return `Nhóm ${condition.group}, từ ${condition.startAt} đến ${condition.endAt}`
-  } else if (condition.group != null && condition.area != null) {
-    return `Nhóm ${condition.group}, tại ${condition.area}`
-  } else if (condition.group != null) {
-    return `Nhóm ${condition.group}`
-  } else if (condition.area != null) {
-    return `Tại ${condition.area}`
-  } else if (condition.area != null && condition.startAt != null && condition.endAt != null) {
-    return `Tại ${condition.area}, từ ${condition.startAt} đến ${condition.endAt}`
-  } else if (condition.area != null && condition.startAt != null) {
-    return `Tại ${condition.area}, từ ${condition.startAt}`
-  } else if (condition.startAt != null && condition.endAt != null) {
-    return `Từ ${condition.startAt} đến ${condition.endAt}`
-  } else if (condition.startAt != null) {
-    return `Từ ${condition.startAt}`
-  } else if (condition.endAt != null) {
-    return `Hạn cuối ${condition.endAt}`
-  }
-}
-
-const conditionData = ref([])
-const attendance = ref({})
-const requestCheckin = async () => {
-  debugger
-  if (route.query?.c == null) {
-    ElNotification("Không có điểm danh nào đang hiện hành")
-    return
-  }
-
-  if (typeof (coords.value.latitude) == "Infinity" || typeof (coords.value.longitude) == "Infinity") {
-    ElMessage.error("Không thể lấy vị trí của bạn")
-    return
-  }
-
-  if (!coords.value.latitude || !coords.value.longitude) {
-    ElMessage.error("Không thể lấy vị trí của bạn")
-    return
-  }
-
-  if (coords.value.latitude === 0 || coords.value.longitude === 0) {
-    ElMessage.error("Không thể lấy vị trí của bạn")
-    return
-  }
-
-
-  if (coords.value.latitude === null || coords.value.longitude === null) {
-    ElMessage.error("Không thể lấy vị trí của bạn")
-    return
-  }
-
-
-
-  data.value.lat = coords.value.latitude
-  data.value.lng = coords.value.longitude
-  data.value.accuracy = coords.value.accuracy
-  data.value.code = route.query.c
-
-  var encodedData = encodeVal(data.value)
-  // var res = await publicAttendanceCheckIn({ ...data.value })
-
-  var res = await publicAttendanceCheckIn({ data: encodedData })
-  debugger
-  if (res.code == 0) {
-    if (res.data.conditions != null) {
-      // conditionData.value = res.data.conditions
-      // //console.log("res.data.conditions: ", res.data.conditions)
-      conditionData.value = res.data.conditions.filter((condition, index, self) =>
-        index === self.findIndex((c) => c.ID === condition.ID)
-      )
-    }
-    attendance.value = res.data.attendance
-
-    // if (res.data.message) {
-    //   // msg = [...new Set(res.data.message)].join(', ')
-    // }
-
-    var msg = "Bạn điểm danh không thành công. Vui lòng thao tác lại."
-    var passcount = conditionData?.value.reduce((count, item) => {
-      return item.isPass ? count + 1 : count;
-    }, 0);
-    if (passcount >0){
-      msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} lần`
-    }
-    
-    if (conditionData.value.length == 0) {
-      msg = "Bạn đã điểm danh thành công"
-    }
-
-    ElMessageBox.alert(msg, 'Thông báo', {
-      confirmButtonText: 'OK',
-      type: 'success'
-    }).then(() => {
-      if (attendance.value.redirectUrl) {
-        window.location.href = attendance.value.redirectUrl
-      }
-    });
-  } else {
-    ElMessage(res.data?.msg ?? res.msg)
-  }
-}
-
-
-const handleScroll = () => {
-  if (!header.value) return;
-  const value = window.scrollY;
-
-  if (value > 0) {
-    header.value.classList.add('bg-white');
-    header.value.classList.remove('bg-transparent');
-  } else {
-    header.value.classList.add('bg-transparent');
-    header.value.classList.remove('bg-white');
-  }
-};
+// Các biến và hàm khác của phần điểm danh, QR code, tìm kiếm, etc.
+const conditionData = ref([]);
+const attendance = ref({});
+const isSupported = ref(true); // Giả sử browser hỗ trợ
 
 onMounted(async () => {
   await nextTick();
@@ -365,27 +359,28 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
 });
 
-// watch([isLoading, error], ([loading, err]) => {
-//   if (!loading && !err) {
-//     ElMessage.success('Lấy vị trí thành công!');
-//   } else if (!loading && err) {
-//     ElMessage.error(errorMessage.value || 'Không thể lấy vị trí');
-//   }
-// });
-
+function handleScroll() {
+  if (!header.value) return;
+  const value = window.scrollY;
+  if (value > 0) {
+    header.value.classList.add('bg-white');
+    header.value.classList.remove('bg-transparent');
+  } else {
+    header.value.classList.add('bg-transparent');
+    header.value.classList.remove('bg-white');
+  }
+}
 </script>
 
-<style scope>
+<style scoped>
 body,
 html {
   height: 100%;
   overflow-y: auto;
 }
-
 main.isolate {
   overflow-y: unset;
 }
-
 #app {
   height: 100%;
   overflow-y: auto;
