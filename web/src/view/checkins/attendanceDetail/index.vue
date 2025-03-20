@@ -33,8 +33,10 @@
                   </el-form-item>
                 </div>
                 <el-form-item label="Danh mục" prop="categoryId" class="w-full required">
-                  <el-tree-select class="w-full" v-model="formData.categoryId" :data="categoryOptions"
-                    check-on-click-node :render-after-expand="false" style="width: 240px" />
+                  <el-tree-select 
+                    v-model="formData.categoryId" class="w-full" :data="categoryOptions"
+                    check-on-click-node :render-after-expand="false" style="width: 240px" 
+                  />
                 </el-form-item>
                 <el-form-item label="Đơn vị" prop="agencyId" class="w-full required">
                   <el-select v-model="formData.agencyId" placeholder="Chọn đơn vị" clearable filterable>
@@ -43,7 +45,7 @@
                 </el-form-item>
                   
                 <el-form-item prop="description" label="Mô tả" class="w-full">
-                  <el-input type="text" v-model="formData.description"></el-input>
+                  <el-input v-model="formData.description" type="text" />
                 </el-form-item>
                 <div class="flex justify-between">
                   <el-form-item label="Cho phép mọi người chỉnh sửa" label-width="150px" prop="everyoneCanEdit">
@@ -59,11 +61,20 @@
                   <el-switch v-model="formData.requirePhoto" />
                 </el-form-item>
                 </div>
-                <el-button link type="primary" icon="arrow-down" @click="showAllOptionConfig = true"
-                  v-if="!showAllOptionConfig">Mở
-                  rộng</el-button>
-                <el-button link type="primary" icon="arrow-up" @click="showAllOptionConfig = false" v-else>Thu
-                  gọn</el-button>
+                <el-button 
+                  v-if="!showAllOptionConfig"
+                  link type="primary" icon="arrow-down" 
+                  @click="showAllOptionConfig = true"                  
+                >
+                  Mở rộng
+                </el-button>
+                <el-button 
+                  v-else
+                  link type="primary" icon="arrow-up" 
+                  @click="showAllOptionConfig = false" 
+                >
+                  Thu gọn
+                </el-button>
                 <template v-if="showAllOptionConfig">
                   <div class="flex justify-between">
                     <el-form-item label="Hệ số" prop="formData.weight">
@@ -78,8 +89,10 @@
                   </div>
 
                   <el-form-item label="Giới hạn IP truy cập" prop="formData.restrictIp">
-                    <el-input v-model="formData.restrictIp" type="text" clearable
-                      placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32" />
+                    <el-input 
+                      v-model="formData.restrictIp" type="text" clearable
+                      placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32" 
+                    />
                     <span class="text-sm my-1 italic font-normal">Để giới hạn các IP điểm danh, nhập các IP được cho
                       phép
                       vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
@@ -90,16 +103,19 @@
                       sau khi điểm danh</span>
                   </el-form-item>
                 </template>
-
               </el-col>
               <el-col :span="12" class="grid-cell flex-column px-4">
                 <div class="flex justify-end p-2">
-                  <el-button type="primary" @click="saveAttendance"> Lưu</el-button>
+                  <el-button type="primary" @click="saveAttendance">
+                    Lưu
+                  </el-button>
                 </div>
                 <div class="flex w-full p-4 justify-center">
-                  <QRCodeVue3 :width="1000" :height="1000" :value="targetClientURL" :key="targetClientURL" :qr-options="{
-                    errorCorrectionLevel: 'H'
-                  }" :image-options="{ hideBackgroundDots: true, imageSize: 0.4, margin: 10 }"
+                  <QRCodeVue3 
+                    :key="targetClientURL"
+                    :width="1000" :height="1000" :value="targetClientURL"  
+                    :qr-options="{errorCorrectionLevel: 'H'}" 
+                    :image-options="{ hideBackgroundDots: true, imageSize: 0.4, margin: 10 }"
                     :corners-square-options="{ type: 'extra-rounded', color: '#514C39' }" :corners-dot-options="{
                       type: undefined,
                       color: '#7BA227'
@@ -116,7 +132,8 @@
                       }
                     }" :download="true" image="/dlu.svg" buttonName="Tải xuống" :downloadOptions="downloadQrOptions"
                     downloadButton="download-btn" :backgroundOptions="backgroundQROptions" myclass="detail-qrcode"
-                    imgclass="qrcode-img" />
+                    imgclass="qrcode-img" 
+                  />
                 </div>
               </el-col>
             </el-row>
@@ -152,25 +169,40 @@
           </div>
           <div class="flex flex-row justify-evenly py-2">
             <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
-              <p class="text-5xl font-bold text-center py-3">{{ formData.total }}</p>
-              <p class="text-slate-700">Tổng số thành viên</p>
+              <p class="text-5xl font-bold text-center py-3">
+                {{ formData.total }}
+              </p>
+              <p class="text-slate-700">
+                Tổng số thành viên
+              </p>
             </div>
             <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
-              <p class="text-5xl font-bold text-center py-3">{{ formData.totalCheckin }}</p>
-              <p class="text-slate-700">Đã điểm danh</p>
+              <p class="text-5xl font-bold text-center py-3">
+                {{ formData.totalCheckin }}
+              </p>
+              <p class="text-slate-700">
+                Đã điểm danh
+              </p>
             </div>
             <!-- <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
               <p class="text-5xl font-bold text-center py-3">{{ formData.total - formData.totalCheckin }}</p>
               <p class="text-slate-700">Chưa điểm danh</p>
             </div> -->
             <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
-              <p class="text-5xl font-bold text-center py-3">{{ total }}</p>
-              <p class="text-slate-700">Tổng lượt truy cập</p>
+              <p class="text-5xl font-bold text-center py-3">
+                {{ total }}
+              </p>
+              <p class="text-slate-700">
+                Tổng lượt truy cập
+              </p>
             </div>
           </div>
           <div class="my-4">
-            <el-form label-position="top"ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
-              :rules="searchRules" @keyup.enter="onSubmit">
+            <el-form 
+              ref="elSearchFormRef" label-position="top"
+              :inline="true" :model="searchInfo" class="demo-form-inline"
+              :rules="searchRules" @keyup.enter="onSubmit"
+            >
               <el-form-item label="Ngày tạo" prop="createdAt">
                 <el-date-picker v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu" />
               </el-form-item>
@@ -187,9 +219,9 @@
                   <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
                 </el-select>
               </el-form-item>
-            <el-form-item label="Agent" prop="agent">
-              <el-input v-model="searchInfo.agent" type="text" placeholder="Agent"></el-input>
-            </el-form-item>
+              <el-form-item label="Agent" prop="agent">
+                <el-input v-model="searchInfo.agent" type="text" placeholder="Agent" />
+              </el-form-item>
               <el-form-item label="Hành động">
                 <el-button type="primary" icon="search" @click="onSubmit">
                   Tìm kiếm
@@ -226,9 +258,12 @@
               <el-table-column align="left" label="IP" prop="iP" width="140" />
               <el-table-column align="left" label="Vị trí" width="170">
                 <template #default="scope">
-                  <a target="_blank"
-                    :href="'https://www.google.com/maps?q=' + scope.row.lattidue + ',' + scope.row.longtidue">{{
-                      scope.row.lattidue }}, {{ scope.row.longtidue }}</a>
+                  <a 
+                    target="_blank"
+                    :href="'https://www.google.com/maps?q=' + scope.row.lattidue + ',' + scope.row.longtidue"
+                  >
+                    {{ scope.row.lattidue }}, {{ scope.row.longtidue }}
+                  </a>
                 </template>
               </el-table-column>
               <el-table-column align="left" label="Client ID" prop="visitorId" width="160">
@@ -238,14 +273,16 @@
               </el-table-column>
               <el-table-column label="Agent" prop="agent">
                 <template #default="scope">
-                  {{formatUserAgent(scope.row.agent)}}
+                  {{ formatUserAgent(scope.row.agent) }}
                 </template>
               </el-table-column>
             </el-table>
             <div class="gva-pagination">
-              <el-pagination layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
+              <el-pagination 
+                layout="total, sizes, prev, pager, next, jumper" :current-page="page" :page-size="pageSize"
                 :page-sizes="[10, 30, 50, 100]" :total="total" @current-change="handleCurrentChange"
-                @size-change="handleSizeChange" />
+                @size-change="handleSizeChange" 
+              />
             </div>
           </div>
         </div>

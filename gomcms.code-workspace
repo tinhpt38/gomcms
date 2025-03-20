@@ -27,7 +27,7 @@
         "request": "launch",
         "name": "Backend",
         "cwd": "${workspaceFolder:backend}",
-        "program": "${workspaceFolder:backend}/"
+        "program": "${workspaceFolder:backend}/"2
       },
       {
         "type": "node",

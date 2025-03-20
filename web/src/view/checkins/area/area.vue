@@ -11,7 +11,7 @@
         @keyup.enter="onSubmit"
       >
         <el-form-item label="Khu vực" prop="areaId">
-          <el-select v-mod placeholder="Chọn khu vực" clearable filterable>
+          <el-select v-model="searchInfo.areaId" placeholder="Chọn khu vực" clearable filterable>
             <el-option v-for="item in tableData" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>

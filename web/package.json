@@ -20,7 +20,7 @@
         "@vueuse/core": "^10.11.1",
         "@wangeditor/editor": "^5.1.23",
         "@wangeditor/editor-for-vue": "^5.1.12",
-        "axios": "^1.4.0",
+        "axios": "^1.8.3",
         "core-js": "^3.31.1",
         "echarts": "^5.5.1",
         "element-plus": "^2.9.5",
