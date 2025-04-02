@@ -112,7 +112,14 @@
     })
   }
 
-
+// @Tags Participant
+// @Summary 根据 phiên điểm danh 获取 Sinh viên (Người tham dự phiên điểm danh) 列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.PageInfo true "根据 phiên điểm danh 获取 Sinh viên (Người tham dự phiên điểm danh) 列表"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /participant/getParticipantListByAttendance [get]
   export const getParticipantListByAttendance = (params) => {
     return service({
       url: '/participant/getParticipantListByAttendance',
@@ -120,3 +127,19 @@
       params
     })
   }
+
+// @Tags Participant
+// @Summary 获取 Sinh viên 条件详情 (用于展示每个成员的 điểm danh điều kiện)
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param participantId query uint true "Sinh viênID"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
+// @Router /participant/getParticipantConditions [get]
+export const getParticipantConditions = (params) => {
+  return service({
+    url: '/participant/conditions',
+    method: 'get',
+    params
+  })
+}

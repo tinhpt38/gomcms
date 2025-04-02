@@ -22,11 +22,11 @@ func (participantApi *ParticipantApi) CreateParticipant(c *gin.Context) {
 	}
 	err = participantService.CreateParticipant(&participant)
 	if err != nil {
-		global.GVA_LOG.Error("thất bại!", zap.Error(err))
-		response.FailWithMessage("thất bại:"+err.Error(), c)
+		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+		response.FailWithMessage("Thất bại: "+err.Error(), c)
 		return
 	}
-	response.OkWithMessage("thành công", c)
+	response.OkWithMessage("Thành công", c)
 }
 
 func (participantApi *ParticipantApi) BulkCreateParticipants(c *gin.Context) {
@@ -39,7 +39,7 @@ func (participantApi *ParticipantApi) BulkCreateParticipants(c *gin.Context) {
 	err = participantService.BulkCreateParticipants(req)
 	if err != nil {
 		global.GVA_LOG.Error("Thêm hàng loạt thất bại!", zap.Error(err))
-		response.FailWithMessage("Thêm hàng loạt thất bại:"+err.Error(), c)
+		response.FailWithMessage("Thêm hàng loạt thất bại: "+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("Thêm hàng loạt thành công", c)
@@ -52,21 +52,19 @@ func (participantApi *ParticipantApi) DeleteParticipant(c *gin.Context) {
 	if attId > 0 {
 		err := participantService.DeleteParticipantInAttendance(ID, uint(attId))
 		if err != nil {
-			global.GVA_LOG.Error("thất bại!", zap.Error(err))
-			response.FailWithMessage("thất bại:"+err.Error(), c)
+			global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+			response.FailWithMessage("Thất bại: "+err.Error(), c)
 			return
 		}
-
 	} else {
 		err := participantService.DeleteParticipant(ID)
 		if err != nil {
-			global.GVA_LOG.Error("thất bại!", zap.Error(err))
-			response.FailWithMessage("thất bại:"+err.Error(), c)
+			global.GVA_LOG.Error("Thất bại!", zap.Error(err))
+			response.FailWithMessage("Thất bại: "+err.Error(), c)
 			return
 		}
 	}
-
-	response.OkWithMessage("thành công", c)
+	response.OkWithMessage("Thành công", c)
 }
 
 func (participantApi *ParticipantApi) DeleteParticipantByIds(c *gin.Context) {
@@ -74,7 +72,7 @@ func (participantApi *ParticipantApi) DeleteParticipantByIds(c *gin.Context) {
 	err := participantService.DeleteParticipantByIds(IDs)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		response.FailWithMessage("Thất bại: "+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("Thành công", c)
@@ -90,7 +88,7 @@ func (participantApi *ParticipantApi) UpdateParticipant(c *gin.Context) {
 	err = participantService.UpdateParticipant(participant)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		response.FailWithMessage("Thất bại: "+err.Error(), c)
 		return
 	}
 	response.OkWithMessage("Thành công", c)
@@ -101,7 +99,7 @@ func (participantApi *ParticipantApi) FindParticipant(c *gin.Context) {
 	reparticipant, err := participantService.GetParticipant(ID)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		response.FailWithMessage("Thất bại: "+err.Error(), c)
 		return
 	}
 	response.OkWithData(reparticipant, c)
@@ -112,7 +110,7 @@ func (participantApi *ParticipantApi) FindLuckyParticipant(c *gin.Context) {
 	reparticipant, err := participantService.GetLuckyParticipant(acId)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		response.FailWithMessage("Thất bại: "+err.Error(), c)
 		return
 	}
 	response.OkWithData(reparticipant, c)
@@ -128,7 +126,7 @@ func (participantApi *ParticipantApi) GetParticipantList(c *gin.Context) {
 	list, total, err := participantService.GetParticipantInfoList(pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		response.FailWithMessage("Thất bại: "+err.Error(), c)
 		return
 	}
 	response.OkWithDetailed(response.PageResult{
@@ -149,7 +147,7 @@ func (participantApi *ParticipantApi) GetParticipantListByAttendance(c *gin.Cont
 	list, total, err := participantService.GetParticipantInfoListByAttendance(pageInfo)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		response.FailWithMessage("Thất bại: "+err.Error(), c)
 		return
 	}
 	response.OkWithDetailed(response.PageResult{
@@ -161,8 +159,33 @@ func (participantApi *ParticipantApi) GetParticipantListByAttendance(c *gin.Cont
 }
 
 func (participantApi *ParticipantApi) GetParticipantPublic(c *gin.Context) {
-
 	response.OkWithDetailed(gin.H{
 		"info": "Check thành viên (Người tham dự phiên điểm danh)",
 	}, "Thành công", c)
+}
+
+func (participantApi *ParticipantApi) GetParticipantConditions(c *gin.Context) {
+	participantIdStr := c.Query("participantId")
+	attendanceIdStr := c.Query("attendanceId")
+
+	participantId, err := strconv.Atoi(participantIdStr)
+	if err != nil {
+		response.FailWithMessage("participantId không hợp lệ", c)
+		return
+	}
+
+	attendanceId, err := strconv.Atoi(attendanceIdStr)
+	if err != nil {
+		response.FailWithMessage("attendanceId không hợp lệ", c)
+		return
+	}
+
+	data, err := participantService.GetParticipantConditionData(uint(participantId), uint(attendanceId))
+	if err != nil {
+		global.GVA_LOG.Error("Thất bại khi lấy điều kiện", zap.Error(err))
+		response.FailWithMessage("Thất bại: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithData(data, c)
 }

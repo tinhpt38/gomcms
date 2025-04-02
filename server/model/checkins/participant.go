@@ -13,6 +13,9 @@ type Participant struct {
 	GroupId      *[]uint `json:"groupId" form:"groupId" gorm:"-"`
 	AttendanceId *uint   `json:"attendanceId" form:"attendanceId" gorm:"-"`
 	Groups       []Group `json:"groups" gorm:"many2many:attendance_group_participants;"`
+
+	SuccessCount  int `json:"successCount"`
+	RequiredCount int `json:"requiredCount"`
 }
 
 // TableName Sinh viên (Người tham dự phiên điểm danh) Participant自定义表名 participant

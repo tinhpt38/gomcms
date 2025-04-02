@@ -24,8 +24,11 @@ func (s *ParticipantRouter) InitParticipantRouter(Router *gin.RouterGroup, Publi
 		participantRouterWithoutRecord.GET("findLuckyParticipant", participantApi.FindLuckyParticipant) // 根据ID获取Sinh viên (Người tham dự phiên điểm danh)
 		participantRouterWithoutRecord.GET("getParticipantList", participantApi.GetParticipantList)     // 获取Sinh viên (Người tham dự phiên điểm danh)列表
 		participantRouterWithoutRecord.GET("getParticipantListByAttendance", participantApi.GetParticipantListByAttendance)
+
 	}
 	{
 		participantRouterWithoutAuth.GET("getParticipantPublic", participantApi.GetParticipantPublic) // 获取Sinh viên (Người tham dự phiên điểm danh)列表
+		participantRouterWithoutAuth.GET("getParticipantConditions", participantApi.GetParticipantConditions)
+		participantRouterWithoutAuth.GET("conditions", participantApi.GetParticipantConditions)
 	}
 }
