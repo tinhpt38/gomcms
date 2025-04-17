@@ -13,6 +13,7 @@ type AttendanceSearch struct {
 	EndDate        *time.Time `json:"endDate" form:"endDate"`
 	AgencyId       uint       `json:"agencyId" form:"agencyId"`
 	CategoryId     uint       `json:"categoryId" form:"categoryId"`
+	RequirePhoto   *bool      `json:"requirePhoto" form:"requirePhoto"`
 	request.PageInfo
 }
 

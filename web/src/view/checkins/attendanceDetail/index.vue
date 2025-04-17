@@ -58,9 +58,17 @@
                     <el-switch v-model="formData.allowGuest" />
                   </el-form-item>
                   <el-form-item label="Yêu cầu chụp ảnh" label-width="150px" prop="requirePhoto">
-                  <el-switch v-model="formData.requirePhoto" />
-                </el-form-item>
+                    <el-switch v-model="formData.requirePhoto" />
+                  </el-form-item>
                 </div>
+                <!-- Hiển thị thông báo nếu chức năng chụp ảnh được bật -->
+                <el-alert
+                  v-if="formData.requirePhoto"
+                  title="Khi điểm danh, hệ thống sẽ yêu cầu bạn chụp ảnh để xác thực danh tính."
+                  type="info"
+                  show-icon
+                  style="margin-bottom: 12px;"
+                />
                 <el-button 
                   v-if="!showAllOptionConfig"
                   link type="primary" icon="arrow-down" 
@@ -93,14 +101,15 @@
                       v-model="formData.restrictIp" type="text" clearable
                       placeholder="172.0.0.1,196.0.0.1,10.0.0.0/32" 
                     />
-                    <span class="text-sm my-1 italic font-normal">Để giới hạn các IP điểm danh, nhập các IP được cho
-                      phép
-                      vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng</span>
+                    <span class="text-sm my-1 italic font-normal">
+                      Để giới hạn các IP điểm danh, nhập các IP được cho phép vào ô dưới đây, cách nhau bởi dấu phẩy, không có khoảng trắng
+                    </span>
                   </el-form-item>
                   <el-form-item label="URL chuyển hướng" prop="formData.clientUrl">
                     <el-input v-model="formData.redirectUrl" type="text" clearable />
-                    <span class="text-sm my-1 italic font-normal">Hệ thống sẽ chuyển hướng bạn đến địa chỉ được nhập vào
-                      sau khi điểm danh</span>
+                    <span class="text-sm my-1 italic font-normal">
+                      Hệ thống sẽ chuyển hướng bạn đến địa chỉ được nhập vào sau khi điểm danh
+                    </span>
                   </el-form-item>
                 </template>
               </el-col>
@@ -116,10 +125,9 @@
                     :width="1000" :height="1000" :value="targetClientURL"  
                     :qr-options="{errorCorrectionLevel: 'H'}" 
                     :image-options="{ hideBackgroundDots: true, imageSize: 0.4, margin: 10 }"
-                    :corners-square-options="{ type: 'extra-rounded', color: '#514C39' }" :corners-dot-options="{
-                      type: undefined,
-                      color: '#7BA227'
-                    }" :dots-options="{
+                    :corners-square-options="{ type: 'extra-rounded', color: '#514C39' }" 
+                    :corners-dot-options="{ type: undefined, color: '#7BA227' }" 
+                    :dots-options="{
                       type: 'dots',
                       color: '#7BA227',
                       gradient: {
@@ -130,8 +138,14 @@
                           { offset: 1, color: '#E67F32' }
                         ]
                       }
-                    }" :download="true" image="/dlu.svg" buttonName="Tải xuống" :downloadOptions="downloadQrOptions"
-                    downloadButton="download-btn" :backgroundOptions="backgroundQROptions" myclass="detail-qrcode"
+                    }" 
+                    :download="true" 
+                    image="/dlu.svg" 
+                    buttonName="Tải xuống" 
+                    :downloadOptions="downloadQrOptions"
+                    downloadButton="download-btn" 
+                    :backgroundOptions="backgroundQROptions" 
+                    myclass="detail-qrcode"
                     imgclass="qrcode-img" 
                   />
                 </div>
@@ -184,10 +198,6 @@
                 Đã điểm danh
               </p>
             </div>
-            <!-- <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
-              <p class="text-5xl font-bold text-center py-3">{{ formData.total - formData.totalCheckin }}</p>
-              <p class="text-slate-700">Chưa điểm danh</p>
-            </div> -->
             <div class="bg-white shadow-md text-base p-4 rounded justify-between items-center">
               <p class="text-5xl font-bold text-center py-3">
                 {{ total }}
@@ -206,14 +216,11 @@
               <el-form-item label="Ngày tạo" prop="createdAt">
                 <el-date-picker v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu" />
               </el-form-item>
-              <!-- <el-form-item label="Email" prop="email">
-                <el-input v-model="searchInfo.email" type="text" placeholder="Email"clearable />
-              </el-form-item>               -->
               <el-form-item label="Thành viên" prop="fullName">
-              <el-select v-model="searchInfo.fullName" placeholder="Chọn thành viên" multiple clearable filterable>
-                <el-option v-for="item in participantOptions" :key="item.id" :label="item.fullName" :value="item.fullName" />
-              </el-select>
-            </el-form-item>
+                <el-select v-model="searchInfo.fullName" placeholder="Chọn thành viên" multiple clearable filterable>
+                  <el-option v-for="item in participantOptions" :key="item.id" :label="item.fullName" :value="item.fullName" />
+                </el-select>
+              </el-form-item>
               <el-form-item label="Nhóm" prop="groupId">
                 <el-select v-model="searchInfo.groupId" placeholder="Chọn nhóm" clearable filterable>
                   <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
@@ -254,7 +261,6 @@
                   <span>{{ scope.row.group?.name ?? '/' }}</span>
                 </template>
               </el-table-column>
-
               <el-table-column align="left" label="IP" prop="iP" width="140" />
               <el-table-column align="left" label="Vị trí" width="170">
                 <template #default="scope">
@@ -325,7 +331,7 @@ import {
 
 import { useRoute } from 'vue-router';
 import { ElForm, ElMessage } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import Partticipant from '@/view/checkins/components/participant/index.vue'
 import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
@@ -365,7 +371,15 @@ const formData = ref({
   categoryId: null,
   agencyId: null,
   everyoneCanEdit: false,
-  requirePhoto: false
+  requirePhoto: false, 
+  weight: null,
+  limitCount: null,
+  limitClientCount: null,
+  clientUrl: '',
+  redirectUrl: '',
+  description: '',
+  total: 0,
+  totalCheckin: 0
 })
 
 const elFormRef = ref();
@@ -406,16 +420,18 @@ const searchRules = reactive({
   ],
 })
 
+// Tùy chọn: Watcher để log (hoặc tự động lưu) khi requirePhoto thay đổi
+watch(() => formData.value.requirePhoto, (newVal, oldVal) => {
+  console.log("Chức năng yêu cầu chụp ảnh thay đổi từ", oldVal, "sang", newVal)
+  // Nếu muốn tự động lưu khi thay đổi, có thể gọi saveAttendance() tại đây.
+})
+
 const getDetailData = async () => {
-  var id = $route.params.id
-  //console.log('client URL', clientURL.value)
   const res = await findAttendance({ id: $route.params.id })
   if (res.code == 0) {
     formData.value = res.data
   }
   generateQRCode();
-  // //console.log("getDetailData: ", formData.value)
-
 }
 getDetailData();
 
@@ -426,14 +442,12 @@ const saveAttendance = async () => {
   if (formData.value.limitClientCount) {
     formData.value.limitClientCount = Number(formData.value.limitClientCount)
   }
-
   if (formData.value.weight) {
     formData.value.weight = Number(formData.value.weight)
   }
-
   elFormRef.value?.validate(async (valid) => {
     if (!valid) return
-    var res = await updateAttendance(formData.value)
+    const res = await updateAttendance(formData.value)
     if (res.code === 0) {
       ElMessage({
         type: 'success',
@@ -450,18 +464,14 @@ const backgroundQROptions = ref({
   color: '#FFFFFF00'
 })
 const generateQRCode = async () => {
-  var params = base32.encode($route.params.id)
-  //console.log('params-endcode' + params)
-  //console.log(clientURL.value)
-  var url = clientURL.value + '/?c=' + params
+  const params = base32.encode($route.params.id)
+  const url = clientURL.value + '/?c=' + params
   formData.value.clientUrl = url
-  //console.log('url', url)
   targetClientURL.value = url
   downloadQrOptions.value = {
     name: 'QR Điểm danh - ' + formData.value.title + " ngày " + formatDate(formData.value.startDate),
     extension: 'png'
   }
-
 }
 
 const reGetOptions = async () => {
@@ -485,8 +495,7 @@ const rule = reactive({
     required: true,
     message: 'Ngày bắt đầu là bắt buộc',
     trigger: ['input', 'blur'],
-  },
-  ],
+  }],
   endDate: [{
     required: true,
     message: 'Ngày kết thúc là bắt buộc',
@@ -502,21 +511,17 @@ const rule = reactive({
     message: 'Đơn vị không được để trống',
     trigger: ['input', 'blur'],
   }],
-
 })
-
 
 const handleSizeChange = (val) => {
   pageSize.value = val
   getTableData()
 }
 
-
 const handleCurrentChange = (val) => {
   page.value = val
   getTableData()
 }
-
 
 const getTableData = async () => {
   searchInfo.value.attendanceId = $route.params.id
@@ -527,25 +532,14 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  // //console.log("Danh sách điểm danh")
-  // //console.log(table)
   generateQRCode()
 }
-
 getTableData()
 
 const onSubmit = () => {
   page.value = 1
   pageSize.value = 10
   getTableData()
-
-  // elSearchFormRef.value?.validate(async (valid) => {
-  //   if (!valid) return
-  //   page.value = 1
-  //   pageSize.value = 10
-  //   getTableData()
-  // })
-
 }
 
 const onReset = () => {
@@ -558,9 +552,7 @@ const getCategoryOptions = async () => {
   if (table.code === 0) {
     categoryOptions.value = convertToTree(table.data.list)
   }
-  // //console.log("parent Options", categoryOptions.value)
 }
-
 getCategoryOptions()
 
 const getAgencyOptions = async () => {
@@ -571,32 +563,24 @@ const getAgencyOptions = async () => {
 }
 getAgencyOptions()
 
-
 const convertToTree = (data) => {
   const map = {}
   const roots = []
-
-  // Create a map of nodes using their ID as the key
   data.forEach((node) => {
     map[node.ID] = { ...node, value: node.ID, label: node.name, children: [] }
   })
-
-  // Iterate over the nodes and assign children to their parent
   data.forEach((node) => {
     const parent = map[node.parentId]
-
     if (parent) {
       parent.children.push(map[node.ID])
     } else {
       roots.push(map[node.ID])
     }
   })
-  //console.log('roots', roots)
   return roots
 }
 
 const tabHandleClick = async (tab, event) => {
-
   if (tab.props.name === 'conditionTab') {
     await conditionTabRef.value?.getAgencyOptions()
     await conditionTabRef.value?.getGroupOptions()
@@ -607,16 +591,13 @@ const areaOptions = ref([])
 const getAreaListData = async () => {
   const table = await findAttendanceArea({ id: searchInfo.value.attendanceId })
   if (table.code === 0) {
-    areaOptions.value = table.data.map(item => {
-      return {
-        ID: item.ID,
-        name: item.area?.name
-      }
-    })
+    areaOptions.value = table.data.map(item => ({
+      ID: item.ID,
+      name: item.area?.name
+    }))
   }
-
 }
-getAreaListData();
+getAreaListData()
 
 const groupOptions = ref([])
 const getGroupOptions = async () => {
@@ -624,12 +605,8 @@ const getGroupOptions = async () => {
   if (table.code === 0) {
     groupOptions.value = table.data.list
   }
-  //console.log('groupOptions', groupOptions.value)
 }
-getGroupOptions();
-
-
-
+getGroupOptions()
 </script>
 
 <style lang="scss">
@@ -651,14 +628,12 @@ button.download-btn {
   margin: 0 auto;
   display: flex;
   justify-content: center;
-
 }
 
 .detail-qrcode+div {
   margin: 0 auto;
   display: flex;
   justify-content: center;
-
 }
 
 img.qrcode-img {

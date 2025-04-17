@@ -148,6 +148,10 @@ func (attendanceService *AttendanceService) GetAttendanceInfoList(info checkinsR
 		db = db.Where("category_id = ?", info.CategoryId)
 	}
 
+	if info.RequirePhoto != nil {
+		db = db.Where("require_photo = ?", *info.RequirePhoto)
+	}
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return
@@ -210,7 +214,9 @@ func (attendanceService *AttendanceService) GetPublicAttendanceInfoList(info che
 	if info.CategoryId != 0 {
 		db = db.Where("category_id = ?", info.CategoryId)
 	}
-
+	if info.RequirePhoto != nil {
+		db = db.Where("require_photo = ?", *info.RequirePhoto)
+	}
 	// db = db.Where("is_locked = 0")
 
 	err = db.Count(&total).Error

@@ -243,6 +243,18 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
 	}
 
+	if attendance.RequirePhoto && strings.TrimSpace(req.PhotoData) == "" {
+		//msg := "Yêu cầu chụp ảnh để xác thực danh tính"
+		//checkinLog.MessageList += msg + "$$"
+		//global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
+		result := map[string]interface{}{
+			"attendance": attendance,
+			"conditions": []checkins.Condition{}, // hoặc rConditions nếu có
+			"message":    "Vui lòng chụp ảnh để xác thực danh tính",
+		}
+		return result, nil
+	}
+
 	if attendance.LimitCount > 0 {
 		var list []checkins.AttendanceCheckIn
 		global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&list)
@@ -269,7 +281,6 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			// return nil, errors.New("thiết bị đã điểm danh đủ số lần cho phép")
 		}
 	}
-
 	// Kiểm tra điều kiện điểm danh
 	var listAgpIDs []int
 	for _, agp := range listAgps {
@@ -319,6 +330,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 				Agent:            userAgent,
 				Accuracy:         req.Accuracy,
 				VisitorId:        req.VisitorId,
+				PhotoURL:         req.PhotoData,
 			}
 			agpCheckins = append(agpCheckins, attendanceCheckIn)
 		}
@@ -346,6 +358,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 							Agent:            userAgent,
 							Accuracy:         req.Accuracy,
 							VisitorId:        req.VisitorId,
+							PhotoURL:         req.PhotoData,
 						}
 						agpCheckins = append(agpCheckins, attendanceCheckIn)
 					} else {

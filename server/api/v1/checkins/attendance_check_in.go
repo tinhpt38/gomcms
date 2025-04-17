@@ -185,9 +185,16 @@ func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Conte
 	result, err := attendanceCheckInService.CheckinAttendance(checkinReq, ip, userAgent)
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
-		response.FailWithMessage("Thất bại:"+err.Error(), c)
+		// special-case: server trả payload kèm requirePhoto
+		if result != nil {
+			// trả HTTP 200 với dữ liệu để frontend mở camera
+			response.OkWithDetailed(result, "Vui lòng chụp ảnh để xác thực danh tính", c)
+			return
+		}
+		// các lỗi khác vẫn là fail
+		response.FailWithMessage("Thất bại: "+err.Error(), c)
 		return
 	}
-	response.OkWithData(result, c)
-
+	// check‑in thành công không cần ảnh
+	response.OkWithDetailed(result, "Điểm danh thành công", c)
 }
