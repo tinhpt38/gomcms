@@ -112,3 +112,11 @@ export const getAttendanceCheckInLogList = (params) => {
     params
   })
 }
+export const submitAttendanceAnswer = (data) => {
+  return service({
+    url: '/attendanceCheckIn/submitAnswer',
+    method: 'post',
+    data
+  })
+}
+

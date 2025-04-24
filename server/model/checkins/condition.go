@@ -10,18 +10,19 @@ import (
 // Điều kiện để checkins 结构体  Condition
 type Condition struct {
 	global.GVA_MODEL
-	AttendanceId *uint           `json:"attendanceId" form:"attendanceId" gorm:"column:attendance_id;comment:;"` //Khu vực
-	GroupId      *uint           `json:"groupId" form:"groupId" gorm:"column:group_id;comment:;"`                //Nhóm
-	AreaId       *uint           `json:"areaId" form:"areaId" gorm:"column:area_id;comment:;"`                   //Khu vực
-	StartAt      *time.Time      `json:"startAt" form:"startAt" gorm:"column:start_at;comment:;"`                //Bắt đầu
-	EndAt        *time.Time      `json:"endAt" form:"endAt" gorm:"column:end_at;comment:;"`                      //Kết thúc
-	CreatedBy    uint            `gorm:"column:created_by;comment:创建者"`
-	UpdatedBy    uint            `gorm:"column:updated_by;comment:更新者"`
-	DeletedBy    uint            `gorm:"column:deleted_by;comment:删除者"`
-	Group        *Group          `json:"group" gorm:"foreignKey:GroupId;references:ID;comment:Nhóm;"`  //Nhóm
-	Area         *AttendanceArea `json:"area" gorm:"foreignKey:AreaId;references:ID;comment:Khu vực;"` //Khu vực
-	IsPass       bool            `json:"isPass" form:"isPass" gorm:"-"`                                //是否通过
-	Message      string          `json:"msg" form:"msg" gorm:"-"`                                      //是否通过
+	AttendanceId  *uint           `json:"attendanceId" form:"attendanceId" gorm:"column:attendance_id;comment:;"` //Khu vực
+	GroupId       *uint           `json:"groupId" form:"groupId" gorm:"column:group_id;comment:;"`                //Nhóm
+	AreaId        *uint           `json:"areaId" form:"areaId" gorm:"column:area_id;comment:;"`                   //Khu vực
+	StartAt       *time.Time      `json:"startAt" form:"startAt" gorm:"column:start_at;comment:;"`                //Bắt đầu
+	EndAt         *time.Time      `json:"endAt" form:"endAt" gorm:"column:end_at;comment:;"`                      //Kết thúc
+	CreatedBy     uint            `gorm:"column:created_by;comment:创建者"`
+	UpdatedBy     uint            `gorm:"column:updated_by;comment:更新者"`
+	DeletedBy     uint            `gorm:"column:deleted_by;comment:删除者"`
+	Group         *Group          `json:"group" gorm:"foreignKey:GroupId;references:ID;comment:Nhóm;"`               //Nhóm
+	Area          *AttendanceArea `json:"area" gorm:"foreignKey:AreaId;references:ID;comment:Khu vực;"`              //Khu vực
+	IsPass        bool            `json:"isPass" form:"isPass" gorm:"-"`                                             //是否通过
+	Message       string          `json:"msg" form:"msg" gorm:"-"`                                                   //是否通过
+	CorrectAnswer string          `json:"correctAnswer" form:"correctAnswer" gorm:"column:correct_answer;comment:;"` //正确答案
 }
 
 // TableName Điều kiện để checkins Condition自定义表名 conditions

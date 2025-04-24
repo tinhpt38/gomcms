@@ -38,3 +38,7 @@ type AttendanceSearchHistory struct {
 	request.PageInfo
 	Email string `json:"email" form:"email"`
 }
+type Question struct {
+	AttendanceID uint `json:"attendanceID" form:"attendanceID"`
+	QuestionID   uint `json:"questionID" form:"questionID"`
+}

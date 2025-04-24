@@ -18,6 +18,7 @@ func (s *AttendanceRouter) InitAttendanceRouter(Router *gin.RouterGroup, PublicR
 		attendanceRouter.POST("statsByAgencyCategory", attendanceApi.StatsByAgencyCategory)
 		attendanceRouter.POST("statsScatterPlot", attendanceApi.StatsScatterPlot)
 		attendanceRouter.POST("statsTrendLine", attendanceApi.StatsTrendLine)
+		attendanceRouter.POST("createAttendanceQuestion", attendanceApi.CreateAttendance)
 
 		attendanceRouter.DELETE("deleteAttendance", attendanceApi.DeleteAttendance)
 		attendanceRouter.DELETE("deleteAttendanceArea", attendanceApi.DeleteAttendanceArea)
@@ -30,6 +31,8 @@ func (s *AttendanceRouter) InitAttendanceRouter(Router *gin.RouterGroup, PublicR
 		attendanceRouterWithoutRecord.GET("findAttendance", attendanceApi.FindAttendance)
 		attendanceRouterWithoutRecord.GET("findAttendanceArea", attendanceApi.FindAttendanceArea)
 		attendanceRouterWithoutRecord.GET("getAttendanceList", attendanceApi.GetAttendanceList)
+		attendanceRouterWithoutRecord.GET("getAttendanceQuestion", attendanceApi.FindAttendance)
+
 	}
 	{
 		attendanceRouterWithoutAuth.GET("getAttendancePublic", attendanceApi.GetPublicAttendanceList)

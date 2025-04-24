@@ -331,6 +331,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 				Accuracy:         req.Accuracy,
 				VisitorId:        req.VisitorId,
 				PhotoURL:         req.PhotoData,
+				//AnswerQuestion: checkinReq.AnswerQuestion,
 			}
 			agpCheckins = append(agpCheckins, attendanceCheckIn)
 		}
@@ -359,6 +360,9 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 							Accuracy:         req.Accuracy,
 							VisitorId:        req.VisitorId,
 							PhotoURL:         req.PhotoData,
+
+							//AnswerQuestion: checkinReq.AnswerQuestion,
+
 						}
 						agpCheckins = append(agpCheckins, attendanceCheckIn)
 					} else {

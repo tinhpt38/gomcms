@@ -356,10 +356,24 @@ const getDetails = async (row) => {
     nextTick(() => { initOpenLayersMap() })
   }
 }
+// Đóng cửa sổ chi tiết
+const closeDetailShow = () => {
+  detailShow.value = false
+  detailFrom.value = {}
+}
+// --- OpenLayers tích hợp cho Drawer xem chi tiết ---
+import 'ol/ol.css'
+import Map from 'ol/Map'
+import View from 'ol/View'
+import TileLayer from 'ol/layer/Tile'
+import OSM from 'ol/source/OSM'
+import { fromLonLat } from 'ol/proj'
+import { Circle as CircleGeom } from 'ol/geom'
+import { Feature } from 'ol'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import { Style, Stroke, Fill } from 'ol/style'
 
-const closeDetailShow = () => { detailShow.value = false; detailFrom.value = {} }
-
-// ==================== OpenLayers Map ====================
 
 let detailMapInstance = null
 let currentInteraction = null

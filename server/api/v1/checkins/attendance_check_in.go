@@ -198,3 +198,39 @@ func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Conte
 	// check‑in thành công không cần ảnh
 	response.OkWithDetailed(result, "Điểm danh thành công", c)
 }
+func (a *AttendanceCheckInApi) SubmitAnswer(c *gin.Context) {
+	var input checkins.AttendanceCheckIn
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response.FailWithMessage("Dữ liệu không hợp lệ", c)
+		return
+	}
+
+	if input.ID == 0 {
+		response.FailWithMessage("Thiếu ID của bản ghi điểm danh", c)
+		return
+	}
+
+	// Cập nhật answer vào bản ghi theo ID
+	if err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+		Where("id = ?", input.ID).
+		Update("answer", input.AnswerQuestion).Error; err != nil {
+		response.FailWithMessage("Cập nhật câu trả lời thất bại", c)
+		return
+	}
+
+	response.OkWithMessage("Cập nhật câu trả lời thành công", c)
+}
+
+// func (attendanceCheckInApi *AttendanceCheckInApi) SubmitAttendanceAnswer(c *gin.Context) {
+// 	var req checkinsReq.AttendanceCheckIn
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		response.FailWithMessage("Dữ liệu không hợp lệ", c)
+// 		return
+// 	}
+// 	err := attendanceCheckInService.SubmitAttendanceAnswer(req.Question, req.Answer)
+// 	if err != nil {
+// 		response.FailWithMessage("Lưu thất bại: "+err.Error(), c)
+// 		return
+// 	}
+// 	response.OkWithMessage("Lưu thành công!", c)
+// }

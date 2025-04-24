@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="gva-search-box">
+    <div class="gva-search-box ">
       <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule"
       @keyup.enter="onSubmit">
       
@@ -14,9 +14,9 @@
           end-placeholder="Ngày kết thúc" format="YYYY-MM-DD" clearable />
       </el-form-item>
       
-      <el-form-item label="Tên phân loại" prop="name">
+      <!-- <el-form-item label="Tên phân loại" prop="name">
         <el-input v-model.number="searchInfo.name" placeholder="Điều kiện tìm kiếm" />
-      </el-form-item>
+      </el-form-item> -->
       
       <template v-if="showAllQuery">
         <!-- Thêm các điều kiện tìm kiếm cần điều khiển hiển thị vào đây -->
