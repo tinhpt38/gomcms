@@ -50,12 +50,19 @@
       <!-- Cột hiển thị điểm danh -->
       <el-table-column label="Điểm danh" width="180">
         <template #default="scope">
-          <span>{{ scope.row.passCount }} / {{ scope.row.conditionCount }}</span>
+          <!-- <span>{{ scope.row.passCount }} / {{ scope.row.conditionCount }}</span> -->
+          <span>{{ scope.row.passCount }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Số điều kiện" width="180">
+        <template #default="scope">
+          <!-- <span>{{ scope.row.passCount }} / {{ scope.row.conditionCount }}</span> -->
+          <span>{{ scope.row.conditionCount }}</span>
         </template>
       </el-table-column>
 
       <!-- Cột hiển thị danh sách điều kiện -->
-      <el-table-column label="Tên điều kiện" min-width="300">
+      <!-- <el-table-column label="Tên điều kiện" min-width="300">
         <template #default="scope">
           <div v-if="scope.row.conditions && scope.row.conditions.length">
             <div v-for="(cond, index) in scope.row.conditions" :key="index">
@@ -66,7 +73,7 @@
             Không có dữ liệu
           </div>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       
       <el-table-column align="right" label="Hành động" fixed="right" min-width="240">
         <template #default="scope">
@@ -120,7 +127,7 @@
           <span class="text-lg">Thêm hàng loạt thành viên</span>
           <div>
             <el-button type="primary" @click="bulkAddParticipantsFunc">Đồng ý</el-button>
-            <el-button @click="bulkAddVisible = false">Hủy</el-button>
+            <el-button @click="bulkAddVisible == false">Hủy</el-button>
           </div>
         </div>
       </template>
@@ -131,7 +138,7 @@
         </div>
         <el-form-item label="Nhập danh sách thành viên:" prop="list">
           <el-input type="textarea" :rows="20" v-model="bulkFormData.list" :clearable="true"
-            placeholder="Nhập danh sách email thành viên" />
+            placeholder="Nhập mã số email thành viên" />
         </el-form-item>
         <el-form-item label="Nhóm:" prop="groupId">
           <el-select v-model="bulkFormData.groupId" placeholder="Chọn nhóm" filterable clearable>
@@ -186,7 +193,7 @@ const props = defineProps({
   },
   groupOptions: {
     type: Array,
-    default: () => []
+    required: false
   }
 })
 
@@ -216,9 +223,9 @@ const handleCurrentChange = (val) => {
 
 // Đồng bộ điều kiện cho toàn bộ thành viên trong phiên điểm danh
 const syncConditionsForAttendance = async () => {
-  const data = { AttendanceId: props.acId }
+  //const data = { AttendanceId: props.acId }
   try {
-    const res = await syncCondition(data)
+    const res = await syncCondition({attendanceId: Number(props.acId)})
     if (res.code !== 0) {
       if (res.msg && res.msg.includes("Không đủ quyền")) {
         console.warn("Sync condition skipped: Không đủ quyền")

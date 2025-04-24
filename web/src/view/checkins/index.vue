@@ -245,7 +245,7 @@ const uploadSuccess = async (res) => {
   await requestCheckin()
   showCamera.value = false
   stopCamera()
-  
+
   await ElMessageBox.alert('Bạn đã điểm danh thành công', 'Thông báo', {
     confirmButtonText: 'OK',
     type: 'success'

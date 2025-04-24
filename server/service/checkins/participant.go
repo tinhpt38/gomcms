@@ -176,15 +176,19 @@ func (participantService *ParticipantService) FillMetadata(participants []checki
 	for _, p := range participants {
 		// Đếm số bản ghi checkin (yêu cầu điểm danh) của thành viên tại phiên điểm danh
 		var totalRequest int64
-		if err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-			Where("partpaticipant_id = ? AND attendance_id = ? AND deleted_at IS NULL", p.ID, attendanceId).
+		if err := global.GVA_DB.
+			Model(&checkins.AttendanceCheckIn{}).
+			Where("partpaticipant_id = ? AND attendance_id = ? AND deleted_at IS NULL",
+				p.ID, attendanceId).
 			Count(&totalRequest).Error; err != nil {
 			return nil, err
 		}
 		// Đếm số lần checkin thành công (ví dụ: condition_id khác 0)
 		var totalPass int64
-		if err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-			Where("partpaticipant_id = ? AND attendance_id = ? AND deleted_at IS NULL AND condition_id != 0", p.ID, attendanceId).
+		if err := global.GVA_DB.
+			Model(&checkins.AttendanceCheckIn{}).
+			Where("partpaticipant_id = ? AND attendance_id = ? AND condition_id IS NOT NULL AND deleted_at IS NULL",
+				p.ID, attendanceId).
 			Count(&totalPass).Error; err != nil {
 			return nil, err
 		}
@@ -198,16 +202,29 @@ func (participantService *ParticipantService) FillMetadata(participants []checki
 	return result, nil
 }
 
-// GetParticipantConditions trả về danh sách các điều kiện điểm danh của một thành viên
-// Qua join bảng conditions, agp_conditions và attendance_group_participants
+// func (participantService *ParticipantService) GetParticipantConditions(participantId uint, attendanceId uint) (conditions []checkins.Condition, err error) {
+// 	err = global.GVA_DB.
+// 		Table("conditions").
+// 		Joins("JOIN agp_conditions ON agp_conditions.condition_id = conditions.id").
+// 		Joins("JOIN attendance_group_participants ON agp_conditions.agp_id = attendance_group_participants.id").
+// 		Where("attendance_group_participants.participant_id = ? AND attendance_group_participants.attendance_id = ?", participantId, attendanceId).
+// 		Find(&conditions).Error
+// 	return
+// }
+
 func (participantService *ParticipantService) GetParticipantConditions(participantId uint, attendanceId uint) (conditions []checkins.Condition, err error) {
+	var conds []checkins.Condition
 	err = global.GVA_DB.
-		Table("conditions").
+		Model(&checkins.Condition{}).
+		Select("conditions.*").
 		Joins("JOIN agp_conditions ON agp_conditions.condition_id = conditions.id").
 		Joins("JOIN attendance_group_participants ON agp_conditions.agp_id = attendance_group_participants.id").
 		Where("attendance_group_participants.participant_id = ? AND attendance_group_participants.attendance_id = ?", participantId, attendanceId).
-		Find(&conditions).Error
-	return
+		Preload("Area.Area").
+		Preload("Group").
+		Find(&conds).Error
+
+	return conds, err
 }
 
 // ImportExcel và các hàm liên quan dưới đây giữ nguyên như cũ để xử lý nhập liệu từ file Excel
@@ -572,40 +589,80 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 	return list, total, err
 }
 
-// GetParticipantConditionData trả về dữ liệu điều kiện của 1 thành viên trong phiên điểm danh
-func (participantService *ParticipantService) GetParticipantConditionData(participantId uint, attendanceId uint) (data map[string]interface{}, err error) {
-	// Lấy danh sách điều kiện theo participant
-	conditions, err := participantService.GetParticipantConditions(participantId, attendanceId)
+func (participantService *ParticipantService) GetParticipantConditionData(
+	participantID, attendanceID uint,
+) (map[string]interface{}, error) {
+	conditions, err := participantService.GetParticipantConditions(participantID, attendanceID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Tính tổng số yêu cầu điểm danh (requiredCount) và số lần checkin thành công (successCount)
-	var totalRequest int64
-	if err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-		Where("partpaticipant_id = ? AND attendance_id = ? AND deleted_at IS NULL", participantId, attendanceId).
-		Count(&totalRequest).Error; err != nil {
+	var successCount int64
+	if err := global.GVA_DB.
+		Model(&checkins.AttendanceCheckIn{}).
+		Where("partpaticipant_id = ? AND attendance_id = ? AND condition_id IS NOT NULL AND deleted_at IS NULL",
+			participantID, attendanceID).
+		Count(&successCount).Error; err != nil {
 		return nil, err
 	}
 
-	var totalPass int64
-	if err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-		Select("DISTINCT condition_id").
-		Where("partpaticipant_id = ? AND attendance_id = ? AND deleted_at IS NULL AND condition_id IS NOT NULL", participantId, attendanceId).
-		Count(&totalPass).Error; err != nil {
-		return nil, err
+	requiredCount := len(conditions)
+
+	status := "Chưa điểm danh"
+	if successCount > 0 {
+		status = "Đã điểm danh"
 	}
 
-	status := "Có dữ liệu"
-	if len(conditions) == 0 {
-		status = "Không có dữ liệu"
+	type ConditionDTO struct {
+		Name   string `json:"name"`
+		Status string `json:"status"`
+		Count  int    `json:"count"`
+	}
+	var detail []ConditionDTO
+
+	for _, c := range conditions {
+		var cnt int64
+		if err := global.GVA_DB.
+			Model(&checkins.AttendanceCheckIn{}).
+			Where("partpaticipant_id = ? AND attendance_id = ? AND condition_id = ? AND deleted_at IS NULL",
+				participantID, attendanceID, c.ID).
+			Count(&cnt).Error; err != nil {
+			return nil, err
+		}
+
+		st := "Chưa hoàn thành"
+		if cnt > 0 {
+			st = "Đã hoàn thành"
+		}
+
+		var name string
+		if c.Area != nil && c.Area.Area != nil {
+			name = c.Area.Area.Name
+		} else if c.Group != nil {
+			name = c.Group.Name
+		} else {
+			name = fmt.Sprintf("Condition #%d", c.ID)
+		}
+
+		detail = append(detail, ConditionDTO{
+			Name:   name,
+			Status: st,
+			Count:  int(cnt),
+		})
 	}
 
-	data = map[string]interface{}{
+	if len(detail) == 0 && requiredCount > 0 {
+		detail = append(detail, ConditionDTO{
+			Name:   "Tổng hợp",
+			Status: status,
+			Count:  int(successCount),
+		})
+	}
+
+	return map[string]interface{}{
 		"status":        status,
-		"successCount":  totalPass,
-		"requiredCount": totalRequest,
-		"conditions":    conditions,
-	}
-	return data, nil
+		"successCount":  int(successCount),
+		"requiredCount": requiredCount,
+		"conditions":    detail,
+	}, nil
 }
