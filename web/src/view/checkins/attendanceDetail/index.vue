@@ -21,6 +21,7 @@
                 <el-form-item label="Tiêu đề" prop="formData.title" class=" required">
                   <el-input v-model="formData.title" type="text" clearable />
                 </el-form-item>
+               
                 <el-form-item label="URL Điểm danh" prop="formData.clientUrl" class="required">
                   <el-input v-model="formData.clientUrl" type="text" clearable disabled />
                 </el-form-item>
@@ -41,7 +42,6 @@
                     <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
                   </el-select>
                 </el-form-item>
-                  
                 <el-form-item prop="description" label="Mô tả" class="w-full">
                   <el-input type="text" v-model="formData.description"></el-input>
                 </el-form-item>
@@ -54,6 +54,10 @@
                   </el-form-item>
                   <el-form-item label="Cho phép khách" label-width="150px" prop="allowGuest">
                     <el-switch v-model="formData.allowGuest" />
+                  </el-form-item>
+                  <!-- Bật/tắt phần thêm câu hỏi -->
+                  <el-form-item label="Thêm câu hỏi kiểm tra" label-width="150px"prop="showQuestions">
+                    <el-switch v-model="formData.showQuestions" />
                   </el-form-item>
                 </div>
                 <el-button link type="primary" icon="arrow-down" @click="showAllOptionConfig = true"
@@ -86,8 +90,28 @@
                     <span class="text-sm my-1 italic font-normal">Hệ thống sẽ chuyển hướng bạn đến địa chỉ được nhập vào
                       sau khi điểm danh</span>
                   </el-form-item>
+                  
+                  <el-form-item label="Câu hỏi điểm danh" prop="formData.question">
+                    <el-input
+                      v-model="formData.question"
+                      type="text"
+                      placeholder="Nhập câu hỏi điểm danh"
+                      clearable
+                    />
+                    <span class="text-sm my-1 italic font-normal">
+                      Câu hỏi này sẽ hiển thị trong buổi điểm danh để người tham gia trả lời.
+                    </span>
+                  </el-form-item>
+                  <!-- <el-button 
+                  type="primary" 
+                  class="mt-4" 
+                  @click="saveQuestions" 
+                  :disabled="!enableAnswering || questions.length === 0"
+                >
+                  Lưu lên hệ thống
+                </el-button> -->
                 </template>
-
+                
               </el-col>
               <el-col :span="12" class="grid-cell flex-column px-4">
                 <div class="flex justify-end p-2">
@@ -171,21 +195,16 @@
               <el-form-item label="Ngày tạo" prop="createdAt">
                 <el-date-picker v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu" />
               </el-form-item>
-              <!-- <el-form-item label="Email" prop="email">
+              <el-form-item label="Email" prop="email">
                 <el-input v-model="searchInfo.email" type="text" placeholder="Email"clearable />
-              </el-form-item>               -->
-              <el-form-item label="Thành viên" prop="fullName">
-              <el-select v-model="searchInfo.fullName" placeholder="Chọn thành viên" multiple clearable filterable>
-                <el-option v-for="item in participantOptions" :key="item.id" :label="item.fullName" :value="item.fullName" />
-              </el-select>
-            </el-form-item>
+              </el-form-item>              
               <el-form-item label="Nhóm" prop="groupId">
                 <el-select v-model="searchInfo.groupId" placeholder="Chọn nhóm" clearable filterable>
                   <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
                 </el-select>
               </el-form-item>
             <el-form-item label="Agent" prop="agent">
-              <el-input v-model="searchInfo.agent" type="text" placeholder="Agent"></el-input>
+              <el-input v-model="searchInfo.agent" type="text" placeholder="Agent"clearable></el-input>
             </el-form-item>
               <el-form-item label="Hành động">
                 <el-button type="primary" icon="search" @click="onSubmit">
@@ -270,6 +289,7 @@
 import {
   updateAttendance,
   findAttendance,
+  createAttendanceQuestion
 } from '@/api/checkins/attendance'
 import {
   getAttendanceCheckInList
@@ -317,15 +337,18 @@ const tabsActiveTab = ref('attendanceInfoTab')
 const currentId = ref($route.params.id)
 
 const clientURL = ref(import.meta.env.VITE_CLIENT_URL)
-
+const questions = ref([]);
+const newQuestion = ref("");
+const enableAnswering = ref(true);
 const formData = ref({
   isLocked: false,
   allowGuest: false,
+  showQuestions: false,
   title: '',
   categoryId: null,
   agencyId: null,
   everyoneCanEdit: false,
-
+  
 })
 
 const elFormRef = ref();
@@ -341,6 +364,39 @@ const agencyOptions = ref([])
 const showAllOptionConfig = ref(false)
 const conditionTabRef = ref()
 
+const props = defineProps({
+  acId: {
+    type: Number,
+    required: true
+  }
+});
+const addQuestion = () => {
+  if (newQuestion.value.trim()) {
+    questions.value.push({ text: newQuestion.value });
+    newQuestion.value = ""; // Clear input sau khi thêm
+  } else {
+    ElMessage.warning('Vui lòng nhập câu hỏi trước khi thêm');
+  }
+};
+const removeQuestion = (index) => {
+  questions.value.splice(index, 1);
+};
+const saveQuestions = async () => {
+  try {
+    for (const q of questions.value) {
+      const payload = {
+        //question_id: questions?.id ?? 0,    
+        question: q.text
+      };
+      const res = await createAttendanceQuestion(payload);
+      console.log(JSON.stringify(error.response.data, null, 2))
+      if (res.code !== 0) throw new Error(res.message);
+    }
+    ElMessage.success('Đã lưu câu hỏi!');
+  } catch (error) {
+    ElMessage.error('Lỗi khi lưu: ' + error.message);
+  }
+};
 const searchRules = reactive({
   createdAt: [
     {

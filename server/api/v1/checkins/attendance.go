@@ -20,6 +20,7 @@ func (attendanceApi *AttendanceApi) CreateAttendance(c *gin.Context) {
 		return
 	}
 	attendance.CreatedBy = utils.GetUserID(c)
+
 	err = attendanceService.CreateAttendance(&attendance)
 	if err != nil {
 		global.GVA_LOG.Error("tạo thất bại!", zap.Error(err))
@@ -28,7 +29,6 @@ func (attendanceApi *AttendanceApi) CreateAttendance(c *gin.Context) {
 	}
 	response.OkWithMessage("tạo thành công", c)
 }
-
 func (attendanceApi *AttendanceApi) CreateAttendanceArea(c *gin.Context) {
 	var attendanceArea checkins.AttendanceArea
 	err := c.ShouldBindJSON(&attendanceArea)
@@ -287,4 +287,23 @@ func (attendanceApi *AttendanceApi) StatsTrendLine(c *gin.Context) {
 		return
 	}
 	response.OkWithData(res, c)
+}
+func (attendanceApi *AttendanceApi) CreateAttendanceQuestion(c *gin.Context) {
+	var question checkins.Attendance
+	err := c.ShouldBindJSON(&question)
+	if err != nil {
+		response.FailWithMessage("Dữ liệu không hợp lệ: "+err.Error(), c)
+		return
+	}
+
+	//question.CreatedBy = utils.GetUserID(c)
+
+	err = attendanceService.CreateAttendanceQuestion(&question)
+	if err != nil {
+		global.GVA_LOG.Error("Tạo câu hỏi thất bại!", zap.Error(err))
+		response.FailWithMessage("Tạo câu hỏi thất bại: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithMessage("Tạo câu hỏi thành công", c)
 }

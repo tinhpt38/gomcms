@@ -8,6 +8,7 @@ type CheckinsReq struct {
 	Lng       *float64 `json:"lng" form:"lng" gorm:"column:lng;comment:Kinh độ"`
 	Accuracy  *float64 `json:"accuracy" form:"accuracy" gorm:"column:accuracy;comment:Độ chính xác"`
 	FullName  *string  `json:"fullName" form:"fullName"`
+	//AnswerQuestion string   `json:"answer"`
 }
 
 type CheckinReqEncode struct {

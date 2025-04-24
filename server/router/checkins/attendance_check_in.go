@@ -27,5 +27,7 @@ func (s *AttendanceCheckInRouter) InitAttendanceCheckInRouter(Router *gin.Router
 	{
 		attendanceCheckInRouterWithoutAuth.GET("getAttendanceCheckInPublic", attendanceCheckInApi.GetAttendanceCheckInPublic)
 		attendanceCheckInRouterWithoutAuth.POST("publicAttendanceCheckIn", attendanceCheckInApi.CheckinAttendance)
+		attendanceCheckInRouterWithoutAuth.POST("submitAnswer", attendanceCheckInApi.CreateAttendanceCheckIn)
+		// attendanceCheckInRouterWithoutAuth.POST("saveQuestionAnswer", attendanceCheckInApi.SaveQuestionAnswer)
 	}
 }

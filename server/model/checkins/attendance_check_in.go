@@ -30,6 +30,8 @@ type AttendanceCheckIn struct {
 	Condition        *Condition   `json:"condition" gorm:"foreignKey:ConditionId;references:ID;comment:Điều kiện;"`         //Điều kiện
 	Attendance       *Attendance  `json:"attendance" gorm:"foreignKey:AttendanceId;references:ID;comment:Lớp điểm danh;"`   //Lớp điểm danh
 	Participant      *Participant `json:"participant" gorm:"foreignKey:PartpaticipantId;references:ID;comment:Thành viên;"` //Thành viên
+	//Question         string       `json:"question" form:"question" gorm:"column:question;comment:;"`                        //Câu hỏi
+	AnswerQuestion string `json:"answer" form:"answer" gorm:"column:answer;comment:;"` //Câu trả lời
 }
 
 // TableName Thành viên checkins AttendanceCheckIn自定义表名 attendanceCheckIns

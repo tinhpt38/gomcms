@@ -28,12 +28,15 @@ type Attendance struct {
 	UpdatedBy        uint       `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy        uint       `gorm:"column:deleted_by;comment:删除者"`
 
-	Category     *AttendanceCategory `json:"category" form:"category" gorm:"foreignKey:CategoryId;references:ID"`
-	Agency       *AttendanceAgency   `json:"agency" form:"agency" gorm:"foreignKey:AgencyId;references:ID"` //Đơn vị
-	Areas        []Area              `gorm:"many2many:attendance_areas;"`                                   // Quan hệ nhiều-nhiều với Area thông qua bảng trung gian AttendanceArea
-	Participants []Participant       `gorm:"many2many:participant_attendances;"`                            // Quan hệ nhiều-nhiều với Participant thông qua bảng trung gian AttendanceGroupParticipant
-	Total        int                 `json:"total" form:"total"`
-	TotalCheckin int                 `json:"totalCheckin" form:"totalCheckin" `
+	Category      *AttendanceCategory `json:"category" form:"category" gorm:"foreignKey:CategoryId;references:ID"`
+	Agency        *AttendanceAgency   `json:"agency" form:"agency" gorm:"foreignKey:AgencyId;references:ID"` //Đơn vị
+	Areas         []Area              `gorm:"many2many:attendance_areas;"`                                   // Quan hệ nhiều-nhiều với Area thông qua bảng trung gian AttendanceArea
+	Participants  []Participant       `gorm:"many2many:participant_attendances;"`                            // Quan hệ nhiều-nhiều với Participant thông qua bảng trung gian AttendanceGroupParticipant
+	Total         int                 `json:"total" form:"total"`
+	TotalCheckin  int                 `json:"totalCheckin" form:"totalCheckin" `
+	Question      string              `json:"question" form:"question" gorm:"column:question;comment:;"`                                              //Câu hỏi
+	ShowQuestions bool                `json:"showQuestions" form:"showQuestions" gorm:"column:show_questions;comment:Hiển thị câu hỏi khi điểm danh"` //Hiển thị câu hỏi
+
 }
 
 func (Attendance) TableName() string {

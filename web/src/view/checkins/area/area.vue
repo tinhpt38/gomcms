@@ -11,7 +11,7 @@
         @keyup.enter="onSubmit"
       >
         <el-form-item label="Khu vực" prop="areaId">
-          <el-select v-mod placeholder="Chọn khu vực" clearable filterable>
+          <el-select v-model="searchInfo.areaId" placeholder="Chọn khu vực" clearable filterable>
             <el-option v-for="item in tableData" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
@@ -492,12 +492,11 @@ const closeDetailShow = () => {
   detailFrom.value = {}
 }
 // --- OpenLayers tích hợp cho Drawer xem chi tiết ---
-//import 'ol/dist/ol.css';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
-
+import 'ol/ol.css'
+import Map from 'ol/Map'
+import View from 'ol/View'
+import TileLayer from 'ol/layer/Tile'
+import OSM from 'ol/source/OSM'
 import { fromLonLat } from 'ol/proj'
 import { Circle as CircleGeom } from 'ol/geom'
 import { Feature } from 'ol'

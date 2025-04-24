@@ -317,8 +317,9 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 				Lattidue:         req.Lat,
 				Longtidue:        req.Lng,
 				Agent:            userAgent,
-				Accuracy:         req.Accuracy,
-				VisitorId:        req.VisitorId,
+				//AnswerQuestion: checkinReq.AnswerQuestion,
+				Accuracy:  req.Accuracy,
+				VisitorId: req.VisitorId,
 			}
 			agpCheckins = append(agpCheckins, attendanceCheckIn)
 		}
@@ -344,8 +345,9 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 							Lattidue:         req.Lat,
 							Longtidue:        req.Lng,
 							Agent:            userAgent,
-							Accuracy:         req.Accuracy,
-							VisitorId:        req.VisitorId,
+							//AnswerQuestion: checkinReq.AnswerQuestion,
+							Accuracy:  req.Accuracy,
+							VisitorId: req.VisitorId,
 						}
 						agpCheckins = append(agpCheckins, attendanceCheckIn)
 					} else {

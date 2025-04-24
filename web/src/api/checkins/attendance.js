@@ -120,7 +120,13 @@ export const statsTrendLine = (data) => {
     data
   })
 }
-
+export const createAttendanceQuestion = (data) => {
+  return service({
+    url: '/attendance/createAttendanceQuestion',
+    method: 'post',
+    data
+  })
+}
 
 
 export const getAttendanceHistory = (params) => {
