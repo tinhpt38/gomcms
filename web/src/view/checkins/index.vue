@@ -200,9 +200,18 @@ import { useGeolocation } from '@vueuse/core'
 import { decodeCredential, GoogleLogin } from 'vue3-google-login'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import FingerprintJS from '@fingerprintjs/fingerprintjs'
-import { publicAttendanceCheckIn } from '@/api/checkins/attendanceCheckIn'
 import { formatDateTime, getBaseUrl } from '@/utils/format'
 import { isVideoMime, isImageMime } from '@/utils/image'
+import {
+  updateAttendance,
+  findAttendance,
+  createAttendanceQuestion
+} from '@/api/checkins/attendance'
+import { publicAttendanceCheckIn,
+  createAttendanceCheckIn,
+  getAttendanceCheckInLogList,
+  submitAttendanceAnswer
+} from '@/api/checkins/attendanceCheckIn'
 
 defineOptions({
   name: "Checkins",
@@ -219,26 +228,6 @@ const authHeaders = computed(() => ({
 //console.log("token", authHeaders)
 const fileList = ref([])
 const fullscreenLoading = ref(false)
-import { nextTick, onMounted, ref, onUnmounted } from 'vue'
-import axios from 'axios'
-import { publicAttendanceCheckIn,
-  createAttendanceCheckIn,
-  getAttendanceCheckInLogList,
-  submitAttendanceAnswer
-} from '@/api/checkins/attendanceCheckIn'
-import {
-  updateAttendance,
-  findAttendance,
-  createAttendanceQuestion
-} from '@/api/checkins/attendance'
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
-import { useGeolocation } from '@vueuse/core'
-import { decodeCredential } from 'vue3-google-login'
-import { useRoute } from 'vue-router'
-import { formatDateTime } from '@/utils/format'
-import FingerprintJS from '@fingerprintjs/fingerprintjs'
-defineOptions({ name: "Checkins" })
-
 
 // Câu hỏi và đáp án có thể sinh động hoặc lấy từ API
 const question = 'Trường bạn đang học là trường nào?'
@@ -307,13 +296,6 @@ const formData = ref({
   requirePhoto: ref(true),
 
 })
-// Quản lý camera
-const cameraOpen = ref(false)
-const capturedImage = ref(null)
-const videoRef = ref(null)
-const videoStream = ref(null)
-let canvas = null
-
 // Google login callback
 // const callback = async (response) => {
 //   const userData = decodeCredential(response.credential)
@@ -402,12 +384,11 @@ const data = ref({
   requirePhoto: false
 })
 //console.log("Initial data:", data.value);
-
 const showCamera = ref(false)
 const video = ref(null)
+const canvas = ref(null)
 const stream = ref(null)
 const flash = ref(false)
-
 
 // Đồng bộ vị trí lấy từ trình duyệt
 watch(coords, (newCoords) => {
@@ -626,7 +607,11 @@ const requestCheckin = async () => {
         showCamera.value = true;
         return;
       }
-
+      // if (attendance.value.requireQuestion) {
+      //   question.value = res.data.questions || [];
+      //   showQuestionModal.value = true;
+      //   return;
+      // }
       let msg = "Bạn điểm danh không thành công. Vui lòng thao tác lại.";
       const passcount = conditionData.value.reduce((count, item) => item.isPass ? count + 1 : count, 0);
       if (passcount > 0) {
@@ -669,207 +654,28 @@ const handleScroll = () => {
   }
 };
 
-const requestCheckin = async () => {
-  console.log("Requesting checkin...");
-  if (route.query?.c == null) {
-    ElNotification({
-      title: 'Thông báo',
-      message: 'Không có điểm danh nào đang hiện hành',
-      type: 'warning'
-    });
-    console.warn("No checkin code found in route query.");
-    return;
-  }
-
-  if (!coords.value.latitude || !coords.value.longitude ||
-      coords.value.latitude === 0 || coords.value.longitude === 0) {
-    ElMessage.error("Không thể lấy vị trí của bạn");
-    console.error("Invalid coordinates:", coords.value);
-    return;
-  }
-
-  // Gán dữ liệu vị trí và mã điểm danh
-  data.value.lat = coords.value.latitude;
-  data.value.lng = coords.value.longitude;
-  data.value.accuracy = coords.value.accuracy;
-  data.value.code = route.query.c;
-  console.log("Data for checkin:", data.value);
-
-  const encodedData = encodeVal(data.value);
-  console.log("Sending encoded data to API...");
-
-  try {
-    const res = await publicAttendanceCheckIn({ data: encodedData });
-    console.log("API response:", res);
-
-    if (res.code === 7 && res.data.attendance?.requirePhoto) {
-      attendance.value = res.data.attendance;
-      showCamera.value = true;
-      return;
-    }
-
-    if (res.code === 0) {
-      attendance.value = res.data.attendance;
-      conditionData.value = res.data.conditions?.filter((condition, index, self) =>
-        index === self.findIndex((c) => c.ID === condition.ID)
-      ) || [];
-
-      // ❗Nếu yêu cầu chụp ảnh
-      if (attendance.value.requirePhoto) {
-        showCamera.value = true;
-        return;
-      }
-
-      // ❗Nếu yêu cầu trả lời câu hỏi (điểm danh bằng câu hỏi)
-      if (attendance.value.requireQuestion) {
-        question.value = res.data.questions || [];
-        showQuestionModal.value = true;
-        return;
-      }
-
-      // ✅ Nếu không có điều kiện đặc biệt: xử lý thông báo điểm danh
-      let msg = "Bạn điểm danh không thành công. Vui lòng thao tác lại.";
-      const passcount = conditionData.value.reduce((count, item) => item.isPass ? count + 1 : count, 0);
-      if (passcount > 0) {
-        msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} lần`;
-      }
-      if (conditionData.value.length === 0) {
-        msg = "Bạn đã điểm danh thành công";
-      }
-
-      console.log("Checkin message to display:", msg);
-      await ElMessageBox.alert(msg, 'Thông báo', {
-        confirmButtonText: 'OK',
-        type: 'success'
-      }).then(() => {
-        if (attendance.value.redirectUrl) {
-          window.location.href = attendance.value.redirectUrl;
-        }
-      });
-    } else {
-      ElMessage(res.data?.msg ?? res.msg);
-      ElMessage.error(res.data?.msg || res.msg || "Có lỗi xảy ra");
-      console.error("API responded with error:", res);
-    }
-  } catch (error) {
-    ElMessage.error("Lỗi điểm danh: " + error);
-    console.error("Exception during checkin:", error);
-  }
-};
-
-
-
-// Lấy giá trị `requirePhoto` từ API khi component mount
-onMounted(async () => {
-  try {
-    const response = await axios.get('/api/attendance')
-    console.log("Dữ liệu điểm danh:", response.data)  // Kiểm tra dữ liệu ở đây
-    formData.value = response.data
-  } catch (error) {
-    console.error("Lỗi lấy dữ liệu điểm danh:", error)
-  }
-})
-
-// Hàm mở camera
-const startCamera = () => {
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
-      if (videoRef.value) {
-        videoRef.value.srcObject = stream
-      }
-    })
-    .catch(err => {
-      console.error("Lỗi truy cập camera:", err)
-    })
-}
-
-
-// Khi người dùng nhấn "Xác nhận", gọi API điểm danh và đóng modal
-// const confirmPhoto = async () => {
-//   if (!capturedImage.value) {
-//     ElMessage.error("Vui lòng chụp ảnh trước khi xác nhận điểm danh!");
-//     return;
-//   }
-//   try {
-//     const blob = dataURLtoBlob(capturedImage.value);
-//     const formDataUpload = new FormData();
-//     formDataUpload.append("file", blob, "checkin.jpg");
-//     const uploadRes = await axios.post('/api/upload', formDataUpload, {
-//       headers: { "Content-Type": "multipart/form-data" }
-//     });
-//     console.log("uploadRes:", uploadRes);
-//     const photoUrl = uploadRes.data.url;
-    
-//     const checkinRes = await axios.post('/api/checkin', { photoUrl /*, email: data.value.email, lat: coords.latitude, lng: coords.longitude, ...*/ });
-//     console.log("checkinRes:", checkinRes);
-    
-//     if (checkinRes.data && checkinRes.data.success) {
-//       cameraOpen.value = false;
-//       ElMessage.success("Bạn đã điểm danh thành công!");
-//     } else {
-//       ElMessage.error("Điểm danh thất bại!");
-//     }
-//   } catch (err) {
-//     console.error("Lỗi điểm danh:", err);
-//     ElMessage.error("Điểm danh thất bại!");
-//   }
-// }
-const confirmPhoto = async () => {
-  if (!capturedImage.value) {
-    ElMessage.error("Vui lòng chụp ảnh trước khi xác nhận điểm danh!")
-    return
-  }
-  cameraOpen.value = false
-  ElMessage.success("Bạn đã điểm danh thành công!")
-}
-
-// Nếu muốn chụp lại
-const retakePhoto = () => {
-  capturedImage.value = null
-  startCamera()
-}
-
 // Hàm chuyển đổi dataURL sang Blob
-function dataURLtoBlob(dataurl) {
-  const arr = dataurl.split(',');
-  const mime = arr[0].match(/:(.*?);/)[1];
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while(n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  return new Blob([u8arr], { type: mime });
-}
+// function dataURLtoBlob(dataurl) {
+//   const arr = dataurl.split(',');
+//   const mime = arr[0].match(/:(.*?);/)[1];
+//   const bstr = atob(arr[1]);
+//   let n = bstr.length;
+//   const u8arr = new Uint8Array(n);
+//   while(n--) {
+//     u8arr[n] = bstr.charCodeAt(n);
+//   }
+//   return new Blob([u8arr], { type: mime });
+// }
 
-// Hàm gọi API điểm danh, gửi kèm URL ảnh nếu có
-async function requestCheckin(photoUrl) {
-  return axios.post('/api/checkin', { photoUrl });
-}
-
-// Hàm chuyển đổi data thành chuỗi nhị phân và mã hóa
-function toBinaryStr(str) {
-  const encoder = new TextEncoder();
-  const charCodes = encoder.encode(str);
-  return String.fromCharCode(...charCodes);
-}
-
-// Hàm lấy fingerprint
-async function getFingerprint() {
-  const fpPromise = FingerprintJS.load();
-  const fp = await fpPromise;
-  const result = await fp.get();
-  return result.visitorId;
-}
-const fingerPrint = () => {
-  getFingerprint().then(visitorId => {
-    data.value.visitorId = visitorTemplate(visitorId)
-  });
-}
-fingerPrint();
-const visitorTemplate = (val) => {
-  return "dlu_activities_20422_5BS:W`A8nF<J6Y{V4Nv.r!Je_" + val;
-}
+// const fingerPrint = () => {
+//   getFingerprint().then(visitorId => {
+//     data.value.visitorId = visitorTemplate(visitorId)
+//   });
+// }
+// fingerPrint();
+// const visitorTemplate = (val) => {
+//   return "dlu_activities_20422_5BS:W`A8nF<J6Y{V4Nv.r!Je_" + val;
+// }
 
 // Các biến và hàm khác của phần điểm danh, QR code, tìm kiếm, etc.
 const conditionData = ref([]);
@@ -878,26 +684,9 @@ const isSupported = ref(true); // Giả sử browser hỗ trợ
 
 
 onMounted(async () => {
-
   await nextTick()
   window.addEventListener('scroll', handleScroll)
 })
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
-});
-
-function handleScroll() {
-  if (!header.value) return;
-  const value = window.scrollY;
-  if (value > 0) {
-    header.value.classList.add('bg-white');
-    header.value.classList.remove('bg-transparent');
-  } else {
-    header.value.classList.add('bg-transparent');
-    header.value.classList.remove('bg-white');
-  }
-}
 </script>
 
 <style scoped>
