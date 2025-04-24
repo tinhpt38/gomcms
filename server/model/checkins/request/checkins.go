@@ -11,6 +11,8 @@ type CheckinsReq struct {
 
 	PhotoData    string `json:"photoData" form:"photoData"`
 	RequirePhoto bool   `json:"requirePhoto" form:"requirePhoto"`
+
+	//AnswerQuestion string   `json:"answer"`
 }
 
 type CheckinReqEncode struct {

@@ -24,6 +24,10 @@ func (attendanceService *AttendanceService) UpdateAttendanceArea(attendanceArea 
 	err = global.GVA_DB.Model(&checkins.AttendanceArea{}).Where("id = ?", attendanceArea.ID).Save(&attendanceArea).Error
 	return err
 }
+func (attendanceService *AttendanceService) CreateAttendanceQuestion(question *checkins.Attendance) (err error) {
+	err = global.GVA_DB.Create(question).Error
+	return err
+}
 
 func (attendanceService *AttendanceService) DeleteAttendanceArea(id string) (err error) {
 	// err = global.GVA_DB.Delete(&checkins.AttendanceArea{}, "id = ? ", id).Error

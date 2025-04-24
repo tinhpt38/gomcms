@@ -5,23 +5,18 @@
     </div>
     
     <el-button type="primary" @click="showTable = true" class="mb-4" v-if="!showTable">
-      Tạo bảng câu hỏi và câu trả lời
+      Tạo bảng câu hỏi
     </el-button>
 
     <div v-if="showTable">
       <el-table :data="questions" border stripe class="w-full max-w-2xl mx-auto" :disabled="!enableAnswering">
-        <el-table-column prop="text" label="Câu hỏi" width="300">
+        <el-table-column prop="text" label="Câu hỏi" width="400">
           <template #default="{ row }">
             <el-input v-model="row.text" placeholder="Nhập câu hỏi..." :disabled="!enableAnswering" />
           </template>
-        </el-table-column>
-        <el-table-column label="Câu trả lời">
-          <template #default="{ row }">
-            <el-input v-model="row.answer" placeholder="Nhập câu trả lời..." :disabled="!enableAnswering" />
-          </template>
-        </el-table-column>
+        </el-table-column>  
         <el-table-column label="Hành động" width="100">
-          <template #default="{ row, $index }">
+          <template #default="{ $index }">
             <el-button type="danger" @click="removeQuestion($index)" size="small" :disabled="!enableAnswering">Xóa</el-button>
           </template>
         </el-table-column>
@@ -32,34 +27,47 @@
         <el-button type="success" @click="addQuestion" :disabled="!enableAnswering">Thêm câu hỏi</el-button>
       </div>
     </div>
+
+    <el-button 
+      type="primary" 
+      class="mt-4" 
+      @click="saveQuestions" 
+      :disabled="!enableAnswering || questions.length === 0"
+    >
+      Lưu lên hệ thống
+    </el-button>
   </div>
 </template>
 
+
 <script setup>
-
-import{
-  createQuestion
-
-}from '@/api/checkins/question'
-
 import { ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
+import { createAttendanceQuestion } from '@/api/checkins/attendance';
 
 const props = defineProps({
   acId: {
-    type: String,
-    required: true,
-  },
+    type: Number,
+    required: true
+  }
 });
 
-const showTable = ref(false);
+const emit = defineEmits(['onSuccess'])
+
+const showTable = ref(true);
 const questions = ref([]);
 const newQuestion = ref("");
 const enableAnswering = ref(true);
 
+watch(enableAnswering, (newValue) => {
+  if (newValue) {
+    showTable.value = true;
+  }
+});
+
 const addQuestion = () => {
   if (newQuestion.value.trim()) {
-    questions.value.push({ text: newQuestion.value, answer: '' });
+    questions.value.push({ text: newQuestion.value });
     newQuestion.value = "";
   } else {
     ElMessage.warning('Vui lòng nhập câu hỏi trước khi thêm');
@@ -68,5 +76,26 @@ const addQuestion = () => {
 
 const removeQuestion = (index) => {
   questions.value.splice(index, 1);
+};
+
+const saveQuestions = async () => {
+  try {
+    for (const q of questions.value) {
+      const payload = {
+        attendance_id: props.acId,
+        question: q.text
+      };
+
+      const res = await createAttendanceQuestion(payload);
+      if (res.code !== 0) {
+        throw new Error(res.message || 'Gửi thất bại');
+      }
+    }
+    ElMessage.success('Đã lưu tất cả câu hỏi!');
+    emit('onSuccess');
+  } 
+  catch (error) {
+    ElMessage.error('Lỗi khi lưu: ' + error.message);
+  }
 };
 </script>
