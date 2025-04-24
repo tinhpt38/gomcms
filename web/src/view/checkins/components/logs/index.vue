@@ -100,7 +100,7 @@ const handleCurrentChange = (val) => {
 const getTableData = async () => {
     searchInfo.value.attendanceId = props.acId
     const table = await getAttendanceCheckInLogList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
-    console.log(table)
+    console.log("Table: ", table)
     if (table.code === 0) {
         tableData.value = table.data.list
         total.value = table.data.total

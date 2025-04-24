@@ -24,6 +24,7 @@
         "core-js": "^3.31.1",
         "echarts": "^5.5.1",
         "element-plus": "^2.9.5",
+        "file-saver": "^2.0.5",
         "headlessui": "^0.0.0",
         "hi-base32": "^0.5.1",
         "highlight.js": "^11.8.0",
@@ -48,7 +49,8 @@
         "vue-router": "^4.3.2",
         "vue3-echarts": "^1.1.0",
         "vue3-google-login": "^2.0.33",
-        "vuedraggable": "^4.1.0"
+        "vuedraggable": "^4.1.0",
+        "xlsx": "^0.18.5"
     },
     "devDependencies": {
         "@babel/eslint-parser": "^7.22.9",

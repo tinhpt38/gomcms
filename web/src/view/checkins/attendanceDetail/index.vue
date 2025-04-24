@@ -381,7 +381,6 @@ const formData = ref({
   total: 0,
   totalCheckin: 0
 })
-
 const elFormRef = ref();
 const page = ref(1)
 const total = ref(0)

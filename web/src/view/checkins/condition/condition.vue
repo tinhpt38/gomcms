@@ -227,6 +227,7 @@ const handleCurrentChange = (val) => {
 // Tìm kiếm
 const getTableData = async() => {
   const table = await getConditionList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  console.log("getTableData: ", table)
   if (table.code === 0) {
   tableData.value = table.data.list
   total.value = table.data.total
@@ -370,7 +371,6 @@ const enterDialog = async () => {
               }
       })
 }
-
 
 const detailFrom = ref({})
 

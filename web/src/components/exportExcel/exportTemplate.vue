@@ -13,7 +13,9 @@ const props = defineProps({
 import { ElMessage } from 'element-plus'
 
 const exportTemplate = async () => {
-  if (props.templateId === '') {
+  if (!props.templateId || props.templateId === 'undefined') {
+    console.log('Data:', props.templateId);
+    
     ElMessage.error('Chưa chọn ID')
     return
   }

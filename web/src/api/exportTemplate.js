@@ -73,6 +73,7 @@ export const updateSysExportTemplate = (data) => {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
 // @Router /sysExportTemplate/findSysExportTemplate [get]
 export const findSysExportTemplate = (params) => {
+  console.log(params, 'params')
   return service({
     url: '/sysExportTemplate/findSysExportTemplate',
     method: 'get',

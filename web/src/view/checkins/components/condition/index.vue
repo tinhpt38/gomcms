@@ -259,6 +259,7 @@ const handleCurrentChange = (val) => {
 // Tìm kiếm
 const getTableData = async () => {
   const table = await getConditionList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  console.log('Condition table', table)
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -361,7 +362,6 @@ const deleteConditionFunc = async (row) => {
 
 const dialogFormVisible = ref(false)
 
-
 const openDialog = () => {
   type.value = 'create'
   dialogFormVisible.value = true
@@ -377,6 +377,33 @@ const closeDialog = () => {
     endAt: null,
   }
 }
+
+// const enterDialog = async () => {
+//   elFormRef.value?.validate(async (valid) => {
+//     if (!valid) return
+//     let res
+//     formData.value.attendanceId = props.acId * 1
+//     switch (type.value) {
+//       case 'create':
+//         res = await createCondition(formData.value)
+//         break
+//       case 'update':
+//         res = await updateCondition(formData.value)
+//         break
+//       default:
+//         res = await createCondition(formData.value)
+//         break
+//     }
+//     if (res.code === 0) {
+//       ElMessage({
+//         type: 'success',
+//         message: 'Tạo/cập nhật thành công'
+//       })
+//       closeDialog()
+//       getTableData()
+//     }
+//   })
+// }
 
 const enterDialog = async () => {
   elFormRef.value?.validate(async (valid) => {
@@ -399,6 +426,9 @@ const enterDialog = async () => {
         type: 'success',
         message: 'Tạo/cập nhật thành công'
       })
+
+      await syncCondition({ attendanceId: Number(props.acId) })
+
       closeDialog()
       getTableData()
     }
