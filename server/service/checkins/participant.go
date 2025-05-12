@@ -227,22 +227,28 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	db := global.GVA_DB.Model(&checkins.Participant{})
-	var participants []checkins.Participant
-	err = db.Joins("JOIN attendance_group_participants ON participants.id = attendance_group_participants.participant_id").
-		Where("attendance_group_participants.attendance_id = ? and attendance_group_participants.deleted_at is null", info.AttendanceId ).Count(&total).Error
+	agpDb := global.GVA_DB.Model(&checkins.AttendanceGroupParticipant{})
+	var parIds []uint
+	if info.GroupId != nil && *info.GroupId != 0 {
+		agpDb = agpDb.Where("group_id = ?", *info.GroupId)
+	}
+	if info.AttendanceId != nil && *info.AttendanceId != 0 {
+		agpDb = agpDb.Where("attendance_id = ?", *info.AttendanceId)
+	}
+
+	err = agpDb.Select("DISTINCT participant_id").Find(&parIds).Error
 	if err != nil {
 		return
 	}
+
+	db := global.GVA_DB.Model(&checkins.Participant{})
+	var participants []checkins.Participant
+	db = db.Where("id IN (?)", parIds)
 	if info.FullName != "" {
 		db = db.Where("full_name LIKE ?", "%"+info.FullName+"%")
 	}
 	if info.Email != "" {
 		db = db.Where("email LIKE ?", "%"+info.Email+"%")
-	}
-
-	if info.GroupId != nil && *info.GroupId != 0 {
-		db = db.Joins("JOIN `groups` ON groups.id = attendance_group_participants.group_id").Where("groups.id = ?", info.GroupId)
 	}
 
 	if limit != 0 {
