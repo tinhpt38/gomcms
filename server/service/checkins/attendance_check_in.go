@@ -7,6 +7,7 @@ import (
 	"math"
 	"net"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -18,17 +19,48 @@ import (
 
 type AttendanceCheckInService struct{}
 
+type CheckinContext struct {
+	ParticipantID uint
+	AttendanceID  uint
+	Timestamp     time.Time
+	IP            string
+	Lat           *float64
+	Lng           *float64
+	ConditionLogs []string
+}
+
+func logConditionCheck(ctx *CheckinContext, conditionID uint, result bool, message string) {
+	log := fmt.Sprintf("Điều kiện #%d: %s - %v", conditionID, message, result)
+	ctx.ConditionLogs = append(ctx.ConditionLogs, log)
+
+	// Có thể lưu log này vào database trong tương lai
+}
+
+type conditionResult struct {
+	ConditionID uint
+	Pass        bool
+	Error       error
+}
+
 func (attendanceCheckInService *AttendanceCheckInService) CreateAttendanceCheckIn(attendanceCheckIn *checkins.AttendanceCheckIn) (err error) {
 	// var count int64
-	err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{
-		AttendanceId:     attendanceCheckIn.AttendanceId,
-		PartpaticipantId: attendanceCheckIn.PartpaticipantId,
-		ConditionId:      attendanceCheckIn.ConditionId,
-		IsLucky:          attendanceCheckIn.IsLucky,
-	}).FirstOrCreate(attendanceCheckIn).Error
-	if err != nil {
-		return err
+	if attendanceCheckIn.IsLucky {
+		err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{
+			AttendanceId:     attendanceCheckIn.AttendanceId,
+			PartpaticipantId: attendanceCheckIn.PartpaticipantId,
+			ConditionId:      attendanceCheckIn.ConditionId,
+			IsLucky:          attendanceCheckIn.IsLucky,
+		}).FirstOrCreate(attendanceCheckIn).Error
+		if err != nil {
+			return err
+		}
+	} else {
+		err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{}).Create(attendanceCheckIn).Error
+		if err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
@@ -301,8 +333,9 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	var coreConditions []checkins.Condition
 
 	if len(rConditions) == 0 {
+		// Trường hợp không có điều kiện cụ thể, điểm danh tự do
+		globalMsg = "Điểm danh thành công"
 		for _, agp := range listAgps {
-			globalMsg = "Điểm danh thành công"
 			attendanceCheckIn := checkins.AttendanceCheckIn{
 				CheckinDate:      time.Now().UTC(),
 				AttendanceId:     &attendance.ID,
@@ -320,52 +353,97 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			agpCheckins = append(agpCheckins, attendanceCheckIn)
 		}
 	} else {
+		// Chuẩn bị danh sách các điều kiện cần kiểm tra cho mỗi agp
+		type groupCondition struct {
+			agp        checkins.AttendanceGroupParticipant
+			conditions []checkins.Condition
+		}
+
+		// Nhóm các điều kiện theo từng agp để xử lý song song hiệu quả hơn
+		agpConditions := make(map[uint]groupCondition)
+
 		for _, condition := range rConditions {
-			var tempCon checkins.Condition
 			for _, agp := range listAgps {
-				// tempCon = *rConditions[i].Condition
-				tempCon = *condition.Condition
-				// if condition.AttendanceGroupParticipantId == int(agp.ID) && !arrayContains(conditionCheckedIn, tempCon.ID) {
 				if condition.AttendanceGroupParticipantId == int(agp.ID) {
-					result, cerr := checkCondition(agp, tempCon, req, ip)
-					if result {
+					// Nếu điều kiện đã được điểm danh trước đó, đánh dấu là đã qua
+					if arrayContains(conditionCheckedIn, condition.Condition.ID) {
+						tempCon := *condition.Condition
 						tempCon.IsPass = true
-						globalMsg = "Điểm danh thành công"
-						isLucky := false
-						if attendance.UseLuckyNumber {
-							if attendance.LuckyShowAfterMinCount > 0 && checkinCount >= int64(attendance.LuckyShowAfterMinCount) {
-								isLucky = true
-							}
-						}
-						attendanceCheckIn := checkins.AttendanceCheckIn{
-							CheckinDate:      time.Now().UTC(),
-							AttendanceId:     &attendance.ID,
-							PartpaticipantId: &participant.ID,
-							AreaId:           tempCon.AreaId,
-							GroupId:          agp.GroupId,
-							ConditionId:      &tempCon.ID,
-							IP:               ip,
-							Lattidue:         req.Lat,
-							Longtidue:        req.Lng,
-							Agent:            userAgent,
-							Accuracy:         req.Accuracy,
-							VisitorId:        req.VisitorId,
-							IsLucky:          isLucky,
-						}
-						agpCheckins = append(agpCheckins, attendanceCheckIn)
-					} else {
-						tempCon.IsPass = false
-						tempCon.Message = cerr.Error()
+						coreConditions = append(coreConditions, tempCon)
+						continue
 					}
-					coreConditions = append(coreConditions, tempCon)
-				}
 
-				if arrayContains(conditionCheckedIn, tempCon.ID) {
-					tempCon.IsPass = true
-					coreConditions = append(coreConditions, tempCon)
+					// Thêm vào danh sách kiểm tra
+					gc, exists := agpConditions[agp.ID]
+					if !exists {
+						gc = groupCondition{
+							agp:        agp,
+							conditions: make([]checkins.Condition, 0),
+						}
+					}
+					gc.conditions = append(gc.conditions, *condition.Condition)
+					agpConditions[agp.ID] = gc
 				}
-
 			}
+		}
+
+		// Kiểm tra các điều kiện song song cho từng nhóm
+		var anyConditionPassed bool
+		for _, gc := range agpConditions {
+			// Sử dụng hàm kiểm tra song song
+			resultList := checkConditionsParallel(gc.agp, gc.conditions, req, ip)
+
+			// Xử lý kết quả
+			for _, result := range resultList {
+				var tempCon checkins.Condition
+				for _, c := range gc.conditions {
+					if c.ID == result.ConditionID {
+						tempCon = c
+						break
+					}
+				}
+
+				if result.Pass {
+					tempCon.IsPass = true
+					anyConditionPassed = true
+
+					// Kiểm tra số may mắn
+					isLucky := false
+					if attendance.UseLuckyNumber {
+						if attendance.LuckyShowAfterMinCount > 0 && checkinCount >= int64(attendance.LuckyShowAfterMinCount) {
+							isLucky = true
+						}
+					}
+
+					// Tạo bản ghi điểm danh
+					attendanceCheckIn := checkins.AttendanceCheckIn{
+						CheckinDate:      time.Now().UTC(),
+						AttendanceId:     &attendance.ID,
+						PartpaticipantId: &participant.ID,
+						AreaId:           tempCon.AreaId,
+						GroupId:          gc.agp.GroupId,
+						ConditionId:      &tempCon.ID,
+						IP:               ip,
+						Lattidue:         req.Lat,
+						Longtidue:        req.Lng,
+						Agent:            userAgent,
+						Accuracy:         req.Accuracy,
+						VisitorId:        req.VisitorId,
+						IsLucky:          isLucky,
+					}
+					agpCheckins = append(agpCheckins, attendanceCheckIn)
+				} else {
+					tempCon.IsPass = false
+					tempCon.Message = formatErrorMessage(tempCon, result.Error)
+				}
+
+				coreConditions = append(coreConditions, tempCon)
+			}
+		}
+
+		// Cập nhật thông báo nếu có ít nhất một điều kiện đạt
+		if anyConditionPassed {
+			globalMsg = "Điểm danh thành công"
 		}
 	}
 
@@ -412,206 +490,309 @@ func (attendanceCheckInService *AttendanceCheckInService) DecodeBase32(encoded s
 	return string(decoded), nil
 }
 
+// checkMatchArea là phiên bản cải tiến của hàm kiểm tra vị trí
 func checkMatchArea(ip string, lat *float64, lng *float64, accuracy *float64, area checkins.AttendanceArea) (bool, error) {
+	// Kiểm tra dữ liệu đầu vào
 	if lat == nil || lng == nil {
 		return false, errors.New("không tìm thấy vị trí")
 	}
-	latArea := area.Area.Latitude
-	lngArea := area.Area.Longitude
-	defaultRadius := area.Area.Radius // default meter
-	if accuracy == nil || *accuracy == 0 {
-		*accuracy = float64(0.1)
+
+	// Lấy thông tin khu vực
+	if area.Area == nil || area.Area.Latitude == nil || area.Area.Longitude == nil {
+		return false, errors.New("thông tin khu vực không đầy đủ")
 	}
 
-	radiusArea := area.Radius
-	if radiusArea == nil {
-		radiusArea = defaultRadius
-	}
-	radius := float32(float64(*radiusArea) / float64(1000))
-	result := isWithinRadius(*latArea, *lngArea, float64(radius), *lat, *lng, *accuracy)
-	if area.AllowRestrictIp {
-		ipString := area.Area.RestrictIp
-		ipRanges := strings.Split(*ipString, ",")
-		if len(ipRanges) > 0 {
-			if !isIPAllowed(ip, ipRanges) {
-				return false, errors.New("IP vị trí của bạn không khớp")
-			}
+	// Ưu tiên kiểm tra IP trước (nếu có) vì xác thực IP nhanh hơn tính toán khoảng cách
+	if area.AllowRestrictIp && area.Area.RestrictIp != nil && *area.Area.RestrictIp != "" {
+		ipRanges := strings.Split(*area.Area.RestrictIp, ",")
+		if len(ipRanges) > 0 && !isIPAllowed(ip, ipRanges) {
+			return false, errors.New("địa chỉ IP của bạn không được phép truy cập")
 		}
 	}
-	if !result {
-		return false, errors.New("Vị trí của bạn không khớp")
+
+	// Kiểm tra khoảng cách
+	latArea := area.Area.Latitude
+	lngArea := area.Area.Longitude
+
+	// Xác định bán kính: ưu tiên bán kính từ AttendanceArea, nếu không có thì lấy từ Area
+	var radiusMeters float64
+	if area.Radius != nil && *area.Radius > 0 {
+		radiusMeters = *area.Radius
+	} else if area.Area.Radius != nil && *area.Area.Radius > 0 {
+		radiusMeters = *area.Area.Radius
+	} else {
+		radiusMeters = 100 // Mặc định bán kính 100m nếu không có thông tin
 	}
-	return result, nil
+
+	// Chuyển đổi radius từ mét sang km cho hàm tính khoảng cách
+	radiusKm := radiusMeters / 1000.0
+
+	// Tính khoảng cách và kiểm tra
+	distance := haversine(*latArea, *lngArea, *lat, *lng)
+
+	// Xem xét độ chính xác khi so sánh
+	if distance > radiusKm {
+		// Log chi tiết hơn về khoảng cách
+		return false, fmt.Errorf("vị trí của bạn nằm ngoài phạm vi cho phép. Khoảng cách: %0.2f km, tối đa cho phép: %0.2f km",
+			distance, radiusKm)
+	}
+
+	return true, nil
 }
 
+// haversine tính khoảng cách giữa hai điểm trên mặt đất (đơn vị km)
 func haversine(lat1, lon1, lat2, lon2 float64) float64 {
-	// Convert degrees to radians
+	// Chuyển độ sang radian
 	const pi = math.Pi
 	lat1Rad := lat1 * pi / 180
 	lon1Rad := lon1 * pi / 180
 	lat2Rad := lat2 * pi / 180
 	lon2Rad := lon2 * pi / 180
 
-	// Haversine formula
+	// Công thức haversine
 	dlat := lat2Rad - lat1Rad
 	dlon := lon2Rad - lon1Rad
-	a := math.Sin(dlat/2)*math.Sin(dlat/2) + math.Cos(lat1Rad)*math.Cos(lat2Rad)*math.Sin(dlon/2)*math.Sin(dlon/2)
+	a := math.Sin(dlat/2)*math.Sin(dlat/2) +
+		math.Cos(lat1Rad)*math.Cos(lat2Rad)*math.Sin(dlon/2)*math.Sin(dlon/2)
 	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 
-	// Earth radius in kilometers
-	const earthRadius = 6371
+	// Bán kính trái đất (km)
+	const earthRadius = 6371.0
 	return earthRadius * c
 }
 
-// isWithinRadius checks if the point (xLat, xLng) is within the given radius (in kilometers) of (lat, lon).
-func isWithinRadius(lat, lon, radius, xLat, xLng, accuracy float64) bool {
-	distance := haversine(lat, lon, xLat, xLng)
-	return distance <= radius
-	// return math.Abs(distance-radius) <= accuracy
-}
-
+// checkCondition là phiên bản cải tiến của hàm kiểm tra điều kiện
 func checkCondition(participant checkins.AttendanceGroupParticipant, condition checkins.Condition, req checkinsReq.CheckinsReq, ip string) (bool, error) {
+	// Thứ tự kiểm tra:
+	// 1. Kiểm tra thời gian (nhanh nhất)
+	// 2. Kiểm tra nhóm (nhanh)
+	// 3. Kiểm tra vị trí (chậm nhất - có tính toán)
 
-	lat := req.Lat
-	lng := req.Lng
-	// Trường hợp 1 -- Điều kiện không phân nhóm, có khu vực, có thời gian
-	if condition.GroupId == nil && condition.AreaId != nil && condition.StartAt != nil && condition.EndAt != nil {
-		inArea, err := checkMatchArea(ip, lat, lng, req.Accuracy, *condition.Area)
-		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
-		return inArea && matchTime, err
+	// 1. Kiểm tra thời gian
+	now := time.Now().UTC()
+	if condition.StartAt != nil && now.Before(*condition.StartAt) {
+		return false, errors.New("chưa đến thời gian điểm danh")
+	}
+	if condition.EndAt != nil && now.After(*condition.EndAt) {
+		return false, errors.New("đã hết thời gian điểm danh")
 	}
 
-	// Trường hợp 2 -- Điều kiện không phân nhóm, không khu vực, có thời gian
-	if condition.GroupId == nil && condition.AreaId == nil && condition.StartAt != nil && condition.EndAt != nil {
-		result := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
-		if !result {
-			return false, errors.New("Thời gian không khớp")
-		}
-		return result, nil
-	}
-
-	// // Trường hợp 3 -- Điều kiện không phân nhóm, không khu vực, không thời gian bắt đầu, có thời gian kết thúc -- NL
-	// if condition.GroupId == nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt != nil {
-	// 	result := time.Now().UTC().Before(*condition.EndAt)
-	// 	if !result {
-	// 		return false, errors.New("Thời gian không khớp")
-	// 	}
-	// 	return result, nil
-	// }
-
-	// Trường hợp 4 -- Điều kiện có phân nhóm, khu vực, có thời gian
-	if condition.GroupId != nil && condition.AreaId != nil && condition.StartAt != nil && condition.EndAt != nil {
-		// Kiểm tra xem có participant.GroupId không
+	// 2. Kiểm tra nhóm
+	if condition.GroupId != nil {
 		if participant.GroupId == nil {
-			return false, errors.New("Không tìm thấy thông tin nhóm")
+			return false, errors.New("không tìm thấy thông tin nhóm")
 		}
-
-		inArea, aerr := checkMatchArea(ip, lat, lng, req.Accuracy, *condition.Area)
-		if aerr != nil {
-			return false, aerr
-		}
-		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
-		result := inArea == matchTime && (*condition.GroupId == *participant.GroupId)
-		if !result {
-			return false, errors.New("Thông tin nhóm và thời gian không thoả điều kiện")
-		}
-
-	}
-
-	// Trường hợp 5 -- Điều kiện có phân nhóm, không khu vực, có thời gian
-	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt != nil && condition.EndAt != nil {
-		// Kiểm tra xem có participant.GroupId không
-		if participant.GroupId == nil {
-			return false, errors.New("Không tìm thấy thông tin nhóm")
-		}
-
-		matchTime := time.Now().UTC().After(*condition.StartAt) && time.Now().UTC().Before(*condition.EndAt)
-		result := (*condition.GroupId == *participant.GroupId) && matchTime
-		if !result {
-			return false, errors.New("Thông tin nhóm và thời gian không thoả điều kiện")
-		}
-		return result, nil
-	}
-
-	// // Trường hợp 6 -- Điều kiện có phân nhóm, không khu vực, không thời gian bắt đầu, có thời gian kết thúc  -- NL
-	// if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt != nil {
-	// 	// Kiểm tra xem có participant.GroupId không
-	// 	if participant.GroupId == nil {
-	// 		return false, errors.New("Không tìm thấy thông tin nhóm")
-	// 	}
-
-	// 	matchTime := time.Now().UTC().Before(*condition.EndAt)
-	// 	result := (*condition.GroupId == *participant.GroupId) && matchTime
-	// 	if !result {
-	// 		return false, errors.New("Thông tin nhóm và thời gian không thoả điều kiện")
-	// 	}
-	// 	return result, nil
-	// }
-	// Có thể gộp giữ 7 và 6
-	// Trường hợp 7 - Điều kiện có phân nhóm, không khu vực, không thời gian bắt đầu, không thời gian kết thúc
-	if condition.GroupId != nil && condition.AreaId == nil && condition.StartAt == nil && condition.EndAt == nil {
-		// Kiểm tra xem có participant.GroupId không
-		if participant.GroupId == nil {
-			return false, errors.New("Không tìm thấy thông tin nhóm")
-		}
-
-		result := *condition.GroupId == *participant.GroupId
-		if !result {
-			return false, errors.New("Thông tin nhóm không thoả điều kiện")
-		}
-		return result, nil
-	}
-
-	// Trường hợp 8 -- Điều kiện không phân nhóm, không khu vực, có thời gian bắt đầu, không thời gian kết thúc -- NL
-	if condition.GroupId == nil && condition.AreaId == nil && condition.StartAt != nil && condition.EndAt == nil {
-		result := time.Now().UTC().After(*condition.StartAt)
-		if !result {
-			return false, errors.New("Thời gian không khớp")
-		}
-		return result, nil
-
-	}
-
-	// Trường hợp 9 -- Điều kiện có phân nhóm, khu vực, không thời gian bắt đầu, không thời gian kết thúc
-	if condition.GroupId != nil && condition.AreaId != nil && condition.StartAt == nil && condition.EndAt == nil {
-		// Kiểm tra xem có participant.GroupId không
-		if participant.GroupId == nil {
-			return false, errors.New("Không tìm thấy thông tin nhóm")
-		}
-
-		inArea, aerr := checkMatchArea(ip, lat, lng, req.Accuracy, *condition.Area)
-		if aerr != nil {
-			return false, aerr
-		}
-
-		result := inArea && (*condition.GroupId == *participant.GroupId)
-		if !result {
-			return false, errors.New("Thông tin nhóm không thoả điều kiện")
+		if *condition.GroupId != *participant.GroupId {
+			return false, errors.New("thông tin nhóm không thoả điều kiện")
 		}
 	}
-	// Trường hợp 10 -- Điều kiện không phân nhóm, có khu vực, không thời gian bắt đầu, không thời gian kết thúc
-	if condition.GroupId == nil && condition.AreaId != nil && condition.StartAt == nil && condition.EndAt == nil {
-		inArea, err := checkMatchArea(ip, lat, lng, req.Accuracy, *condition.Area)
-		return inArea, err
+
+	// 3. Kiểm tra vị trí (chậm nhất)
+	if condition.AreaId != nil && condition.Area != nil {
+		inArea, areaErr := checkMatchArea(ip, req.Lat, req.Lng, req.Accuracy, *condition.Area)
+		if !inArea {
+			return false, areaErr
+		}
 	}
 
+	// Nếu qua được tất cả các điều kiện
 	return true, nil
 }
 
-// TODO: Allow 1 trong 2 dải IP trong ipRangs
-func isIPAllowed(clientIP string, ipRanges []string) bool {
-	for _, ipRange := range ipRanges {
-		_, ipNet, err := net.ParseCIDR(ipRange)
-		if err != nil {
-			ip := net.ParseIP(ipRange)
-			if ip != nil && ip.String() == clientIP {
-				return true
+// checkConditionsParallel kiểm tra nhiều điều kiện đồng thời để tăng hiệu suất
+func checkConditionsParallel(participant checkins.AttendanceGroupParticipant, conditions []checkins.Condition, req checkinsReq.CheckinsReq, ip string) []conditionResult {
+	// Tạo channels cho kết quả và giới hạn số goroutine đồng thời
+	results := make([]conditionResult, len(conditions))
+
+	// Không chạy quá nhiều goroutine cùng lúc để tránh quá tải hệ thống
+	maxConcurrent := 5
+	if len(conditions) < maxConcurrent {
+		maxConcurrent = len(conditions)
+	}
+
+	// Sử dụng worker pool pattern để kiểm soát số lượng goroutine
+	var wg sync.WaitGroup
+	jobs := make(chan struct {
+		index     int
+		condition checkins.Condition
+	}, len(conditions))
+
+	// Tạo một số lượng worker để xử lý song song
+	for w := 0; w < maxConcurrent; w++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for job := range jobs {
+				// Thực hiện kiểm tra điều kiện
+				pass, err := checkCondition(participant, job.condition, req, ip)
+
+				// Lưu kết quả vào slice theo đúng vị trí ban đầu
+				results[job.index] = conditionResult{
+					ConditionID: job.condition.ID,
+					Pass:        pass,
+					Error:       err,
+				}
 			}
-		} else if ipNet.Contains(net.ParseIP(clientIP)) {
-			return true
+		}()
+	}
+
+	// Đưa công việc vào channel để các worker xử lý
+	for i, condition := range conditions {
+		jobs <- struct {
+			index     int
+			condition checkins.Condition
+		}{i, condition}
+	}
+	close(jobs)
+
+	// Đợi tất cả worker hoàn thành
+	wg.Wait()
+
+	return results
+}
+
+// formatErrorMessage tạo thông báo lỗi chi tiết dựa trên loại điều kiện
+func formatErrorMessage(condition checkins.Condition, err error) string {
+	if err == nil {
+		return ""
+	}
+
+	var msg string
+	if condition.Area != nil && condition.Area.Area != nil {
+		// Tạo thông báo về vị trí
+		if condition.Area.Area.Latitude != nil && condition.Area.Area.Longitude != nil {
+			if condition.Area.Radius != nil {
+				// Có bán kính từ điều kiện khu vực
+				msg = fmt.Sprintf("yêu cầu vị trí trong phạm vi %0.0f mét từ %s (%0.6f, %0.6f), ",
+					*condition.Area.Radius, condition.Area.Area.Name,
+					*condition.Area.Area.Latitude, *condition.Area.Area.Longitude)
+			} else if condition.Area.Area.Radius != nil {
+				// Có bán kính từ khu vực
+				msg = fmt.Sprintf("yêu cầu vị trí trong phạm vi %0.0f mét từ %s (%0.6f, %0.6f), ",
+					*condition.Area.Area.Radius, condition.Area.Area.Name,
+					*condition.Area.Area.Latitude, *condition.Area.Area.Longitude)
+			} else {
+				// Không có thông tin bán kính
+				msg = fmt.Sprintf("yêu cầu vị trí ở khu vực %s (%0.6f, %0.6f), ",
+					condition.Area.Area.Name,
+					*condition.Area.Area.Latitude, *condition.Area.Area.Longitude)
+			}
+		} else {
+			// Chỉ có tên khu vực
+			msg = fmt.Sprintf("yêu cầu vị trí nằm trong khu vực %s, ",
+				condition.Area.Area.Name)
 		}
 	}
+
+	// Thêm thông tin về thời gian
+	if condition.StartAt != nil && condition.EndAt != nil {
+		msg = msg + fmt.Sprintf("trong khoảng thời gian từ %s đến %s, ",
+			condition.StartAt.Format("15:04 02/01/2006"),
+			condition.EndAt.Format("15:04 02/01/2006"))
+	} else if condition.StartAt != nil {
+		msg = msg + fmt.Sprintf("sau thời điểm %s, ",
+			condition.StartAt.Format("15:04 02/01/2006"))
+	} else if condition.EndAt != nil {
+		msg = msg + fmt.Sprintf("trước thời điểm %s, ",
+			condition.EndAt.Format("15:04 02/01/2006"))
+	}
+
+	// Ghi log chi tiết về lỗi điều kiện
+	if condition.ID > 0 {
+		fmt.Println("Điều kiện #%d thất bại: %s. %s", condition.ID, err.Error(), msg)
+	}
+
+	if msg != "" {
+		return formatStandardError(fmt.Sprintf("COND_%d", condition.ID), err.Error()+". "+msg)
+	}
+	return formatStandardError(fmt.Sprintf("COND_%d", condition.ID), err.Error())
+}
+
+// FormatStandardError định dạng thông báo lỗi theo chuẩn chung
+func formatStandardError(code string, message string) string {
+	return fmt.Sprintf("[%s] %s", code, message)
+}
+
+// isIPAllowed kiểm tra xem một địa chỉ IP có nằm trong các dải IP cho phép không
+func isIPAllowed(clientIP string, ipRanges []string) bool {
+	// Phân tích địa chỉ IP của người dùng
+	clientIPObj := net.ParseIP(clientIP)
+	if clientIPObj == nil {
+		return false // IP không hợp lệ
+	}
+
+	// Tạo cache để tránh phân tích lại các dải IP
+	// Cache này chỉ tồn tại trong phạm vi hàm
+	cidrCache := make(map[string]*net.IPNet)
+
+	for _, ipRange := range ipRanges {
+		ipRange = strings.TrimSpace(ipRange)
+		if ipRange == "" {
+			continue
+		}
+
+		// Trường hợp 1: Dải CIDR (ví dụ: 192.168.1.0/24)
+		if strings.Contains(ipRange, "/") {
+			// Kiểm tra xem đã phân tích dải này chưa
+			ipNet, exists := cidrCache[ipRange]
+			if !exists {
+				_, ipNetTmp, err := net.ParseCIDR(ipRange)
+				if err != nil {
+					continue // Bỏ qua dải không hợp lệ
+				}
+				ipNet = ipNetTmp
+				cidrCache[ipRange] = ipNet
+			}
+
+			if ipNet.Contains(clientIPObj) {
+				return true
+			}
+		} else {
+			// Trường hợp 2: Địa chỉ IP đơn (ví dụ: 192.168.1.5)
+			rangeIP := net.ParseIP(ipRange)
+			if rangeIP != nil && rangeIP.Equal(clientIPObj) {
+				return true
+			}
+
+			// Trường hợp 3: Dải IP (ví dụ: 192.168.1.1-192.168.1.10)
+			if strings.Contains(ipRange, "-") {
+				parts := strings.Split(ipRange, "-")
+				if len(parts) == 2 {
+					startIP := net.ParseIP(strings.TrimSpace(parts[0]))
+					endIP := net.ParseIP(strings.TrimSpace(parts[1]))
+
+					if startIP != nil && endIP != nil && isIPInRange(clientIPObj, startIP, endIP) {
+						return true
+					}
+				}
+			}
+		}
+	}
+
 	return false
+}
+
+// isIPInRange kiểm tra xem một IP có nằm trong khoảng [startIP, endIP] không
+func isIPInRange(ip, startIP, endIP net.IP) bool {
+	// Chuyển đổi sang dạng 4 byte để so sánh
+	return bytesCompare(ip.To4(), startIP.To4()) >= 0 && bytesCompare(ip.To4(), endIP.To4()) <= 0
+}
+
+// bytesCompare so sánh hai mảng byte
+func bytesCompare(a, b []byte) int {
+	if a == nil || b == nil || len(a) != len(b) {
+		return 0 // Không so sánh được
+	}
+
+	for i := 0; i < len(a); i++ {
+		if a[i] < b[i] {
+			return -1
+		} else if a[i] > b[i] {
+			return 1
+		}
+	}
+
+	return 0 // Bằng nhau
 }
 
 func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInLogInfoList(info checkinsReq.AttendanceCheckInSearch) (list []checkins.CheckinLog, total int64, err error) {
@@ -630,7 +811,7 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInLo
 	}
 
 	if info.Email != nil {
-		db = db.Where("email = ?", *info.Email)
+		db = db.Where("email = ?", info.Email)
 	}
 
 	// if info.Agent != nil {
@@ -644,6 +825,7 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInLo
 
 	if limit != 0 {
 		db = db.Limit(limit).Offset(offset)
+
 	}
 
 	err = db.Order("created_at desc").Debug().Find(&checkinsLog).Error

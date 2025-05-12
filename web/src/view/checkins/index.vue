@@ -92,9 +92,9 @@
                         <el-tag v-if="!item.isPass" effect="dart" type="danger">
                           Bạn chưa điểm danh
                         </el-tag>
-                        <el-tag v-if="!item.isPass" effect="dart" type="primary">
+                        <el-text v-if="!item.isPass" effect="dart" type="primary">
                           <strong>{{ item.msg }}</strong>
-                        </el-tag>
+                        </el-text>
                       </div>
                     </dl>
                   </div>
