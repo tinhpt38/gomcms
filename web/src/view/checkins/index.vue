@@ -64,9 +64,9 @@
                   class="relative mt-6 text-base sm:text-lg font-bold leading-8 text-[#E67F32] sm:max-w-md lg:max-w-none">
                   Bạn hãy đăng nhập bằng tài khoản Email của bạn với Google để đăng nhập.
                 </p>
-                <p class="mt-6 text-lg leading-8 text-gray-600 px-2 mb-6">
+                <!-- <p class="mt-6 text-lg leading-8 text-gray-600 px-2 mb-6">
                   Bạn hãy Sử dụng 1 trong 2 WiFi: DLU Student hoặc DLU Teacher để thực hiện điểm danh
-                </p>
+                </p> -->
                 <p class="relative mt-1 text-sm sm:text-base italic leading-8 text-gray-500 sm:max-w-md lg:max-w-none">
                   {{ isSupported ? "Trình duyệt hỗ trợ lấy vị trí: " : "Trình duyệt không hỗ trợ lấy vị trí" }}
                   {{ coords.latitude + ", " + coords.longitude }}
@@ -81,7 +81,7 @@
                       <div v-for="(item, key) in conditionData" :key="key"
                         class="px-2 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-2  bg-slate-50 mt-2">
                         <dt class="text-sm font-medium text-base text-gray-900">
-                          Lần thứ {{ key + 1 }}
+                          Điều kiện {{ key + 1 }}
                         </dt>
                         <dd class="my-1 text-sm text-base text-gray-700 sm:col-span-2 sm:mt-0">
                           {{ conditionString(item) }}
@@ -93,7 +93,7 @@
                           Bạn chưa điểm danh
                         </el-tag>
                         <el-tag v-if="!item.isPass" effect="dart" type="primary">
-                          <strong>{{item.msg}}</strong>
+                          <strong>{{ item.msg }}</strong>
                         </el-tag>
                       </div>
                     </dl>
@@ -302,29 +302,28 @@ const requestCheckin = async () => {
   // var res = await publicAttendanceCheckIn({ ...data.value })
 
   var res = await publicAttendanceCheckIn({ data: encodedData })
-  debugger
+  console.log("res: ", res)
   if (res.code == 0) {
     if (res.data.conditions != null) {
-      // conditionData.value = res.data.conditions
-      // //console.log("res.data.conditions: ", res.data.conditions)
       conditionData.value = res.data.conditions.filter((condition, index, self) =>
         index === self.findIndex((c) => c.ID === condition.ID)
       )
     }
     attendance.value = res.data.attendance
-
-    // if (res.data.message) {
-    //   // msg = [...new Set(res.data.message)].join(', ')
-    // }
-
+    var checkinCount = res.data.checkinCount
     var msg = "Bạn điểm danh không thành công. Vui lòng thao tác lại."
     var passcount = conditionData?.value.reduce((count, item) => {
       return item.isPass ? count + 1 : count;
     }, 0);
-    if (passcount >0){
-      msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} lần`
+    if (checkinCount > conditionData.value.length) {
+      msg = `Điểm danh thành công ${checkinCount} lần`
+    } else if (passcount > 0) {
+      msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} điều kiện`
     }
-    
+    var luckyNumber = res.data.luckyNumber ?? null
+    if (luckyNumber != null) {
+      msg = `Điểm danh thành công ${checkinCount} lần. Số may mắn của bạn là ${luckyNumber}`
+    }
     if (conditionData.value.length == 0) {
       msg = "Bạn đã điểm danh thành công"
     }

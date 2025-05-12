@@ -9,26 +9,28 @@ import (
 
 type Attendance struct {
 	global.GVA_MODEL
-	Title            string     `json:"title" form:"title" gorm:"column:title;comment:;" binding:"required"`                                         //Tiêu đề
-	StartDate        *time.Time `json:"startDate" form:"startDate" gorm:"column:start_date;comment:;" binding:"required"`                            //Ngày bắt đầu
-	EndDate          *time.Time `json:"endDate" form:"endDate" gorm:"column:end_date;comment:;" binding:"required"`                                  //Ngày kết thúc
-	IsLocked         bool       `json:"isLocked" form:"isLocked" gorm:"column:is_locked;comment:;"`                                                  //Khoá
-	EveryoneCanEdit  bool       `json:"everyoneCanEdit" form:"everyoneCanEdit" gorm:"column:everyone_can_edit;comment:Cho phép mọi người chỉnh sửa"` //Cho phép mọi người chỉnh sửa
-	AllowGuest       bool       `json:"allowGuest" form:"allowGuest" gorm:"column:allow_guest;comment:Cho phép khách"`                               //Cho phép khách
-	ShowHome         bool       `json:"showHome" form:"showHome" gorm:"column:show_home;comment:Hiện trang chủ"`                                     //Hiện trang chủ
-	UseLuckyNumber   bool       `json:"useLuckyNumber" form:"useLuckyNumber" gorm:"column:use_lucky_number;comment:Sử dụng số may`
-	Weight           int        `json:"weight" form:"weight" gorm:"column:weight;comment:Hệ số"`
-	ClientUrl        string     `json:"clientUrl" form:"clientUrl" gorm:"column:client_url;default=\"https://checkins.dlu.edu.vn\";comment:URL truy cập"` //URL của khách hàng
-	RestrictIp       *string    `json:"restrictIp" form:"restrictIp" gorm:"column:restrict_ip;comment:IP giới hạn"`                                       //IPs giới hạn
-	LimitCount       int        `json:"limitCount" form:"limitCount" gorm:"column:limit_count;comment:Số lần giới hạn"`
-	LimitClientCount int        `json:"limitClientCount" form:"limitClientCount" gorm:"column:limit_client_count;comment:Số lần giới hạn theo máy"`
-	RedirectUrl      *string    `json:"redirectUrl" form:"redirectUrl" gorm:"column:redirect_url;comment:URL chuyển hướng"` //URL chuyển hướng
-	AgencyId         *uint      `json:"agencyId" form:"agencyId" gorm:"column:agency_id;comment:Đơn vị"`                    //Đơn vị
-	CategoryId       *uint      `json:"categoryId" form:"categoryId" gorm:"column:category_id;comment:Loại"`                //Loại
-	Description      string     `json:"description" form:"description" gorm:"column:description;comment:Ghi chú"`           //Ghi chú
-	CreatedBy        uint       `gorm:"column:created_by;comment:创建者"`
-	UpdatedBy        uint       `gorm:"column:updated_by;comment:更新者"`
-	DeletedBy        uint       `gorm:"column:deleted_by;comment:删除者"`
+	Title                  string     `json:"title" form:"title" gorm:"column:title;comment:;" binding:"required"`                                         //Tiêu đề
+	StartDate              *time.Time `json:"startDate" form:"startDate" gorm:"column:start_date;comment:;" binding:"required"`                            //Ngày bắt đầu
+	EndDate                *time.Time `json:"endDate" form:"endDate" gorm:"column:end_date;comment:;" binding:"required"`                                  //Ngày kết thúc
+	IsLocked               bool       `json:"isLocked" form:"isLocked" gorm:"column:is_locked;comment:;"`                                                  //Khoá
+	EveryoneCanEdit        bool       `json:"everyoneCanEdit" form:"everyoneCanEdit" gorm:"column:everyone_can_edit;comment:Cho phép mọi người chỉnh sửa"` //Cho phép mọi người chỉnh sửa
+	AllowGuest             bool       `json:"allowGuest" form:"allowGuest" gorm:"column:allow_guest;comment:Cho phép khách"`                               //Cho phép khách
+	ShowHome               bool       `json:"showHome" form:"showHome" gorm:"column:show_home;comment:Hiện trang chủ"`                                     //Hiện trang chủ
+	UseLuckyNumber         bool       `json:"useLuckyNumber" form:"useLuckyNumber" gorm:"column:use_lucky_number;comment:Sử dụng số may"`
+	LuckyShowAfterMinCount int        `json:"luckyShowAfterMinCount" form:"luckyShowAfterMinCount" gorm:"column:lucky_show_after_min_count;comment:Hiện số"`
+	Weight                 int        `json:"weight" form:"weight" gorm:"column:weight;comment:Hệ số"`
+	ClientUrl              string     `json:"clientUrl" form:"clientUrl" gorm:"column:client_url;default=\"https://checkins.dlu.edu.vn\";comment:URL truy cập"` //URL của khách hàng
+	RestrictIp             *string    `json:"restrictIp" form:"restrictIp" gorm:"column:restrict_ip;comment:IP giới hạn"`                                       //IPs giới hạn
+	LimitCount             int        `json:"limitCount" form:"limitCount" gorm:"column:limit_count;comment:Số lần giới hạn"`
+	LimitClientCount       int        `json:"limitClientCount" form:"limitClientCount" gorm:"column:limit_client_count;comment:Số lần giới hạn theo máy"`
+
+	RedirectUrl *string `json:"redirectUrl" form:"redirectUrl" gorm:"column:redirect_url;comment:URL chuyển hướng"` //URL chuyển hướng
+	AgencyId    *uint   `json:"agencyId" form:"agencyId" gorm:"column:agency_id;comment:Đơn vị"`                    //Đơn vị
+	CategoryId  *uint   `json:"categoryId" form:"categoryId" gorm:"column:category_id;comment:Loại"`                //Loại
+	Description string  `json:"description" form:"description" gorm:"column:description;comment:Ghi chú"`           //Ghi chú
+	CreatedBy   uint    `gorm:"column:created_by;comment:创建者"`
+	UpdatedBy   uint    `gorm:"column:updated_by;comment:更新者"`
+	DeletedBy   uint    `gorm:"column:deleted_by;comment:删除者"`
 
 	Category     *AttendanceCategory `json:"category" form:"category" gorm:"foreignKey:CategoryId;references:ID"`
 	Agency       *AttendanceAgency   `json:"agency" form:"agency" gorm:"foreignKey:AgencyId;references:ID"` //Đơn vị

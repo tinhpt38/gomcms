@@ -174,7 +174,6 @@ func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Conte
 	// 	response.FailWithMessage("Bạn chưa cho phép thiết bị lấy vị trí", c)
 	// 	return
 	// }
-	// dlu_activities_20422
 	prefix := "dlu_activities_20422_5BS:W`A8nF<J6Y{V4Nv.r!Je_"
 	if !strings.HasPrefix(checkinReq.VisitorId, prefix) {
 		response.FailWithMessage("Từ chối điểm danh. Bạn đang điểm danh từ một thiết bị không được phép", c)

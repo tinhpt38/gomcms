@@ -20,19 +20,12 @@ type AttendanceCheckInService struct{}
 
 func (attendanceCheckInService *AttendanceCheckInService) CreateAttendanceCheckIn(attendanceCheckIn *checkins.AttendanceCheckIn) (err error) {
 	// var count int64
-	// err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{
-	// 	AttendanceId:     attendanceCheckIn.AttendanceId,
-	// 	PartpaticipantId: attendanceCheckIn.PartpaticipantId,
-	// 	ConditionId:      attendanceCheckIn.ConditionId,
-	// }).Count(&count).Error
-	// if count == 0 {
-	// 	err = global.GVA_DB.Create(attendanceCheckIn).Error
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-	// return nil
-	err = global.GVA_DB.Create(attendanceCheckIn).Error
+	err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{
+		AttendanceId:     attendanceCheckIn.AttendanceId,
+		PartpaticipantId: attendanceCheckIn.PartpaticipantId,
+		ConditionId:      attendanceCheckIn.ConditionId,
+		IsLucky:          attendanceCheckIn.IsLucky,
+	}).FirstOrCreate(attendanceCheckIn).Error
 	if err != nil {
 		return err
 	}
@@ -222,6 +215,13 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		return nil, err
 	}
 
+	// var logCounter int64
+	// err = global.GVA_DB.Model(&checkins.CheckinLog{}).
+	// 	Where("code = ? AND email = ? AND attendance_id = ?", req.Code, email, attendance.ID).Count(&logCounter).Error
+	// if err != nil {
+	// 	return nil, errors.New("không tìm thấy nhật ký kiểm danh của bạn")
+	// }
+
 	if attendance.RestrictIp != nil && *attendance.RestrictIp != "" {
 		ipString := attendance.RestrictIp
 		ipRanges := strings.Split(*ipString, ",")
@@ -242,18 +242,15 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
 		return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
 	}
-
+	var checkinCount int64
+	global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Count(&checkinCount)
 	if attendance.LimitCount > 0 {
-		var list []checkins.AttendanceCheckIn
-		global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&list)
-		if len(list) >= attendance.LimitCount {
-			// checkinLog.MessageList += `Bạn đã điểm danh đủ số lần cho phép: ` + len(list) + " $"
-			msg := fmt.Sprintf("bạn đã điểm danh đủ số lần cho phép %d ", len(list))
+		// var list []checkins.AttendanceCheckIn
+		if int(checkinCount) >= attendance.LimitCount {
+			msg := fmt.Sprintf("bạn đã điểm danh đủ số lần cho phép %d ", checkinCount)
 			checkinLog.MessageList += msg + "$$"
 			global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
 			return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
-			// return nil, errors.New("bạn đã điểm danh đủ số lần cho phép")
-
 		}
 	}
 
@@ -278,7 +275,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 	var conditionCheckedIn []uint
 	_ = global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-		Where("partpaticipant_id = ? and attendance_id = ?", participant.ID, attendance.ID).Debug().
+		Where("partpaticipant_id = ? and attendance_id = ?", participant.ID, attendance.ID).
 		Pluck("condition_id", &conditionCheckedIn).Error
 
 	rConditions, cerr := conditionService.GetConditionOfPartparticipant(attendance.ID, listAgpIDs)
@@ -328,11 +325,18 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			for _, agp := range listAgps {
 				// tempCon = *rConditions[i].Condition
 				tempCon = *condition.Condition
-				if condition.AttendanceGroupParticipantId == int(agp.ID) && !arrayContains(conditionCheckedIn, tempCon.ID) {
+				// if condition.AttendanceGroupParticipantId == int(agp.ID) && !arrayContains(conditionCheckedIn, tempCon.ID) {
+				if condition.AttendanceGroupParticipantId == int(agp.ID) {
 					result, cerr := checkCondition(agp, tempCon, req, ip)
 					if result {
 						tempCon.IsPass = true
 						globalMsg = "Điểm danh thành công"
+						isLucky := false
+						if attendance.UseLuckyNumber {
+							if attendance.LuckyShowAfterMinCount > 0 && checkinCount >= int64(attendance.LuckyShowAfterMinCount) {
+								isLucky = true
+							}
+						}
 						attendanceCheckIn := checkins.AttendanceCheckIn{
 							CheckinDate:      time.Now().UTC(),
 							AttendanceId:     &attendance.ID,
@@ -346,6 +350,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 							Agent:            userAgent,
 							Accuracy:         req.Accuracy,
 							VisitorId:        req.VisitorId,
+							IsLucky:          isLucky,
 						}
 						agpCheckins = append(agpCheckins, attendanceCheckIn)
 					} else {
@@ -368,12 +373,16 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	result["conditions"] = coreConditions
 	result["attendance"] = attendance
 	result["message"] = globalMsg
+	result["checkinCount"] = checkinCount + 1
 	// if len(coreConditions) == 0 {
 	// 	result["message"] = "Không có điều kiện điểm danh nào thoả mãn"
 	// }
 
 	for _, agp := range agpCheckins {
 		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&agp)
+		if agp.IsLucky {
+			result["luckyNumber"] = agp.ID
+		}
 		if aciErr != nil {
 			msg := fmt.Sprintf("thiết bị của bạn đã điểm danh đủ số lần cho phép %s ", aciErr.Error())
 			checkinLog.MessageList += msg + "$$"

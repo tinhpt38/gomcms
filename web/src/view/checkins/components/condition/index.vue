@@ -13,11 +13,6 @@
       </div>
       <el-table ref="multipleTable" style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID" border
         @selection-change="handleSelectionChange">
-        <!-- <el-table-column type="selection" width="55" /> -->
-
-        <!-- <el-table-column align="left" label="Ngày" prop="createdAt" width="180">
-                    <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
-</el-table-column> -->
         <el-table-column align="left" label="Nhóm" prop="group.name" min-width="120" />
         <el-table-column align="left" label="Khu vực" prop="area.area.name" min-width="300">
           <template #default="scope">
@@ -35,8 +30,12 @@
             {{ formatDateTime(scope.row.endAt) }}
           </template>
         </el-table-column>
-        <el-table-column align="left" label="Số lần" prop="count" min-width="120">
-          </el-table-column>
+        <el-table-column align="left" label="Hiển thị số may mắn" prop="showLuckyNumber" min-width="120">
+          <template #default="scope">
+            <el-tag v-if="scope.row.showLuckyNumber" type="success">Có</el-tag>
+            <el-tag v-else type="danger">Không</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
           <template #default="scope">
             <el-button type="primary" link icon="edit" class="table-button" @click="updateConditionFunc(scope.row)">
@@ -89,8 +88,9 @@
           <el-date-picker v-model="formData.endAt" type="datetime" style="width:100%" placeholder="Chọn ngày giờ"
             :clearable="true" />
         </el-form-item>
-        <el-form-item label="Số lần:" prop="count">
-          <el-input v-model.number="formData.count" :clearable="true" placeholder="Nhập số lần" />
+        <el-form-item label="Hiển thị số may mắn:" prop="showLuckyNumber">
+          <el-switch v-model="formData.showLuckyNumber" active-color="#13ce66" inactive-color="#ff4949"
+            active-text="Có" inactive-text="Không" />
         </el-form-item>
       </el-form>
     </el-drawer>

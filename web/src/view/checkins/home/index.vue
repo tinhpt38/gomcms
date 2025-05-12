@@ -97,9 +97,9 @@
                             </span>
                         </span>
                     </h2>
-                    <p class="mt-6 text-lg leading-8 text-center text-gray-600 px-2 mb-6">
+                    <!-- <p class="mt-6 text-lg leading-8 text-center text-gray-600 px-2 mb-6">
                         Bạn hãy Sử dụng 1 trong 2 WiFi: DLU Student hoặc DLU Teacher để thực hiện điểm danh
-                    </p>
+                    </p> -->
                     <div>
 
                         <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"

@@ -92,10 +92,6 @@ func (conditionService *ConditionService) GetCondition(ID string) (condition che
 
 func (conditionService *ConditionService) GetConditionOfPartparticipant(aId uint, agpIds []int) (list []checkins.AGPCondition, err error) {
 	newdb := global.GVA_DB.Model(&checkins.AGPCondition{})
-	// err = newdb.Where("attendance_id = ? AND  agp_id IN (?)", aId, agpIds).
-	// 	Preload(clause.Associations).Preload("Condition.Group").
-	// 	Preload("Condition.Area.Area").Debug().Find(&list).Error
-
 	err = newdb.Joins("LEFT JOIN conditions con ON agp_conditions.condition_id = con.id").
 		Where("agp_conditions.attendance_id = ? AND agp_conditions.agp_id IN (?) AND agp_conditions.deleted_at IS NULL AND con.deleted_at IS NULL", aId, agpIds).
 		Preload(clause.Associations).Preload("Condition.Group").

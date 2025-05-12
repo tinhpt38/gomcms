@@ -5,8 +5,8 @@
         <span class="text-xl font-bold text-gray-500">{{ formData.title }}</span>
       </div>
       <div class="flex mb-2">
-        <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
-        <ExportExcel :form-data="{ action: 'EXPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
+        <!-- <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
+        <ExportExcel :form-data="{ action: 'EXPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" /> -->
       </div>
       <el-button class="mx-4 hidden" type="danger" icon="download">
         Xuất Excel
@@ -69,16 +69,25 @@
                 <el-button link type="primary" icon="arrow-up" @click="showAllOptionConfig = false" v-else>Thu
                   gọn</el-button>
                 <template v-if="showAllOptionConfig">
-                  <div class="flex justify-between">
+                  <div class="flex flex-col">
+                    <div class="flex justify-between">
                     <el-form-item label="Hệ số" prop="formData.weight">
                       <el-input v-model="formData.weight" type="number" clearable />
                     </el-form-item>
-                    <el-form-item label="Giới hạn số lần / thành viên" prop="formData.limitCount">
+                    
+                    <el-form-item label="Giới hạn số may mắn" prop="formData.luckyShowAfterMinCount">
+                      <el-input v-model="formData.luckyShowAfterMinCount" type="number" clearable />
+                    </el-form-item>
+                    </div>
+                    <div class="flex justify-between">
+                      <el-form-item label="Số lần / thành viên" prop="formData.limitCount">
                       <el-input v-model="formData.limitCount" type="number" clearable />
                     </el-form-item>
-                    <el-form-item label="Giới hạn số lần / máy" prop="formData.limitClientCount">
+                    <el-form-item label="Số lần / máy" prop="formData.limitClientCount">
                       <el-input v-model="formData.limitClientCount" type="number" clearable />
                     </el-form-item>
+                    
+                    </div>
                   </div>
 
                   <el-form-item label="Giới hạn IP truy cập" prop="formData.restrictIp">
@@ -386,6 +395,9 @@ const saveAttendance = async () => {
 
   if (formData.value.weight) {
     formData.value.weight = Number(formData.value.weight)
+  }
+  if (formData.value.luckyShowAfterMinCount) {
+    formData.value.luckyShowAfterMinCount = Number(formData.value.luckyShowAfterMinCount)
   }
 
   elFormRef.value?.validate(async (valid) => {
