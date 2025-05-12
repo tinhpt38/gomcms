@@ -15,6 +15,7 @@ type Condition struct {
 	AreaId       *uint           `json:"areaId" form:"areaId" gorm:"column:area_id;comment:;"`                   //Khu vực
 	StartAt      *time.Time      `json:"startAt" form:"startAt" gorm:"column:start_at;comment:;"`                //Bắt đầu
 	EndAt        *time.Time      `json:"endAt" form:"endAt" gorm:"column:end_at;comment:;"`                      //Kết thúc
+	Count        int             `json:"count" form:"count" gorm:"column:count;comment:Số lần điểm danh"`        //Điều kiện
 	CreatedBy    uint            `gorm:"column:created_by;comment:创建者"`
 	UpdatedBy    uint            `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy    uint            `gorm:"column:deleted_by;comment:删除者"`

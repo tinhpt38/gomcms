@@ -35,12 +35,10 @@
             {{ formatDateTime(scope.row.endAt) }}
           </template>
         </el-table-column>
+        <el-table-column align="left" label="Số lần" prop="count" min-width="120">
+          </el-table-column>
         <el-table-column align="left" label="Hành động" fixed="right" min-width="240">
           <template #default="scope">
-            <!-- <el-button type="primary" link class="table-button" @click="getDetails(scope.row)"><el-icon
-                                style="margin-right: 5px">
-                                <InfoFilled />
-                            </el-icon>Xem chi tiết</el-button> -->
             <el-button type="primary" link icon="edit" class="table-button" @click="updateConditionFunc(scope.row)">
               Chỉnh sửa
             </el-button>
@@ -90,6 +88,9 @@
         <el-form-item label="Kết thúc:" prop="endAt">
           <el-date-picker v-model="formData.endAt" type="datetime" style="width:100%" placeholder="Chọn ngày giờ"
             :clearable="true" />
+        </el-form-item>
+        <el-form-item label="Số lần:" prop="count">
+          <el-input v-model.number="formData.count" :clearable="true" placeholder="Nhập số lần" />
         </el-form-item>
       </el-form>
     </el-drawer>

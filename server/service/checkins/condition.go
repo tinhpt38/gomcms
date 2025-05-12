@@ -170,7 +170,7 @@ func (conditionService *ConditionService) SyncCondtionForAllMember(attId int) (e
 		LEFT JOIN conditions c 
 		ON (c.group_id = agp.group_id OR c.group_id IS NULL AND c.attendance_id = ?)
 		WHERE agp.attendance_id = ?`
-	err = global.GVA_DB.Exec(rawQuery, attId, attId).Debug().Error
+	err = global.GVA_DB.Exec(rawQuery, attId, attId).Error
 	if err != nil {
 		return err
 	}
