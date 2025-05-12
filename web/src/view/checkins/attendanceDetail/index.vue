@@ -49,12 +49,16 @@
                   <el-form-item label="Cho phép mọi người chỉnh sửa" label-width="150px" prop="everyoneCanEdit">
                     <el-switch v-model="formData.everyoneCanEdit" />
                   </el-form-item>
+                  <el-form-item label="Hiển thị ở trang chủ" label-width="150px" prop="showHome">
+                    <el-switch v-model="formData.showHome" />
+                  </el-form-item>
+                      <el-form-item label="Cho phép khách" label-width="150px" prop="allowGuest">
+                    <el-switch v-model="formData.allowGuest" />
+                  </el-form-item>
                   <el-form-item label="Đóng điểm danh" label-width="150px" prop="isLocked">
                     <el-switch v-model="formData.isLocked" />
                   </el-form-item>
-                  <el-form-item label="Cho phép khách" label-width="150px" prop="allowGuest">
-                    <el-switch v-model="formData.allowGuest" />
-                  </el-form-item>
+
                 </div>
                 <el-button link type="primary" icon="arrow-down" @click="showAllOptionConfig = true"
                   v-if="!showAllOptionConfig">Mở
@@ -166,8 +170,8 @@
             </div>
           </div>
           <div class="my-4">
-            <el-form label-position="top"ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
-              :rules="searchRules" @keyup.enter="onSubmit">
+            <el-form label-position="top" ref="elSearchFormRef" :inline="true" :model="searchInfo"
+              class="demo-form-inline" :rules="searchRules" @keyup.enter="onSubmit">
               <el-form-item label="Ngày tạo" prop="createdAt">
                 <el-date-picker v-model="searchInfo.startCreatedAt" type="date" placeholder="Ngày bắt đầu" />
               </el-form-item>
@@ -179,9 +183,9 @@
                   <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
                 </el-select>
               </el-form-item>
-            <el-form-item label="Agent" prop="agent">
-              <el-input v-model="searchInfo.agent" type="text" placeholder="Agent"></el-input>
-            </el-form-item>
+              <el-form-item label="Agent" prop="agent">
+                <el-input v-model="searchInfo.agent" type="text" placeholder="Agent"></el-input>
+              </el-form-item>
               <el-form-item label="Hành động">
                 <el-button type="primary" icon="search" @click="onSubmit">
                   Tìm kiếm
@@ -201,7 +205,8 @@
               </el-table-column>
               <el-table-column align="left" label="Thành viên" width="200">
                 <template #default="scope">
-                  <span>{{ scope.row.participant?.fullName?.replace("undefined", "") ?? scope.row.participant.email }}</span>
+                  <span>{{ scope.row.participant?.fullName?.replace("undefined", "") ?? scope.row.participant.email
+                    }}</span>
                 </template>
               </el-table-column>
               <el-table-column align="left" label="Khu vực" width="120">
@@ -230,7 +235,7 @@
               </el-table-column>
               <el-table-column label="Agent" prop="agent">
                 <template #default="scope">
-                  {{formatUserAgent(scope.row.agent)}}
+                  {{ formatUserAgent(scope.row.agent) }}
                 </template>
               </el-table-column>
             </el-table>

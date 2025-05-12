@@ -15,6 +15,7 @@ type Attendance struct {
 	IsLocked         bool       `json:"isLocked" form:"isLocked" gorm:"column:is_locked;comment:;"`                                                  //Khoá
 	EveryoneCanEdit  bool       `json:"everyoneCanEdit" form:"everyoneCanEdit" gorm:"column:everyone_can_edit;comment:Cho phép mọi người chỉnh sửa"` //Cho phép mọi người chỉnh sửa
 	AllowGuest       bool       `json:"allowGuest" form:"allowGuest" gorm:"column:allow_guest;comment:Cho phép khách"`                               //Cho phép khách
+	ShowHome         bool       `json:"showHome" form:"showHome" gorm:"column:show_home;comment:Hiện trang chủ"`                                     //Hiện trang chủ
 	Weight           int        `json:"weight" form:"weight" gorm:"column:weight;comment:Hệ số"`
 	ClientUrl        string     `json:"clientUrl" form:"clientUrl" gorm:"column:client_url;default=\"https://checkins.dlu.edu.vn\";comment:URL truy cập"` //URL của khách hàng
 	RestrictIp       *string    `json:"restrictIp" form:"restrictIp" gorm:"column:restrict_ip;comment:IP giới hạn"`                                       //IPs giới hạn

@@ -270,14 +270,12 @@ const searchInfo = ref({
     agencyId: null,
     categoryId: null,
     startDate: null,
-    endDate: null
+    endDate: null,
+    showHome: true
 })
 
 const getPostData = async () => {
-    // var now = moment()
-    // searchInfo.value.startDate = now.format('YYYY-MM-DDTHH:mm:ssZ')
-    // searchInfo.value.endDate = now.add(30, 'days').format('YYYY-MM-DDTHH:mm:ssZ')
-    // const res = await getAttendancePublic({ page: page.value, pageSize: pageSize.value, startDate: searchInfo.value.startDate, endDate: searchInfo.value.endDate })
+
     const res = await getAttendancePublic({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
     if (res.code == 0) {
         postData.value = res.data.list

@@ -211,6 +211,10 @@ func (attendanceService *AttendanceService) GetPublicAttendanceInfoList(info che
 		db = db.Where("category_id = ?", info.CategoryId)
 	}
 
+	if info.ShowHome {
+		db = db.Where("show_home = 1 or show_home is null")
+	}
+
 	// db = db.Where("is_locked = 0")
 
 	err = db.Count(&total).Error

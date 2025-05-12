@@ -170,17 +170,17 @@ const handleCurrentChange = (val) => {
 
 const getTableData = async () => {
   searchInfo.value.attendanceId = props.acId
-  const table = await getParticipantListByAttendance({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
-  if (table.code === 0) {
-    tableData.value = table.data.list.map((e) => {
-      var groupIds = e.groups?.map(k => k.ID)
-      e.groupId = groupIds
-      return e
-    })
-    total.value = table.data.total
-    page.value = table.data.page
-    pageSize.value = table.data.pageSize
-  }
+  // const table = await getParticipantListByAttendance({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  // if (table.code === 0) {
+  //   tableData.value = table.data.list.map((e) => {
+  //     var groupIds = e.groups?.map(k => k.ID)
+  //     e.groupId = groupIds
+  //     return e
+  //   })
+  //   total.value = table.data.total
+  //   page.value = table.data.page
+  //   pageSize.value = table.data.pageSize
+  // }
   // //console.log("participant components")
   // //console.log(tableData.value)
 }
