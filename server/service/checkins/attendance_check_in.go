@@ -141,6 +141,19 @@ func (attendanceCheckInService *AttendanceCheckInService) DeleteAttendanceCheckI
 }
 
 func (attendanceCheckInService *AttendanceCheckInService) UpdateAttendanceCheckIn(attendanceCheckIn checkins.AttendanceCheckIn) (err error) {
+	// First, get the existing record to ensure we don't lose data
+	var existingCheckIn checkins.AttendanceCheckIn
+	err = global.GVA_DB.Where("id = ?", attendanceCheckIn.ID).First(&existingCheckIn).Error
+	if err != nil {
+		return err
+	}
+
+	// Preserve lucky number if it exists
+	if existingCheckIn.LuckyNumber > 0 && attendanceCheckIn.LuckyNumber == 0 {
+		attendanceCheckIn.LuckyNumber = existingCheckIn.LuckyNumber
+	}
+
+	// Update the record
 	err = global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).Where("id = ?", attendanceCheckIn.ID).Updates(&attendanceCheckIn).Error
 	return err
 }
@@ -582,8 +595,18 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 		// Nếu đủ điều kiện để hiển thị số may mắn
 		if hasShowLuckyNumberCondition && upcomingCheckinCount >= attendance.LuckyShowAfterMinCount {
-			// Tạo số may mắn ngẫu nhiên từ 1-999 sử dụng bộ tạo số ngẫu nhiên cục bộ
-			luckyNumber = 1 + localRand.Intn(999)
+			// Kiểm tra xem người tham gia đã có số may mắn chưa
+			var existingLuckyCheckIn checkins.AttendanceCheckIn
+			existingLuckyResult := global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ? AND lucky_number > 0",
+				participant.ID, attendance.ID).First(&existingLuckyCheckIn)
+
+			if existingLuckyResult.Error == nil && existingLuckyCheckIn.LuckyNumber > 0 {
+				// Nếu đã có số may mắn, sử dụng lại số đó
+				luckyNumber = existingLuckyCheckIn.LuckyNumber
+			} else {
+				// Tạo số may mắn ngẫu nhiên từ 1-999 sử dụng bộ tạo số ngẫu nhiên cục bộ
+				luckyNumber = 1 + localRand.Intn(999)
+			}
 
 			// Lưu số may mắn vào các bản ghi điểm danh mới
 			for i := range agpCheckins {

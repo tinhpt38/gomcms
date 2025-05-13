@@ -92,6 +92,9 @@
                             <span class="font-bold">Số lần</span>
                           </el-badge>
                         </el-tag>
+                        <el-tag v-if="item.isPass && item.showLuckyNumber" class="ml-2 mt-2" type="warning">
+                          <i class="el-icon-star-on mr-1"></i>Điều kiện may mắn
+                        </el-tag>
                         <el-tag v-if="!item.isPass" effect="dart" type="danger">
                           Bạn chưa điểm danh
                         </el-tag>
@@ -100,6 +103,34 @@
                         </el-text>
                       </div>
                     </dl>
+                  </div>
+                </div>
+
+                <!-- Display Lucky Number when available -->
+                <div v-if="res.data && res.data.luckyNumber" class="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-300 shadow-lg relative">
+                  <div v-if="showConfetti" class="confetti-container">
+                    <div v-for="n in 50" :key="n" class="confetti" 
+                        :style="{
+                          left: Math.random() * 100 + '%',
+                          top: -10 * Math.random() + '%',
+                          backgroundColor: getRandomColor(),
+                          width: 5 + Math.random() * 10 + 'px',
+                          height: 5 + Math.random() * 10 + 'px',
+                          animationDelay: Math.random() * 3 + 's'
+                        }">
+                    </div>
+                  </div>
+                  <h3 class="text-xl font-bold text-[#7BA227] mb-3 flex items-center" :class="{'lucky-number-shine': showBounceAnimation}">
+                    <i class="el-icon-star-on mr-2 text-yellow-500"></i>Số may mắn của bạn
+                  </h3>
+                  <div class="flex flex-col items-center">
+                    <div class="text-5xl font-bold text-[#E67F32] bg-[#C2D88C] rounded-full h-28 w-28 flex items-center justify-center border-4 border-yellow-300 shadow-inner transform hover:scale-110 transition-all duration-300" 
+                      :class="{'lucky-number-celebrate': showBounceAnimation}">
+                      {{ res.data.luckyNumber }}
+                    </div>
+                    <p class="mt-3 text-sm text-yellow-700 italic">
+                      Hãy lưu lại số may mắn này để tham gia các hoạt động khác!
+                    </p>
                   </div>
                 </div>
 
@@ -266,6 +297,16 @@ const conditionString = (item) => {
 
 const conditionData = ref([])
 const attendance = ref({})
+const res = ref({data: {}}) // Store the entire response for reference
+const showBounceAnimation = ref(false) // Control bounce animation
+const showConfetti = ref(false) // Control confetti animation
+
+// Function to generate random colors for confetti
+const getRandomColor = () => {
+  const colors = ['#ffd700', '#ffcc33', '#ffc107', '#ffb300', '#ffa000', '#ff8f00', '#ff6f00']
+  return colors[Math.floor(Math.random() * colors.length)]
+}
+
 const requestCheckin = async () => {
   debugger
   if (route.query?.c == null) {
@@ -304,11 +345,13 @@ const requestCheckin = async () => {
   var encodedData = encodeVal(data.value)
   // var res = await publicAttendanceCheckIn({ ...data.value })
 
-  var res = await publicAttendanceCheckIn({ data: encodedData })
-  console.log("res: ", res)
-  if (res.code == 0) {
-    if (res.data.conditions != null) {
-      conditionData.value = res.data.conditions.filter((condition, index, self) =>
+  var apiResponse = await publicAttendanceCheckIn({ data: encodedData })
+  console.log("res: ", apiResponse)
+  res.value = apiResponse // Store the entire response
+  
+  if (apiResponse.code == 0) {
+    if (apiResponse.data.conditions != null) {
+      conditionData.value = apiResponse.data.conditions.filter((condition, index, self) =>
         index === self.findIndex((c) => c.ID === condition.ID)
       )
 
@@ -322,38 +365,91 @@ const requestCheckin = async () => {
       })
     }
     attendance.value = res.data.attendance
-    var checkinCount = res.data.checkinCount
-    var msg = "Bạn điểm danh không thành công. Vui lòng thao tác lại."
-    var passcount = conditionData?.value.reduce((count, item) => {
-      return item.isPass ? count + 1 : count;
-    }, 0);
+    // Retrieve total check-in count and lucky number from response
+    var checkinCount = 0;
+    var luckyNumber = res.data.luckyNumber ?? null
     
-    // Get total check-in count including repetitions
-    const totalCheckIns = conditionData?.value.reduce((total, item) => {
-      return item.isPass ? total + (item.counter || 1) : total;
-    }, 0);
+    // Get check-in counter from the first check-in if available
+    if (res.data.checkins && res.data.checkins.length > 0) {
+      checkinCount = res.data.checkins[0].counter || 0;
+    }
     
-    if (checkinCount > conditionData.value.length) {
-      msg = `Điểm danh thành công ${checkinCount} lần`
-    } else if (passcount > 0) {
-      if (totalCheckIns > passcount) {
-        msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} điều kiện (tổng ${totalCheckIns} lần)`
+    // Calculate condition stats if conditions exist
+    var passcount = 0;
+    var totalConditions = 0;
+    var totalCheckIns = 0;
+    
+    if (conditionData.value && conditionData.value.length > 0) {
+      passcount = conditionData.value.reduce((count, item) => {
+        return item.isPass ? count + 1 : count;
+      }, 0);
+      
+      totalConditions = conditionData.value.length;
+      
+      // Get total check-in count including repetitions
+      totalCheckIns = conditionData.value.reduce((total, item) => {
+        return item.isPass ? total + (item.counter || 1) : total;
+      }, 0);
+    }
+    
+    // Build a structured message for better readability
+    let msgComponents = [];
+    
+    // 1. Basic success message
+    if (res.data.message) {
+      // If server provided a message, use it
+      msgComponents.push(res.data.message);
+    } else {
+      // Otherwise build our own message
+      if (conditionData.value.length === 0) {
+        msgComponents.push("Bạn đã điểm danh thành công");
+      } else if (passcount > 0) {
+        msgComponents.push(`Điểm danh thành công ${passcount}/${totalConditions} điều kiện`);
       } else {
-        msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} điều kiện`
+        msgComponents.push("Điểm danh thành công");
       }
     }
-    var luckyNumber = res.data.luckyNumber ?? null
-    if (luckyNumber != null) {
-      msg = `Điểm danh thành công ${checkinCount} lần. Số may mắn của bạn là ${luckyNumber}`
+    
+    // 2. Check-in count info if not in the basic message
+    if (!res.data.message && checkinCount > 1 && !msgComponents[0].includes("lần")) {
+      msgComponents.push(`Tổng số lần điểm danh: ${checkinCount}`);
     }
-    if (conditionData.value.length == 0) {
-      msg = "Bạn đã điểm danh thành công"
+    
+    // 3. Lucky number info if not in the basic message
+    if (!res.data.message && luckyNumber != null && !msgComponents[0].includes("may mắn")) {
+      msgComponents.push(`<span class="text-yellow-600 font-bold"><i class="el-icon-star-on"></i> Chúc mừng! Số may mắn của bạn: ${luckyNumber}</span>`);
     }
+    
+    // 4. Additional info about attendance
+    if (attendance.value.useLuckyNumber && !luckyNumber && checkinCount < attendance.value.luckyShowAfterMinCount) {
+      msgComponents.push(`Bạn cần điểm danh thêm ${attendance.value.luckyShowAfterMinCount - checkinCount} lần nữa để nhận số may mắn`);
+    }
+    
+    // Combine all message components
+    const msg = msgComponents.join("<br>");
 
+    // Show message with HTML support
     ElMessageBox.alert(msg, 'Thông báo', {
       confirmButtonText: 'OK',
-      type: 'success'
+      type: 'success',
+      dangerouslyUseHTMLString: true,
+      center: true
     }).then(() => {
+      if (luckyNumber) {
+        // Trigger animations after showing the message box
+        showBounceAnimation.value = true
+        showConfetti.value = true
+        
+        // Stop animations after a while
+        setTimeout(() => { 
+          showBounceAnimation.value = false 
+        }, 3000)
+        
+        setTimeout(() => { 
+          showConfetti.value = false 
+        }, 5000)
+      }
+      
       if (attendance.value.redirectUrl) {
         window.location.href = attendance.value.redirectUrl
       }
@@ -410,5 +506,102 @@ main.isolate {
 #app {
   height: 100%;
   overflow-y: auto;
+}
+
+/* Import lucky number animations */
+/* @import '../../style/lucky-animation.css'; */
+@keyframes celebrate {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+  }
+}
+
+@keyframes shine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.lucky-number-celebrate {
+  animation: celebrate 1s ease-in-out infinite;
+}
+
+.lucky-number-shine {
+  background: linear-gradient(
+    to right, 
+    #ffd700 0%, 
+    #fff8e1 20%, 
+    #ffd700 40%, 
+    #ffecc1 60%, 
+    #ffd700 80%, 
+    #fff8e1 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 2s linear infinite;
+}
+
+/* Confetti Animation */
+.confetti-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #ffd700;
+  opacity: 0.7;
+  animation: confetti-fall 3s ease-in-out infinite, confetti-shake 2s ease-in-out infinite;
+}
+
+@keyframes confetti-fall {
+  0% {
+    top: -10%;
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes confetti-shake {
+  0% {
+    transform: skew(0deg, 0deg) rotate(0deg);
+  }
+  25% {
+    transform: skew(5deg, 5deg) rotate(5deg);
+  }
+  50% {
+    transform: skew(-5deg, -5deg) rotate(10deg);
+  }
+  75% {
+    transform: skew(5deg, 5deg) rotate(5deg);
+  }
+  100% {
+    transform: skew(0deg, 0deg) rotate(0deg);
+  }
 }
 </style>
