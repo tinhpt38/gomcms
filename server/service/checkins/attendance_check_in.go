@@ -1039,12 +1039,11 @@ func (attendanceCheckInService *AttendanceCheckInService) generateUniqueLuckyNum
 	defer luckyNumberMutex.Unlock()
 
 	// Khai báo các hằng số
-	const (
-		// Số may mắn tối đa: 1 triệu thay vì 9999 để hỗ trợ sự kiện rất lớn
-		maxLuckyNumber = 1000000
-		// Số lượng bucket trong bloom filter
-		bloomFilterSize = 1048576 // 2^20
-	)
+	// Số lượng bucket trong bloom filter
+	const bloomFilterSize = 1048576 // 2^20
+
+	// Xác định kích thước tối đa của số may mắn dựa trên số lượng người tham gia
+	var maxLuckyNumber int
 
 	// Thống kê tổng số người tham gia đã có số may mắn
 	var totalParticipantsWithLuckyNumber int64
@@ -1055,6 +1054,57 @@ func (attendanceCheckInService *AttendanceCheckInService) generateUniqueLuckyNum
 
 	if err != nil {
 		global.GVA_LOG.Error("Lỗi khi đếm số người dùng đã có số may mắn", zap.Error(err))
+	}
+
+	// Đếm tổng số người đã check-in (thay vì đếm toàn bộ người tham gia)
+	var totalCheckedInParticipants int64
+	err = global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+		Where("attendance_id = ?", attendanceID).
+		Group("partpaticipant_id").
+		Count(&totalCheckedInParticipants).Error
+
+	if err != nil {
+		global.GVA_LOG.Error("Lỗi khi đếm số người đã check-in", zap.Error(err))
+		// Fallback nếu không đếm được chính xác
+		totalCheckedInParticipants = totalParticipantsWithLuckyNumber * 2
+	}
+
+	// Thêm hệ số dự phòng (3x) để đảm bảo luôn có đủ số may mắn
+	const bufferFactor = 3
+
+	// Tính toán số người đã check-in với hệ số dự phòng
+	adjustedParticipantCount := totalCheckedInParticipants * bufferFactor
+
+	// Điều chỉnh kích thước tối đa của số may mắn dựa trên số lượng người đã check-in (có dự phòng)
+	if adjustedParticipantCount <= 10 {
+		// Với số lượng người ít, chỉ cần số nhỏ 2 chữ số (1-99)
+		maxLuckyNumber = 99
+	} else if adjustedParticipantCount <= 100 {
+		// Với số lượng vừa phải, dùng số 3 chữ số (1-999)
+		maxLuckyNumber = 999
+	} else if adjustedParticipantCount <= 1000 {
+		// Với sự kiện lớn hơn, dùng số 4 chữ số (1-9999)
+		maxLuckyNumber = 9999
+	} else if adjustedParticipantCount <= 10000 {
+		// Với sự kiện rất lớn, dùng số 5 chữ số (1-99999)
+		maxLuckyNumber = 99999
+	} else {
+		// Với sự kiện cực lớn, giữ nguyên số 6 chữ số (1-1000000)
+		maxLuckyNumber = 1000000
+	}
+
+	// Đảm bảo maxLuckyNumber luôn lớn hơn ít nhất 2 lần số người đã check-in
+	if int64(maxLuckyNumber) <= totalCheckedInParticipants*2 {
+		// Nâng lên mức số tiếp theo nếu không đủ
+		if maxLuckyNumber <= 99 {
+			maxLuckyNumber = 999
+		} else if maxLuckyNumber <= 999 {
+			maxLuckyNumber = 9999
+		} else if maxLuckyNumber <= 9999 {
+			maxLuckyNumber = 99999
+		} else if maxLuckyNumber <= 99999 {
+			maxLuckyNumber = 1000000
+		}
 	}
 
 	// Lấy mẫu để xác định chiến lược tối ưu
@@ -1074,8 +1124,12 @@ func (attendanceCheckInService *AttendanceCheckInService) generateUniqueLuckyNum
 	// Ghi log chiến lược được chọn
 	global.GVA_LOG.Info("Chiến lược sinh số may mắn được chọn",
 		zap.String("strategy", strategy),
-		zap.Int64("participants", totalParticipantsWithLuckyNumber),
-		zap.Uint("attendanceID", attendanceID))
+		zap.Int64("participants_with_lucky_number", totalParticipantsWithLuckyNumber),
+		zap.Int64("checked_in_participants", totalCheckedInParticipants),
+		zap.Int64("adjusted_participant_count", adjustedParticipantCount),
+		zap.Int("buffer_factor", bufferFactor),
+		zap.Uint("attendanceID", attendanceID),
+		zap.Int("maxLuckyNumber", maxLuckyNumber))
 
 	// Biến lưu kết quả số may mắn
 	var luckyNumber int
@@ -1263,17 +1317,36 @@ func (attendanceCheckInService *AttendanceCheckInService) generateUniqueLuckyNum
 		// Tạo UUID-based number để đảm bảo không trùng lặp
 		// Sử dụng timestamp nano + ID người dùng để tạo số đặc biệt
 		timestamp := time.Now().UnixNano()
-		specialNumber := (timestamp % 900000) + 100000 + int64(participantID%1000)*1000
-
-		// Đảm bảo số nằm trong khoảng hợp lệ (6 chữ số)
-		luckyNumber = int(specialNumber % 1000000)
-		if luckyNumber < 100000 {
-			luckyNumber += 100000 // Đảm bảo ít nhất 6 chữ số
+		// Điều chỉnh phương pháp tạo số đặc biệt dựa trên maxLuckyNumber
+		if maxLuckyNumber <= 99 {
+			// Với số 2 chữ số, đảm bảo số nằm trong khoảng 1-99
+			specialNumber := (timestamp % 90) + 10 + int64(participantID%10)
+			luckyNumber = int(specialNumber)
+		} else if maxLuckyNumber <= 999 {
+			// Với số 3 chữ số, đảm bảo số nằm trong khoảng 100-999
+			specialNumber := (timestamp % 900) + 100 + int64(participantID%100)
+			luckyNumber = int(specialNumber)
+		} else if maxLuckyNumber <= 9999 {
+			// Với số 4 chữ số, đảm bảo số nằm trong khoảng 1000-9999
+			specialNumber := (timestamp % 9000) + 1000 + int64(participantID%100)*10
+			luckyNumber = int(specialNumber)
+		} else if maxLuckyNumber <= 99999 {
+			// Với số 5 chữ số, đảm bảo số nằm trong khoảng 10000-99999
+			specialNumber := (timestamp % 90000) + 10000 + int64(participantID%100)*100
+			luckyNumber = int(specialNumber)
+		} else {
+			// Với số 6 chữ số, giữ nguyên phương pháp cũ
+			specialNumber := (timestamp % 900000) + 100000 + int64(participantID%1000)*1000
+			luckyNumber = int(specialNumber % 1000000)
+			if luckyNumber < 100000 {
+				luckyNumber += 100000 // Đảm bảo ít nhất 6 chữ số
+			}
 		}
 
 		global.GVA_LOG.Warn("Sử dụng phương pháp đặc biệt để tạo số may mắn",
 			zap.Int("luckyNumber", luckyNumber),
-			zap.Uint("attendanceID", attendanceID))
+			zap.Uint("attendanceID", attendanceID),
+			zap.Int("maxLuckyNumber", maxLuckyNumber))
 	}
 
 	return luckyNumber, nil
