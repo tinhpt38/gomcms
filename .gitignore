@@ -34,3 +34,4 @@ server/uploads/
 web/.pnpm-debug.log
 web/pnpm-lock.yaml
 server/config.yaml
+server/main

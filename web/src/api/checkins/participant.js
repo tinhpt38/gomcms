@@ -96,6 +96,14 @@ export const findLuckyParticipant = (params) => {
   })
 }
 
+export const clearLuckyHistory = (params) => {
+  return service({
+    url: '/participant/clearLuckyHistory',
+    method: 'delete',
+    params
+  })
+}
+
 // @Tags Participant
 // @Summary 分页获取Sinh viên (Người tham dự phiên điểm danh)列表
 // @Security ApiKeyAuth

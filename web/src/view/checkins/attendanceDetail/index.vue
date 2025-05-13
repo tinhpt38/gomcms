@@ -135,7 +135,6 @@
             </el-row>
           </el-form>
         </div>
-
         <el-divider />
       </el-tab-pane>
       <el-tab-pane name="partticipantsTab" label="Thành viên">
@@ -269,6 +268,7 @@
           <RandomWheel :ac-id="currentId" />
         </div>
       </el-tab-pane>
+    
     </el-tabs>
   </div>
 </template>

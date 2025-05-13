@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
@@ -149,17 +150,81 @@ func (participantService *ParticipantService) GetParticipant(ID string) (partici
 	return
 }
 
-func (participantService *ParticipantService) GetLuckyParticipant(acId string) (participant checkins.Participant, err error) {
-	// 	SELECT *
-	// FROM table_name
-	// ORDER BY RAND()
-	db := global.GVA_DB.Model(&checkins.Participant{})
-	err = db.Joins("JOIN attendance_group_participants ON participants.id = attendance_group_participants.participant_id").
-		Where("attendance_group_participants.attendance_id = ?", acId).
-		Order("RAND()").
-		First(&participant).Error
+func (participantService *ParticipantService) GetLuckyParticipant(acId string) (participant checkins.Participant, luckyNumber int, err error) {
+	// Lấy lịch sử số may mắn đã quay
+	var luckyHistory []checkins.UsedLuckyParticipant
+	_ = global.GVA_DB.Where("attendance_id = ?", acId).
+		Order("created_at DESC").
+		Find(&luckyHistory).Error
 
-	return
+	// Tạo số may mắn ngẫu nhiên (từ 1-3 lần thử để tìm được người may mắn)
+	maxAttempts := 3 // Số lần thử tối đa
+	foundLuckyParticipant := false
+
+	// Random từ 1 đến 99
+	randomNumber := 1 + (time.Now().Nanosecond() % 99)
+	luckyNumber = randomNumber
+
+	// Tìm người tham gia có lucky number tương ứng
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		// Tìm trong attendance_check_ins xem có ai có số may mắn này không
+		var checkIn checkins.AttendanceCheckIn
+		checkInErr := global.GVA_DB.Where("attendance_id = ? AND lucky_number = ?", acId, luckyNumber).
+			Order("created_at DESC").
+			First(&checkIn).Error
+
+		if checkInErr == nil && checkIn.ID > 0 {
+			// Tìm thấy người tham gia có số may mắn này
+			dbErr := global.GVA_DB.Where("id = ?", checkIn.PartpaticipantId).
+				First(&participant).Error
+
+			if dbErr == nil {
+				foundLuckyParticipant = true
+
+				// Lưu vào lịch sử
+				usedLuckyParticipant := checkins.UsedLuckyParticipant{
+					AttendanceId:  acId,
+					ParticipantId: &participant.ID,
+					LuckyNumber:   &luckyNumber,
+				}
+				global.GVA_DB.Create(&usedLuckyParticipant)
+
+				break // Đã tìm thấy người may mắn, không cần thử thêm
+			}
+		}
+
+		// Nếu không tìm thấy hoặc có lỗi, thử số may mắn khác
+		if attempt < maxAttempts {
+			randomNumber = 1 + (time.Now().Nanosecond() % 99) + attempt*10
+			randomNumber = randomNumber % 99
+			if randomNumber == 0 {
+				randomNumber = 1
+			}
+			luckyNumber = randomNumber
+			time.Sleep(100 * time.Millisecond) // Đảm bảo random khác nhau
+		}
+	}
+
+	// Nếu không tìm thấy người may mắn sau tất cả các lần thử, vẫn lưu số may mắn vào lịch sử
+	if !foundLuckyParticipant {
+		usedLuckyParticipant := checkins.UsedLuckyParticipant{
+			AttendanceId: acId,
+			LuckyNumber:  &luckyNumber,
+		}
+		global.GVA_DB.Create(&usedLuckyParticipant)
+	}
+
+	return participant, luckyNumber, nil
+}
+
+// Helper function to check if a slice contains a value
+func contains(slice []uint, value uint) bool {
+	for _, item := range slice {
+		if item == value {
+			return true
+		}
+	}
+	return false
 }
 
 func (participantService *ParticipantService) GetParticipantByEmail(email string) (participant checkins.Participant, err error) {

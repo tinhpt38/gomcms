@@ -2,6 +2,7 @@ package checkins
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
@@ -109,13 +110,61 @@ func (participantApi *ParticipantApi) FindParticipant(c *gin.Context) {
 
 func (participantApi *ParticipantApi) FindLuckyParticipant(c *gin.Context) {
 	acId := c.Query("attendanceId")
-	reparticipant, err := participantService.GetLuckyParticipant(acId)
+
+	// Lấy người may mắn hiện tại
+	participant, luckyNumber, err := participantService.GetLuckyParticipant(acId)
+
+	// Lấy lịch sử các số may mắn đã quay
+	var luckyHistory []checkins.UsedLuckyParticipant
+	global.GVA_DB.Where("attendance_id = ?", acId).
+		Order("created_at DESC").
+		Limit(20).
+		Find(&luckyHistory)
+
+	// Lấy thông tin chi tiết của mỗi người tham gia trong lịch sử
+	type LuckyHistoryItem struct {
+		ID            uint      `json:"id"`
+		LuckyNumber   *int      `json:"luckyNumber"`
+		ParticipantId *uint     `json:"participantId"`
+		Email         string    `json:"email"`
+		FullName      string    `json:"fullName"`
+		CreatedAt     time.Time `json:"createdAt"`
+	}
+
+	var historyItems []LuckyHistoryItem
+	for _, hist := range luckyHistory {
+		item := LuckyHistoryItem{
+			ID:            hist.ID,
+			LuckyNumber:   hist.LuckyNumber,
+			ParticipantId: hist.ParticipantId,
+			CreatedAt:     hist.CreatedAt,
+		}
+
+		// Nếu có participant_id, lấy thông tin người tham gia
+		if hist.ParticipantId != nil && *hist.ParticipantId > 0 {
+			var p checkins.Participant
+			if global.GVA_DB.Where("id = ?", *hist.ParticipantId).First(&p).Error == nil {
+				item.Email = p.Email
+				if p.FullName != nil {
+					item.FullName = *p.FullName
+				}
+			}
+		}
+
+		historyItems = append(historyItems, item)
+	}
+
 	if err != nil {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
 		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
-	response.OkWithData(reparticipant, c)
+
+	response.OkWithData(gin.H{
+		"participant":  participant,
+		"luckyNumber":  luckyNumber,
+		"luckyHistory": historyItems,
+	}, c)
 }
 
 func (participantApi *ParticipantApi) GetParticipantList(c *gin.Context) {
