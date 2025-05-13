@@ -546,6 +546,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		if len(coreConditions) == 0 {
 			// Nếu không có điều kiện, chỉ kiểm tra có điểm danh nào trong agpCheckins không
 			hasAnyPassedCondition = len(agpCheckins) > 0
+			hasShowLuckyNumberCondition = true
 		} else {
 			// Kiểm tra điều kiện đã pass
 			for _, condition := range coreConditions {
