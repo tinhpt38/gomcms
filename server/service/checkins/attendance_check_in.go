@@ -43,23 +43,67 @@ type conditionResult struct {
 }
 
 func (attendanceCheckInService *AttendanceCheckInService) CreateAttendanceCheckIn(attendanceCheckIn *checkins.AttendanceCheckIn) (err error) {
-	// var count int64
-	if attendanceCheckIn.IsLucky {
-		err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{
-			AttendanceId:     attendanceCheckIn.AttendanceId,
-			PartpaticipantId: attendanceCheckIn.PartpaticipantId,
-			ConditionId:      attendanceCheckIn.ConditionId,
-			IsLucky:          attendanceCheckIn.IsLucky,
-		}).FirstOrCreate(attendanceCheckIn).Error
-		if err != nil {
-			return err
+	// Kiểm tra xem người tham gia đã điểm danh với điều kiện này trước đó chưa
+	var existingCheckIn checkins.AttendanceCheckIn
+
+	err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{
+		AttendanceId:     attendanceCheckIn.AttendanceId,
+		PartpaticipantId: attendanceCheckIn.PartpaticipantId,
+		ConditionId:      attendanceCheckIn.ConditionId,
+	}).First(&existingCheckIn).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// Nếu chưa điểm danh với điều kiện này trước đó, tạo record mới với counter = 1
+			attendanceCheckIn.Counter = 1
+			err = global.GVA_DB.Create(attendanceCheckIn).Error
+			if err != nil {
+				return err
+			}
+			return nil
 		}
-	} else {
-		err = global.GVA_DB.Where(&checkins.AttendanceCheckIn{}).Create(attendanceCheckIn).Error
-		if err != nil {
-			return err
-		}
+		return err
 	}
+
+	// Nếu đã điểm danh trước đó, tăng counter và cập nhật
+	// Đảm bảo counter không bao giờ là 0
+	if existingCheckIn.Counter <= 0 {
+		existingCheckIn.Counter = 1
+	}
+	existingCheckIn.Counter += 1
+
+	// Cập nhật các thông tin mới nếu cần
+	if attendanceCheckIn.IP != "" {
+		existingCheckIn.IP = attendanceCheckIn.IP
+	}
+	if attendanceCheckIn.Lattidue != nil {
+		existingCheckIn.Lattidue = attendanceCheckIn.Lattidue
+	}
+	if attendanceCheckIn.Longtidue != nil {
+		existingCheckIn.Longtidue = attendanceCheckIn.Longtidue
+	}
+	if attendanceCheckIn.Accuracy != nil {
+		existingCheckIn.Accuracy = attendanceCheckIn.Accuracy
+	}
+	if attendanceCheckIn.Agent != "" {
+		existingCheckIn.Agent = attendanceCheckIn.Agent
+	}
+	if attendanceCheckIn.VisitorId != "" {
+		existingCheckIn.VisitorId = attendanceCheckIn.VisitorId
+	}
+
+	// Cập nhật thời gian điểm danh mới nhất
+	existingCheckIn.CheckinDate = attendanceCheckIn.CheckinDate
+
+	// Lưu cập nhật vào database
+	err = global.GVA_DB.Save(&existingCheckIn).Error
+	if err != nil {
+		return err
+	}
+
+	// Cập nhật lại thông tin counter cho đối tượng ban đầu để hiển thị
+	attendanceCheckIn.Counter = existingCheckIn.Counter
+	attendanceCheckIn.ID = existingCheckIn.ID
 
 	return nil
 }
@@ -247,13 +291,6 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		return nil, err
 	}
 
-	// var logCounter int64
-	// err = global.GVA_DB.Model(&checkins.CheckinLog{}).
-	// 	Where("code = ? AND email = ? AND attendance_id = ?", req.Code, email, attendance.ID).Count(&logCounter).Error
-	// if err != nil {
-	// 	return nil, errors.New("không tìm thấy nhật ký kiểm danh của bạn")
-	// }
-
 	if attendance.RestrictIp != nil && *attendance.RestrictIp != "" {
 		ipString := attendance.RestrictIp
 		ipRanges := strings.Split(*ipString, ",")
@@ -274,9 +311,10 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
 		return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
 	}
-	var checkinCount int64
-	global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Count(&checkinCount)
+
 	if attendance.LimitCount > 0 {
+		var checkinCount int64
+		global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Count(&checkinCount)
 		// var list []checkins.AttendanceCheckIn
 		if int(checkinCount) >= attendance.LimitCount {
 			msg := fmt.Sprintf("bạn đã điểm danh đủ số lần cho phép %d ", checkinCount)
@@ -391,9 +429,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		var anyConditionPassed bool
 		for _, gc := range agpConditions {
 			// Sử dụng hàm kiểm tra song song
-			resultList := checkConditionsParallel(gc.agp, gc.conditions, req, ip)
-
-			// Xử lý kết quả
+			resultList := checkConditionsParallel(gc.agp, gc.conditions, req, ip) // Xử lý kết quả
 			for _, result := range resultList {
 				var tempCon checkins.Condition
 				for _, c := range gc.conditions {
@@ -402,19 +438,9 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 						break
 					}
 				}
-
 				if result.Pass {
 					tempCon.IsPass = true
 					anyConditionPassed = true
-
-					// Kiểm tra số may mắn
-					isLucky := false
-					if attendance.UseLuckyNumber {
-						if attendance.LuckyShowAfterMinCount > 0 && checkinCount >= int64(attendance.LuckyShowAfterMinCount) {
-							isLucky = true
-						}
-					}
-
 					// Tạo bản ghi điểm danh
 					attendanceCheckIn := checkins.AttendanceCheckIn{
 						CheckinDate:      time.Now().UTC(),
@@ -429,7 +455,6 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 						Agent:            userAgent,
 						Accuracy:         req.Accuracy,
 						VisitorId:        req.VisitorId,
-						IsLucky:          isLucky,
 					}
 					agpCheckins = append(agpCheckins, attendanceCheckIn)
 				} else {
@@ -451,16 +476,62 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	result["conditions"] = coreConditions
 	result["attendance"] = attendance
 	result["message"] = globalMsg
-	result["checkinCount"] = checkinCount + 1
+
+	// Lấy và trả về danh sách điểm danh với counter
+	var existingCheckins []checkins.AttendanceCheckIn
+	err = global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&existingCheckins).Error
+	if err == nil {
+		result["checkins"] = existingCheckins
+
+		// Bổ sung thông tin counter vào conditions
+		if len(existingCheckins) > 0 && len(coreConditions) > 0 {
+			// Tạo map để ánh xạ condition_id với counter
+			counterMap := make(map[uint]int)
+			for _, checkin := range existingCheckins {
+				if checkin.ConditionId != nil {
+					counterMap[*checkin.ConditionId] = checkin.Counter
+				}
+			}
+
+			// Bổ sung thông tin counter vào kết quả conditions
+			var conditionsWithCounter []map[string]interface{}
+			for _, condition := range coreConditions {
+				conditionMap := make(map[string]interface{})
+				for k, v := range map[string]interface{}{
+					"ID":              condition.ID,
+					"AttendanceId":    condition.AttendanceId,
+					"GroupId":         condition.GroupId,
+					"AreaId":          condition.AreaId,
+					"StartAt":         condition.StartAt,
+					"EndAt":           condition.EndAt,
+					"IsPass":          condition.IsPass,
+					"Message":         condition.Message,
+					"ShowLuckyNumber": condition.ShowLuckyNumber,
+				} {
+					conditionMap[k] = v
+				}
+
+				// Thêm counter vào condition
+				if counter, exists := counterMap[condition.ID]; exists {
+					conditionMap["counter"] = counter
+				} else {
+					conditionMap["counter"] = 0
+				}
+
+				conditionsWithCounter = append(conditionsWithCounter, conditionMap)
+			}
+
+			// Thay thế conditions trong kết quả
+			result["conditions"] = conditionsWithCounter
+		}
+	}
+
 	// if len(coreConditions) == 0 {
 	// 	result["message"] = "Không có điều kiện điểm danh nào thoả mãn"
 	// }
 
 	for _, agp := range agpCheckins {
 		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&agp)
-		if agp.IsLucky {
-			result["luckyNumber"] = agp.ID
-		}
 		if aciErr != nil {
 			msg := fmt.Sprintf("thiết bị của bạn đã điểm danh đủ số lần cho phép %s ", aciErr.Error())
 			checkinLog.MessageList += msg + "$$"

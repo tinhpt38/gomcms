@@ -19,10 +19,11 @@ type AttendanceCheckIn struct {
 	IP               string    `json:"iP" form:"iP" gorm:"column:ip;comment:;"`                                                               //IP
 	Lattidue         *float64  `json:"lattidue" form:"lattidue" gorm:"column:lattidue;comment:;"`                                             //Kinh độ
 	Longtidue        *float64  `json:"longtidue" form:"longtidue" gorm:"column:longtidue;comment:;"`
-	Accuracy         *float64  `json:"accuracy" form:"accuracy" gorm:"column:accuracy;comment:;"`                        //Độ chính xác
-	Agent            string    `json:"agent" form:"agent" gorm:"column:agent;comment:;type:text;`                        //Agent
-	VisitorId        string    `json:"visitorId" form:"visitorId" gorm:"column:visitor_id;comment:;"`                    //ID khách
-	IsLucky          bool      `json:"isLucky" form:"isLucky" gorm:"column:is_lucky;comment:;type:tinyint(1);default:0"` //Số may
+	Accuracy         *float64  `json:"accuracy" form:"accuracy" gorm:"column:accuracy;comment:;"`                   //Độ chính xác
+	Agent            string    `json:"agent" form:"agent" gorm:"column:agent;comment:;type:text;"`                  //Agent
+	VisitorId        string    `json:"visitorId" form:"visitorId" gorm:"column:visitor_id;comment:;"`               //ID khách
+	LuckyNumber      int       `json:"luckyNumber" form:"luckyNumber" gorm:"column:lucky_number;comment:;type:int"` //Số may
+	Counter          int       `json:"counter" form:"counter" gorm:"column:counter;comment:;type:int"`              //Counter
 	CreatedBy        uint      `gorm:"column:created_by;comment:创建者"`
 	UpdatedBy        uint      `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy        uint      `gorm:"column:deleted_by;comment:删除者"`

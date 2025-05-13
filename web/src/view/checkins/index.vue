@@ -86,8 +86,11 @@
                         <dd class="my-1 text-sm text-base text-gray-700 sm:col-span-2 sm:mt-0">
                           {{ conditionString(item) }}
                         </dd>
-                        <el-tag v-if="item.isPass" effect="dark" type="success">
-                          Bạn đã điểm danh
+                        <el-tag v-if="item.isPass" effect="dark" type="success" class="flex items-center gap-1">
+                          <span>Bạn đã điểm danh</span>
+                          <el-badge v-if="item.counter > 1" :value="item.counter" type="primary" class="ml-2">
+                            <span class="font-bold">Số lần</span>
+                          </el-badge>
                         </el-tag>
                         <el-tag v-if="!item.isPass" effect="dart" type="danger">
                           Bạn chưa điểm danh
@@ -308,6 +311,15 @@ const requestCheckin = async () => {
       conditionData.value = res.data.conditions.filter((condition, index, self) =>
         index === self.findIndex((c) => c.ID === condition.ID)
       )
+
+      // Ensure counter information is correctly processed
+      // Conditions may already have counter data from backend
+      conditionData.value.forEach(condition => {
+        // Ensure counter property exists and has a valid value
+        if (typeof condition.counter === 'undefined') {
+          condition.counter = 0
+        }
+      })
     }
     attendance.value = res.data.attendance
     var checkinCount = res.data.checkinCount
@@ -315,10 +327,20 @@ const requestCheckin = async () => {
     var passcount = conditionData?.value.reduce((count, item) => {
       return item.isPass ? count + 1 : count;
     }, 0);
+    
+    // Get total check-in count including repetitions
+    const totalCheckIns = conditionData?.value.reduce((total, item) => {
+      return item.isPass ? total + (item.counter || 1) : total;
+    }, 0);
+    
     if (checkinCount > conditionData.value.length) {
       msg = `Điểm danh thành công ${checkinCount} lần`
     } else if (passcount > 0) {
-      msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} điều kiện`
+      if (totalCheckIns > passcount) {
+        msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} điều kiện (tổng ${totalCheckIns} lần)`
+      } else {
+        msg = `Điểm danh thành công ${passcount}/${conditionData.value.length} điều kiện`
+      }
     }
     var luckyNumber = res.data.luckyNumber ?? null
     if (luckyNumber != null) {
