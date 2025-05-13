@@ -1,6 +1,6 @@
 <template>
   <div class="lucky-number-feature">
-    <!-- Progress Bar - Show when user is working toward a lucky number -->
+    <!-- Simple notice when user is working toward a lucky number -->
     <div v-if="showProgress && !luckyNumber && remainingCheckins > 0" 
          class="mt-4 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 shadow-md">
       <h3 class="text-lg font-medium text-gray-700 mb-3 flex items-center">
@@ -8,18 +8,9 @@
         <span>Điểm danh để nhận số may mắn</span>
       </h3>
       
-      <div class="mb-2 flex justify-between items-center text-sm">
-        <span class="text-gray-500">Đã điểm danh: <span class="font-bold text-green-600">{{ currentCheckins }}</span></span>
-        <span class="text-gray-500">Còn cần: <span class="font-bold text-yellow-600">{{ remainingCheckins }}</span></span>
-        <span class="text-gray-500">Tổng: <span class="font-bold">{{ requiredCheckins }}</span></span>
-      </div>
-      
-      <div class="lucky-progress-container">
-        <div class="lucky-progress-bar" :style="{ width: progressPercent + '%' }"></div>
-      </div>
-      
       <p class="mt-2 text-sm text-gray-600 italic">
-        <i class="el-icon-time mr-1"></i>Còn {{ remainingCheckins }} lần điểm danh nữa để nhận số may mắn của bạn
+        <i class="el-icon-info-filled mr-1 text-blue-500"></i>
+        <strong>Lưu ý:</strong> Bạn phải điểm danh thành công ít nhất một điều kiện mới nhận được số may mắn
       </p>
     </div>
     

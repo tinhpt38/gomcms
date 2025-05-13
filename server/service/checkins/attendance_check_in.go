@@ -601,18 +601,28 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 		// Kiểm tra xem có điều kiện nào đạt và cho phép hiển thị số may mắn không
 		var hasShowLuckyNumberCondition bool
+
+		// Kiểm tra xem có điểm danh thành công ít nhất một điều kiện không
+		var hasAnyPassedCondition bool
+
+		// Nếu có điều kiện đã điểm danh thành công hoặc điểm danh mới thành công
 		if len(coreConditions) == 0 {
-			hasShowLuckyNumberCondition = true
-		}
-		for _, condition := range coreConditions {
-			if condition.IsPass && condition.ShowLuckyNumber {
-				hasShowLuckyNumberCondition = true
-				break
+			// Nếu không có điều kiện, chỉ kiểm tra có điểm danh nào trong agpCheckins không
+			hasAnyPassedCondition = len(agpCheckins) > 0
+		} else {
+			// Kiểm tra điều kiện đã pass
+			for _, condition := range coreConditions {
+				if condition.IsPass {
+					hasAnyPassedCondition = true
+					if condition.ShowLuckyNumber {
+						hasShowLuckyNumberCondition = true
+					}
+				}
 			}
 		}
 
-		// Nếu đủ điều kiện để hiển thị số may mắn
-		if hasShowLuckyNumberCondition && upcomingCheckinCount >= attendance.LuckyShowAfterMinCount {
+		// Nếu đủ điều kiện để hiển thị số may mắn (đủ số lần điểm danh và có ít nhất 1 điều kiện thành công)
+		if hasAnyPassedCondition && hasShowLuckyNumberCondition && upcomingCheckinCount >= attendance.LuckyShowAfterMinCount {
 			// Kiểm tra xem người tham gia đã có số may mắn chưa
 			var existingLuckyCheckIn checkins.AttendanceCheckIn
 			existingLuckyResult := global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ? AND lucky_number > 0",

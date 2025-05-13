@@ -73,7 +73,15 @@
                 </p>
                 <div v-if="attendance.title != null" class="mt-4 p-2 rounded shadow-slate-400">
                   <h3>{{ attendance.title }}</h3>
-                  <div v-if="conditionData.length > 0">
+                  <!-- Lucky Number feature -->
+                <LuckyNumberDisplay 
+                  :lucky-number="apiResponse?.data?.luckyNumber" 
+                  :current-checkins="checkinCount"
+                  :required-checkins="attendance.luckyShowAfterMinCount || 0"
+                  :is-new-lucky-number="isNewLuckyNumber"
+                  :show-progress="attendance.useLuckyNumber"
+                />
+                  <div class="mt-4" v-if="conditionData.length > 0">
                     <div class="text-base text-gray-900">
                       Danh sách điều kiện điểm danh
                     </div>
@@ -87,7 +95,7 @@
                           {{ conditionString(item) }}
                         </dd>
                         <el-tag v-if="item.IsPass" effect="dark" type="success" class="flex items-center gap-1">
-                          <span>Bạn đã điểm danh thành công {{item.counter }} lần</span>
+                          <span>Bạn đã điểm danh thành công {{item.counter + 1 }} lần</span>
                         </el-tag>
                         <el-tag v-if="item.IsPass && item.ShowLuckyNumber" class="ml-2 mt-2" type="warning">
                           <i class="el-icon-star-on mr-1"></i>Điều kiện may mắn
@@ -106,24 +114,7 @@
                   </div>
                 </div>
 
-                <!-- Display Lucky Number Progress when available but not yet achieved -->
-                <div v-if="attendance?.useLuckyNumber && !apiResponse?.data?.luckyNumber && checkinsRemaining > 0" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-md">
-                  <h3 class="text-lg font-medium text-gray-700 mb-2 flex items-center">
-                    <i class="el-icon-time mr-2"></i>Còn {{ checkinsRemaining }} lần điểm danh nữa để nhận số may mắn
-                  </h3>
-                  <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-                    <div class="bg-yellow-400 h-2.5 rounded-full" :style="{ width: checkinsProgress + '%' }"></div>
-                  </div>
-                </div>
-
-                <!-- Lucky Number feature -->
-                <LuckyNumberDisplay 
-                  :lucky-number="apiResponse?.data?.luckyNumber" 
-                  :current-checkins="checkinCount"
-                  :required-checkins="attendance.luckyShowAfterMinCount || 0"
-                  :is-new-lucky-number="isNewLuckyNumber"
-                  :show-progress="attendance.useLuckyNumber"
-                />
+                
 
                 <GoogleLogin class="my-4" :callback="callback" :error="gError" prompt />
               </div>
@@ -441,7 +432,7 @@ const requestCheckin = async () => {
     // 4. Additional info about attendance
     if (attendance.value.useLuckyNumber && !luckyNumber && checkinCount < attendance.value.luckyShowAfterMinCount) {
       const remaining = attendance.value.luckyShowAfterMinCount - checkinCount;
-      msgComponents.push(`Bạn cần điểm danh thêm ${remaining} lần nữa để nhận số may mắn`);
+      msgComponents.push(`Bạn cần điểm danh thêm ${remaining} lần nữa và điểm danh thành công ít nhất một điều kiện để nhận số may mắn`);
       
       // Update the progress bar values
       checkinsRemaining.value = remaining;
