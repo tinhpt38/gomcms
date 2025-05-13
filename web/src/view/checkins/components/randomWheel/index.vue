@@ -5,12 +5,13 @@
             <span v-else>Đang quay...</span>
         </el-button>
         
-        <div class="wheel-container mb-8" v-if="isSpinning || hasResult">
+        <!-- Wheel without pre-displayed numbers -->
+        <div class="wheel-container mb-8" v-if="isSpinning">
             <div class="wheel" ref="wheelRef" :class="{ 'spinning': isSpinning }">
                 <div class="wheel-inner">
-                    <div v-for="(item, index) in wheelItems" :key="index" class="wheel-item" 
-                        :style="getWheelItemStyle(index)">
-                        {{ item }}
+                    <div v-for="index in 12" :key="index" class="wheel-item" 
+                        :style="getWheelItemStyle(index - 1)">
+                        <!-- No numbers displayed here -->
                     </div>
                     <div class="wheel-center"></div>
                 </div>
@@ -18,10 +19,11 @@
             </div>
         </div>
         
-        <div v-if="hasResult" class="result-container">
-            <div class="winner-card" :class="{ 'animate__animated animate__tada': showAnimation }">
+        <!-- Lucky number popup that appears when a result is found -->
+        <div v-if="showLuckyPopup" class="lucky-popup-overlay" @click="closeLuckyPopup">
+            <div class="lucky-popup animate__animated animate__zoomIn" @click.stop>
                 <div class="confetti-container" v-if="showConfetti">
-                    <div v-for="n in 50" :key="n" class="confetti" 
+                    <div v-for="n in 100" :key="n" class="confetti" 
                         :style="{
                             left: Math.random() * 100 + '%',
                             top: -10 * Math.random() + '%',
@@ -33,39 +35,56 @@
                     </div>
                 </div>
                 
-                <div class="winner-info">
-                    <div class="lucky-number-display">
-                        <span class="lucky-number-label">Số May Mắn</span>
-                        <span class="lucky-number">{{ luckyNumber }}</span>
+                <div class="spotlight-container">
+                    <div class="spotlight spotlight-1"></div>
+                    <div class="spotlight spotlight-2"></div>
+                </div>
+                
+                <div class="lucky-popup-content">
+                    <div class="lucky-number">{{ luckyNumber }}</div>
+                </div>
+                
+                <div class="star-container">
+                    <div v-for="n in 20" :key="`star-${n}`" class="star"
+                        :style="{
+                            left: Math.random() * 100 + '%',
+                            top: Math.random() * 100 + '%',
+                            animationDelay: Math.random() * 2 + 's',
+                            animationDuration: 1 + Math.random() * 2 + 's'
+                        }">
                     </div>
-                    <h2 class="winner-title">Người may mắn</h2>
-                    <template v-if="luckyMember && luckyMember.email">
-                        <p class="winner-email">{{ luckyMember.email }}</p>
-                        <p class="winner-name">{{ luckyMember.fullName?.replaceAll("undefined", "") ?? "--" }}</p>
-                    </template>
-                    <template v-else>
-                        <p class="winner-email no-winner">Chưa tìm được chủ nhân</p>
-                        <p class="winner-name">--</p>
-                    </template>
                 </div>
             </div>
-            
-            <!-- History of lucky numbers -->
-            <div class="history-container" v-if="luckyNumbersHistory.length > 0">
-                <div class="history-header">
-                    <h3 class="history-title">Lịch sử số may mắn</h3>
-                    <el-button type="danger" size="small" @click="clearHistory" icon="Delete">Xóa lịch sử</el-button>
-                </div>
-                <div class="history-list">
-                    <div v-for="(item, idx) in luckyNumbersHistory" :key="idx" class="history-item">
-                        <div class="history-number">{{ item.luckyNumber }}</div>
-                        <div class="history-info" v-if="item.email">
+        </div>
+        
+        <!-- History is always visible when there's data -->
+        <div class="history-container mt-6" v-if="luckyNumbersHistory.length > 0">
+            <div class="history-header">
+                <h3 class="history-title">Lịch sử số may mắn</h3>
+                <el-button type="danger" size="small" @click="clearHistory" icon="Delete">Xóa lịch sử</el-button>
+            </div>
+            <div class="history-list">
+                <div v-for="(item, idx) in luckyNumbersHistory" :key="idx" class="history-item">
+                    <div class="history-number">{{ item.luckyNumber }}</div>
+                    <div class="history-details">
+                        <div class="history-info" v-if="!item.showDetails && item.email">
+                            <span class="history-email">Đã có người trúng</span>
+                        </div>
+                        <div class="history-info" v-else-if="!item.showDetails && !item.email">
+                            <span class="history-email no-winner">Chưa tìm được chủ nhân</span>
+                        </div>
+                        <div class="history-info expanded" v-if="item.showDetails && item.email">
                             <span class="history-email">{{ item.email }}</span>
                             <span class="history-name">{{ item.fullName || "--" }}</span>
                         </div>
-                        <div class="history-info" v-else>
-                            <span class="history-email no-winner">Chưa tìm được chủ nhân</span>
-                        </div>
+                        <el-button 
+                            v-if="item.email" 
+                            type="primary" 
+                            size="small" 
+                            @click="toggleDetails(idx)" 
+                            class="details-button">
+                            {{ item.showDetails ? 'Ẩn thông tin' : 'Xem thông tin' }}
+                        </el-button>
                     </div>
                 </div>
             </div>
@@ -108,11 +127,8 @@ const isSpinning = ref(false)
 const hasResult = ref(false)
 const showAnimation = ref(false)
 const showConfetti = ref(false)
+const showLuckyPopup = ref(false)
 const wheelRef = ref(null)
-const wheelItems = ref([
-    '1', '2', '3', '4', '5', '6', '7', '8',
-    '9', '10', '11', '12', '13', '14', '15', '16'
-])
 
 // Compute if we have a result to show
 const hasLuckyMember = computed(() => {
@@ -133,17 +149,37 @@ const getRandomColor = () => {
 
 // Function to get wheel item style based on index
 const getWheelItemStyle = (index) => {
-    const angle = (360 / wheelItems.value.length) * index;
+    const angle = (360 / 12) * index;
     return {
         transform: `rotate(${angle}deg) translateY(-125px) rotate(-${angle}deg)`,
         backgroundColor: index % 2 === 0 ? '#ff9800' : '#ffeb3b',
     }
 }
 
+// Toggle details visibility for a history item
+const toggleDetails = (index) => {
+    const item = luckyNumbersHistory.value[index];
+    if (item) {
+        // Create a new array with the updated item to maintain reactivity
+        luckyNumbersHistory.value = luckyNumbersHistory.value.map((historyItem, idx) => {
+            if (idx === index) {
+                return { ...historyItem, showDetails: !historyItem.showDetails };
+            }
+            return historyItem;
+        });
+    }
+};
+
+// Close the lucky popup
+const closeLuckyPopup = () => {
+    showLuckyPopup.value = false;
+};
+
 // Start animations when result is shown
 const startAnimations = () => {
     showAnimation.value = true;
     showConfetti.value = true;
+    showLuckyPopup.value = true;
     
     // Stop animations after a while
     setTimeout(() => { 
@@ -183,6 +219,7 @@ const clearHistory = () => {
 const onLuckyClick = async () => {
     try {
         isSpinning.value = true;
+        showLuckyPopup.value = false;
         hasResult.value = false;
         
         // Randomize wheel rotation
@@ -206,7 +243,11 @@ const onLuckyClick = async () => {
             
             // Load history directly from API response
             if (res.data.luckyHistory && res.data.luckyHistory.length > 0) {
-                luckyNumbersHistory.value = res.data.luckyHistory;
+                // Add the showDetails property to each history item
+                luckyNumbersHistory.value = res.data.luckyHistory.map(item => ({
+                    ...item,
+                    showDetails: false
+                }));
             }
             
             // Show results after spinning finishes
@@ -222,15 +263,14 @@ const onLuckyClick = async () => {
 }
 
 onMounted(() => {
-    // Check if we already have results to display
-    if (hasLuckyMember.value) {
-        hasResult.value = true;
-    }
-    
     // Tải danh sách lịch sử từ server khi component được mount
     findLuckyParticipant({ attendanceId: props.acId }).then(res => {
         if (res.data && res.data.luckyHistory) {
-            luckyNumbersHistory.value = res.data.luckyHistory;
+            // Add the showDetails property to each history item
+            luckyNumbersHistory.value = res.data.luckyHistory.map(item => ({
+                ...item,
+                showDetails: false
+            }));
             
             // Nếu có số may mắn mới nhất, hiển thị nó
             if (res.data.luckyNumber) {
@@ -327,80 +367,129 @@ onMounted(() => {
     animation: spinning 4s cubic-bezier(0.1, 0.7, 0.1, 1) forwards;
 }
 
-/* Result Styles */
-.result-container {
-    margin-top: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* Lucky Popup Styles */
+.lucky-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    gap: 2rem;
+    height: 100%;
+    background-color: rgba(255, 236, 179, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    cursor: pointer;
 }
 
-.winner-card {
+.lucky-popup {
     position: relative;
-    padding: 2rem;
-    border-radius: 1rem;
-    background: linear-gradient(135deg, #fffdf0, #fff8e1);
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2), 0 0 10px rgba(255, 215, 0, 0.1);
-    border: 2px solid #ffd700;
+    width: 90%;
+    max-width: 600px;
+    padding: 5rem;
+    border-radius: 3rem;
+    background: radial-gradient(circle, #ffffff, #fff5e0);
+    box-shadow: 0 0 100px rgba(255, 184, 0, 0.6), 0 0 60px rgba(255, 184, 0, 0.4);
+    border: 6px solid #ffb700;
     text-align: center;
     overflow: hidden;
-    width: 80%;
-    max-width: 600px;
+    cursor: default;
 }
 
-.lucky-number-display {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.lucky-number-label {
-    font-size: 1.2rem;
-    color: #ff6f00;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
+.lucky-popup-content {
+    position: relative;
+    z-index: 5;
 }
 
 .lucky-number {
-    font-size: 4rem;
-    font-weight: bold;
-    color: #ff6f00;
-    background: linear-gradient(135deg, #ffd700, #ff6f00);
+    font-size: 12rem;
+    font-weight: 900;
+    color: #ff8c00;
+    background: linear-gradient(135deg, #ffb700, #ff8c00, #ff7800);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-shadow: 
+        0 0 20px rgba(255, 183, 0, 0.9),
+        0 0 40px rgba(255, 183, 0, 0.7),
+        0 0 80px rgba(255, 183, 0, 0.5);
     display: inline-block;
-    padding: 0.5rem 1.5rem;
-    border-radius: 2rem;
-    border: 2px dashed #ffd700;
-    background-color: rgba(255, 255, 240, 0.8);
+    animation: pulse 1.5s infinite, shake 5s infinite;
 }
 
-.winner-title {
-    color: #ff6f00;
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+/* Spotlight effects */
+.spotlight-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
 }
 
-.winner-email {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #222;
-    margin-bottom: 0.5rem;
+.spotlight {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.7;
+    z-index: 1;
+    animation: spotlight 8s infinite linear;
 }
 
-.no-winner {
-    color: #f44336;
-    font-style: italic;
+.spotlight-1 {
+    background: radial-gradient(circle, rgba(255, 183, 0, 0.8), transparent 70%);
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
 }
 
-.winner-name {
-    font-size: 1.5rem;
-    color: #444;
+.spotlight-2 {
+    background: radial-gradient(circle, rgba(255, 140, 0, 0.6), transparent 70%);
+    bottom: -100px;
+    right: -100px;
+    animation-delay: 4s;
+}
+
+/* Star effects */
+.star-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.star {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF8C00'%3E%3Cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z'/%3E%3C/svg%3E");
+    background-size: contain;
+    opacity: 0.8;
+    animation: twinkle 2s infinite;
+}
+
+/* Confetti animation */
+.confetti-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.confetti {
+    position: absolute;
+    animation: confetti-fall 5s linear forwards;
+    z-index: 1;
 }
 
 /* History styles */
@@ -466,11 +555,27 @@ onMounted(() => {
     height: 50px;
 }
 
+.history-details {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow: hidden;
+}
+
 .history-info {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    overflow: hidden;
+    margin-bottom: 0.5rem;
+    width: 100%;
+}
+
+.history-info.expanded {
+    background-color: rgba(255, 248, 225, 0.5);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border-left: 3px solid #ff6f00;
 }
 
 .history-email {
@@ -493,22 +598,9 @@ onMounted(() => {
     max-width: 100%;
 }
 
-/* Confetti animation */
-.confetti-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 0;
-    pointer-events: none;
-}
-
-.confetti {
-    position: absolute;
-    animation: confetti-fall 3s linear forwards;
-    z-index: 1;
+.details-button {
+    align-self: flex-end;
+    margin-top: 0.25rem;
 }
 
 /* Animations */
@@ -523,6 +615,31 @@ onMounted(() => {
 
 @keyframes confetti-fall {
     0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(1000%) rotate(360deg); opacity: 0; }
+    100% { transform: translateY(1000%) rotate(720deg); opacity: 0; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); text-shadow: 0 0 20px rgba(255, 183, 0, 0.9), 0 0 40px rgba(255, 183, 0, 0.7), 0 0 80px rgba(255, 183, 0, 0.5); }
+    50% { transform: scale(1.1); text-shadow: 0 0 30px rgba(255, 183, 0, 1), 0 0 60px rgba(255, 183, 0, 0.8), 0 0 100px rgba(255, 183, 0, 0.6); }
+    100% { transform: scale(1); text-shadow: 0 0 20px rgba(255, 183, 0, 0.9), 0 0 40px rgba(255, 183, 0, 0.7), 0 0 80px rgba(255, 183, 0, 0.5); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes spotlight {
+    0% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(50px, 50px) scale(1.2); }
+    50% { transform: translate(0, 100px) scale(1); }
+    75% { transform: translate(-50px, 50px) scale(0.8); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
 }
 </style>
