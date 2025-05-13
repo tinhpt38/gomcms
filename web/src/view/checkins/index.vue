@@ -371,7 +371,7 @@ const requestCheckin = async () => {
     
     // Get check-in counter from the first check-in if available
     if (apiResponse.value.data.checkins && apiResponse.value.data.checkins.length > 0) {
-      checkinCount = apiResponse.value.data.checkins[0].counter || 0;
+      checkinCount = apiResponse.value.data.checkins.reduce((total, checkin) => total + (checkin.counter || 0), 0);
     }
     
     // Calculate condition stats if conditions exist
@@ -420,12 +420,12 @@ const requestCheckin = async () => {
     }
     
     // 2. Check-in count info if not in the basic message
-    if (!apiResponse.data.message && checkinCount > 1 && !msgComponents[0].includes("lần")) {
+    if (!apiResponse.data?.message && checkinCount > 1 && !msgComponents[0]?.includes("lần")) {
       msgComponents.push(`Tổng số lần điểm danh: ${checkinCount}`);
     }
     
     // 3. Lucky number info if not in the basic message
-    if (!apiResponse.data.message && luckyNumber != null && !msgComponents[0].includes("may mắn")) {
+    if (!apiResponse.data?.message && luckyNumber != null && !msgComponents[0]?.includes("may mắn")) {
       msgComponents.push(`<span class="text-yellow-600 font-bold"><i class="el-icon-star-on"></i> Chúc mừng! Số may mắn của bạn: ${luckyNumber}</span>`);
     }
     
@@ -518,7 +518,7 @@ main.isolate {
 }
 
 /* Import styles for the legacy UI parts */
-@import '../../style/lucky-animation.css';
+/* @import '../../style/lucky-animation.css'; */
 
 /* Confetti animation styles */
 .confetti {

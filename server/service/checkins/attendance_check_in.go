@@ -521,15 +521,94 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	result["attendance"] = attendance
 	result["message"] = globalMsg
 
-	// Lấy và trả về danh sách điểm danh với counter
-	var existingCheckins []checkins.AttendanceCheckIn
-	err = global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&existingCheckins).Error
+	// Kiểm tra và tạo số may mắn nếu điều kiện thỏa mãn
+	if attendance.UseLuckyNumber && attendance.LuckyShowAfterMinCount > 0 {
+		// Trong trường hợp này, các điểm danh đã được lưu trước đó, nên có thể truy vấn trực tiếp
+		// từ cơ sở dữ liệu để lấy tổng số điểm danh
+		type CounterSum struct {
+			TotalCounter int64
+		}
+		var counterSum CounterSum
+		global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+			Select("COALESCE(SUM(counter), 0) as total_counter").
+			Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).
+			Scan(&counterSum)
+
+		// Số điểm danh hiện tại (đã bao gồm các điểm danh mới)
+		currentCheckinCount := int(counterSum.TotalCounter)
+
+		// Kiểm tra xem có điều kiện nào đạt và cho phép hiển thị số may mắn không
+		var hasShowLuckyNumberCondition bool
+
+		// Kiểm tra xem có điểm danh thành công ít nhất một điều kiện không
+		var hasAnyPassedCondition bool
+
+		// Nếu có điều kiện đã điểm danh thành công hoặc điểm danh mới thành công
+		if len(coreConditions) == 0 {
+			// Nếu không có điều kiện, chỉ kiểm tra có điểm danh nào trong agpCheckins không
+			hasAnyPassedCondition = len(agpCheckins) > 0
+		} else {
+			// Kiểm tra điều kiện đã pass
+			for _, condition := range coreConditions {
+				if condition.IsPass {
+					hasAnyPassedCondition = true
+					if condition.ShowLuckyNumber {
+						hasShowLuckyNumberCondition = true
+					}
+				}
+			}
+		}
+
+		// Nếu đủ điều kiện để hiển thị số may mắn (đủ số lần điểm danh và có ít nhất 1 điều kiện thành công)
+		if hasAnyPassedCondition && hasShowLuckyNumberCondition && currentCheckinCount >= attendance.LuckyShowAfterMinCount {
+			// Kiểm tra xem người tham gia đã có số may mắn chưa
+			var existingLuckyCheckIn checkins.AttendanceCheckIn
+			existingLuckyResult := global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ? AND lucky_number > 0",
+				participant.ID, attendance.ID).First(&existingLuckyCheckIn)
+
+			if existingLuckyResult.Error == nil && existingLuckyCheckIn.LuckyNumber > 0 {
+				// Nếu đã có số may mắn, sử dụng lại số đó
+				luckyNumber = existingLuckyCheckIn.LuckyNumber
+			} else {
+				// Sử dụng hàm riêng để sinh số may mắn không trùng lặp
+				luckyNumber, err = attendanceCheckInService.generateUniqueLuckyNumber(attendance.ID, participant.ID, localRand)
+				if err != nil {
+					global.GVA_LOG.Error("Lỗi khi sinh số may mắn", zap.Error(err))
+				}
+			}
+
+			// Lưu số may mắn vào các bản ghi điểm danh mới
+			for i := range agpCheckins {
+				agpCheckins[i].LuckyNumber = luckyNumber
+			}
+
+			// Thêm số may mắn vào kết quả trả về
+			result["luckyNumber"] = luckyNumber
+		}
+	}
+
+	// Lưu tất cả các điểm danh vào database trước
+	for _, agp := range agpCheckins {
+		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&agp)
+		if aciErr != nil {
+			msg := fmt.Sprintf("thiết bị của bạn đã điểm danh đủ số lần cho phép %s ", aciErr.Error())
+			checkinLog.MessageList += msg + "$$"
+			global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
+			return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
+			// return nil, errors.New("điểm danh thất bại" + aciErr.Error())
+		}
+	}
+
+	// Sau khi lưu tất cả các điểm danh mới, lấy lại toàn bộ danh sách điểm danh từ database
+	var allCheckins []checkins.AttendanceCheckIn
+	err = global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).Find(&allCheckins).Error
 	if err == nil {
-		result["checkins"] = existingCheckins
+		// Gán lại danh sách điểm danh đã được cập nhật counter vào kết quả
+		result["checkins"] = allCheckins
 
 		// Kiểm tra xem đã có số may mắn đã cấp trước đó hay chưa
 		if luckyNumber == 0 {
-			for _, checkin := range existingCheckins {
+			for _, checkin := range allCheckins {
 				if checkin.LuckyNumber > 0 {
 					luckyNumber = checkin.LuckyNumber
 					result["luckyNumber"] = luckyNumber
@@ -539,10 +618,10 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		}
 
 		// Bổ sung thông tin counter vào conditions
-		if len(existingCheckins) > 0 && len(coreConditions) > 0 {
+		if len(allCheckins) > 0 && len(coreConditions) > 0 {
 			// Tạo map để ánh xạ condition_id với counter
 			counterMap := make(map[uint]int)
-			for _, checkin := range existingCheckins {
+			for _, checkin := range allCheckins {
 				if checkin.ConditionId != nil {
 					counterMap[*checkin.ConditionId] = checkin.Counter
 				}
@@ -578,86 +657,6 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 			// Thay thế conditions trong kết quả
 			result["conditions"] = conditionsWithCounter
-		}
-	}
-
-	// if len(coreConditions) == 0 {
-	// 	result["message"] = "Không có điều kiện điểm danh nào thoả mãn"
-	// }
-
-	// Kiểm tra và tạo số may mắn nếu điều kiện thỏa mãn
-	if attendance.UseLuckyNumber && attendance.LuckyShowAfterMinCount > 0 {
-		// Tính tổng số lần điểm danh thành công của người tham gia bằng cách tổng các counter
-		type CounterSum struct {
-			TotalCounter int64
-		}
-		var counterSum CounterSum
-		global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-			Select("COALESCE(SUM(counter), 0) as total_counter").
-			Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).
-			Scan(&counterSum)
-
-		// Số lần điểm danh sắp tới sau khi thêm các lần điểm danh mới
-		upcomingCheckinCount := int(counterSum.TotalCounter) + len(agpCheckins)
-
-		// Kiểm tra xem có điều kiện nào đạt và cho phép hiển thị số may mắn không
-		var hasShowLuckyNumberCondition bool
-
-		// Kiểm tra xem có điểm danh thành công ít nhất một điều kiện không
-		var hasAnyPassedCondition bool
-
-		// Nếu có điều kiện đã điểm danh thành công hoặc điểm danh mới thành công
-		if len(coreConditions) == 0 {
-			// Nếu không có điều kiện, chỉ kiểm tra có điểm danh nào trong agpCheckins không
-			hasAnyPassedCondition = len(agpCheckins) > 0
-		} else {
-			// Kiểm tra điều kiện đã pass
-			for _, condition := range coreConditions {
-				if condition.IsPass {
-					hasAnyPassedCondition = true
-					if condition.ShowLuckyNumber {
-						hasShowLuckyNumberCondition = true
-					}
-				}
-			}
-		}
-
-		// Nếu đủ điều kiện để hiển thị số may mắn (đủ số lần điểm danh và có ít nhất 1 điều kiện thành công)
-		if hasAnyPassedCondition && hasShowLuckyNumberCondition && upcomingCheckinCount >= attendance.LuckyShowAfterMinCount {
-			// Kiểm tra xem người tham gia đã có số may mắn chưa
-			var existingLuckyCheckIn checkins.AttendanceCheckIn
-			existingLuckyResult := global.GVA_DB.Where("partpaticipant_id = ? AND attendance_id = ? AND lucky_number > 0",
-				participant.ID, attendance.ID).First(&existingLuckyCheckIn)
-
-			if existingLuckyResult.Error == nil && existingLuckyCheckIn.LuckyNumber > 0 {
-				// Nếu đã có số may mắn, sử dụng lại số đó
-				luckyNumber = existingLuckyCheckIn.LuckyNumber
-			} else {
-				// Sử dụng hàm riêng để sinh số may mắn không trùng lặp
-				luckyNumber, err = attendanceCheckInService.generateUniqueLuckyNumber(attendance.ID, participant.ID, localRand)
-				if err != nil {
-					global.GVA_LOG.Error("Lỗi khi sinh số may mắn", zap.Error(err))
-				}
-			}
-
-			// Lưu số may mắn vào các bản ghi điểm danh mới
-			for i := range agpCheckins {
-				agpCheckins[i].LuckyNumber = luckyNumber
-			}
-
-			// Thêm số may mắn vào kết quả trả về
-			result["luckyNumber"] = luckyNumber
-		}
-	}
-
-	for _, agp := range agpCheckins {
-		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&agp)
-		if aciErr != nil {
-			msg := fmt.Sprintf("thiết bị của bạn đã điểm danh đủ số lần cho phép %s ", aciErr.Error())
-			checkinLog.MessageList += msg + "$$"
-			global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
-			return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn")
-			// return nil, errors.New("điểm danh thất bại" + aciErr.Error())
 		}
 	}
 
