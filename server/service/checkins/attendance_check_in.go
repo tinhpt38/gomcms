@@ -429,10 +429,28 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			for _, agp := range listAgps {
 				if condition.AttendanceGroupParticipantId == int(agp.ID) {
 					// Nếu điều kiện đã được điểm danh trước đó, đánh dấu là đã qua
+					// và tạo bản ghi mới để tăng counter
 					if arrayContains(conditionCheckedIn, condition.Condition.ID) {
 						tempCon := *condition.Condition
 						tempCon.IsPass = true
 						coreConditions = append(coreConditions, tempCon)
+
+						// Tạo bản ghi điểm danh mới cho điều kiện đã pass để tăng counter
+						attendanceCheckIn := checkins.AttendanceCheckIn{
+							CheckinDate:      time.Now().UTC(),
+							AttendanceId:     &attendance.ID,
+							PartpaticipantId: &participant.ID,
+							AreaId:           tempCon.AreaId,
+							GroupId:          agp.GroupId,
+							ConditionId:      &tempCon.ID,
+							IP:               ip,
+							Lattidue:         req.Lat,
+							Longtidue:        req.Lng,
+							Agent:            userAgent,
+							Accuracy:         req.Accuracy,
+							VisitorId:        req.VisitorId,
+						}
+						agpCheckins = append(agpCheckins, attendanceCheckIn)
 						continue
 					}
 
