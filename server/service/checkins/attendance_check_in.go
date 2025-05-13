@@ -284,7 +284,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			AttendanceId:  &attendance.ID,
 		}).FirstOrCreate(&newagp).Error
 		if err != nil {
-			msg := fmt.Sprintln("không thể thêm thông tin điểm danh của bạn: %s", err.Error())
+			msg := fmt.Sprintf("không thể thêm thông tin điểm danh của bạn: %s", err.Error())
 			return nil, errors.New(msg)
 		}
 		listAgps = append(listAgps, *newagp)
@@ -633,245 +633,10 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 				// Nếu đã có số may mắn, sử dụng lại số đó
 				luckyNumber = existingLuckyCheckIn.LuckyNumber
 			} else {
-				// Sử dụng phương pháp tối ưu để sinh số may mắn không trùng lặp
-				// Sử dụng mutex để đảm bảo an toàn đồng thời
-				var luckyNumberMutex sync.Mutex
-				luckyNumberMutex.Lock()
-				defer luckyNumberMutex.Unlock()
-
-				// Khai báo các hằng số
-				const (
-					// Số may mắn tối đa: 1 triệu thay vì 9999 để hỗ trợ sự kiện rất lớn
-					maxLuckyNumber = 1000000
-					// Số lượng bucket trong bloom filter
-					bloomFilterSize = 1048576 // 2^20
-				)
-
-				// Thống kê tổng số người tham gia đã có số may mắn
-				var totalParticipantsWithLuckyNumber int64
-				err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-					Where("attendance_id = ? AND lucky_number > 0", attendance.ID).
-					Group("partpaticipant_id").
-					Count(&totalParticipantsWithLuckyNumber).Error
-
+				// Sử dụng hàm riêng để sinh số may mắn không trùng lặp
+				luckyNumber, err = attendanceCheckInService.generateUniqueLuckyNumber(attendance.ID, participant.ID, localRand)
 				if err != nil {
-					global.GVA_LOG.Error("Lỗi khi đếm số người dùng đã có số may mắn", zap.Error(err))
-				}
-
-				// Lấy mẫu để xác định chiến lược tối ưu
-				var strategy string
-
-				// Nếu số người đã có số may mắn ít hơn 1000, sử dụng chiến lược ngẫu nhiên đơn giản
-				if totalParticipantsWithLuckyNumber < 1000 {
-					strategy = "random"
-				} else if totalParticipantsWithLuckyNumber < 10000 {
-					// Nếu có từ 1000-10000 người, sử dụng Bloom Filter + ánh xạ
-					strategy = "bloom_filter"
-				} else {
-					// Cho số lượng lớn, sử dụng phương pháp phân đoạn số để tối ưu
-					strategy = "segmented"
-				}
-
-				// Ghi log chiến lược được chọn
-				global.GVA_LOG.Info("Chiến lược sinh số may mắn được chọn",
-					zap.String("strategy", strategy),
-					zap.Int64("participants", totalParticipantsWithLuckyNumber),
-					zap.Uint("attendanceID", attendance.ID))
-
-				// Dựa vào chiến lược để tạo số may mắn
-				switch strategy {
-				case "random":
-					// Chiến lược 1: Sinh ngẫu nhiên và kiểm tra trùng lặp trực tiếp trong DB
-					// Phù hợp cho số lượng người tham gia ít
-					maxAttempts := 5 // Giảm số lần thử vì ta sẽ kiểm tra trực tiếp
-
-					for attempts := 0; attempts < maxAttempts; attempts++ {
-						// Tạo số may mắn ngẫu nhiên với phân phối đều 1-1000000
-						candidateNumber := 1 + localRand.Intn(maxLuckyNumber)
-
-						// Kiểm tra số này đã được dùng hay chưa bằng cách truy vấn trực tiếp
-						var count int64
-						err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-							Where("attendance_id = ? AND lucky_number = ?", attendance.ID, candidateNumber).
-							Count(&count).Error
-
-						if err != nil {
-							global.GVA_LOG.Error("Lỗi khi kiểm tra số may mắn", zap.Error(err))
-							continue
-						}
-
-						if count == 0 {
-							// Nếu số chưa được dùng, sử dụng nó
-							luckyNumber = candidateNumber
-							break
-						}
-					}
-
-				case "bloom_filter":
-					// Chiến lược 2: Sử dụng bloom filter để tối ưu kiểm tra
-					// Phù hợp cho số lượng người tham gia vừa phải (1K-10K)
-
-					// Lấy tất cả số may mắn đã dùng
-					var usedLuckyNumbers []int
-					err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-						Where("attendance_id = ? AND lucky_number > 0", attendance.ID).
-						Distinct("lucky_number").
-						Pluck("lucky_number", &usedLuckyNumbers).Error
-
-					if err != nil {
-						global.GVA_LOG.Error("Lỗi khi lấy danh sách số may mắn", zap.Error(err))
-					}
-
-					// Tạo bloom filter đơn giản (mảng bit)
-					bloomFilter := make([]bool, bloomFilterSize)
-
-					// Hash function đơn giản cho bloom filter
-					hashFunc := func(num int) int {
-						return num % bloomFilterSize
-					}
-
-					// Tạo map để kiểm tra chính xác
-					usedLuckyNumbersMap := make(map[int]bool)
-
-					// Đánh dấu các số đã dùng vào bloom filter và map
-					for _, num := range usedLuckyNumbers {
-						bloomFilter[hashFunc(num)] = true
-						usedLuckyNumbersMap[num] = true
-					}
-
-					// Số lần thử tối đa
-					maxAttempts := 20
-
-					// Tạo số may mắn không trùng
-					for attempts := 0; attempts < maxAttempts; attempts++ {
-						candidateNumber := 1 + localRand.Intn(maxLuckyNumber)
-
-						// Kiểm tra nhanh với bloom filter trước
-						if !bloomFilter[hashFunc(candidateNumber)] {
-							// Nếu bloom filter nói không có, chắc chắn là chưa dùng
-							luckyNumber = candidateNumber
-							break
-						} else if !usedLuckyNumbersMap[candidateNumber] {
-							// Nếu bloom filter nói có nhưng map nói không (false positive), vẫn ok
-							luckyNumber = candidateNumber
-							break
-						}
-					}
-
-				case "segmented":
-					// Chiến lược 3: Phân đoạn số và tìm khoảng trống
-					// Phù hợp cho số lượng rất lớn (>10K)
-
-					// Tính số phân đoạn dựa trên số lượng người tham gia
-					numSegments := 10 + int(totalParticipantsWithLuckyNumber/1000)
-					if numSegments > 100 {
-						numSegments = 100 // Giới hạn số phân đoạn
-					}
-
-					// Kích thước mỗi phân đoạn
-					segmentSize := maxLuckyNumber / numSegments
-
-					// Đếm số lượng số đã dùng trong mỗi phân đoạn
-					segments := make([]int64, numSegments)
-
-					for i := 0; i < numSegments; i++ {
-						segmentStart := i*segmentSize + 1
-						segmentEnd := (i + 1) * segmentSize
-
-						// Đếm số lượng số may mắn đã dùng trong phân đoạn này
-						err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-							Where("attendance_id = ? AND lucky_number >= ? AND lucky_number <= ?",
-								attendance.ID, segmentStart, segmentEnd).
-							Distinct("lucky_number").
-							Count(&segments[i]).Error
-
-						if err != nil {
-							global.GVA_LOG.Error("Lỗi khi đếm số may mắn theo phân đoạn", zap.Error(err))
-						}
-					}
-
-					// Tìm phân đoạn có ít số đã dùng nhất
-					leastUsedSegment := 0
-					leastUsedCount := segments[0]
-
-					for i := 1; i < numSegments; i++ {
-						if segments[i] < leastUsedCount {
-							leastUsedSegment = i
-							leastUsedCount = segments[i]
-						}
-					}
-
-					// Tỷ lệ sử dụng của phân đoạn này
-					usageRatio := float64(leastUsedCount) / float64(segmentSize)
-
-					// Nếu phân đoạn đã đầy trên 80%, sử dụng phương pháp khác
-					if usageRatio >= 0.8 {
-						// Sinh số ngẫu nhiên và kiểm tra trực tiếp
-						for attempts := 0; attempts < 10; attempts++ {
-							candidateNumber := 1 + localRand.Intn(maxLuckyNumber)
-
-							var count int64
-							err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-								Where("attendance_id = ? AND lucky_number = ?", attendance.ID, candidateNumber).
-								Count(&count).Error
-
-							if err == nil && count == 0 {
-								luckyNumber = candidateNumber
-								break
-							}
-						}
-					} else {
-						// Sinh số ngẫu nhiên trong phân đoạn có ít số đã dùng nhất
-						segmentStart := leastUsedSegment*segmentSize + 1
-						segmentEnd := (leastUsedSegment + 1) * segmentSize
-
-						// Lấy danh sách số đã dùng trong phân đoạn
-						var usedInSegment []int
-						err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
-							Where("attendance_id = ? AND lucky_number >= ? AND lucky_number <= ?",
-								attendance.ID, segmentStart, segmentEnd).
-							Distinct("lucky_number").
-							Pluck("lucky_number", &usedInSegment).Error
-
-						if err != nil {
-							global.GVA_LOG.Error("Lỗi khi lấy số đã dùng trong phân đoạn", zap.Error(err))
-						}
-
-						// Tạo map cho phân đoạn
-						usedInSegmentMap := make(map[int]bool)
-						for _, num := range usedInSegment {
-							usedInSegmentMap[num] = true
-						}
-
-						// Sinh số trong phân đoạn này
-						maxAttempts := 20
-						for attempts := 0; attempts < maxAttempts; attempts++ {
-							candidateNumber := segmentStart + localRand.Intn(segmentEnd-segmentStart+1)
-
-							if !usedInSegmentMap[candidateNumber] {
-								luckyNumber = candidateNumber
-								break
-							}
-						}
-					}
-				}
-
-				// Nếu các phương pháp trên không tạo được số, sử dụng phương pháp cuối cùng
-				if luckyNumber == 0 {
-					// Tạo UUID-based number để đảm bảo không trùng lặp
-					// Sử dụng timestamp nano + ID người dùng để tạo số đặc biệt
-					timestamp := time.Now().UnixNano()
-					specialNumber := (timestamp % 900000) + 100000 + int64(participant.ID%1000)*1000
-
-					// Đảm bảo số nằm trong khoảng hợp lệ (6 chữ số)
-					luckyNumber = int(specialNumber % 1000000)
-					if luckyNumber < 100000 {
-						luckyNumber += 100000 // Đảm bảo ít nhất 6 chữ số
-					}
-
-					global.GVA_LOG.Warn("Sử dụng phương pháp đặc biệt để tạo số may mắn",
-						zap.Int("luckyNumber", luckyNumber),
-						zap.Uint("attendanceID", attendance.ID))
+					global.GVA_LOG.Error("Lỗi khi sinh số may mắn", zap.Error(err))
 				}
 			}
 
@@ -1131,7 +896,7 @@ func formatErrorMessage(condition checkins.Condition, err error) string {
 
 	// Ghi log chi tiết về lỗi điều kiện
 	if condition.ID > 0 {
-		fmt.Println("Điều kiện #%d thất bại: %s. %s", condition.ID, err.Error(), msg)
+		fmt.Printf("Điều kiện #%d thất bại: %s. %s\n", condition.ID, err.Error(), msg)
 	}
 
 	if msg != "" {
@@ -1262,4 +1027,255 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInLo
 
 	err = db.Order("created_at desc").Debug().Find(&checkinsLog).Error
 	return checkinsLog, total, err
+}
+
+// Global mutex để đảm bảo thread-safety khi tạo số may mắn
+var luckyNumberMutex sync.Mutex
+
+// generateUniqueLuckyNumber tạo số may mắn không trùng lặp cho sự kiện điểm danh
+// Hàm này sử dụng nhiều chiến lược khác nhau dựa trên quy mô của sự kiện
+func (attendanceCheckInService *AttendanceCheckInService) generateUniqueLuckyNumber(attendanceID uint, participantID uint, localRand *rand.Rand) (int, error) {
+	// Sử dụng mutex toàn cục để đảm bảo an toàn đồng thời giữa các request
+	luckyNumberMutex.Lock()
+	defer luckyNumberMutex.Unlock()
+
+	// Khai báo các hằng số
+	const (
+		// Số may mắn tối đa: 1 triệu thay vì 9999 để hỗ trợ sự kiện rất lớn
+		maxLuckyNumber = 1000000
+		// Số lượng bucket trong bloom filter
+		bloomFilterSize = 1048576 // 2^20
+	)
+
+	// Thống kê tổng số người tham gia đã có số may mắn
+	var totalParticipantsWithLuckyNumber int64
+	err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+		Where("attendance_id = ? AND lucky_number > 0", attendanceID).
+		Group("partpaticipant_id").
+		Count(&totalParticipantsWithLuckyNumber).Error
+
+	if err != nil {
+		global.GVA_LOG.Error("Lỗi khi đếm số người dùng đã có số may mắn", zap.Error(err))
+	}
+
+	// Lấy mẫu để xác định chiến lược tối ưu
+	var strategy string
+
+	// Nếu số người đã có số may mắn ít hơn 1000, sử dụng chiến lược ngẫu nhiên đơn giản
+	if totalParticipantsWithLuckyNumber < 1000 {
+		strategy = "random"
+	} else if totalParticipantsWithLuckyNumber < 10000 {
+		// Nếu có từ 1000-10000 người, sử dụng Bloom Filter + ánh xạ
+		strategy = "bloom_filter"
+	} else {
+		// Cho số lượng lớn, sử dụng phương pháp phân đoạn số để tối ưu
+		strategy = "segmented"
+	}
+
+	// Ghi log chiến lược được chọn
+	global.GVA_LOG.Info("Chiến lược sinh số may mắn được chọn",
+		zap.String("strategy", strategy),
+		zap.Int64("participants", totalParticipantsWithLuckyNumber),
+		zap.Uint("attendanceID", attendanceID))
+
+	// Biến lưu kết quả số may mắn
+	var luckyNumber int
+
+	// Dựa vào chiến lược để tạo số may mắn
+	switch strategy {
+	case "random":
+		// Chiến lược 1: Sinh ngẫu nhiên và kiểm tra trùng lặp trực tiếp trong DB
+		// Phù hợp cho số lượng người tham gia ít
+		maxAttempts := 5 // Giảm số lần thử vì ta sẽ kiểm tra trực tiếp
+
+		for attempts := 0; attempts < maxAttempts; attempts++ {
+			// Tạo số may mắn ngẫu nhiên với phân phối đều 1-1000000
+			candidateNumber := 1 + localRand.Intn(maxLuckyNumber)
+
+			// Kiểm tra số này đã được dùng hay chưa bằng cách truy vấn trực tiếp
+			var count int64
+			err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+				Where("attendance_id = ? AND lucky_number = ?", attendanceID, candidateNumber).
+				Count(&count).Error
+
+			if err != nil {
+				global.GVA_LOG.Error("Lỗi khi kiểm tra số may mắn", zap.Error(err))
+				continue
+			}
+
+			if count == 0 {
+				// Nếu số chưa được dùng, sử dụng nó
+				luckyNumber = candidateNumber
+				break
+			}
+		}
+
+	case "bloom_filter":
+		// Chiến lược 2: Sử dụng bloom filter để tối ưu kiểm tra
+		// Phù hợp cho số lượng người tham gia vừa phải (1K-10K)
+
+		// Lấy tất cả số may mắn đã dùng
+		var usedLuckyNumbers []int
+		err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+			Where("attendance_id = ? AND lucky_number > 0", attendanceID).
+			Distinct("lucky_number").
+			Pluck("lucky_number", &usedLuckyNumbers).Error
+
+		if err != nil {
+			global.GVA_LOG.Error("Lỗi khi lấy danh sách số may mắn", zap.Error(err))
+		}
+
+		// Tạo bloom filter đơn giản (mảng bit)
+		bloomFilter := make([]bool, bloomFilterSize)
+
+		// Hash function đơn giản cho bloom filter
+		hashFunc := func(num int) int {
+			return num % bloomFilterSize
+		}
+
+		// Tạo map để kiểm tra chính xác
+		usedLuckyNumbersMap := make(map[int]bool)
+
+		// Đánh dấu các số đã dùng vào bloom filter và map
+		for _, num := range usedLuckyNumbers {
+			bloomFilter[hashFunc(num)] = true
+			usedLuckyNumbersMap[num] = true
+		}
+
+		// Số lần thử tối đa
+		maxAttempts := 20
+
+		// Tạo số may mắn không trùng
+		for attempts := 0; attempts < maxAttempts; attempts++ {
+			candidateNumber := 1 + localRand.Intn(maxLuckyNumber)
+
+			// Kiểm tra nhanh với bloom filter trước
+			if !bloomFilter[hashFunc(candidateNumber)] {
+				// Nếu bloom filter nói không có, chắc chắn là chưa dùng
+				luckyNumber = candidateNumber
+				break
+			} else if !usedLuckyNumbersMap[candidateNumber] {
+				// Nếu bloom filter nói có nhưng map nói không (false positive), vẫn ok
+				luckyNumber = candidateNumber
+				break
+			}
+		}
+
+	case "segmented":
+		// Chiến lược 3: Phân đoạn số và tìm khoảng trống
+		// Phù hợp cho số lượng rất lớn (>10K)
+
+		// Tính số phân đoạn dựa trên số lượng người tham gia
+		numSegments := 10 + int(totalParticipantsWithLuckyNumber/1000)
+		if numSegments > 100 {
+			numSegments = 100 // Giới hạn số phân đoạn
+		}
+
+		// Kích thước mỗi phân đoạn
+		segmentSize := maxLuckyNumber / numSegments
+
+		// Đếm số lượng số đã dùng trong mỗi phân đoạn
+		segments := make([]int64, numSegments)
+
+		for i := 0; i < numSegments; i++ {
+			segmentStart := i*segmentSize + 1
+			segmentEnd := (i + 1) * segmentSize
+
+			// Đếm số lượng số may mắn đã dùng trong phân đoạn này
+			err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+				Where("attendance_id = ? AND lucky_number >= ? AND lucky_number <= ?",
+					attendanceID, segmentStart, segmentEnd).
+				Distinct("lucky_number").
+				Count(&segments[i]).Error
+
+			if err != nil {
+				global.GVA_LOG.Error("Lỗi khi đếm số may mắn theo phân đoạn", zap.Error(err))
+			}
+		}
+
+		// Tìm phân đoạn có ít số đã dùng nhất
+		leastUsedSegment := 0
+		leastUsedCount := segments[0]
+
+		for i := 1; i < numSegments; i++ {
+			if segments[i] < leastUsedCount {
+				leastUsedSegment = i
+				leastUsedCount = segments[i]
+			}
+		}
+
+		// Tỷ lệ sử dụng của phân đoạn này
+		usageRatio := float64(leastUsedCount) / float64(segmentSize)
+
+		// Nếu phân đoạn đã đầy trên 80%, sử dụng phương pháp khác
+		if usageRatio >= 0.8 {
+			// Sinh số ngẫu nhiên và kiểm tra trực tiếp
+			for attempts := 0; attempts < 10; attempts++ {
+				candidateNumber := 1 + localRand.Intn(maxLuckyNumber)
+
+				var count int64
+				err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+					Where("attendance_id = ? AND lucky_number = ?", attendanceID, candidateNumber).
+					Count(&count).Error
+
+				if err == nil && count == 0 {
+					luckyNumber = candidateNumber
+					break
+				}
+			}
+		} else {
+			// Sinh số ngẫu nhiên trong phân đoạn có ít số đã dùng nhất
+			segmentStart := leastUsedSegment*segmentSize + 1
+			segmentEnd := (leastUsedSegment + 1) * segmentSize
+
+			// Lấy danh sách số đã dùng trong phân đoạn
+			var usedInSegment []int
+			err := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+				Where("attendance_id = ? AND lucky_number >= ? AND lucky_number <= ?",
+					attendanceID, segmentStart, segmentEnd).
+				Distinct("lucky_number").
+				Pluck("lucky_number", &usedInSegment).Error
+
+			if err != nil {
+				global.GVA_LOG.Error("Lỗi khi lấy số đã dùng trong phân đoạn", zap.Error(err))
+			}
+
+			// Tạo map cho phân đoạn
+			usedInSegmentMap := make(map[int]bool)
+			for _, num := range usedInSegment {
+				usedInSegmentMap[num] = true
+			}
+
+			// Sinh số trong phân đoạn này
+			maxAttempts := 20
+			for attempts := 0; attempts < maxAttempts; attempts++ {
+				candidateNumber := segmentStart + localRand.Intn(segmentEnd-segmentStart+1)
+
+				if !usedInSegmentMap[candidateNumber] {
+					luckyNumber = candidateNumber
+					break
+				}
+			}
+		}
+	}
+
+	// Nếu các phương pháp trên không tạo được số, sử dụng phương pháp cuối cùng
+	if luckyNumber == 0 {
+		// Tạo UUID-based number để đảm bảo không trùng lặp
+		// Sử dụng timestamp nano + ID người dùng để tạo số đặc biệt
+		timestamp := time.Now().UnixNano()
+		specialNumber := (timestamp % 900000) + 100000 + int64(participantID%1000)*1000
+
+		// Đảm bảo số nằm trong khoảng hợp lệ (6 chữ số)
+		luckyNumber = int(specialNumber % 1000000)
+		if luckyNumber < 100000 {
+			luckyNumber += 100000 // Đảm bảo ít nhất 6 chữ số
+		}
+
+		global.GVA_LOG.Warn("Sử dụng phương pháp đặc biệt để tạo số may mắn",
+			zap.Int("luckyNumber", luckyNumber),
+			zap.Uint("attendanceID", attendanceID))
+	}
+
+	return luckyNumber, nil
 }
