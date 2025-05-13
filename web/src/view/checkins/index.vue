@@ -96,7 +96,7 @@
                           {{ conditionString(item) }}
                         </dd>
                         <el-tag v-if="item.IsPass" effect="dark" type="success" class="flex items-center gap-1">
-                          <span>Bạn đã điểm danh thành công {{item.counter + 1 }} lần</span>
+                          <span>Bạn đã điểm danh thành công {{item.counter }} lần</span>
                         </el-tag>
                         <el-tag v-if="item.IsPass && item.ShowLuckyNumber" class="ml-2 mt-2" type="warning">
                           <i class="el-icon-star-on mr-1"></i>Điều kiện may mắn

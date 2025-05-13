@@ -899,9 +899,9 @@ func formatErrorMessage(condition checkins.Condition, err error) string {
 	}
 
 	if msg != "" {
-		return formatStandardError(fmt.Sprintf("COND_%d", condition.ID), err.Error()+". "+msg)
+		return formatStandardError("", err.Error()+". "+msg)
 	}
-	return formatStandardError(fmt.Sprintf("COND_%d", condition.ID), err.Error())
+	return formatStandardError("", err.Error())
 }
 
 // FormatStandardError định dạng thông báo lỗi theo chuẩn chung
