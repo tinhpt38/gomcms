@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/rand"
 	"net"
 	"strings"
 	"sync"
@@ -90,6 +91,11 @@ func (attendanceCheckInService *AttendanceCheckInService) CreateAttendanceCheckI
 	}
 	if attendanceCheckIn.VisitorId != "" {
 		existingCheckIn.VisitorId = attendanceCheckIn.VisitorId
+	}
+
+	// Cập nhật số may mắn nếu có
+	if attendanceCheckIn.LuckyNumber > 0 {
+		existingCheckIn.LuckyNumber = attendanceCheckIn.LuckyNumber
 	}
 
 	// Cập nhật thời gian điểm danh mới nhất
@@ -192,6 +198,12 @@ func (attendanceCheckInService *AttendanceCheckInService) GetAttendanceCheckInIn
 }
 
 func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req checkinsReq.CheckinsReq, ip string, userAgent string) (result map[string]interface{}, err error) {
+	// Sử dụng bộ tạo số ngẫu nhiên cục bộ
+	localRand := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	// Khởi tạo biến cho số may mắn
+	var luckyNumber int
+
 	conditionService := new(ConditionService)
 	attendanceService := new(AttendanceService)
 	participantService := new(ParticipantService)
@@ -483,6 +495,17 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	if err == nil {
 		result["checkins"] = existingCheckins
 
+		// Kiểm tra xem đã có số may mắn đã cấp trước đó hay chưa
+		if luckyNumber == 0 {
+			for _, checkin := range existingCheckins {
+				if checkin.LuckyNumber > 0 {
+					luckyNumber = checkin.LuckyNumber
+					result["luckyNumber"] = luckyNumber
+					break
+				}
+			}
+		}
+
 		// Bổ sung thông tin counter vào conditions
 		if len(existingCheckins) > 0 && len(coreConditions) > 0 {
 			// Tạo map để ánh xạ condition_id với counter
@@ -530,6 +553,48 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	// 	result["message"] = "Không có điều kiện điểm danh nào thoả mãn"
 	// }
 
+	// Kiểm tra và tạo số may mắn nếu điều kiện thỏa mãn
+	if attendance.UseLuckyNumber && attendance.LuckyShowAfterMinCount > 0 {
+		// Tính tổng số lần điểm danh thành công của người tham gia bằng cách tổng các counter
+		type CounterSum struct {
+			TotalCounter int64
+		}
+		var counterSum CounterSum
+		global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+			Select("COALESCE(SUM(counter), 0) as total_counter").
+			Where("partpaticipant_id = ? AND attendance_id = ?", participant.ID, attendance.ID).
+			Scan(&counterSum)
+
+		// Số lần điểm danh sắp tới sau khi thêm các lần điểm danh mới
+		upcomingCheckinCount := int(counterSum.TotalCounter) + len(agpCheckins)
+
+		// Kiểm tra xem có điều kiện nào đạt và cho phép hiển thị số may mắn không
+		var hasShowLuckyNumberCondition bool
+		if len(coreConditions) == 0 {
+			hasShowLuckyNumberCondition = true
+		}
+		for _, condition := range coreConditions {
+			if condition.IsPass && condition.ShowLuckyNumber {
+				hasShowLuckyNumberCondition = true
+				break
+			}
+		}
+
+		// Nếu đủ điều kiện để hiển thị số may mắn
+		if hasShowLuckyNumberCondition && upcomingCheckinCount >= attendance.LuckyShowAfterMinCount {
+			// Tạo số may mắn ngẫu nhiên từ 1-999 sử dụng bộ tạo số ngẫu nhiên cục bộ
+			luckyNumber = 1 + localRand.Intn(999)
+
+			// Lưu số may mắn vào các bản ghi điểm danh mới
+			for i := range agpCheckins {
+				agpCheckins[i].LuckyNumber = luckyNumber
+			}
+
+			// Thêm số may mắn vào kết quả trả về
+			result["luckyNumber"] = luckyNumber
+		}
+	}
+
 	for _, agp := range agpCheckins {
 		aciErr := attendanceCheckInService.CreateAttendanceCheckIn(&agp)
 		if aciErr != nil {
@@ -540,7 +605,13 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			// return nil, errors.New("điểm danh thất bại" + aciErr.Error())
 		}
 	}
-	result["message"] = "Điểm danh thành công"
+
+	// Cập nhật thông báo
+	if luckyNumber > 0 {
+		result["message"] = fmt.Sprintf("Điểm danh thành công. Số may mắn của bạn là: %d", luckyNumber)
+	} else {
+		result["message"] = "Điểm danh thành công"
+	}
 	return
 }
 
