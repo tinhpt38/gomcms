@@ -73,8 +73,9 @@
                 </p>
                 <div v-if="attendance.title != null" class="mt-4 p-2 rounded shadow-slate-400">
                   <h3>{{ attendance.title }}</h3>
-                  <!-- Lucky Number feature -->
+                  <!-- Lucky Number feature - Only show if useLuckyNumber is true -->
                 <LuckyNumberDisplay 
+                  v-if="attendance.useLuckyNumber"
                   :lucky-number="apiResponse?.data?.luckyNumber" 
                   :current-checkins="checkinCount"
                   :required-checkins="attendance.luckyShowAfterMinCount || 0"
@@ -425,7 +426,7 @@ const requestCheckin = async () => {
     }
     
     // 3. Lucky number info if not in the basic message
-    if (!apiResponse.data?.message && luckyNumber != null && !msgComponents[0]?.includes("may mắn")) {
+    if (attendance.value.useLuckyNumber && !apiResponse.data?.message && luckyNumber != null && !msgComponents[0]?.includes("may mắn")) {
       msgComponents.push(`<span class="text-yellow-600 font-bold"><i class="el-icon-star-on"></i> Chúc mừng! Số may mắn của bạn: ${luckyNumber}</span>`);
     }
     
@@ -449,7 +450,7 @@ const requestCheckin = async () => {
       dangerouslyUseHTMLString: true,
       center: true
     }).then(() => {
-      if (luckyNumber) {
+      if (attendance.value.useLuckyNumber && luckyNumber) {
         // Set flag to indicate this is a new lucky number
         isNewLuckyNumber.value = true
         
