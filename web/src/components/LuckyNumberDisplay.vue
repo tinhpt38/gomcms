@@ -5,7 +5,8 @@
          class="mt-4 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 shadow-md">
       <h3 class="text-lg font-medium text-gray-700 mb-3 flex items-center">
         <i class="el-icon-star-on mr-2 text-yellow-500 lucky-star-pulse"></i>
-        <span>Điểm danh để nhận số may mắn</span>
+        <span>Điểm danh ít nhất {{ requiredCheckins }} lần để nhận số may mắn</span>
+        
       </h3>
       
       <p class="mt-2 text-sm text-gray-600 italic">

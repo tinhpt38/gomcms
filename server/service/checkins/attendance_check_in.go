@@ -268,8 +268,8 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		}
 	}
 
-	var listAgps []checkins.AttendanceGroupParticipant
-	listAgps, _ = participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
+	var listAgpsTemp []checkins.AttendanceGroupParticipant
+	listAgpsTemp, _ = participantService.GetParticipantInAttendance(participant.ID, attendance.ID)
 	if attendance.AllowGuest {
 		agpDb := global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName())
 		newagp := &checkins.AttendanceGroupParticipant{
@@ -287,7 +287,18 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			msg := fmt.Sprintf("không thể thêm thông tin điểm danh của bạn: %s", err.Error())
 			return nil, errors.New(msg)
 		}
-		listAgps = append(listAgps, *newagp)
+
+		listAgpsTemp = append(listAgpsTemp, *newagp)
+	}
+
+	var listAgps []checkins.AttendanceGroupParticipant
+	listAgpIDSet := make(map[int]bool) // Sử dụng map để kiểm tra trùng lặp
+	for _, agp := range listAgpsTemp {
+		agpID := int(agp.ID)
+		if !listAgpIDSet[agpID] { // Nếu chưa tồn tại trong map
+			listAgps = append(listAgps, agp)
+			listAgpIDSet[agpID] = true // Đánh dấu là đã tồn tại
+		}
 	}
 
 	if len(listAgps) == 0 {
@@ -365,8 +376,13 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 
 	// Kiểm tra điều kiện điểm danh
 	var listAgpIDs []int
+	agpIDSet := make(map[int]bool) // Sử dụng map để kiểm tra trùng lặp
 	for _, agp := range listAgps {
-		listAgpIDs = append(listAgpIDs, int(agp.ID))
+		agpID := int(agp.ID)
+		if !agpIDSet[agpID] { // Nếu chưa tồn tại trong map
+			listAgpIDs = append(listAgpIDs, agpID)
+			agpIDSet[agpID] = true // Đánh dấu là đã tồn tại
+		}
 	}
 
 	var conditionCheckedIn []uint
@@ -430,28 +446,11 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			for _, agp := range listAgps {
 				if condition.AttendanceGroupParticipantId == int(agp.ID) {
 					// Nếu điều kiện đã được điểm danh trước đó, đánh dấu là đã qua
-					// và tạo bản ghi mới để tăng counter
+					// nhưng KHÔNG tạo bản ghi mới - chỉ cập nhật counter ở cuối hàm
 					if arrayContains(conditionCheckedIn, condition.Condition.ID) {
 						tempCon := *condition.Condition
 						tempCon.IsPass = true
 						coreConditions = append(coreConditions, tempCon)
-
-						// Tạo bản ghi điểm danh mới cho điều kiện đã pass để tăng counter
-						attendanceCheckIn := checkins.AttendanceCheckIn{
-							CheckinDate:      time.Now().UTC(),
-							AttendanceId:     &attendance.ID,
-							PartpaticipantId: &participant.ID,
-							AreaId:           tempCon.AreaId,
-							GroupId:          agp.GroupId,
-							ConditionId:      &tempCon.ID,
-							IP:               ip,
-							Lattidue:         req.Lat,
-							Longtidue:        req.Lng,
-							Agent:            userAgent,
-							Accuracy:         req.Accuracy,
-							VisitorId:        req.VisitorId,
-						}
-						agpCheckins = append(agpCheckins, attendanceCheckIn)
 						continue
 					}
 
