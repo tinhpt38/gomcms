@@ -166,8 +166,163 @@ const startAnimations = () => {
   animation: fadeIn 1s ease-in-out;
 }
 
+/* Enhanced lucky number container styling */
+.lucky-number-container {
+  position: relative;
+  padding: 2rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #fffdf0, #fff8e1);
+  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2), 0 0 10px rgba(255, 215, 0, 0.1);
+  border: 2px solid #ffd700;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Enhanced Badge styling */
+.lucky-number-badge {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #ffd700, #ffb700);
+  border-radius: 50%;
+  margin: 1rem auto;
+  box-shadow: 0 5px 15px rgba(255, 180, 0, 0.4);
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
+
+.lucky-number-badge:hover {
+  transform: scale(1.05) rotate(5deg);
+}
+
+/* Number value styling */
+.lucky-number-value {
+  font-size: 3rem;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 2;
+  animation: pulse 2s infinite;
+}
+
+/* Star decorations */
+.lucky-star-decoration {
+  position: absolute;
+  color: #fff9c4;
+  font-size: 1.5rem;
+  text-shadow: 0 0 5px gold, 0 0 10px rgba(255, 215, 0, 0.8);
+  animation: twinkle 1.5s infinite alternate;
+  z-index: 1;
+}
+
+.star-top-left {
+  top: 10px;
+  left: 10px;
+  animation-delay: 0.2s;
+}
+
+.star-top-right {
+  top: 10px;
+  right: 10px;
+  animation-delay: 0.5s;
+}
+
+.star-bottom-left {
+  bottom: 10px;
+  left: 10px;
+  animation-delay: 0.8s;
+}
+
+.star-bottom-right {
+  bottom: 10px;
+  right: 10px;
+  animation-delay: 1.1s;
+}
+
+/* Title animations */
+.lucky-number-shine {
+  background: linear-gradient(90deg, #f6f7f8, #ffd700, #f6f7f8);
+  background-size: 200% auto;
+  color: #000;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 2s linear infinite;
+  display: inline-block;
+}
+
+/* Animation for the lucky number badge */
+.lucky-number-celebrate {
+  animation: celebrate 3s ease-in-out;
+}
+
+/* Confetti container */
+.confetti-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.confetti {
+  position: absolute;
+  animation: confetti-fall 3s linear forwards;
+  z-index: 1;
+}
+
+/* Animation keyframes */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes twinkle {
+  from { opacity: 0.5; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes shine {
+  to { background-position: 200% center; }
+}
+
+@keyframes celebrate {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.1) rotate(5deg); }
+  75% { transform: scale(1.05) rotate(-5deg); }
+  100% { transform: scale(1); }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(1000%) rotate(360deg); opacity: 0; }
+}
+
+/* Lucky star icon animation */
+.lucky-star {
+  animation: star-rotate 5s infinite linear;
+  display: inline-block;
+  transform-origin: center;
+}
+
+@keyframes star-rotate {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-15deg); }
+  100% { transform: rotate(0deg); }
 }
 </style>
