@@ -306,6 +306,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 	}
 
 	// Kiểm tra số lần điểm danh của thành viên đó
+	// Tạo checkinLog mới
 	checkinLog := checkins.CheckinLog{
 		Email:        email,
 		Code:         req.Code,
@@ -319,13 +320,60 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 		FullName:     req.FullName,
 	}
 
-	if err := global.GVA_DB.Where(checkins.CheckinLog{
+	// Kiểm tra xem đã có log với cùng thông tin hay không
+	var existingLog checkins.CheckinLog
+	err = global.GVA_DB.Where(&checkins.CheckinLog{
 		Email:        email,
 		Code:         req.Code,
 		AttendanceId: attendance.ID,
 		VisitorId:    req.VisitorId,
-	}).Create(&checkinLog).Error; err != nil {
-		return nil, err
+		Ip:           ip,
+	}).Order("created_at DESC").First(&existingLog).Error
+
+	// Nếu tìm thấy log trước đó, chỉ tạo log mới nếu có sự thay đổi về dữ liệu
+	if err == nil {
+		// Kiểm tra sự khác biệt giữa log hiện tại và log mới
+		hasChanges := false
+
+		// So sánh các thông tin về vị trí
+		if (existingLog.Lat == nil && req.Lat != nil) ||
+			(existingLog.Lat != nil && req.Lat == nil) ||
+			(existingLog.Lat != nil && req.Lat != nil && *existingLog.Lat != *req.Lat) {
+			hasChanges = true
+		}
+
+		if (existingLog.Lng == nil && req.Lng != nil) ||
+			(existingLog.Lng != nil && req.Lng == nil) ||
+			(existingLog.Lng != nil && req.Lng != nil && *existingLog.Lng != *req.Lng) {
+			hasChanges = true
+		}
+
+		if (existingLog.Accuracy == nil && req.Accuracy != nil) ||
+			(existingLog.Accuracy != nil && req.Accuracy == nil) ||
+			(existingLog.Accuracy != nil && req.Accuracy != nil && *existingLog.Accuracy != *req.Accuracy) {
+			hasChanges = true
+		}
+
+		// So sánh các thông tin khác
+		// if existingLog.Agent != userAgent {
+		// 	hasChanges = true
+		// }
+
+		// Nếu không có sự thay đổi, sử dụng lại log cũ
+		if !hasChanges {
+			checkinLog = existingLog
+			global.GVA_LOG.Info("Sử dụng lại log hiện có thay vì tạo mới", zap.String("email", email), zap.String("visitorId", req.VisitorId))
+		} else {
+			// Có sự thay đổi, tạo log mới
+			if err := global.GVA_DB.Create(&checkinLog).Error; err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		// Không tìm thấy log trước đó, tạo mới
+		if err := global.GVA_DB.Create(&checkinLog).Error; err != nil {
+			return nil, err
+		}
 	}
 
 	if attendance.RestrictIp != nil && *attendance.RestrictIp != "" {
