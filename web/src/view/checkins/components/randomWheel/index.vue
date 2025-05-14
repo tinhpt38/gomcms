@@ -50,9 +50,42 @@
         <div class="mt-8">
             <h3 class="text-xl font-bold mb-4">Lịch sử quay số</h3>
 
+            <!-- Thêm ô tìm kiếm số -->
+            <div class="search-container mb-4">
+                <div class="search-title mb-2 text-center">
+                    <span class="search-icon">🔍</span>
+                    <span class="ml-2">Tìm kiếm số may mắn</span>
+                </div>
+                <el-input
+                    v-model="searchQuery"
+                    placeholder="Nhập số may mắn để tìm kiếm"
+                    clearable
+                    @clear="resetSearch"
+                    @input="handleSearch"
+                >
+                    <template #prefix>
+                        <el-icon><Search /></el-icon>
+                    </template>
+                </el-input>
+                <div v-if="searchQuery && filteredHistory.length > 0" class="search-results-info">
+                    Tìm thấy <strong>{{ filteredHistory.length }}</strong> kết quả
+                </div>
+                <div v-if="searchQuery && filteredHistory.length === 0" class="search-no-results">
+                    Không tìm thấy kết quả nào cho "<strong>{{ searchQuery }}</strong>"
+                </div>
+            </div>
+
             <el-table :data="paginatedHistory" style="width: 100%" border stripe v-loading="historyLoading"
                 :empty-text="historyLoading ? 'Đang tải...' : 'Không có dữ liệu lịch sử'">
-                <el-table-column prop="luckyNumber" label="Số may mắn" min-width="200" align="center" />
+                <el-table-column prop="luckyNumber" label="Số may mắn" min-width="200" align="center" >
+                    <template #default="scope">
+                        <div class="lucky-number-container">
+                            <div class="lucky-number-tag">
+                                {{ scope.row.luckyNumber }}
+                            </div>
+                        </div>
+                    </template>
+                </el-table-column>
                 <!-- <el-table-column label="Người trúng" min-width="200">
                     <template #default="scope">
                         <div>
@@ -79,10 +112,10 @@
             </el-table>
 
             <!-- Pagination component -->
-            <div class="pagination-container mt-4 flex justify-end" v-if="luckyHistory.length > 0">
+            <div class="pagination-container mt-4 flex justify-end" v-if="filteredHistory.length > 0">
                 <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
                     :page-sizes="[5, 10, 20, 50]" layout="total, sizes, prev, pager, next, jumper"
-                    :total="luckyHistory.length" @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                    :total="filteredHistory.length" @size-change="handleSizeChange" @current-change="handleCurrentChange"
                     background />
             </div>
         </div>
@@ -163,6 +196,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 import {
     findLuckyParticipant,
     clearLuckyHistory
@@ -205,11 +239,25 @@ const luckyHistory = ref([
 const currentPage = ref(1)
 const pageSize = ref(10)
 
+// Search functionality
+const searchQuery = ref('')
+
+// Computed property for filtered history data
+const filteredHistory = computed(() => {
+    if (!searchQuery.value) {
+        return luckyHistory.value
+    }
+    const query = searchQuery.value.trim().toLowerCase()
+    return luckyHistory.value.filter(item => 
+        item.luckyNumber.toString().includes(query)
+    )
+})
+
 // Computed property for paginated history data
 const paginatedHistory = computed(() => {
     const startIndex = (currentPage.value - 1) * pageSize.value
     const endIndex = startIndex + pageSize.value
-    return luckyHistory.value.slice(startIndex, endIndex)
+    return filteredHistory.value.slice(startIndex, endIndex)
 })
 
 // Pagination event handlers
@@ -504,6 +552,18 @@ const viewParticipantInfo = (participant) => {
     console.log('Viewing participant:', participant)
     selectedParticipant.value = { ...participant }
     dialogVisible.value = true
+}
+
+// Search functionality handlers
+const handleSearch = () => {
+    // Reset to first page when searching
+    currentPage.value = 1
+    // The actual filtering happens in the filteredHistory computed property
+}
+
+const resetSearch = () => {
+    searchQuery.value = ''
+    currentPage.value = 1
 }
 
 onMounted(() => {
@@ -844,6 +904,71 @@ canvas#wheel {
         text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
     }
 
+    /* Thêm style cho lucky number trong bảng */
+    .el-table .lucky-number-tag {
+        font-size: 20px;
+        font-weight: 800;
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #fff1c1, #ffb700);
+        color: #7d4e00;
+        border-radius: 50px;
+        box-shadow: 0 4px 12px rgba(255, 183, 0, 0.4);
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        min-width: 50px;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        animation: lucky-number-glow 2s infinite;
+    }
+
+    .el-table .lucky-number-tag:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(255, 183, 0, 0.6);
+    }
+
+    /* Thêm hiệu ứng ánh sáng trước và sau số */
+    .el-table .lucky-number-tag::before,
+    .el-table .lucky-number-tag::after {
+        content: '✨';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 14px;
+        color: #ffb700;
+        opacity: 0.8;
+    }
+
+    .el-table .lucky-number-tag::before {
+        left: -5px;
+        animation: sparkle 1.5s infinite ease-in-out;
+    }
+
+    .el-table .lucky-number-tag::after {
+        right: -5px;
+        animation: sparkle 1.5s infinite ease-in-out 0.5s;
+    }
+
+    /* Keyframe cho hiệu ứng phát sáng */
+    @keyframes lucky-number-glow {
+        0%, 100% {
+            box-shadow: 0 4px 12px rgba(255, 183, 0, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(255, 183, 0, 0.7);
+        }
+    }
+
+    @keyframes sparkle {
+        0%, 100% {
+            opacity: 0.5;
+            transform: translateY(-50%) scale(0.8);
+        }
+        50% {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.2);
+        }
+    }
+
     .lucky-number-display {
         padding: 10px 0;
     }
@@ -860,6 +985,96 @@ canvas#wheel {
 
 .no-data {
     padding: 30px 0;
+}
+
+/* Container cho số may mắn trong bảng */
+.lucky-number-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px 0;
+    position: relative;
+}
+
+/* Hiệu ứng ánh sáng xung quanh container */
+.lucky-number-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0) 70%);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: 0;
+    animation: pulse-bg 3s infinite;
+}
+
+@keyframes pulse-bg {
+    0%, 100% {
+        opacity: 0.2;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+}
+
+/* Tùy chỉnh bảng lịch sử */
+.el-table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+/* Tùy chỉnh header của bảng */
+:deep(.el-table__header) {
+    background: linear-gradient(180deg, #fff8e6, #fff5d6);
+}
+
+:deep(.el-table__header .cell) {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* Tùy chỉnh tiêu đề của phần lịch sử quay số */
+.mt-8 > h3 {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+.mt-8 > h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #ffb700, transparent);
+    border-radius: 3px;
+}
+
+/* Tùy chỉnh tiêu đề cột số may mắn */
+:deep(.el-table__header-wrapper .el-table__cell[data-label="Số may mắn"]) {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
+    font-weight: bold;
+    color: #d48806;
+}
+
+/* Tùy chỉnh hàng trong bảng khi hover */
+:deep(.el-table__row:hover) {
+    background-color: rgba(255, 248, 230, 0.7) !important;
+}
+
+/* Hiệu ứng hover cho số may mắn */
+.el-table__row:hover .lucky-number-tag {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 8px 20px rgba(255, 183, 0, 0.5);
 }
 
 /* Animations */
@@ -970,5 +1185,104 @@ canvas#wheel {
         text-shadow: 0 0 10px gold, 0 0 20px gold;
         transform: scale(1.1);
     }
+}
+
+/* Search container styling */
+.search-container {
+    position: relative;
+    margin-bottom: 20px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.search-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-icon {
+    font-size: 18px;
+    animation: bounce 1s infinite alternate;
+}
+
+.search-results-info {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    background-color: #f8f9fa;
+    padding: 8px;
+    border-radius: 4px;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.search-no-results {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+    color: #ff9800;
+    background-color: #fff8e1;
+    padding: 8px;
+    border-radius: 4px;
+    border-left: 3px solid #ff9800;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.search-container :deep(.el-input__wrapper) {
+    border-radius: 50px;
+    padding: 2px 15px;
+    box-shadow: 0 3px 10px rgba(255, 184, 0, 0.1);
+    border: 1px solid rgba(255, 183, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.search-container :deep(.el-input__wrapper:hover),
+.search-container :deep(.el-input__wrapper.is-focus) {
+    box-shadow: 0 5px 15px rgba(255, 184, 0, 0.2);
+    border-color: rgba(255, 183, 0, 0.5);
+}
+
+.search-container :deep(.el-input__prefix) {
+    color: #ffb700;
+}
+
+.search-container :deep(.el-input__inner::placeholder) {
+    color: #999;
+    font-style: italic;
+}
+
+.search-container :deep(.el-input__inner) {
+    font-size: 15px;
+    color: #333;
+}
+
+/* Add animation for the clear button */
+.search-container :deep(.el-input__suffix) {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.search-container :deep(.el-input__suffix:hover) {
+    transform: scale(1.2);
+}
+
+@keyframes bounce {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 </style>
