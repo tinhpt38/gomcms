@@ -111,15 +111,8 @@ func (participantApi *ParticipantApi) FindParticipant(c *gin.Context) {
 func (participantApi *ParticipantApi) FindLuckyParticipant(c *gin.Context) {
 	acId := c.Query("attendanceId")
 
-	// Lấy người may mắn hiện tại
+	// Lấy người may mắn hiện tại - Chuyển toàn bộ logic vào service
 	participant, luckyNumber, err := participantService.GetLuckyParticipant(acId)
-
-	// Lấy lịch sử các số may mắn đã quay
-	var luckyHistory []checkins.UsedLuckyParticipant
-	global.GVA_DB.Where("attendance_id = ?", acId).
-		Order("created_at DESC").
-		Limit(20).
-		Find(&luckyHistory)
 
 	// Lấy thông tin chi tiết của mỗi người tham gia trong lịch sử
 	type LuckyHistoryItem struct {
@@ -132,6 +125,12 @@ func (participantApi *ParticipantApi) FindLuckyParticipant(c *gin.Context) {
 	}
 
 	var historyItems []LuckyHistoryItem
+	// Lấy lịch sử các số may mắn đã quay
+	var luckyHistory []checkins.UsedLuckyParticipant
+	global.GVA_DB.Model(&checkins.UsedLuckyParticipant{}).Where("attendance_id = ?", acId).
+		Order("created_at DESC").
+		Find(&luckyHistory)
+
 	for _, hist := range luckyHistory {
 		item := LuckyHistoryItem{
 			ID:            hist.ID,
@@ -143,7 +142,7 @@ func (participantApi *ParticipantApi) FindLuckyParticipant(c *gin.Context) {
 		// Nếu có participant_id, lấy thông tin người tham gia
 		if hist.ParticipantId != nil && *hist.ParticipantId > 0 {
 			var p checkins.Participant
-			if global.GVA_DB.Where("id = ?", *hist.ParticipantId).First(&p).Error == nil {
+			if global.GVA_DB.Model(&checkins.Participant{}).Where("id = ?", *hist.ParticipantId).First(&p).Error == nil {
 				item.Email = p.Email
 				if p.FullName != nil {
 					item.FullName = *p.FullName

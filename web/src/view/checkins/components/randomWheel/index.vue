@@ -49,10 +49,10 @@
         <!-- Lịch sử quay số -->
         <div class="mt-8">
             <h3 class="text-xl font-bold mb-4">Lịch sử quay số</h3>
-            
+
             <!-- Hiển thị thông báo cập nhật lịch sử -->
             <div v-if="isSpinning" class="updating-history-message">
-                <span class="loading-icon">🔄</span> Đang quay số, lịch sử sẽ được cập nhật sau khi vòng quay dừng lại...
+                <!-- <span class="loading-icon">🔄</span> Đang quay số, lịch sử sẽ được cập nhật sau khi vòng quay dừng lại... -->
             </div>
 
             <!-- Thêm ô tìm kiếm số -->
@@ -61,15 +61,12 @@
                     <span class="search-icon">🔍</span>
                     <span class="ml-2">Tìm kiếm số may mắn</span>
                 </div>
-                <el-input
-                    v-model="searchQuery"
-                    placeholder="Nhập số may mắn để tìm kiếm"
-                    clearable
-                    @clear="resetSearch"
-                    @input="handleSearch"
-                >
+                <el-input v-model="searchQuery" placeholder="Nhập số may mắn để tìm kiếm" clearable @clear="resetSearch"
+                    @input="handleSearch">
                     <template #prefix>
-                        <el-icon><Search /></el-icon>
+                        <el-icon>
+                            <Search />
+                        </el-icon>
                     </template>
                 </el-input>
                 <div v-if="searchQuery && filteredHistory.length > 0" class="search-results-info">
@@ -83,7 +80,7 @@
             <el-table :data="paginatedHistory" style="width: 100%" border stripe v-loading="historyLoading"
                 :empty-text="historyLoading ? 'Đang tải...' : 'Vui lòng quay số để xem kết quả và lịch sử quay số!'"
                 :class="['history-table', { 'updated': historyJustUpdated }]">
-                <el-table-column prop="luckyNumber" label="Số may mắn" min-width="200" align="center" >
+                <el-table-column prop="luckyNumber" label="Số may mắn" min-width="200" align="center">
                     <template #default="scope">
                         <div class="lucky-number-container">
                             <div class="lucky-number-tag">
@@ -121,30 +118,22 @@
             <div class="pagination-container mt-4 flex justify-end" v-if="filteredHistory.length > 0">
                 <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
                     :page-sizes="[5, 10, 20, 50]" layout="total, sizes, prev, pager, next, jumper"
-                    :total="filteredHistory.length" @size-change="handleSizeChange" @current-change="handleCurrentChange"
-                    background />
+                    :total="filteredHistory.length" @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange" background />
             </div>
         </div>
 
         <!-- Participant Info Dialog -->
-        <el-dialog
-            v-model="dialogVisible"
-            title="Thông tin người trúng"
-            width="520px"
-            :show-close="true"
-            :close-on-click-modal="true"
-            :close-on-press-escape="true"
-            class="participant-dialog"
-            destroy-on-close
-            top="15vh"
-        >
+        <el-dialog v-model="dialogVisible" title="Thông tin người trúng" width="520px" :show-close="true"
+            :close-on-click-modal="true" :close-on-press-escape="true" class="participant-dialog" destroy-on-close
+            top="15vh">
             <div v-if="selectedParticipant" class="participant-info">
                 <div class="info-section">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold">Thông tin số may mắn</h3>
                         <div class="golden-trophy">🏆</div>
                     </div>
-                    
+
                     <div class="lucky-number-display mb-4 flex justify-center items-center">
                         <div class="lucky-number-tag">{{ selectedParticipant.luckyNumber }}</div>
                     </div>
@@ -156,7 +145,7 @@
                         </span>
                     </div>
                 </div>
-                
+
                 <div class="info-section">
                     <div class="flex items-center mb-4">
                         <h3 class="text-lg font-bold">Thông tin người trúng</h3>
@@ -166,30 +155,30 @@
                         <span class="info-label">Họ tên:</span>
                         <span class="info-value font-medium">{{ selectedParticipant.fullName || '--' }}</span>
                     </div>
-                    
+
                     <div class="info-row">
                         <span class="info-label">Email:</span>
                         <span class="info-value email-value">{{ selectedParticipant.email || '--' }}</span>
                     </div>
-                    
+
                     <!-- Additional participant info section -->
-                    <div v-if="selectedParticipant.participantId" class="mt-3 pt-3 border-t border-gray-200">
+                    <!-- <div v-if="selectedParticipant.participantId" class="mt-3 pt-3 border-t border-gray-200">
                         <div class="info-row">
                             <span class="info-label">ID:</span>
                             <span class="info-value id-value">{{ selectedParticipant.participantId }}</span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
-                
+
                 <div class="mt-4 text-center text-sm text-gray-500">
                     Đã quay số vào {{ new Date(selectedParticipant.createdAt).toLocaleDateString() }}
                 </div>
             </div>
-            
+
             <div v-else class="no-data">
                 <el-empty description="Không có thông tin" />
             </div>
-            
+
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="dialogVisible = false">Đóng</el-button>
@@ -244,7 +233,7 @@ const filteredHistory = computed(() => {
         return luckyHistory.value
     }
     const query = searchQuery.value.trim().toLowerCase()
-    return luckyHistory.value.filter(item => 
+    return luckyHistory.value.filter(item =>
         item.luckyNumber.toString().includes(query)
     )
 })
@@ -332,18 +321,18 @@ const startAnimations = () => {
             fullName: tempApiResult.value.fullName || '',
             createdAt: new Date().toISOString()
         };
-        
+
         // Kiểm tra xem kết quả này đã tồn tại trong lịch sử chưa
-        const existingIndex = luckyHistory.value.findIndex(item => 
-            item.id === newResult.id || 
-            (item.luckyNumber === newResult.luckyNumber && 
-             new Date(item.createdAt).toDateString() === new Date(newResult.createdAt).toDateString())
+        const existingIndex = luckyHistory.value.findIndex(item =>
+            item.id === newResult.id ||
+            (item.luckyNumber === newResult.luckyNumber &&
+                new Date(item.createdAt).toDateString() === new Date(newResult.createdAt).toDateString())
         );
-        
+
         if (existingIndex === -1) {
             luckyHistory.value.unshift(newResult);
             console.log('Đã thêm kết quả mới vào lịch sử:', newResult);
-            
+
             // Đánh dấu là lịch sử vừa được cập nhật để hiển thị animation
             historyJustUpdated.value = true;
             setTimeout(() => {
@@ -451,7 +440,7 @@ const frame = () => {
                 // Đảm bảo kết quả mới nhất được hiển thị ở đầu tiên
                 currentPage.value = 1;
             }
-            
+
             // Bắt đầu hiệu ứng
             startAnimations();
         } else {
@@ -497,7 +486,7 @@ const onLuckyClick = () => {
     isSpinning.value = true;
     showLuckyPopup.value = false;
     hasResult.value = false;
-    
+
     // Reset lucky number and member before making the API call
     luckyNumber.value = null;
     luckyMember.value = { email: null, fullName: null };
@@ -513,7 +502,7 @@ const onLuckyClick = () => {
             luckyNumber.value = res.data.luckyNumber;
             luckyMember.value = res.data.participant || {};
             tempApiResult.value = res.data;
-            
+
             // Không cập nhật history ở đây, mà sẽ cập nhật sau khi vòng quay dừng lại
             console.log('Đã nhận kết quả từ API, đợi vòng quay dừng lại để hiển thị');
         }
@@ -541,7 +530,7 @@ const fetchLuckyHistory = async () => {
         // Note: In a real implementation, you'd fetch history from a dedicated API endpoint
         // For now, we'll just set loading to false without adding any sample data
         await new Promise(resolve => setTimeout(resolve, 300))
-        
+
         // Not adding any sample data anymore - history will be populated only after spinning
     } catch (error) {
         console.error('Failed to fetch lucky history:', error)
@@ -819,7 +808,7 @@ canvas#wheel {
         color: var(--el-color-primary);
         position: relative;
         padding-left: 10px;
-        
+
         &::before {
             content: '';
             position: absolute;
@@ -869,7 +858,7 @@ canvas#wheel {
         color: #606266;
         position: relative;
         padding-left: 15px;
-        
+
         &::before {
             content: '•';
             position: absolute;
@@ -940,19 +929,25 @@ canvas#wheel {
 
     /* Keyframe cho hiệu ứng phát sáng */
     @keyframes lucky-number-glow {
-        0%, 100% {
+
+        0%,
+        100% {
             box-shadow: 0 4px 12px rgba(255, 183, 0, 0.4);
         }
+
         50% {
             box-shadow: 0 4px 20px rgba(255, 183, 0, 0.7);
         }
     }
 
     @keyframes sparkle {
-        0%, 100% {
+
+        0%,
+        100% {
             opacity: 0.5;
             transform: translateY(-50%) scale(0.8);
         }
+
         50% {
             opacity: 1;
             transform: translateY(-50%) scale(1.2);
@@ -968,7 +963,9 @@ canvas#wheel {
         animation: trophy-glow 2s ease-in-out infinite;
     }
 
-    .time-value, .email-value, .id-value {
+    .time-value,
+    .email-value,
+    .id-value {
         color: #666;
     }
 }
@@ -1002,10 +999,13 @@ canvas#wheel {
 }
 
 @keyframes pulse-bg {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.2;
         transform: translate(-50%, -50%) scale(1);
     }
+
     50% {
         opacity: 0.5;
         transform: translate(-50%, -50%) scale(1.2);
@@ -1031,14 +1031,14 @@ canvas#wheel {
 }
 
 /* Tùy chỉnh tiêu đề của phần lịch sử quay số */
-.mt-8 > h3 {
+.mt-8>h3 {
     position: relative;
     display: inline-block;
     padding-bottom: 8px;
     margin-bottom: 16px;
 }
 
-.mt-8 > h3::after {
+.mt-8>h3::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -1167,10 +1167,13 @@ canvas#wheel {
 }
 
 @keyframes trophy-glow {
-    0%, 100% {
+
+    0%,
+    100% {
         text-shadow: 0 0 0px gold;
         transform: scale(1);
     }
+
     50% {
         text-shadow: 0 0 10px gold, 0 0 20px gold;
         transform: scale(1.1);
@@ -1266,14 +1269,22 @@ canvas#wheel {
     0% {
         transform: translateY(0);
     }
+
     100% {
         transform: translateY(-3px);
     }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Thêm style cho thông báo đang cập nhật lịch sử */
@@ -1300,8 +1311,13 @@ canvas#wheel {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Thêm style để highlight bảng lịch sử khi có cập nhật mới */
@@ -1310,8 +1326,16 @@ canvas#wheel {
 }
 
 @keyframes highlight-update {
-    0% { box-shadow: 0 0 0px rgba(255, 183, 0, 0); }
-    50% { box-shadow: 0 0 20px rgba(255, 183, 0, 0.8); }
-    100% { box-shadow: 0 0 0px rgba(255, 183, 0, 0); }
+    0% {
+        box-shadow: 0 0 0px rgba(255, 183, 0, 0);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(255, 183, 0, 0.8);
+    }
+
+    100% {
+        box-shadow: 0 0 0px rgba(255, 183, 0, 0);
+    }
 }
 </style>

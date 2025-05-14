@@ -152,34 +152,60 @@ func (participantService *ParticipantService) GetParticipant(ID string) (partici
 }
 
 func (participantService *ParticipantService) GetLuckyParticipant(acId string) (participant checkins.Participant, luckyNumber int, err error) {
-	// Lấy lịch sử số may mắn đã quay để không lặp lại
-	var usedLuckyNumbers []checkins.UsedLuckyParticipant
-	err = global.GVA_DB.Where("attendance_id = ?", acId).
+	// Lấy lịch sử các số may mắn đã quay
+	var luckyHistory []checkins.UsedLuckyParticipant
+	global.GVA_DB.Where("attendance_id = ?", acId).
 		Order("created_at DESC").
-		Find(&usedLuckyNumbers).Error
+		Find(&luckyHistory)
 
-	if err != nil {
-		global.GVA_LOG.Error("Lỗi khi lấy lịch sử số may mắn", zap.Error(err))
-	}
-
-	// Tạo map để lưu các số đã hiển thị
-	usedNumbers := make(map[int]bool)
-	for _, used := range usedLuckyNumbers {
-		if used.LuckyNumber != nil {
-			usedNumbers[*used.LuckyNumber] = true
+	// Đếm số lần quay không trúng liên tiếp gần nhất
+	consecutiveFailures := 0
+	for _, hist := range luckyHistory {
+		if hist.ParticipantId == nil || *hist.ParticipantId == 0 {
+			consecutiveFailures++
+		} else {
+			break
 		}
 	}
 
-	// Lấy số lần đã quay cho phiên điểm danh này
-	var spinCount int64
-	err = global.GVA_DB.Model(&checkins.UsedLuckyParticipant{}).
-		Where("attendance_id = ?", acId).
-		Count(&spinCount).Error
-
-	if err != nil {
-		global.GVA_LOG.Error("Lỗi khi đếm số lần quay", zap.Error(err))
-		return participant, 0, err
+	// Lấy danh sách các số đã quay (cả trúng và không trúng)
+	var usedNumbers []int
+	for _, hist := range luckyHistory {
+		if hist.LuckyNumber != nil {
+			usedNumbers = append(usedNumbers, *hist.LuckyNumber)
+		}
 	}
+
+	// Quyết định xem lần quay này có người trúng hay không
+	var shouldHaveWinner bool
+
+	// Nếu đã có 3 lần quay không trúng liên tiếp, bắt buộc lần này phải có người trúng
+	if consecutiveFailures >= 3 {
+		shouldHaveWinner = true
+	} else {
+		// Tỷ lệ trúng thưởng ngẫu nhiên để tạo sự hấp dẫn
+		// Tỷ lệ trúng thưởng tăng theo số lần thất bại liên tiếp
+		var winProbability int64
+		switch consecutiveFailures {
+		case 0:
+			winProbability = 30 // 30% cơ hội trúng nếu lần trước đã trúng
+		case 1:
+			winProbability = 40 // 40% cơ hội trúng sau 1 lần thất bại
+		case 2:
+			winProbability = 70 // 70% cơ hội trúng sau 2 lần thất bại liên tiếp
+		default:
+			winProbability = 100 // 100% sẽ trúng sau 3 lần thất bại liên tiếp
+		}
+
+		shouldHaveWinner = (time.Now().UnixNano() % 100) < winProbability
+	}
+
+	// Tạo random number generator
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	// Khởi tạo số may mắn
+	var chosenNumber int
+
 	// Lấy danh sách tất cả các số may mắn trong DB (có thể trúng)
 	var existingLuckyNumbers []int
 	err = global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
@@ -192,150 +218,66 @@ func (participantService *ParticipantService) GetLuckyParticipant(acId string) (
 		return participant, 0, err
 	}
 
-	// Tạo random number generator
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	// Kiểm tra xem có khoảng số nào chưa được quay
+	var availableNumbers []int
+	existingMap := make(map[int]bool)
+	for _, num := range existingLuckyNumbers {
+		existingMap[num] = true
+	}
 
-	// Nếu chưa có người thắng, tiếp tục xử lý
-	var chosenNumber int
-	foundLuckyParticipant := false
+	usedMap := make(map[int]bool)
+	for _, num := range usedNumbers {
+		usedMap[num] = true
+	}
 
-	// Chiến lược quay số dựa trên số lần đã quay:
-	// Lần 1: Chọn số không có trong DB (không có người trúng)
-	// Lần 2: 50/50 giữa số trúng và không trúng
-	// Lần 3: Đảm bảo có người trúng
-
-	if spinCount >= 2 { // Lần quay thứ 3 trở đi: đảm bảo có người trúng
-		// Tìm một số có trong database và chưa được hiển thị
-		var potentialWinningNumbers []int
-		for _, num := range existingLuckyNumbers {
-			if !usedNumbers[num] {
-				potentialWinningNumbers = append(potentialWinningNumbers, num)
-			}
+	// Tạo danh sách các số chưa quay
+	for i := 1; i <= 99; i++ {
+		if !usedMap[i] {
+			availableNumbers = append(availableNumbers, i)
 		}
+	}
 
-		if len(potentialWinningNumbers) > 0 {
-			// Chọn ngẫu nhiên từ các số có thể thắng chưa hiển thị
-			idx := r.Intn(len(potentialWinningNumbers))
-			chosenNumber = potentialWinningNumbers[idx]
-		} else if len(existingLuckyNumbers) > 0 {
-			// Nếu đã hiển thị hết các số có thể thắng, chọn ngẫu nhiên một người tham dự bất kỳ
-			var randomParticipant checkins.AttendanceGroupParticipant
-			randomParticipantErr := global.GVA_DB.Where("attendance_id = ?", acId).
-				Order("RAND()").
-				First(&randomParticipant).Error
-
-			if randomParticipantErr == nil && randomParticipant.ParticipantId != nil {
-				// Lấy thông tin người tham dự
-				participantErr := global.GVA_DB.Where("id = ?", *randomParticipant.ParticipantId).
-					First(&participant).Error
-
-				if participantErr == nil {
-					// Tìm một số chưa được hiển thị để gán cho người này
-					for i := 1; i <= 99; i++ {
-						if !usedNumbers[i] {
-							chosenNumber = i
-							// Lưu kết quả vào lịch sử
-							usedLuckyParticipant := checkins.UsedLuckyParticipant{
-								AttendanceId:  acId,
-								ParticipantId: &participant.ID,
-								LuckyNumber:   &chosenNumber,
-							}
-							global.GVA_DB.Create(&usedLuckyParticipant)
-							return participant, chosenNumber, nil
-						}
-					}
-					// Nếu đã hiển thị hết tất cả các số, reset lại
-					chosenNumber = r.Intn(99) + 1
-					usedLuckyParticipant := checkins.UsedLuckyParticipant{
-						AttendanceId:  acId,
-						ParticipantId: &participant.ID,
-						LuckyNumber:   &chosenNumber,
-					}
-					global.GVA_DB.Create(&usedLuckyParticipant)
-					return participant, chosenNumber, nil
-				}
-			}
-			// Nếu không tìm được người tham dự, chọn một số chưa hiển thị
-			for i := 1; i <= 99; i++ {
-				if !usedNumbers[i] {
-					chosenNumber = i
-					break
-				}
-			}
-			// Nếu đã hiển thị hết tất cả các số, chọn ngẫu nhiên
-			if chosenNumber == 0 {
-				chosenNumber = r.Intn(99) + 1
-			}
+	// Nếu không còn số nào chưa quay, reset lại
+	if len(availableNumbers) == 0 {
+		availableNumbers = make([]int, 99)
+		for i := 0; i < 99; i++ {
+			availableNumbers[i] = i + 1
 		}
-	} else if spinCount == 1 { // Lần quay thứ 2: 50/50
-		// Tạo hai mảng: số thắng và số không thắng (chưa hiển thị)
-		var winningNumbers, nonWinningNumbers []int
+	}
 
-		// Số thắng là các số trong existingLuckyNumbers và chưa hiển thị
+	// Chia ra các trường hợp để xử lý
+	if shouldHaveWinner {
+		// Nếu cần có người trúng thưởng, lấy số từ existingLuckyNumbers mà chưa bị quay
+		var winningNumbers []int
 		for _, num := range existingLuckyNumbers {
-			if !usedNumbers[num] {
+			if !usedMap[num] {
 				winningNumbers = append(winningNumbers, num)
 			}
 		}
 
-		// Số không thắng là các số từ 1-99 trừ đi các số thắng và chưa hiển thị
-		existingMap := make(map[int]bool)
-		for _, num := range existingLuckyNumbers {
-			existingMap[num] = true
-		}
-
-		for i := 1; i <= 99; i++ {
-			if !existingMap[i] && !usedNumbers[i] {
-				nonWinningNumbers = append(nonWinningNumbers, i)
-			}
-		}
-
-		// 50/50 giữa số thắng và không thắng
-		if len(winningNumbers) > 0 && len(nonWinningNumbers) > 0 {
-			if r.Intn(2) == 0 { // 50% cơ hội chọn số thắng
-				idx := r.Intn(len(winningNumbers))
-				chosenNumber = winningNumbers[idx]
-			} else { // 50% cơ hội chọn số không thắng
-				idx := r.Intn(len(nonWinningNumbers))
-				chosenNumber = nonWinningNumbers[idx]
-			}
-		} else if len(winningNumbers) > 0 {
+		if len(winningNumbers) > 0 {
+			// Chọn ngẫu nhiên từ các số có thể thắng
 			idx := r.Intn(len(winningNumbers))
 			chosenNumber = winningNumbers[idx]
-		} else if len(nonWinningNumbers) > 0 {
-			idx := r.Intn(len(nonWinningNumbers))
-			chosenNumber = nonWinningNumbers[idx]
+		} else if len(existingLuckyNumbers) > 0 {
+			// Nếu tất cả các số thắng đã bị quay, chọn một số ngẫu nhiên từ các số thắng
+			idx := r.Intn(len(existingLuckyNumbers))
+			chosenNumber = existingLuckyNumbers[idx]
 		} else {
-			// Nếu không còn số chưa hiển thị, reset lại
-			// Tìm một số bất kỳ chưa được sử dụng
-			var availableNumbers []int
-			for i := 1; i <= 99; i++ {
-				if !usedNumbers[i] {
-					availableNumbers = append(availableNumbers, i)
-				}
-			}
-
-			if len(availableNumbers) > 0 {
-				idx := r.Intn(len(availableNumbers))
-				chosenNumber = availableNumbers[idx]
-			} else {
-				// Nếu đã hiển thị hết tất cả các số, chọn ngẫu nhiên
-				chosenNumber = r.Intn(99) + 1
-			}
+			// Nếu không có số thắng nào trong DB, chọn một số bất kỳ
+			idx := r.Intn(len(availableNumbers))
+			chosenNumber = availableNumbers[idx]
+			// Gán số này cho một người tham gia ngẫu nhiên
+			err = global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).
+				Where("attendance_id = ?", acId).
+				Update("lucky_number", chosenNumber).Error
 		}
-	} else { // Lần quay đầu tiên: ưu tiên số không thắng
-		// Tìm các số không có trong DB và chưa hiển thị
+	} else {
+		// Nếu không cần có người trúng, chọn một số không có trong existingLuckyNumbers
 		var nonWinningNumbers []int
-
-		// Số không thắng là các số từ 1-99 trừ đi các số trong DB và chưa hiển thị
-		existingMap := make(map[int]bool)
-		for _, num := range existingLuckyNumbers {
-			existingMap[num] = true
-		}
-
-		for i := 1; i <= 99; i++ {
-			if !existingMap[i] && !usedNumbers[i] {
-				nonWinningNumbers = append(nonWinningNumbers, i)
+		for _, num := range availableNumbers {
+			if !existingMap[num] {
+				nonWinningNumbers = append(nonWinningNumbers, num)
 			}
 		}
 
@@ -344,23 +286,14 @@ func (participantService *ParticipantService) GetLuckyParticipant(acId string) (
 			idx := r.Intn(len(nonWinningNumbers))
 			chosenNumber = nonWinningNumbers[idx]
 		} else {
-			// Nếu không còn số không thắng chưa hiển thị, tìm số bất kỳ chưa hiển thị
-			var availableNumbers []int
-			for i := 1; i <= 99; i++ {
-				if !usedNumbers[i] {
-					availableNumbers = append(availableNumbers, i)
-				}
-			}
-
-			if len(availableNumbers) > 0 {
-				idx := r.Intn(len(availableNumbers))
-				chosenNumber = availableNumbers[idx]
-			} else {
-				// Nếu đã hiển thị hết tất cả các số, reset và chọn ngẫu nhiên
-				chosenNumber = r.Intn(99) + 1
-			}
+			// Nếu không còn số không thắng, chọn một số bất kỳ
+			idx := r.Intn(len(availableNumbers))
+			chosenNumber = availableNumbers[idx]
 		}
 	}
+
+	// Lưu thông tin số may mắn đã chọn
+	luckyNumber = chosenNumber
 
 	// Kiểm tra xem số đã chọn có người thắng không
 	var checkIn checkins.AttendanceCheckIn
@@ -368,17 +301,13 @@ func (participantService *ParticipantService) GetLuckyParticipant(acId string) (
 		Order("created_at DESC").
 		First(&checkIn).Error
 
-	luckyNumber = chosenNumber
-
-	if checkInErr == nil && checkIn.ID > 0 {
-		// Tìm thấy người tham gia có số may mắn này
+	if checkInErr == nil && checkIn.ID > 0 && shouldHaveWinner {
+		// Tìm thấy người thắng
 		dbErr := global.GVA_DB.Where("id = ?", checkIn.PartpaticipantId).
 			First(&participant).Error
 
 		if dbErr == nil {
-			foundLuckyParticipant = true
-
-			// Lưu vào lịch sử
+			// Lưu vào lịch sử với người thắng
 			usedLuckyParticipant := checkins.UsedLuckyParticipant{
 				AttendanceId:  acId,
 				ParticipantId: &participant.ID,
@@ -386,10 +315,8 @@ func (participantService *ParticipantService) GetLuckyParticipant(acId string) (
 			}
 			global.GVA_DB.Create(&usedLuckyParticipant)
 		}
-	}
-
-	// Nếu không tìm thấy người thắng, lưu vào lịch sử không có người thắng
-	if !foundLuckyParticipant {
+	} else {
+		// Không có người thắng, lưu vào lịch sử không có người thắng
 		usedLuckyParticipant := checkins.UsedLuckyParticipant{
 			AttendanceId: acId,
 			LuckyNumber:  &chosenNumber,
