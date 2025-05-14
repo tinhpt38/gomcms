@@ -154,12 +154,19 @@ func (participantService *ParticipantService) GetParticipant(ID string) (partici
 func (participantService *ParticipantService) GetLuckyParticipant(acId string) (participant checkins.Participant, luckyNumber int, err error) {
 	// Lấy lịch sử các số may mắn đã quay
 	var luckyHistory []checkins.UsedLuckyParticipant
-	global.GVA_DB.Where("attendance_id = ?", acId).
+	global.GVA_DB.Model(&checkins.UsedLuckyParticipant{}).Where("attendance_id = ?", acId).
 		Order("created_at DESC").
 		Find(&luckyHistory)
 
 	// Đếm số lần quay không trúng liên tiếp gần nhất
 	consecutiveFailures := 0
+	// Kiểm tra xem lần gần nhất có người trúng không
+	hadPreviousWinner := false
+	if len(luckyHistory) > 0 && luckyHistory[0].ParticipantId != nil && *luckyHistory[0].ParticipantId != 0 {
+		hadPreviousWinner = true
+	}
+
+	// Đếm số lần quay không trúng liên tiếp gần nhất
 	for _, hist := range luckyHistory {
 		if hist.ParticipantId == nil || *hist.ParticipantId == 0 {
 			consecutiveFailures++
@@ -182,6 +189,10 @@ func (participantService *ParticipantService) GetLuckyParticipant(acId string) (
 	// Nếu đã có 3 lần quay không trúng liên tiếp, bắt buộc lần này phải có người trúng
 	if consecutiveFailures >= 3 {
 		shouldHaveWinner = true
+	} else if hadPreviousWinner {
+		// Nếu lần trước có người trúng, giảm tỷ lệ trúng thưởng lần này để tạo xen kẽ
+		var winProbability int64 = 5 // Chỉ 5% cơ hội trúng nếu lần trước đã trúng
+		shouldHaveWinner = (time.Now().UnixNano() % 100) < winProbability
 	} else {
 		// Tỷ lệ trúng thưởng ngẫu nhiên để tạo sự hấp dẫn
 		// Tỷ lệ trúng thưởng tăng theo số lần thất bại liên tiếp
@@ -190,9 +201,9 @@ func (participantService *ParticipantService) GetLuckyParticipant(acId string) (
 		case 0:
 			winProbability = 30 // 30% cơ hội trúng nếu lần trước đã trúng
 		case 1:
-			winProbability = 40 // 40% cơ hội trúng sau 1 lần thất bại
+			winProbability = 50 // Tăng lên 50% cơ hội trúng sau 1 lần thất bại
 		case 2:
-			winProbability = 70 // 70% cơ hội trúng sau 2 lần thất bại liên tiếp
+			winProbability = 80 // Tăng lên 80% cơ hội trúng sau 2 lần thất bại liên tiếp
 		default:
 			winProbability = 100 // 100% sẽ trúng sau 3 lần thất bại liên tiếp
 		}
@@ -297,13 +308,13 @@ func (participantService *ParticipantService) GetLuckyParticipant(acId string) (
 
 	// Kiểm tra xem số đã chọn có người thắng không
 	var checkIn checkins.AttendanceCheckIn
-	checkInErr := global.GVA_DB.Where("attendance_id = ? AND lucky_number = ?", acId, chosenNumber).
+	checkInErr := global.GVA_DB.Model(&checkins.AttendanceCheckIn{}).Where("attendance_id = ? AND lucky_number = ?", acId, chosenNumber).
 		Order("created_at DESC").
 		First(&checkIn).Error
 
 	if checkInErr == nil && checkIn.ID > 0 && shouldHaveWinner {
 		// Tìm thấy người thắng
-		dbErr := global.GVA_DB.Where("id = ?", checkIn.PartpaticipantId).
+		dbErr := global.GVA_DB.Model(&checkins.Participant{}).Where("id = ?", checkIn.PartpaticipantId).
 			First(&participant).Error
 
 		if dbErr == nil {
