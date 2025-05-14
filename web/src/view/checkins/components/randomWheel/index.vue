@@ -49,6 +49,11 @@
         <!-- Lịch sử quay số -->
         <div class="mt-8">
             <h3 class="text-xl font-bold mb-4">Lịch sử quay số</h3>
+            
+            <!-- Hiển thị thông báo cập nhật lịch sử -->
+            <div v-if="isSpinning" class="updating-history-message">
+                <span class="loading-icon">🔄</span> Đang quay số, lịch sử sẽ được cập nhật sau khi vòng quay dừng lại...
+            </div>
 
             <!-- Thêm ô tìm kiếm số -->
             <div class="search-container mb-4">
@@ -76,7 +81,8 @@
             </div>
 
             <el-table :data="paginatedHistory" style="width: 100%" border stripe v-loading="historyLoading"
-                :empty-text="historyLoading ? 'Đang tải...' : 'Không có dữ liệu lịch sử'">
+                :empty-text="historyLoading ? 'Đang tải...' : 'Vui lòng quay số để xem kết quả và lịch sử quay số!'"
+                :class="['history-table', { 'updated': historyJustUpdated }]">
                 <el-table-column prop="luckyNumber" label="Số may mắn" min-width="200" align="center" >
                     <template #default="scope">
                         <div class="lucky-number-container">
@@ -222,18 +228,8 @@ const luckyMember = ref({
 // Lucky number storage
 const luckyNumber = ref(null)
 
-// Lịch sử quay số
-const luckyHistory = ref([
-    // Dữ liệu mẫu - sẽ được ghi đè bởi dữ liệu từ API
-    {
-        "id": 62,
-        "luckyNumber": 13,
-        "participantId": null,
-        "email": "",
-        "fullName": "",
-        "createdAt": "2025-05-14T12:14:30.918+07:00"
-    }
-])
+// Lịch sử quay số - khởi tạo rỗng
+const luckyHistory = ref([])
 
 // Pagination variables
 const currentPage = ref(1)
@@ -309,11 +305,52 @@ const closeLuckyPopup = () => {
     showLuckyPopup.value = false;
 };
 
+// Store history update state
+const historyJustUpdated = ref(false);
+
 // Start animations when result is shown
 const startAnimations = () => {
+    // Hiển thị các hiệu ứng
     showAnimation.value = true;
     showConfetti.value = true;
     showLuckyPopup.value = true;
+
+    // Cập nhật lịch sử quay số sau khi wheel đã dừng
+    if (tempApiResult.value) {
+        // Lưu lịch sử quay số nếu có từ API
+        if (tempApiResult.value.luckyHistory && Array.isArray(tempApiResult.value.luckyHistory)) {
+            luckyHistory.value = tempApiResult.value.luckyHistory;
+            console.log('Đã cập nhật lịch sử quay số:', luckyHistory.value);
+        }
+
+        // Thêm kết quả mới vào lịch sử
+        const newResult = {
+            id: tempApiResult.value.id || Date.now(),
+            luckyNumber: tempApiResult.value.luckyNumber,
+            participantId: tempApiResult.value.participantId,
+            email: tempApiResult.value.email || '',
+            fullName: tempApiResult.value.fullName || '',
+            createdAt: new Date().toISOString()
+        };
+        
+        // Kiểm tra xem kết quả này đã tồn tại trong lịch sử chưa
+        const existingIndex = luckyHistory.value.findIndex(item => 
+            item.id === newResult.id || 
+            (item.luckyNumber === newResult.luckyNumber && 
+             new Date(item.createdAt).toDateString() === new Date(newResult.createdAt).toDateString())
+        );
+        
+        if (existingIndex === -1) {
+            luckyHistory.value.unshift(newResult);
+            console.log('Đã thêm kết quả mới vào lịch sử:', newResult);
+            
+            // Đánh dấu là lịch sử vừa được cập nhật để hiển thị animation
+            historyJustUpdated.value = true;
+            setTimeout(() => {
+                historyJustUpdated.value = false;
+            }, 2000);
+        }
+    }
 
     // Stop animations after a while
     setTimeout(() => {
@@ -404,11 +441,18 @@ const frame = () => {
         isSpinning.value = false;
         const finalSector = sectors.value[getIndex()];
 
-        // Không cần gọi API vì đã gọi ở bước click
+        // Đợi cho vòng quay dừng hoàn toàn rồi mới hiển thị kết quả
         hasResult.value = true;
 
-        // Nếu đã có kết quả từ API, hiển thị kết quả
+        // Nếu đã có kết quả từ API, hiển thị kết quả và cập nhật lịch sử
         if (luckyNumber.value) {
+            // Thêm dữ liệu vào lịch sử chỉ khi vòng quay dừng lại
+            if (luckyHistory.value.length > 0) {
+                // Đảm bảo kết quả mới nhất được hiển thị ở đầu tiên
+                currentPage.value = 1;
+            }
+            
+            // Bắt đầu hiệu ứng
             startAnimations();
         } else {
             ElMessage.error('Không tìm thấy kết quả số may mắn');
@@ -444,39 +488,34 @@ const initWheel = () => {
     engine();
 }
 
+// Store temporary API result
+const tempApiResult = ref(null);
+
 const onLuckyClick = () => {
     if (isSpinning.value) return;
 
     isSpinning.value = true;
     showLuckyPopup.value = false;
     hasResult.value = false;
+    
+    // Reset lucky number and member before making the API call
+    luckyNumber.value = null;
+    luckyMember.value = { email: null, fullName: null };
+    // Reset temporary result
+    tempApiResult.value = null;
 
-    // Gọi API để tìm số may mắn ngay khi ấn vào vòng quay
+    // Gọi API để tìm số may mắn khi ấn vào vòng quay
     searchInfo.value.attendanceId = props.acId;
     findLuckyParticipant(searchInfo.value).then(res => {
         // Lưu kết quả số may mắn và thông tin người chơi
         if (res.data && res.data.luckyNumber) {
+            // Lưu kết quả vào biến tạm, chưa cập nhật vào luckyHistory
             luckyNumber.value = res.data.luckyNumber;
             luckyMember.value = res.data.participant || {};
-
-            // Lưu lịch sử quay số nếu có
-            if (res.data.luckyHistory && Array.isArray(res.data.luckyHistory)) {
-                luckyHistory.value = res.data.luckyHistory;
-                console.log('Lịch sử quay số:', luckyHistory.value);
-            }
-
-            // Add the new result to the history
-            luckyHistory.value.unshift({
-                id: res.data.id || Date.now(),
-                luckyNumber: res.data.luckyNumber,
-                participantId: res.data.participantId,
-                email: res.data.email || '',
-                fullName: res.data.fullName || '',
-                createdAt: new Date().toISOString()
-            });
-
-            // Reset to first page to show the latest result
-            currentPage.value = 1;
+            tempApiResult.value = res.data;
+            
+            // Không cập nhật history ở đây, mà sẽ cập nhật sau khi vòng quay dừng lại
+            console.log('Đã nhận kết quả từ API, đợi vòng quay dừng lại để hiển thị');
         }
     }).catch(err => {
         ElMessage.error('Có lỗi xảy ra khi tìm người trúng');
@@ -499,43 +538,11 @@ const historyLoading = ref(false)
 const fetchLuckyHistory = async () => {
     historyLoading.value = true
     try {
-        // Replace this with your actual API call
-        // Example: const response = await yourApiService.getLuckyHistory()
-        // luckyHistory.value = response.data
-
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800))
-
-        // For now, we'll use the sample data
-        // In a real implementation, you'd fetch this from your API
-        luckyHistory.value = [
-            {
-                "id": 62,
-                "luckyNumber": 13,
-                "participantId": null,
-                "email": "user1@example.com",
-                "fullName": "User One",
-                "createdAt": "2023-05-14T12:14:30.918+07:00"
-            },
-            {
-                "id": 61,
-                "luckyNumber": 7,
-                "participantId": null,
-                "email": "user2@example.com",
-                "fullName": "User Two",
-                "createdAt": "2023-05-14T11:45:20.112+07:00"
-            },
-            {
-                "id": 60,
-                "luckyNumber": 21,
-                "participantId": null,
-                "email": "user3@example.com",
-                "fullName": "User Three",
-                "createdAt": "2023-05-14T10:30:15.654+07:00"
-            },
-            // Add more sample entries to demonstrate pagination
-            // ... more sample data entries ...
-        ]
+        // Note: In a real implementation, you'd fetch history from a dedicated API endpoint
+        // For now, we'll just set loading to false without adding any sample data
+        await new Promise(resolve => setTimeout(resolve, 300))
+        
+        // Not adding any sample data anymore - history will be populated only after spinning
     } catch (error) {
         console.error('Failed to fetch lucky history:', error)
     } finally {
@@ -570,24 +577,7 @@ onMounted(() => {
     // Initialize the wheel
     initWheel();
 
-    // Load previous lucky number if exists
-    findLuckyParticipant({ attendanceId: props.acId }).then(res => {
-        if (res.data && res.data.luckyNumber) {
-            luckyNumber.value = res.data.luckyNumber;
-            luckyMember.value = res.data.participant || {};
-            hasResult.value = true;
-
-            // Lưu lịch sử quay số nếu có
-            if (res.data.luckyHistory && Array.isArray(res.data.luckyHistory)) {
-                luckyHistory.value = res.data.luckyHistory;
-                console.log('Lịch sử quay số khi mount:', luckyHistory.value);
-            }
-        }
-    }).catch(err => {
-        console.error("Không thể tải thông tin số may mắn", err);
-    });
-
-    // Fetch history data
+    // Fetch history data only (without calling the findLuckyParticipant API)
     fetchLuckyHistory();
 })
 
@@ -1284,5 +1274,44 @@ canvas#wheel {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Thêm style cho thông báo đang cập nhật lịch sử */
+.updating-history-message {
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 15px;
+    background: #fff9e6;
+    border-radius: 8px;
+    border-left: 4px solid #ffb700;
+    color: #d48806;
+    animation: fadeIn 0.5s ease-in;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-icon {
+    animation: spin 1.5s linear infinite;
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Thêm style để highlight bảng lịch sử khi có cập nhật mới */
+.history-table.updated {
+    animation: highlight-update 1.5s ease;
+}
+
+@keyframes highlight-update {
+    0% { box-shadow: 0 0 0px rgba(255, 183, 0, 0); }
+    50% { box-shadow: 0 0 20px rgba(255, 183, 0, 0.8); }
+    100% { box-shadow: 0 0 0px rgba(255, 183, 0, 0); }
 }
 </style>

@@ -263,7 +263,7 @@
           <CheckinLogs :ac-id="currentId" />
         </div>
       </el-tab-pane>
-      <el-tab-pane name="random" label="Ngẫu nhiên">
+      <el-tab-pane name="random" label="Tìm số may mắn">
         <div class="table-container">
           <RandomWheel :ac-id="currentId" />
         </div>
