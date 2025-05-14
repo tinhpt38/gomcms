@@ -209,20 +209,15 @@ const frame = () => {
         isSpinning.value = false;
         const finalSector = sectors.value[getIndex()];
         
-        // Set the lucky number from the sector
-        luckyNumber.value = finalSector.number;
+        // Không cần gọi API vì đã gọi ở bước click
         hasResult.value = true;
         
-        // Get participant info after the wheel has stopped
-        searchInfo.value.attendanceId = props.acId;
-        findLuckyParticipant(searchInfo.value).then(res => {
-            luckyMember.value = res.data.participant || {};
-            // Show results
+        // Nếu đã có kết quả từ API, hiển thị kết quả
+        if (luckyNumber.value) {
             startAnimations();
-        }).catch(err => {
-            ElMessage.error('Có lỗi xảy ra khi tìm người trúng');
-            console.error(err);
-        });
+        } else {
+            ElMessage.error('Không tìm thấy kết quả số may mắn');
+        }
         
         return;
     }
@@ -260,6 +255,22 @@ const onLuckyClick = () => {
     isSpinning.value = true;
     showLuckyPopup.value = false;
     hasResult.value = false;
+    
+    // Gọi API để tìm số may mắn ngay khi ấn vào vòng quay
+    searchInfo.value.attendanceId = props.acId;
+    findLuckyParticipant(searchInfo.value).then(res => {
+        // Lưu kết quả số may mắn và thông tin người chơi
+        if (res.data && res.data.luckyNumber) {
+            luckyNumber.value = res.data.luckyNumber;
+            luckyMember.value = res.data.participant || {};
+        }
+    }).catch(err => {
+        ElMessage.error('Có lỗi xảy ra khi tìm người trúng');
+        console.error(err);
+        // Dừng vòng quay nếu có lỗi
+        isSpinning.value = false;
+        return;
+    });
     
     // Calculate random spin - increasing velocity for better spin effect
     const minVelocity = 0.5;
