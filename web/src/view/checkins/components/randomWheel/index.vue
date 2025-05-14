@@ -92,7 +92,7 @@ const rad = canvasWidth / 2
 const PI = Math.PI
 const TAU = 2 * PI
 let arc = TAU / 12 // Will be updated based on sectors.length
-const friction = 0.985
+const friction = 0.992 // Increased from 0.985 for smoother deceleration
 let angVel = 0 // Angular velocity
 let ang = 0 // Angle in radians
 let requestId = null
@@ -130,16 +130,36 @@ const startAnimations = () => {
     }, 6000);
 };
 
-// Initialize wheel sectors with numbers
+// Initialize wheel sectors with colors
 const initSectors = () => {
-    const total = 12; // 12 sectors for numbers 1-12
+    const total = 12; // 12 sectors for the wheel
     sectors.value = [];
+    
+    // Array of vibrant colors for the wheel
+    const colors = [
+        '#FF5252', // Red
+        '#FF4081', // Pink
+        '#E040FB', // Purple
+        '#7C4DFF', // Deep Purple
+        '#536DFE', // Indigo
+        '#448AFF', // Blue
+        '#40C4FF', // Light Blue
+        '#18FFFF', // Cyan
+        '#64FFDA', // Teal
+        '#69F0AE', // Green
+        '#B2FF59', // Light Green
+        '#EEFF41', // Lime
+        '#FFFF00', // Yellow
+        '#FFD740', // Amber
+        '#FFAB40', // Orange
+        '#FF6E40'  // Deep Orange
+    ];
     
     for (let i = 1; i <= total; i++) {
         sectors.value.push({
-            number: i,
-            color: i % 2 === 0 ? '#ff9800' : '#ffeb3b',
-            textColor: '#333333'
+            number: i, // Still keep the number for reference
+            color: colors[(i - 1) % colors.length], // Cycle through colors
+            textColor: '#FFFFFF' // Not used anymore but kept for compatibility
         });
     }
     
@@ -158,14 +178,15 @@ const drawSector = (sector, i) => {
     ctx.value.arc(rad, rad, rad, angle, angle + arc);
     ctx.value.lineTo(rad, rad);
     ctx.value.fill();
-
-    // Draw sector text/number
-    ctx.value.translate(rad, rad);
-    ctx.value.rotate(angle + arc / 2);
-    ctx.value.textAlign = "center";
-    ctx.value.fillStyle = sector.textColor;
-    ctx.value.font = "bold 30px 'Lato', sans-serif";
-    ctx.value.fillText(sector.number.toString(), rad - 60, 10);
+    
+    // Add a border between sectors
+    ctx.value.beginPath();
+    ctx.value.strokeStyle = '#FFFFFF';
+    ctx.value.lineWidth = 2;
+    ctx.value.moveTo(rad, rad);
+    ctx.value.arc(rad, rad, rad, angle, angle + arc);
+    ctx.value.lineTo(rad, rad);
+    ctx.value.stroke();
 
     ctx.value.restore();
 }
@@ -176,7 +197,9 @@ const getIndex = () => Math.floor(sectors.value.length - (ang / TAU) * sectors.v
 // Rotate the wheel
 const rotate = () => {
     if (!ctx.value || !wheelCanvas.value) return;
+    // Sử dụng transform với hardware acceleration 
     wheelCanvas.value.style.transform = `rotate(${ang - PI / 2}rad)`;
+    wheelCanvas.value.style.backfaceVisibility = 'hidden'; // Cải thiện hiệu suất
 }
 
 // Animation frame function
@@ -205,7 +228,7 @@ const frame = () => {
     }
 
     angVel *= friction; // Decrease velocity by friction
-    if (angVel < 0.002) angVel = 0; // Stop when very slow
+    if (angVel < 0.001) angVel = 0; // Stop when very slow (giảm ngưỡng để vòng quay nhẹ nhàng hơn)
     ang += angVel; // Update angle
     ang %= TAU; // Normalize angle to 0-2π
     rotate();
@@ -239,8 +262,8 @@ const onLuckyClick = () => {
     hasResult.value = false;
     
     // Calculate random spin - increasing velocity for better spin effect
-    const minVelocity = 0.3;
-    const maxVelocity = 0.7;
+    const minVelocity = 0.5;
+    const maxVelocity = 0.9;
     angVel = minVelocity + Math.random() * (maxVelocity - minVelocity);
 }
 
@@ -284,11 +307,12 @@ onUnmounted(() => {
     margin: 0 auto;
     border-radius: 50%;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: center center;
 }
 
 .wheel-container:hover {
-    transform: scale(1.02);
+    transform: scale(1.03);
 }
 
 .wheel-container.cursor-not-allowed {
@@ -300,7 +324,10 @@ canvas#wheel {
     z-index: 1;
     border-radius: 50%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-    transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1);
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
 }
 
 .wheel-pointer {
