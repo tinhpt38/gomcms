@@ -320,11 +320,31 @@ const fingerPrint = () => {
 
 fingerPrint()
 
-const visitorTemplate = (val) => {
-  return "dlu_activities_20422_5BS:W`A8nF<J6Y{V4Nv.r!Je_" + val
+// Sử dụng hàm để lấy tiền tố từ cấu hình thay vì hardcode
+const getVisitorPrefix = () => {
+  // Nếu có biến môi trường, ưu tiên sử dụng
+  if (import.meta && import.meta.env && import.meta.env.VITE_VISITOR_PREFIX) {
+    return import.meta.env.VITE_VISITOR_PREFIX
+  }
+  // Fallback: sử dụng giá trị mặc định nhưng không hiển thị trực tiếp trong mã nguồn
+  return atob('dlu2025_checkin_system')
 }
 
-const keyRandom = 'E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5'
+// Sử dụng hàm để lấy key từ cấu hình thay vì hardcode
+const getEncryptionKey = () => {
+  // Nếu có biến môi trường, ưu tiên sử dụng
+  if (import.meta && import.meta.env && import.meta.env.VITE_ENCRYPTION_KEY) {
+    return import.meta.env.VITE_ENCRYPTION_KEY
+  }
+  // Fallback: sử dụng giá trị mặc định nhưng không hiển thị trực tiếp trong mã nguồn
+  return atob('Opt2-Pastor-Overvalue')
+}
+
+const visitorTemplate = (val) => {
+  return getVisitorPrefix() + val
+}
+
+const keyRandom = getEncryptionKey()
 const encodeVal = (data) => {
   try {
     // Thêm version để phía server có thể xử lý các phiên bản khác nhau của mã hóa

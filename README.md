@@ -1,4 +1,3 @@
-
 <div align=center>
 <img src="http://qmplusimg.henrongyi.top/gvalogo.jpg" width="300" height="300" />
 </div>
@@ -133,7 +132,7 @@ swag init
 
 #### 2.4.1 开发
 
-使用`VSCode`打开根目录下的工作区文件`gin-vue-admin.code-workspace`，在边栏可以看到三个虚拟目录：`backend`、`frontend`、`root`。
+使用`VSCode`打开根目录下的工作区文件`gin-vue-admin.code-workspace`，在边栏可以看到三个虚拟目录：`backend`、`frontend`、`root`.
 
 #### 2.4.2 运行/调试
 
@@ -354,3 +353,27 @@ fmt.Println(decodeBytes, err)
 ## 10. 商用注意事项
 
 如果您将此项目用于商业用途，请遵守Apache2.0协议并保留作者技术支持声明。
+
+# Cấu hình bảo mật
+
+Hệ thống sử dụng các biến môi trường để lưu trữ các khóa bảo mật. Bạn cần thiết lập các biến sau:
+
+## Frontend (web)
+
+Tạo tệp `.env` hoặc `.env.development` với các biến sau:
+
+```
+VITE_VISITOR_PREFIX=your_secure_visitor_prefix 
+VITE_ENCRYPTION_KEY=your_secure_encryption_key
+```
+
+## Backend (server)
+
+Tạo tệp `.env` với các biến sau:
+
+```
+ENCRYPTION_KEY=your_secure_encryption_key
+VISITOR_PREFIX=your_secure_visitor_prefix
+```
+
+Lưu ý: `ENCRYPTION_KEY` và `VISITOR_PREFIX` ở frontend và backend phải giống nhau để hệ thống hoạt động chính xác.

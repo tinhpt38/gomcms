@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -142,7 +143,8 @@ func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Conte
 		return
 	}
 
-	endodePrefix := "E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5"
+	// Lấy encryption key từ biến môi trường hoặc config
+	endodePrefix := getEncryptionKey()
 	if !strings.HasPrefix(checkinReqEncode.Data, endodePrefix) {
 		response.FailWithMessage("Dữ liệu gửi lên của bạn không toàn vẹn", c)
 		return
@@ -234,7 +236,7 @@ func (attendanceCheckInApi *AttendanceCheckInApi) CheckinAttendance(c *gin.Conte
 
 	ip := c.ClientIP()
 	userAgent := c.GetHeader("User-Agent")
-	prefix := "dlu_activities_20422_5BS:W`A8nF<J6Y{V4Nv.r!Je_"
+	prefix := getVisitorPrefix()
 	if !strings.HasPrefix(checkinReq.VisitorId, prefix) {
 		response.FailWithMessage("Từ chối điểm danh. Bạn đang điểm danh từ một thiết bị không được phép", c)
 		return
@@ -285,6 +287,30 @@ func decodeUnicodeBase64(s string) (string, error) {
 	}
 
 	return result, nil
+}
+
+// Hàm lấy encryption key từ biến môi trường hoặc cấu hình
+func getEncryptionKey() string {
+	// Thử đọc từ biến môi trường
+	encKey := os.Getenv("ENCRYPTION_KEY")
+	if encKey != "" {
+		return encKey
+	}
+
+	// Fallback: sử dụng mặc định nếu không có trong biến môi trường
+	return "Opt2-Pastor-Overvalue"
+}
+
+// Hàm lấy visitor prefix từ biến môi trường hoặc cấu hình
+func getVisitorPrefix() string {
+	// Thử đọc từ biến môi trường
+	prefix := os.Getenv("VISITOR_PREFIX")
+	if prefix != "" {
+		return prefix
+	}
+
+	// Fallback: sử dụng mặc định nếu không có trong biến môi trường
+	return "dlu2025_checkin_system"
 }
 
 // Hàm chuyển đổi 2 ký tự hex thành byte
