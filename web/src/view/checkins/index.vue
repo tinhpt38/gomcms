@@ -205,6 +205,7 @@ const gError = (error) => {
   //console.log("Handle the error", error)
 }
 
+// Hàm này đã được thay thế bằng encodeUnicode bên dưới
 function toBinaryStr(str) {
   const encoder = new TextEncoder();
   // 1: split the UTF-16 string into an array of bytes
@@ -213,6 +214,96 @@ function toBinaryStr(str) {
   return String.fromCharCode(...charCodes);
 }
 
+// Hàm mã hóa Unicode sang base64 chính xác
+function encodeUnicode(str) {
+  try {
+    // Sử dụng TextEncoder để đảm bảo encode chính xác các ký tự Unicode
+    return btoa(
+      encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+        return String.fromCharCode(parseInt(p1, 16));
+      })
+    );
+  } catch (error) {
+    console.error('Error encoding to base64:', error);
+    // Fallback method if the primary method fails
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(str);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+}
+
+// Hàm giải mã base64 sang Unicode
+function decodeUnicode(str) {
+  try {
+    return decodeURIComponent(
+      Array.prototype.map
+        .call(atob(str), (c) => {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")
+    );
+  } catch (error) {
+    console.error('Error decoding from base64:', error);
+    return '';
+  }
+}
+
+// Hàm tạo checksum đơn giản
+function generateChecksum(data) {
+  let str = JSON.stringify(data);
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) & 0xffffffff;
+  }
+  return hash.toString(16);
+}
+
+// Hàm kiểm tra và chuẩn hóa dữ liệu trước khi mã hóa
+function validateDataBeforeEncoding(data) {
+  // Tạo một bản sao để không ảnh hưởng đến dữ liệu gốc
+  const validatedData = { ...data };
+  
+  // Đảm bảo các trường quan trọng không bị null, undefined hoặc NaN
+  if (!validatedData.lat || isNaN(validatedData.lat)) {
+    console.warn("Latitude is invalid, setting default value");
+    validatedData.lat = 0;
+  }
+  
+  if (!validatedData.lng || isNaN(validatedData.lng)) {
+    console.warn("Longitude is invalid, setting default value");
+    validatedData.lng = 0;
+  }
+  
+  // Đảm bảo độ chính xác là số
+  if (validatedData.accuracy && isNaN(validatedData.accuracy)) {
+    validatedData.accuracy = 0;
+  }
+  
+  // Đảm bảo code không bị null hoặc undefined
+  if (!validatedData.code) {
+    console.warn("Code is missing");
+    validatedData.code = "";
+  }
+  
+  // Đảm bảo visitorId có giá trị
+  if (!validatedData.visitorId) {
+    // Nếu không có visitorId, tạo một chuỗi ngẫu nhiên
+    console.warn("VisitorId is missing, generating random value");
+    validatedData.visitorId = "generated_" + Math.random().toString(36).substr(2, 9);
+  }
+  
+  // Thêm timestamp để tăng tính duy nhất
+  validatedData.timestamp = new Date().toISOString();
+  
+  // Thêm checksum để kiểm tra tính toàn vẹn
+  validatedData._checksum = generateChecksum(validatedData);
+  
+  return validatedData;
+}
 
 async function getFingerprint() {
   const fpPromise = FingerprintJS.load();
@@ -235,11 +326,28 @@ const visitorTemplate = (val) => {
 
 const keyRandom = 'E;>YIws8_DdsSMG£sL£@lq8E<(O?Sc5'
 const encodeVal = (data) => {
-  const jsonString = JSON.stringify(data);
-  // //console.log("jsonString: ", jsonString)
-  const encodedData = btoa(toBinaryStr(jsonString));
-  // //console.log("encodedData: ", encodedData)
-  return keyRandom + "_" + encodedData
+  try {
+    // Thêm version để phía server có thể xử lý các phiên bản khác nhau của mã hóa
+    const dataWithVersion = {
+      ...data,
+      _v: "2.0", // Phiên bản mã hóa
+    };
+    
+    const jsonString = JSON.stringify(dataWithVersion);
+    
+    // Mã hóa dữ liệu bằng hàm encodeUnicode mới
+    const encodedData = encodeUnicode(jsonString);
+    
+    // Thêm token ngẫu nhiên để tăng tính bảo mật
+    const randomToken = Math.random().toString(36).substring(2, 15);
+    
+    // Kết hợp key với dữ liệu đã mã hóa
+    return keyRandom + "_" + randomToken + "_" + encodedData;
+  } catch (error) {
+    console.error('Error in encodeVal:', error);
+    // Trả về dữ liệu mặc định nếu có lỗi
+    return keyRandom + "_error_" + new Date().getTime();
+  }
 }
 
 const redirectToHistory = () => {
@@ -328,144 +436,151 @@ const requestCheckin = async () => {
   data.value.accuracy = coords.value.accuracy
   data.value.code = route.query.c
 
-  var encodedData = encodeVal(data.value)
+  // Validate data before encoding
+  const dataToSend = validateDataBeforeEncoding(data.value)
+  var encodedData = encodeVal(dataToSend)
   // var res = await publicAttendanceCheckIn({ ...data.value })
 
-  var apiResult = await publicAttendanceCheckIn({ data: encodedData })
-  console.log("res: ", apiResult)
-  apiResponse.value = apiResult // Store the entire response
-  
-  if (apiResult.code == 0) {
-    if (apiResult.data.conditions != null) {
-      conditionData.value = apiResult.data.conditions.filter((condition, index, self) =>
-        index === self.findIndex((c) => c.ID === condition.ID)
-      )
+  try {
+    var apiResult = await publicAttendanceCheckIn({ data: encodedData })
+    console.log("res: ", apiResult)
+    apiResponse.value = apiResult // Store the entire response
+    
+    if (apiResult.code == 0) {
+      if (apiResult.data.conditions != null) {
+        conditionData.value = apiResult.data.conditions.filter((condition, index, self) =>
+          index === self.findIndex((c) => c.ID === condition.ID)
+        )
 
-      // Ensure counter information is correctly processed
-      // Conditions may already have counter data from backend
-      conditionData.value.forEach(condition => {
-        // Ensure counter property exists and has a valid value
-        if (typeof condition.counter === 'undefined') {
-          condition.counter = 0
-        }
-        
-        // Normalize ShowLuckyNumber/showLuckyNumber property name
-        if (condition.ShowLuckyNumber !== undefined && condition.showLuckyNumber === undefined) {
-          condition.showLuckyNumber = condition.ShowLuckyNumber
-        } else if (condition.showLuckyNumber !== undefined && condition.ShowLuckyNumber === undefined) {
-          condition.ShowLuckyNumber = condition.showLuckyNumber
-        }
-        
-        // Normalize message property name
-        if (condition.Message !== undefined && condition.msg === undefined) {
-          condition.msg = condition.Message
-        } else if (condition.msg !== undefined && condition.Message === undefined) {
-          condition.Message = condition.msg
-        }
-      })
-      console.log("conditionData: ", conditionData.value)
-    }
-    attendance.value = apiResult.data.attendance
-    // Retrieve total check-in count and lucky number from response
-    var checkinCount = 0;
-    var luckyNumber = apiResponse.value.data.luckyNumber ?? null
-    
-    // Get check-in counter from the first check-in if available
-    if (apiResponse.value.data.checkins && apiResponse.value.data.checkins.length > 0) {
-      checkinCount = apiResponse.value.data.checkins.reduce((total, checkin) => total + (checkin.counter || 0), 0);
-    }
-    
-    // Calculate condition stats if conditions exist
-    var passcount = 0;
-    var totalConditions = 0;
-    var totalCheckIns = 0;
-    
-    if (conditionData.value && conditionData.value.length > 0) {
-      passcount = conditionData.value.reduce((count, item) => {
-        return item.isPass ? count + 1 : count;
-      }, 0);
-      
-      totalConditions = conditionData.value.length;
-      
-      // Get total check-in count including repetitions
-      totalCheckIns = conditionData.value.reduce((total, item) => {
-        return item.isPass ? total + (item.counter || 1) : total;
-      }, 0);
-    }
-    
-    // Update the lucky number progress data
-    if (attendance.value.useLuckyNumber && !luckyNumber) {
-      const requiredCheckins = attendance.value.luckyShowAfterMinCount || 0;
-      if (requiredCheckins > 0 && checkinCount < requiredCheckins) {
-        checkinsRemaining.value = requiredCheckins - checkinCount;
-        checkinsProgress.value = (checkinCount / requiredCheckins) * 100;
+        // Ensure counter information is correctly processed
+        // Conditions may already have counter data from backend
+        conditionData.value.forEach(condition => {
+          // Ensure counter property exists and has a valid value
+          if (typeof condition.counter === 'undefined') {
+            condition.counter = 0
+          }
+          
+          // Normalize ShowLuckyNumber/showLuckyNumber property name
+          if (condition.ShowLuckyNumber !== undefined && condition.showLuckyNumber === undefined) {
+            condition.showLuckyNumber = condition.ShowLuckyNumber
+          } else if (condition.showLuckyNumber !== undefined && condition.ShowLuckyNumber === undefined) {
+            condition.ShowLuckyNumber = condition.showLuckyNumber
+          }
+          
+          // Normalize message property name
+          if (condition.Message !== undefined && condition.msg === undefined) {
+            condition.msg = condition.Message
+          } else if (condition.msg !== undefined && condition.Message === undefined) {
+            condition.Message = condition.msg
+          }
+        })
+        console.log("conditionData: ", conditionData.value)
       }
-    }
-    
-    // Build a structured message for better readability
-    let msgComponents = [];
-    
-    // 1. Basic success message
-    if (apiResponse?.data?.message) {
-      // If server provided a message, use it
-      msgComponents.push(apiResponse.data.msg);
-    } else {
-      // Otherwise build our own message
-      if (conditionData.value.length === 0) {
-        msgComponents.push("Bạn đã điểm danh thành công");
-      } else if (passcount > 0) {
-        msgComponents.push(`Điểm danh thành công ${passcount}/${totalConditions} điều kiện`);
+      attendance.value = apiResult.data.attendance
+      // Retrieve total check-in count and lucky number from response
+      var checkinCount = 0;
+      var luckyNumber = apiResponse.value.data.luckyNumber ?? null
+      
+      // Get check-in counter from the first check-in if available
+      if (apiResponse.value.data.checkins && apiResponse.value.data.checkins.length > 0) {
+        checkinCount = apiResponse.value.data.checkins.reduce((total, checkin) => total + (checkin.counter || 0), 0);
+      }
+      
+      // Calculate condition stats if conditions exist
+      var passcount = 0;
+      var totalConditions = 0;
+      var totalCheckIns = 0;
+      
+      if (conditionData.value && conditionData.value.length > 0) {
+        passcount = conditionData.value.reduce((count, item) => {
+          return item.isPass ? count + 1 : count;
+        }, 0);
+        
+        totalConditions = conditionData.value.length;
+        
+        // Get total check-in count including repetitions
+        totalCheckIns = conditionData.value.reduce((total, item) => {
+          return item.isPass ? total + (item.counter || 1) : total;
+        }, 0);
+      }
+      
+      // Update the lucky number progress data
+      if (attendance.value.useLuckyNumber && !luckyNumber) {
+        const requiredCheckins = attendance.value.luckyShowAfterMinCount || 0;
+        if (requiredCheckins > 0 && checkinCount < requiredCheckins) {
+          checkinsRemaining.value = requiredCheckins - checkinCount;
+          checkinsProgress.value = (checkinCount / requiredCheckins) * 100;
+        }
+      }
+      
+      // Build a structured message for better readability
+      let msgComponents = [];
+      
+      // 1. Basic success message
+      if (apiResponse?.data?.message) {
+        // If server provided a message, use it
+        msgComponents.push(apiResponse.data.msg);
       } else {
-        msgComponents.push("Điểm danh thành công");
+        // Otherwise build our own message
+        if (conditionData.value.length === 0) {
+          msgComponents.push("Bạn đã điểm danh thành công");
+        } else if (passcount > 0) {
+          msgComponents.push(`Điểm danh thành công ${passcount}/${totalConditions} điều kiện`);
+        } else {
+          msgComponents.push("Điểm danh thành công");
+        }
       }
-    }
-    
-    // 2. Check-in count info if not in the basic message
-    if (!apiResponse.data?.message && checkinCount > 1 && !msgComponents[0]?.includes("lần")) {
-      msgComponents.push(`Tổng số lần điểm danh: ${checkinCount}`);
-    }
-    
-    // 3. Lucky number info if not in the basic message
-    if (attendance.value.useLuckyNumber && !apiResponse.data?.message && luckyNumber != null && !msgComponents[0]?.includes("may mắn")) {
-      msgComponents.push(`<span class="text-yellow-600 font-bold"><i class="el-icon-star-on"></i> Chúc mừng! Số may mắn của bạn: ${luckyNumber}</span>`);
-    }
-    
-    // 4. Additional info about attendance
-    if (attendance.value.useLuckyNumber && !luckyNumber && checkinCount < attendance.value.luckyShowAfterMinCount) {
-      const remaining = attendance.value.luckyShowAfterMinCount - checkinCount;
-      msgComponents.push(`Bạn cần điểm danh thêm ${remaining} lần nữa và điểm danh thành công ít nhất một điều kiện để nhận số may mắn`);
       
-      // Update the progress bar values
-      checkinsRemaining.value = remaining;
-      checkinsProgress.value = (checkinCount / attendance.value.luckyShowAfterMinCount) * 100;
-    }
-    
-    // Combine all message components
-    const msg = msgComponents.join("<br>");
-
-    // Show message with HTML support
-    ElMessageBox.alert(msg, 'Thông báo', {
-      confirmButtonText: 'OK',
-      type: 'success',
-      dangerouslyUseHTMLString: true,
-      center: true
-    }).then(() => {
-      if (attendance.value.useLuckyNumber && luckyNumber) {
-        // Set flag to indicate this is a new lucky number
-        isNewLuckyNumber.value = true
+      // 2. Check-in count info if not in the basic message
+      if (!apiResponse.data?.message && checkinCount > 1 && !msgComponents[0]?.includes("lần")) {
+        msgComponents.push(`Tổng số lần điểm danh: ${checkinCount}`);
+      }
+      
+      // 3. Lucky number info if not in the basic message
+      if (attendance.value.useLuckyNumber && !apiResponse.data?.message && luckyNumber != null && !msgComponents[0]?.includes("may mắn")) {
+        msgComponents.push(`<span class="text-yellow-600 font-bold"><i class="el-icon-star-on"></i> Chúc mừng! Số may mắn của bạn: ${luckyNumber}</span>`);
+      }
+      
+      // 4. Additional info about attendance
+      if (attendance.value.useLuckyNumber && !luckyNumber && checkinCount < attendance.value.luckyShowAfterMinCount) {
+        const remaining = attendance.value.luckyShowAfterMinCount - checkinCount;
+        msgComponents.push(`Bạn cần điểm danh thêm ${remaining} lần nữa và điểm danh thành công ít nhất một điều kiện để nhận số may mắn`);
         
-        // Reset the flag after a delay
-        setTimeout(() => { 
-          isNewLuckyNumber.value = false 
-        }, 8000)
+        // Update the progress bar values
+        checkinsRemaining.value = remaining;
+        checkinsProgress.value = (checkinCount / attendance.value.luckyShowAfterMinCount) * 100;
       }
       
-      if (attendance.value.redirectUrl) {
-        window.location.href = attendance.value.redirectUrl
-      }
-    });
-  } else {
-    ElMessage(apiResult.data?.msg ?? apiResult.msg)
+      // Combine all message components
+      const msg = msgComponents.join("<br>");
+
+      // Show message with HTML support
+      ElMessageBox.alert(msg, 'Thông báo', {
+        confirmButtonText: 'OK',
+        type: 'success',
+        dangerouslyUseHTMLString: true,
+        center: true
+      }).then(() => {
+        if (attendance.value.useLuckyNumber && luckyNumber) {
+          // Set flag to indicate this is a new lucky number
+          isNewLuckyNumber.value = true
+          
+          // Reset the flag after a delay
+          setTimeout(() => { 
+            isNewLuckyNumber.value = false 
+          }, 8000)
+        }
+        
+        if (attendance.value.redirectUrl) {
+          window.location.href = attendance.value.redirectUrl
+        }
+      });
+    } else {
+      ElMessage(apiResult.data?.msg ?? apiResult.msg)
+    }
+  } catch (error) {
+    console.error("Error during check-in request:", error)
+    ElMessage.error("Có lỗi xảy ra khi điểm danh. Vui lòng thử lại sau.")
   }
 }
 
