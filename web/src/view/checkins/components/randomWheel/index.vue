@@ -51,9 +51,9 @@
             <h3 class="text-xl font-bold mb-4">Lịch sử quay số</h3>
 
             <!-- Hiển thị thông báo cập nhật lịch sử -->
-            <div v-if="isSpinning" class="updating-history-message">
-                <!-- <span class="loading-icon">🔄</span> Đang quay số, lịch sử sẽ được cập nhật sau khi vòng quay dừng lại... -->
-            </div>
+            <!-- <div v-if="isSpinning" class="updating-history-message">
+                <span class="loading-icon">🔄</span> Đang quay số, lịch sử sẽ được cập nhật sau khi vòng quay dừng lại...
+            </div> -->
 
             <!-- Thêm ô tìm kiếm số -->
             <div class="search-container mb-4">
