@@ -122,7 +122,9 @@ func (conditionApi *ConditionApi) FindCondition(c *gin.Context) {
 		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
-	response.OkWithData(recondition, c)
+	// Convert to frontend-friendly format
+	conditionWithCounter := checkins.NewConditionWithCounter(recondition, 0)
+	response.OkWithData(conditionWithCounter.ToFrontendMap(), c)
 }
 
 // GetConditionList 分页获取Điều kiện để checkins列表
@@ -147,8 +149,16 @@ func (conditionApi *ConditionApi) GetConditionList(c *gin.Context) {
 		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
 	}
+
+	// Convert conditions to frontend-friendly format
+	var formattedList []map[string]interface{}
+	for _, condition := range list {
+		conditionWithCounter := checkins.NewConditionWithCounter(condition, 0)
+		formattedList = append(formattedList, conditionWithCounter.ToFrontendMap())
+	}
+
 	response.OkWithDetailed(response.PageResult{
-		List:     list,
+		List:     formattedList,
 		Total:    total,
 		Page:     pageInfo.Page,
 		PageSize: pageInfo.PageSize,

@@ -57,7 +57,11 @@ func (conditionService *ConditionService) UpdateCondition(condition checkins.Con
 // GetCondition 根据ID获取Điều kiện để checkins记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (conditionService *ConditionService) GetCondition(ID string) (condition checkins.Condition, err error) {
-	err = global.GVA_DB.Where("id = ?", ID).Preload(clause.Associations).Preload("Area.Area").First(&condition).Error
+	err = global.GVA_DB.Where("id = ?", ID).
+		Preload(clause.Associations).
+		Preload("Group").
+		Preload("Area.Area").
+		First(&condition).Error
 	return
 }
 
@@ -94,8 +98,10 @@ func (conditionService *ConditionService) GetConditionOfPartparticipant(aId uint
 	newdb := global.GVA_DB.Model(&checkins.AGPCondition{})
 	err = newdb.Joins("LEFT JOIN conditions con ON agp_conditions.condition_id = con.id").
 		Where("agp_conditions.attendance_id = ? AND agp_conditions.agp_id IN (?) AND agp_conditions.deleted_at IS NULL AND con.deleted_at IS NULL", aId, agpIds).
-		Preload(clause.Associations).Preload("Condition.Group").
-		Preload("Condition.Area.Area").Find(&list).Error
+		Preload(clause.Associations).
+		Preload("Condition.Group").
+		Preload("Condition.Area.Area").
+		Find(&list).Error
 	return
 }
 
@@ -129,17 +135,22 @@ func (conditionService *ConditionService) GetConditionInfoList(info checkinsReq.
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Preload(clause.Associations).Preload("Area.Area").Find(&conditions).Error
+	err = db.Preload(clause.Associations).
+		Preload("Group").
+		Preload("Area.Area").
+		Find(&conditions).Error
 	return conditions, total, err
 }
 
 func (conditionService *ConditionService) GetConditionsByAttendanceId(attId uint) (list []checkins.Condition, err error) {
-
 	db := global.GVA_DB.Model(&checkins.Condition{})
 	var conditions []checkins.Condition
 
 	db = db.Where("attendance_id = ?", attId)
-	err = db.Preload(clause.Associations).Preload("Area.Area").Find(&conditions).Error
+	err = db.Preload(clause.Associations).
+		Preload("Group").
+		Preload("Area.Area").
+		Find(&conditions).Error
 	return conditions, err
 }
 

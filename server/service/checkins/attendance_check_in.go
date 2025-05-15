@@ -677,27 +677,14 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			// Bổ sung thông tin counter vào kết quả conditions
 			var conditionsWithCounter []map[string]interface{}
 			for _, condition := range coreConditions {
-				conditionMap := make(map[string]interface{})
-				for k, v := range map[string]interface{}{
-					"ID":              condition.ID,
-					"AttendanceId":    condition.AttendanceId,
-					"GroupId":         condition.GroupId,
-					"AreaId":          condition.AreaId,
-					"StartAt":         condition.StartAt,
-					"EndAt":           condition.EndAt,
-					"IsPass":          condition.IsPass,
-					"Message":         condition.Message,
-					"ShowLuckyNumber": condition.ShowLuckyNumber,
-				} {
-					conditionMap[k] = v
+				// Create a ConditionWithCounter to use ToFrontendMap
+				counter := 0
+				if c, exists := counterMap[condition.ID]; exists {
+					counter = c
 				}
 
-				// Thêm counter vào condition
-				if counter, exists := counterMap[condition.ID]; exists {
-					conditionMap["counter"] = counter
-				} else {
-					conditionMap["counter"] = 0
-				}
+				conditionWithCounter := checkins.NewConditionWithCounter(condition, counter)
+				conditionMap := conditionWithCounter.ToFrontendMap()
 
 				conditionsWithCounter = append(conditionsWithCounter, conditionMap)
 			}
