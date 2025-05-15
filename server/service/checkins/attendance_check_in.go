@@ -495,12 +495,11 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 				if condition.AttendanceGroupParticipantId == int(agp.ID) {
 					// // Nếu điều kiện đã được điểm danh trước đó, đánh dấu là đã qua
 					// // nhưng KHÔNG tạo bản ghi mới - chỉ cập nhật counter ở cuối hàm
-					// if arrayContains(conditionCheckedIn, condition.Condition.ID) {
-					// 	tempCon := *condition.Condition
-					// 	tempCon.IsPass = true
-					// 	coreConditions = append(coreConditions, tempCon)
-					// 	continue
-					// }
+					if arrayContains(conditionCheckedIn, condition.Condition.ID) {
+						tempCon := *condition.Condition
+						tempCon.IsPass = true
+						coreConditions = append(coreConditions, tempCon)
+					}
 
 					// Thêm vào danh sách kiểm tra
 					gc, exists := agpConditions[agp.ID]
