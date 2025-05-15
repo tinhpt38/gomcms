@@ -377,12 +377,13 @@ const redirectToHistory = () => {
 
 
 const conditionString = (item) => {
+  debugger
   var condition = {
     group: item?.group?.name,
     area: item?.area?.area?.name,
     startAt: item.startAt ? formatDateTime(item.startAt) : null,
     endAt: item.endAt ? formatDateTime(item.endAt) : null,
-    isPass: item.isPass
+    isPass: item.IsPass
   }
   if (condition.group != null && condition.area != null && condition.startAt != null && condition.endAt != null) {
     return `Nhóm ${condition.group}, tại ${condition.area}, từ ${condition.startAt} đến ${condition.endAt}`
