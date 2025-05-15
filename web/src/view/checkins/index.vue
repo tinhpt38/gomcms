@@ -92,9 +92,12 @@
                         <dt class="text-sm font-medium text-base text-gray-900">
                           Điều kiện {{ key + 1 }}
                         </dt>
-                        <dd class="my-1 text-sm text-base text-gray-700 sm:col-span-2 sm:mt-0">
+                        <!-- <dd class="my-1 text-sm text-base text-gray-700 sm:col-span-2 sm:mt-0">
                           {{ conditionString(item) }}
-                        </dd>
+                        </dd> -->
+                        <el-text effect="dart" type="primary">
+                          <strong>{{ conditionString(item) }}</strong>
+                        </el-text>
                         <el-tag v-if="item.IsPass" effect="dark" type="success" class="flex items-center gap-1">
                           <span>Bạn đã điểm danh thành công {{item.counter }} lần</span>
                         </el-tag>
@@ -107,9 +110,9 @@
                         <el-tag v-if="!item.IsPass" effect="dart" type="danger">
                           Bạn chưa điểm danh
                         </el-tag>
-                        <el-text v-if="!item.IsPass" effect="dart" type="primary">
+                        <!-- <el-text v-if="!item.IsPass" effect="dart" type="primary">
                           <strong>{{ item.Message }}</strong>
-                        </el-text>
+                        </el-text> -->
                       </div>
                     </dl>
                   </div>
