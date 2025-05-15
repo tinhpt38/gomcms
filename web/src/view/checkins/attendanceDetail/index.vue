@@ -5,8 +5,8 @@
         <span class="text-xl font-bold text-gray-500">{{ formData.title }}</span>
       </div>
       <div class="flex mb-2">
-        <!-- <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
-        <ExportExcel :form-data="{ action: 'EXPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" /> -->
+        <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
+        <!-- <ExportExcel :form-data="{ action: 'EXPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" /> -->
       </div>
       <el-button class="mx-4 hidden" type="danger" icon="download">
         Xuất Excel
@@ -71,22 +71,22 @@
                 <template v-if="showAllOptionConfig">
                   <div class="flex flex-col">
                     <div class="flex justify-between">
-                    <el-form-item label="Hệ số" prop="formData.weight">
-                      <el-input v-model="formData.weight" type="number" clearable />
-                    </el-form-item>
-                    
-                    <el-form-item label="Giới hạn số may mắn" prop="formData.luckyShowAfterMinCount">
-                      <el-input v-model="formData.luckyShowAfterMinCount" type="number" clearable />
-                    </el-form-item>
+                      <el-form-item label="Hệ số" prop="formData.weight">
+                        <el-input v-model="formData.weight" type="number" clearable />
+                      </el-form-item>
+
+                      <el-form-item label="Giới hạn số may mắn" prop="formData.luckyShowAfterMinCount">
+                        <el-input v-model="formData.luckyShowAfterMinCount" type="number" clearable />
+                      </el-form-item>
                     </div>
                     <div class="flex justify-between">
                       <el-form-item label="Số lần / thành viên" prop="formData.limitCount">
-                      <el-input v-model="formData.limitCount" type="number" clearable />
-                    </el-form-item>
-                    <el-form-item label="Số lần / máy" prop="formData.limitClientCount">
-                      <el-input v-model="formData.limitClientCount" type="number" clearable />
-                    </el-form-item>
-                    
+                        <el-input v-model="formData.limitCount" type="number" clearable />
+                      </el-form-item>
+                      <el-form-item label="Số lần / máy" prop="formData.limitClientCount">
+                        <el-input v-model="formData.limitClientCount" type="number" clearable />
+                      </el-form-item>
+
                     </div>
                   </div>
 
@@ -217,7 +217,7 @@
               <el-table-column align="left" label="Thành viên" width="200">
                 <template #default="scope">
                   <span>{{ scope.row.participant?.fullName?.replace("undefined", "") ?? scope.row.participant.email
-                  }}</span>
+                    }}</span>
                 </template>
               </el-table-column>
               <el-table-column align="left" label="Khu vực" width="120">
@@ -268,7 +268,7 @@
           <RandomWheel :ac-id="currentId" />
         </div>
       </el-tab-pane>
-    
+
     </el-tabs>
   </div>
 </template>

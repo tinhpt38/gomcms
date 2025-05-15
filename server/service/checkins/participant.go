@@ -34,36 +34,108 @@ func (participantService *ParticipantService) CreateParticipant(participant *che
 }
 
 func (participantService *ParticipantService) BulkCreateParticipants(req checkinsReq.ListEmailParticipantRequest) (err error) {
+	// Use transaction for ACID compliance
+	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		// Process in batches of 100 for better performance
+		batchSize := 100
+		totalEmails := len(req.List)
 
-	for _, email := range req.List {
-		participant := checkins.Participant{
-			Email: email,
+		for i := 0; i < totalEmails; i += batchSize {
+			end := i + batchSize
+			if end > totalEmails {
+				end = totalEmails
+			}
+
+			currentBatch := req.List[i:end]
+
+			// Step 1: Find existing participants to avoid unnecessary inserts
+			var existingParticipants []checkins.Participant
+			if err := tx.Model(&checkins.Participant{}).Where("email IN ?", currentBatch).Find(&existingParticipants).Error; err != nil {
+				return err
+			}
+
+			// Create map for quick lookup of existing participants
+			existingMap := make(map[string]checkins.Participant)
+			for _, p := range existingParticipants {
+				existingMap[p.Email] = p
+			}
+
+			// Step 2: Prepare new participants that don't exist yet
+			var newParticipants []checkins.Participant
+			for _, email := range currentBatch {
+				if _, exists := existingMap[email]; !exists {
+					newParticipants = append(newParticipants, checkins.Participant{Email: email})
+				}
+			}
+
+			// Step 3: Bulk insert new participants if any
+			if len(newParticipants) > 0 {
+				if err := tx.Model(&checkins.Participant{}).Create(&newParticipants).Error; err != nil {
+					return err
+				}
+
+				// Add newly created participants to the existing map
+				for _, p := range newParticipants {
+					existingMap[p.Email] = p
+				}
+			}
+
+			// Step 4: Prepare attendance-group-participant records
+			var newAGPs []checkins.AttendanceGroupParticipant
+			var existingAGPEmails []string
+			var existingParticipantIDs []uint
+
+			// Get all participant IDs for the current batch
+			for _, email := range currentBatch {
+				if p, exists := existingMap[email]; exists {
+					existingParticipantIDs = append(existingParticipantIDs, p.ID)
+					existingAGPEmails = append(existingAGPEmails, email)
+				}
+			}
+
+			// Step 5: Find existing AGP records to avoid duplicates
+			var existingAGPs []checkins.AttendanceGroupParticipant
+			if len(existingParticipantIDs) > 0 {
+				if err := tx.Model(&checkins.AttendanceGroupParticipant{}).
+					Where("participant_id IN ? AND attendance_id = ? AND group_id = ?",
+						existingParticipantIDs, req.AttendanceId, req.GroupId).
+					Find(&existingAGPs).Error; err != nil {
+					return err
+				}
+			}
+
+			// Create map of existing AGPs
+			existingAGPMap := make(map[uint]bool)
+			for _, agp := range existingAGPs {
+				if agp.ParticipantId != nil {
+					existingAGPMap[*agp.ParticipantId] = true
+				}
+			}
+
+			// Step 6: Create new AGP records for participants that don't have one
+			for _, email := range currentBatch {
+				if p, exists := existingMap[email]; exists {
+					if !existingAGPMap[p.ID] {
+						participantID := p.ID
+						newAGPs = append(newAGPs, checkins.AttendanceGroupParticipant{
+							ParticipantId: &participantID,
+							AttendanceId:  req.AttendanceId,
+							GroupId:       req.GroupId,
+						})
+					}
+				}
+			}
+
+			// Step 7: Bulk insert new AGP records if any
+			if len(newAGPs) > 0 {
+				if err := tx.Model(&checkins.AttendanceGroupParticipant{}).Create(&newAGPs).Error; err != nil {
+					return err
+				}
+			}
 		}
-		err = global.GVA_DB.Model(&checkins.Participant{}).Where(&checkins.Participant{
-			Email: email,
-		}).FirstOrCreate(&participant).Error
-		if err != nil {
-			return err
-		}
-		agp := checkins.AttendanceGroupParticipant{
-			ParticipantId: &participant.ID,
-			AttendanceId:  req.AttendanceId,
-			GroupId:       req.GroupId,
-		}
-		err = global.GVA_DB.Model(&checkins.AttendanceGroupParticipant{}).Where(&checkins.AttendanceGroupParticipant{
-			ParticipantId: &participant.ID,
-			GroupId:       req.GroupId,
-			AttendanceId:  req.AttendanceId,
-		}).FirstOrCreate(&agp).Error
-	}
 
-	return
-	// err = global.GVA_DB.FirstOrCreate(participant).Error
-
-	// err = global.GVA_DB.Model(&checkins.Participant{}).Where(&checkins.Participant{
-	// 	Email: participant.Email,
-	// }).FirstOrCreate(participant).Error
-
+		return nil
+	})
 }
 
 // DeleteParticipant 删除Sinh viên (Người tham dự phiên điểm danh)记录
@@ -410,26 +482,32 @@ func (participantService *ParticipantService) GetParticipantInfoList(info checki
 }
 
 func (participantService *ParticipantService) GetParticipantInfoListByAttendance(info checkinsReq.ParticipantSearch) (list []checkins.Participant, total int64, err error) {
-
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	agpDb := global.GVA_DB.Model(&checkins.AttendanceGroupParticipant{})
-	var parIds []uint
+
+	// Sử dụng subquery để tránh vấn đề với DISTINCT và pagination
+	subQuery := global.GVA_DB.Table("attendance_group_participants").
+		Select("DISTINCT participant_id")
+
+	// Áp dụng các điều kiện filter vào subquery
 	if info.GroupId != nil && *info.GroupId != 0 {
-		agpDb = agpDb.Where("group_id = ?", *info.GroupId)
+		subQuery = subQuery.Where("group_id = ?", *info.GroupId)
 	}
 	if info.AttendanceId != nil && *info.AttendanceId != 0 {
-		agpDb = agpDb.Where("attendance_id = ?", *info.AttendanceId)
+		subQuery = subQuery.Where("attendance_id = ?", *info.AttendanceId)
 	}
 
-	err = agpDb.Select("DISTINCT participant_id").Find(&parIds).Error
-	if err != nil {
-		return
-	}
+	// Thêm điều kiện cho soft delete
+	subQuery = subQuery.Where("deleted_at IS NULL")
 
+	// Tạo query chính trên bảng participants
 	db := global.GVA_DB.Model(&checkins.Participant{})
-	var participants []checkins.Participant
-	db = db.Where("id IN (?)", parIds)
+	db = db.Where("id IN (?)", subQuery)
+
+	// Áp dụng các điều kiện tìm kiếm khác
+	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
+	}
 	if info.FullName != "" {
 		db = db.Where("full_name LIKE ?", "%"+info.FullName+"%")
 	}
@@ -437,14 +515,34 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 		db = db.Where("email LIKE ?", "%"+info.Email+"%")
 	}
 
+	// Đếm tổng số bản ghi trước khi phân trang
+	err = db.Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if total == 0 {
+		return []checkins.Participant{}, 0, nil
+	}
+
+	// Áp dụng phân trang
 	if limit != 0 {
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Preload("Groups", "attendance_id = ?", info.AttendanceId).Debug().Find(&participants).Error
-	// Xử lý lấy thông tin điều kiện điểm danh
-	// newList := participantService.GetMetadata(participants, *info.AttendanceId)
-	return participants, total, err
+	// Sử dụng preload ngay trong truy vấn chính để tránh truy vấn thứ hai
+	if info.AttendanceId != nil && *info.AttendanceId != 0 {
+		db = db.Preload("Groups", "attendance_id = ?", *info.AttendanceId)
+	}
+
+	var participants []checkins.Participant
+	err = db.Debug().Find(&participants).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return participants, total, nil
+
 }
 
 func (participantService *ParticipantService) ImportExcel(info config.CfgFileProcess) (err error) {
@@ -563,25 +661,12 @@ func (participantService *ParticipantService) ImportExcel(info config.CfgFilePro
 
 		for _, row := range rows[beginDataRowIndex:] {
 			//! Get data from row
-			fullName := utils.GetArrayValue(row, 0)
+			// fullName := utils.GetArrayValue(row, 0)
 			email := utils.GetArrayValue(row, 1)
 			group := utils.GetArrayValue(row, 2)
 
 			// error entries
 			errorEntries := make([]config.FileProcessError, 0)
-
-			if fullName == "" {
-				errorEntries = append(errorEntries, config.FileProcessError{
-					GVA_MODEL:       global.GVA_MODEL{},
-					FileProcessId:   &info.ID,
-					FileProcessUuid: uuid,
-					FieldTitle:      sheetHeaders[0],
-					ExpectedValue:   "Họ và tên",
-					ReceivedValue:   fullName,
-					Note:            "Họ và tên không được để trống",
-					Row:             rowCounter,
-				})
-			}
 
 			if email == "" {
 				errorEntries = append(errorEntries, config.FileProcessError{

@@ -142,7 +142,7 @@ const props = defineProps({
   }
 })
 
-const page = ref(0)
+const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
