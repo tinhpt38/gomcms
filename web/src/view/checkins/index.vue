@@ -74,14 +74,9 @@
                 <div v-if="attendance.title != null" class="mt-4 p-2 rounded shadow-slate-400">
                   <h3>{{ attendance.title }}</h3>
                   <!-- Lucky Number feature - Only show if useLuckyNumber is true -->
-                <LuckyNumberDisplay 
-                  v-if="attendance.useLuckyNumber"
-                  :lucky-number="apiResponse?.data?.luckyNumber" 
-                  :current-checkins="checkinCount"
-                  :required-checkins="attendance.luckyShowAfterMinCount || 0"
-                  :is-new-lucky-number="isNewLuckyNumber"
-                  :show-progress="attendance.useLuckyNumber"
-                />
+                  <LuckyNumberDisplay v-if="attendance.useLuckyNumber" :lucky-number="apiResponse?.data?.luckyNumber"
+                    :current-checkins="checkinCount" :required-checkins="attendance.luckyShowAfterMinCount || 0"
+                    :is-new-lucky-number="isNewLuckyNumber" :show-progress="attendance.useLuckyNumber" />
                   <div class="mt-4" v-if="conditionData.length > 0">
                     <div class="text-base text-gray-900">
                       Danh sách điều kiện điểm danh
@@ -99,7 +94,7 @@
                           <strong>{{ conditionString(item) }}</strong>
                         </el-text>
                         <el-tag v-if="item.IsPass" effect="dark" type="success" class="flex items-center gap-1">
-                          <span>Bạn đã điểm danh thành công {{item.counter }} lần</span>
+                          <span>Bạn đã điểm danh thành công {{ item.counter }} lần</span>
                         </el-tag>
                         <el-tag v-if="item.IsPass && item.ShowLuckyNumber" class="ml-2 mt-2" type="warning">
                           <i class="el-icon-star-on mr-1"></i>Điều kiện may mắn
@@ -118,7 +113,7 @@
                   </div>
                 </div>
 
-                
+
 
                 <GoogleLogin class="my-4" :callback="callback" :error="gError" prompt />
               </div>
@@ -201,6 +196,26 @@ const callback = async (response) => {
   const userData = decodeCredential(response.credential)
   data.value.email = userData.email
   data.value.fullName = (userData?.given_name || "") + ' ' + (userData?.family_name || "")
+  // Kiểm tra lại vị trí sau khi đăng nhập
+  if (!coords.value.latitude || !coords.value.longitude || coords.value.latitude === 0 || coords.value.longitude === 0 || coords.value.latitude === null || coords.value.longitude === null || coords.value.latitude === Infinity || coords.value.longitude === Infinity) {
+    const subtitle = `<div style='margin-top:8px;font-size:14px;color:#666;'>
+      <b>Cách cho phép truy cập vị trí:</b><br>
+      <b>Trên iPhone:</b> Vào <b>Cài đặt</b> &rarr; <b>Quyền riêng tư</b> &rarr; <b>Dịch vụ vị trí</b> &rarr; Bật cho trình duyệt bạn đang dùng (Safari/Chrome).<br>
+      <b>Trên Android:</b> Vào <b>Cài đặt</b> &rarr; <b>Vị trí</b> &rarr; Bật vị trí &rarr; Kiểm tra quyền truy cập vị trí cho trình duyệt.<br>
+      Sau đó reload lại trang.<br>
+    </div>`;
+    const confirm = await ElMessageBox.confirm(
+      `Thiết bị của bạn chưa lấy được vị trí. Hãy kiểm tra lại quyền truy cập vị trí trên thiết bị.<br>${subtitle}<br>Bạn có chắc chắn muốn điểm danh mà không có vị trí không?`,
+      'Cảnh báo',
+      {
+        confirmButtonText: 'Tiếp tục điểm danh',
+        type: 'warning',
+        center: true,
+        dangerouslyUseHTMLString: true
+      }
+    ).catch(() => false)
+    if (!confirm) return
+  }
   await requestCheckin()
 }
 
@@ -269,42 +284,42 @@ function generateChecksum(data) {
 function validateDataBeforeEncoding(data) {
   // Tạo một bản sao để không ảnh hưởng đến dữ liệu gốc
   const validatedData = { ...data };
-  
+
   // Đảm bảo các trường quan trọng không bị null, undefined hoặc NaN
   if (!validatedData.lat || isNaN(validatedData.lat)) {
     console.warn("Latitude is invalid, setting default value");
     validatedData.lat = 0;
   }
-  
+
   if (!validatedData.lng || isNaN(validatedData.lng)) {
     console.warn("Longitude is invalid, setting default value");
     validatedData.lng = 0;
   }
-  
+
   // Đảm bảo độ chính xác là số
   if (validatedData.accuracy && isNaN(validatedData.accuracy)) {
     validatedData.accuracy = 0;
   }
-  
+
   // Đảm bảo code không bị null hoặc undefined
   if (!validatedData.code) {
     console.warn("Code is missing");
     validatedData.code = "";
   }
-  
+
   // Đảm bảo visitorId có giá trị
   if (!validatedData.visitorId) {
     // Nếu không có visitorId, tạo một chuỗi ngẫu nhiên
     console.warn("VisitorId is missing, generating random value");
     validatedData.visitorId = "generated_" + Math.random().toString(36).substr(2, 9);
   }
-  
+
   // Thêm timestamp để tăng tính duy nhất
   validatedData.timestamp = new Date().toISOString();
-  
+
   // Thêm checksum để kiểm tra tính toàn vẹn
   validatedData._checksum = generateChecksum(validatedData);
-  
+
   return validatedData;
 }
 
@@ -355,15 +370,15 @@ const encodeVal = (data) => {
       ...data,
       _v: "2.0", // Phiên bản mã hóa
     };
-    
+
     const jsonString = JSON.stringify(dataWithVersion);
-    
+
     // Mã hóa dữ liệu bằng hàm encodeUnicode mới
     const encodedData = encodeUnicode(jsonString);
-    
+
     // Thêm token ngẫu nhiên để tăng tính bảo mật
     const randomToken = Math.random().toString(36).substring(2, 15);
-    
+
     // Kết hợp key với dữ liệu đã mã hóa
     return keyRandom + "_" + randomToken + "_" + encodedData;
   } catch (error) {
@@ -413,7 +428,7 @@ const conditionString = (item) => {
 
 const conditionData = ref([])
 const attendance = ref({})
-const apiResponse = ref({data: {}}) // Store the entire response for reference
+const apiResponse = ref({ data: {} }) // Store the entire response for reference
 const showBounceAnimation = ref(false) // Control bounce animation
 const showConfetti = ref(false) // Control confetti animation
 const checkinsRemaining = ref(0) // Remaining check-ins needed for lucky number
@@ -469,7 +484,7 @@ const requestCheckin = async () => {
     var apiResult = await publicAttendanceCheckIn({ data: encodedData })
     console.log("res: ", apiResult)
     apiResponse.value = apiResult // Store the entire response
-    
+
     if (apiResult.code == 0) {
       if (apiResult.data.conditions != null) {
         conditionData.value = apiResult.data.conditions.filter((condition, index, self) =>
@@ -483,14 +498,14 @@ const requestCheckin = async () => {
           if (typeof condition.counter === 'undefined') {
             condition.counter = 0
           }
-          
+
           // Normalize ShowLuckyNumber/showLuckyNumber property name
           if (condition.ShowLuckyNumber !== undefined && condition.showLuckyNumber === undefined) {
             condition.showLuckyNumber = condition.ShowLuckyNumber
           } else if (condition.showLuckyNumber !== undefined && condition.ShowLuckyNumber === undefined) {
             condition.ShowLuckyNumber = condition.showLuckyNumber
           }
-          
+ 
           // Normalize message property name
           if (condition.Message !== undefined && condition.msg === undefined) {
             condition.msg = condition.Message
@@ -504,30 +519,30 @@ const requestCheckin = async () => {
       // Retrieve total check-in count and lucky number from response
       var checkinCount = 0;
       var luckyNumber = apiResponse.value.data.luckyNumber ?? null
-      
+
       // Get check-in counter from the first check-in if available
       if (apiResponse.value.data.checkins && apiResponse.value.data.checkins.length > 0) {
         checkinCount = apiResponse.value.data.checkins.reduce((total, checkin) => total + (checkin.counter || 0), 0);
       }
-      
+
       // Calculate condition stats if conditions exist
       var passcount = 0;
       var totalConditions = 0;
       var totalCheckIns = 0;
-      
+
       if (conditionData.value && conditionData.value.length > 0) {
         passcount = conditionData.value.reduce((count, item) => {
           return item.isPass ? count + 1 : count;
         }, 0);
-        
+
         totalConditions = conditionData.value.length;
-        
+
         // Get total check-in count including repetitions
         totalCheckIns = conditionData.value.reduce((total, item) => {
           return item.isPass ? total + (item.counter || 1) : total;
         }, 0);
       }
-      
+
       // Update the lucky number progress data
       if (attendance.value.useLuckyNumber && !luckyNumber) {
         const requiredCheckins = attendance.value.luckyShowAfterMinCount || 0;
@@ -536,10 +551,10 @@ const requestCheckin = async () => {
           checkinsProgress.value = (checkinCount / requiredCheckins) * 100;
         }
       }
-      
+
       // Build a structured message for better readability
       let msgComponents = [];
-      
+
       // 1. Basic success message
       if (apiResponse?.data?.message) {
         // If server provided a message, use it
@@ -554,27 +569,27 @@ const requestCheckin = async () => {
           msgComponents.push("Điểm danh thành công");
         }
       }
-      
+
       // 2. Check-in count info if not in the basic message
       if (!apiResponse.data?.message && checkinCount > 1 && !msgComponents[0]?.includes("lần")) {
         msgComponents.push(`Tổng số lần điểm danh: ${checkinCount}`);
       }
-      
+
       // 3. Lucky number info if not in the basic message
       if (attendance.value.useLuckyNumber && !apiResponse.data?.message && luckyNumber != null && !msgComponents[0]?.includes("may mắn")) {
         msgComponents.push(`<span class="text-yellow-600 font-bold"><i class="el-icon-star-on"></i> Chúc mừng! Số may mắn của bạn: ${luckyNumber}</span>`);
       }
-      
+
       // 4. Additional info about attendance
       if (attendance.value.useLuckyNumber && !luckyNumber && checkinCount < attendance.value.luckyShowAfterMinCount) {
         const remaining = attendance.value.luckyShowAfterMinCount - checkinCount;
         msgComponents.push(`Bạn cần điểm danh thêm ${remaining} lần nữa và điểm danh thành công ít nhất một điều kiện để nhận số may mắn`);
-        
+
         // Update the progress bar values
         checkinsRemaining.value = remaining;
         checkinsProgress.value = (checkinCount / attendance.value.luckyShowAfterMinCount) * 100;
       }
-      
+
       // Combine all message components
       const msg = msgComponents.join("<br>");
 
@@ -588,19 +603,23 @@ const requestCheckin = async () => {
         if (attendance.value.useLuckyNumber && luckyNumber) {
           // Set flag to indicate this is a new lucky number
           isNewLuckyNumber.value = true
-          
+
           // Reset the flag after a delay
-          setTimeout(() => { 
-            isNewLuckyNumber.value = false 
+          setTimeout(() => {
+            isNewLuckyNumber.value = false
           }, 8000)
         }
-        
+
         if (attendance.value.redirectUrl) {
           window.location.href = attendance.value.redirectUrl
         }
       });
     } else {
-      ElMessage(apiResult.data?.msg ?? apiResult.msg)
+      ElMessageBox.alert(apiResult.data?.msg ?? apiResult.msg, 'Thông báo', {
+        confirmButtonText: 'OK',
+        type: 'warning',
+        center: true
+      })
     }
   } catch (error) {
     console.error("Error during check-in request:", error)
@@ -675,6 +694,7 @@ main.isolate {
     top: -10%;
     opacity: 1;
   }
+
   100% {
     top: 100%;
     opacity: 0;
@@ -685,17 +705,33 @@ main.isolate {
   0% {
     transform: skew(0deg, 0deg) rotate(0deg);
   }
+
   25% {
     transform: skew(5deg, 5deg) rotate(5deg);
   }
+
   50% {
     transform: skew(-5deg, -5deg) rotate(10deg);
   }
+
   75% {
     transform: skew(5deg, 5deg) rotate(5deg);
   }
+
   100% {
     transform: skew(0deg, 0deg) rotate(0deg);
+  }
+}
+/* Custom dialog button spacing for location dialog */
+.location-dialog-custom .el-message-box__btns {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  justify-content: center;
+}
+@media (max-width: 600px) {
+  .location-dialog-custom .el-message-box__btns {
+    gap: 32px;
   }
 }
 </style>
