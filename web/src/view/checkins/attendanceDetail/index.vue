@@ -32,36 +32,41 @@
                     <el-date-picker v-model="formData.endDate" type="datetime" class="full-width-input" clearable />
                   </el-form-item>
                 </div>
-
-                <el-form-item label="Danh mục" prop="categoryId" class="w-full required">
-                  <el-tree-select class="w-full" v-model="formData.categoryId" :data="categoryOptions"
-                    check-on-click-node :render-after-expand="false" style="width: 240px" />
-                </el-form-item>
-                <el-form-item label="Đơn vị" prop="agencyId" class="w-full required">
-                  <el-select v-model="formData.agencyId" placeholder="Chọn đơn vị" clearable filterable>
-                    <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
-                  </el-select>
-                </el-form-item>
+                <div class="flex w-full gap-4">
+                  <el-form-item label="Danh mục" prop="categoryId" class="w-full required" style="flex:1;">
+                    <el-tree-select class="w-full" v-model="formData.categoryId" :data="categoryOptions"
+                      check-on-click-node :render-after-expand="false" style="width: 100%" />
+                  </el-form-item>
+                  <el-form-item label="Đơn vị" prop="agencyId" class="w-full required" style="flex:1;">
+                    <el-select v-model="formData.agencyId" placeholder="Chọn đơn vị" clearable filterable style="width: 100%">
+                      <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
+                    </el-select>
+                  </el-form-item>
+                </div>
                 <el-form-item prop="description" label="Mô tả" class="w-full">
                   <el-input type="text" v-model="formData.description"></el-input>
                 </el-form-item>
-                <div class="flex justify-between">
-                  <el-form-item label="Cho phép chỉnh sửa" label-width="150px" prop="everyoneCanEdit">
+                <div class="flex flex-row gap-4 mb-2">
+                  <el-form-item label="Cho phép chỉnh sửa" label-width="150px" prop="everyoneCanEdit" style="flex:1;">
                     <el-switch v-model="formData.everyoneCanEdit" />
                   </el-form-item>
-                  <el-form-item label="Hiển thị ở trang chủ" label-width="150px" prop="showHome">
-                    <el-switch v-model="formData.showHome" />
-                  </el-form-item>
-                  <el-form-item label="Cho phép khách" label-width="150px" prop="allowGuest">
+                  <el-form-item label="Cho phép khách" label-width="150px" prop="allowGuest" style="flex:1;">
                     <el-switch v-model="formData.allowGuest" />
                   </el-form-item>
-                  <el-form-item label="Số may mắn" label-width="150px" prop="useLuckyNumber">
+                  <el-form-item label="Yêu cầu vị trí" label-width="150px" prop="isRequiredLocation" style="flex:1;">
+                    <el-switch v-model="formData.isRequiredLocation" />
+                  </el-form-item>
+                </div>
+                <div class="flex flex-row gap-4 mb-2">
+                  <el-form-item label="Hiển thị ở trang chủ" label-width="150px" prop="showHome" style="flex:1;">
+                    <el-switch v-model="formData.showHome" />
+                  </el-form-item>
+                  <el-form-item label="Số may mắn" label-width="150px" prop="useLuckyNumber" style="flex:1;">
                     <el-switch v-model="formData.useLuckyNumber" />
                   </el-form-item>
-                  <el-form-item label="Đóng điểm danh" label-width="150px" prop="isLocked">
+                  <el-form-item label="Đóng điểm danh" label-width="150px" prop="isLocked" style="flex:1;">
                     <el-switch v-model="formData.isLocked" />
                   </el-form-item>
-
                 </div>
                 <el-button link type="primary" icon="arrow-down" @click="showAllOptionConfig = true"
                   v-if="!showAllOptionConfig">Mở
@@ -331,6 +336,7 @@ const formData = ref({
   categoryId: null,
   agencyId: null,
   everyoneCanEdit: false,
+  isRequiredLocation: false,
 
 })
 

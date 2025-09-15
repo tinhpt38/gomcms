@@ -23,6 +23,7 @@ type Attendance struct {
 	RestrictIp             *string    `json:"restrictIp" form:"restrictIp" gorm:"column:restrict_ip;comment:IP giới hạn"`                                       //IPs giới hạn
 	LimitCount             int        `json:"limitCount" form:"limitCount" gorm:"column:limit_count;comment:Số lần giới hạn"`
 	LimitClientCount       int        `json:"limitClientCount" form:"limitClientCount" gorm:"column:limit_client_count;comment:Số lần giới hạn theo máy"`
+	IsRequiredLocation     bool       `json:"isRequiredLocation" form:"isRequiredLocation" gorm:"column:is_required_location;comment:Yêu cầu vị trí"` //Yêu cầu vị trí
 
 	RedirectUrl *string `json:"redirectUrl" form:"redirectUrl" gorm:"column:redirect_url;comment:URL chuyển hướng"` //URL chuyển hướng
 	AgencyId    *uint   `json:"agencyId" form:"agencyId" gorm:"column:agency_id;comment:Đơn vị"`                    //Đơn vị
