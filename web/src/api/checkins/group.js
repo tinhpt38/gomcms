@@ -116,3 +116,19 @@ export const assignParticipantToGroupAuto = (data) => {
     data
   })
 }
+
+export const reassignParticipantsOnly = (data) => {
+  return service({
+    url: '/group/reassignParticipantsOnly',
+    method: 'post',
+    data
+  })
+}
+
+export const getGroupDependencyCount = (params) => {
+  return service({
+    url: '/group/getGroupDependencyCount',
+    method: 'get',
+    params
+  })
+}

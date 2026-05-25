@@ -1,8 +1,11 @@
 <template>
   <div>
-    <div class="p-1 my-1">
-      <el-button type="primary" icon="plus" @click="openBulkAdd">
+    <div class="p-1 my-1 flex gap-2">
+      <el-button type="primary" icon="plus" @click="openDialog">
         Thêm thành viên
+      </el-button>
+      <el-button type="success" icon="document" @click="openBulkAdd">
+        Thêm hàng loạt
       </el-button>
     </div>
 
@@ -29,10 +32,6 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="p-2 my-2">
-      <!-- <span>Nếu <strong> số Tổng thành công (pass) </strong> lớn hơn <strong> số Tổng điều kiện (total) </strong> có
-        nghĩa là đã có <strong>(pass - total)</strong> điều kiện bị xoá bởi người tạo.</span> -->
-    </div>
     <el-table :data="tableData" style="width: 100%" border>
       <el-table-column prop="fullName" label="Họ và tên" width="250">
         <template #default="scope">
@@ -45,14 +44,11 @@
           <span>{{ scope.row.groups.map((e) => e.name).join(", ") }}</span>
         </template>
       </el-table-column>
-      <!-- <el-table-column prop="passCount" label="Thành công" />
-      <el-table-column prop="conditionCount" label="Tổng điều kiện cần" />
-      <el-table-column prop="requestCount" label="Tổng truy cập" /> -->
       <el-table-column align="right" label="Hành động" fixed="right" min-width="240">
         <template #default="scope">
           <el-button type="primary" link icon="edit" class="table-button"
             @click="updateParticipantFunc(scope.row)">Chỉnh sửa</el-button>
-            <el-button type="danger" link icon="delete" class="table-button"
+          <el-button type="danger" link icon="delete" class="table-button"
             @click="deleteParticipantRow(scope.row)">Xoá</el-button>
         </template>
       </el-table-column>
@@ -62,10 +58,12 @@
         :size="size" :background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
         @size-change="handleSizeChange" @current-change="handleCurrentChange" />
     </div>
+
+    <!-- Drawer thêm/sửa đơn lẻ -->
     <el-drawer destroy-on-close size="800" v-model="dialogFormVisible" :show-close="false" :before-close="closeDialog">
       <template #header>
         <div class="flex justify-between items-center">
-          <span class="text-lg">{{ type === 'create' ? 'Thêm mới' : 'Chỉnh sửa' }}</span>
+          <span class="text-lg">{{ type === 'create' ? 'Thêm thành viên' : 'Chỉnh sửa thành viên' }}</span>
           <div>
             <el-button type="primary" @click="enterDialog">Đồng ý</el-button>
             <el-button @click="closeDialog">Hủy</el-button>
@@ -75,39 +73,41 @@
 
       <el-form :model="formData" label-position="top" ref="elFormRef" :rules="rule" label-width="80px">
         <el-form-item label="Họ và tên:" prop="fullName">
-          <el-input v-model="formData.fullName" :clearable="true" placeholder="Nhập Họ và tên" />
+          <el-input v-model="formData.fullName" :clearable="true" placeholder="Nhập họ và tên" />
         </el-form-item>
         <el-form-item label="Email:" prop="email">
-          <el-input v-model="formData.email" :clearable="true" placeholder="Nhập Email" />
+          <el-input v-model="formData.email" :clearable="true" placeholder="Nhập email" />
         </el-form-item>
         <el-form-item label="Nhóm:" prop="groupId">
-          <el-select v-model="formData.groupId" placeholder="Chọn nhóm" filterable clearable multiple>
+          <el-select v-model="formData.groupId" placeholder="Chọn nhóm" filterable clearable multiple style="width:100%">
             <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
       </el-form>
     </el-drawer>
 
+    <!-- Drawer thêm hàng loạt -->
     <el-drawer destroy-on-close size="800" v-model="bulkAddVisible" :show-close="false">
       <template #header>
         <div class="flex justify-between items-center">
           <span class="text-lg">Thêm hàng loạt thành viên</span>
           <div>
             <el-button type="primary" @click="bulkAddParticipantsFunc">Đồng ý</el-button>
-            <el-button @click="bulkAddVisible == false">Hủy</el-button>
+            <el-button @click="bulkAddVisible = false">Hủy</el-button>
           </div>
         </div>
       </template>
 
       <el-form :model="bulkFormData" ref="bulkFormRef" :rules="bulkRules" label-position="top" label-width="80px">
-        <div class="font-bold py-2">Copy và dán danh sách email của thành viên vào đây. Mỗi email một dòng, tối đa 1000
-          email/ lần</div>
-        <el-form-item label="Nhập danh sách thành viên:" prop="list">
+        <div class="font-bold py-2">Copy và dán danh sách email của thành viên vào đây. Mỗi email một dòng, tối đa
+          1000 email / lần.</div>
+        <el-form-item label="Danh sách email:" prop="list">
           <el-input type="textarea" :rows="20" v-model="bulkFormData.list" :clearable="true"
-            placeholder="Nhập mã số email thành viên" />
+            placeholder="email1@example.com&#10;email2@example.com" />
         </el-form-item>
-        <el-form-item label="Nhóm:" prop="groupId">
-          <el-select v-model="bulkFormData.groupId" placeholder="Chọn nhóm" filterable clearable>
+        <el-form-item label="Nhóm (có thể chọn nhiều):" prop="groupIds">
+          <el-select v-model="bulkFormData.groupIds" placeholder="Chọn nhóm" filterable clearable multiple
+            style="width:100%">
             <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
@@ -120,15 +120,12 @@
 import {
   createParticipant,
   deleteParticipant,
-  deleteParticipantByIds,
-  findParticipant,
   updateParticipant,
   bulkParticipants,
-  getParticipantListByAttendance
+  getParticipantListByAttendance,
 } from '@/api/checkins/participant'
 
 import { ElMessage, ElMessageBox } from 'element-plus'
-
 import { ref, reactive } from 'vue'
 
 const props = defineProps({
@@ -138,25 +135,23 @@ const props = defineProps({
   },
   groupOptions: {
     type: Array,
-    required: false
-  }
+    default: () => [],
+  },
 })
 
 const page = ref(1)
 const total = ref(0)
 const pageSize = ref(10)
+const size = ref(20)
 const tableData = ref([])
-
-const formData = ref({
-})
+const formData = ref({})
 
 const searchInfo = ref({
   fullName: '',
   email: '',
   attendanceId: props.acId,
-  groupId: [],
+  groupId: null,
 })
-
 
 const handleSizeChange = (val) => {
   pageSize.value = val
@@ -173,26 +168,16 @@ const getTableData = async () => {
   const table = await getParticipantListByAttendance({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list.map((e) => {
-      var groupIds = e.groups?.map(k => k.ID)
-      e.groupId = groupIds
+      e.groupId = e.groups?.map(k => k.ID)
       return e
     })
     total.value = table.data.total
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  // //console.log("participant components")
-  // //console.log(tableData.value)
 }
 
 getTableData()
-
-
-const multipleSelection = ref([])
-
-const handleSelectionChange = (val) => {
-  multipleSelection.value = val
-}
 
 const deleteParticipantRow = (row) => {
   ElMessageBox.confirm('Bạn có chắc muốn xóa thành viên này không?', 'Cảnh báo', {
@@ -204,61 +189,18 @@ const deleteParticipantRow = (row) => {
   })
 }
 
-const onDelete = async () => {
-  ElMessageBox.confirm('Bạn có chắc muốn xóa không?', 'Cảnh báo', {
-    confirmButtonText: 'Đồng ý',
-    cancelButtonText: 'Hủy',
-    type: 'warning'
-  }).then(async () => {
-    const IDs = []
-    if (multipleSelection.value.length === 0) {
-      ElMessage({
-        type: 'warning',
-        message: 'Vui lòng chọn dữ liệu để xóa'
-      })
-      return
-    }
-    multipleSelection.value &&
-      multipleSelection.value.map(item => {
-        IDs.push(item.ID)
-      })
-    const res = await deleteParticipantByIds({ IDs })
-    if (res.code === 0) {
-      ElMessage({
-        type: 'success',
-        message: 'Xoá thành công'
-      })
-      if (tableData.value.length === IDs.length && page.value > 1) {
-        page.value--
-      }
-      getTableData()
-    }
-  })
-}
-
-
 const type = ref('')
 
-
 const updateParticipantFunc = async (row) => {
-  // const res = await findParticipant({ ID: row.ID })
   type.value = 'update'
-  // if (res.code === 0) {
-  formData.value = row
-  // formData.value.groupId = res.data.groups.map((e) => e.ID)
+  formData.value = { ...row }
   dialogFormVisible.value = true
-  // }
 }
-
-
 
 const deleteParticipantFunc = async (row) => {
   const res = await deleteParticipant({ ID: row.ID, attendanceId: Number(props.acId) })
   if (res.code === 0) {
-    ElMessage({
-      type: 'success',
-      message: 'Xoá thành công'
-    })
+    ElMessage({ type: 'success', message: 'Xoá thành công' })
     if (tableData.value.length === 1 && page.value > 1) {
       page.value--
     }
@@ -268,48 +210,38 @@ const deleteParticipantFunc = async (row) => {
 
 const dialogFormVisible = ref(false)
 
-
 const openDialog = () => {
   type.value = 'create'
+  formData.value = { fullName: '', email: '', groupId: [] }
   dialogFormVisible.value = true
 }
 
-
 const closeDialog = () => {
   dialogFormVisible.value = false
-  formData.value = {
-    fullName: '',
-    email: '',
-  }
+  formData.value = {}
 }
 
 const elFormRef = ref()
+
+const rule = reactive({
+  email: [
+    { required: true, message: 'Email không được để trống', trigger: ['input', 'blur'] },
+    { type: 'email', message: 'Email không đúng định dạng', trigger: ['input', 'blur'] },
+  ],
+})
+
 const enterDialog = async () => {
-  // if (formData.value.groupId) {
-  //   formData.value.groupId = Number(formData.value.groupId)
-  // }
-  // //console.log(formData.value)
-  // return
   formData.value.attendanceId = Number(props.acId)
   elFormRef.value?.validate(async (valid) => {
     if (!valid) return
     let res
-    switch (type.value) {
-      case 'create':
-        res = await createParticipant(formData.value)
-        break
-      case 'update':
-        res = await updateParticipant(formData.value)
-        break
-      default:
-        res = await createParticipant(formData.value)
-        break
+    if (type.value === 'create') {
+      res = await createParticipant(formData.value)
+    } else {
+      res = await updateParticipant(formData.value)
     }
     if (res.code === 0) {
-      ElMessage({
-        type: 'success',
-        message: 'Tạo/cập nhật thành công'
-      })
+      ElMessage({ type: 'success', message: 'Tạo/cập nhật thành công' })
       closeDialog()
       getTableData()
     }
@@ -321,57 +253,55 @@ const onSubmit = () => {
 }
 
 const onReset = () => {
-  searchInfo.value = {
-    fullName: '',
-    email: '',
-    attendanceId: props.acId
-  }
+  searchInfo.value = { fullName: '', email: '', attendanceId: props.acId, groupId: null }
   getTableData()
 }
 
+// Bulk add
 const bulkAddVisible = ref(false)
-const bulkFormData = ref({
-  list: ''
-})
+const bulkFormData = ref({ list: '', groupIds: [] })
 const bulkFormRef = ref()
 
 const bulkRules = reactive({
   list: [
     {
       validator: (rule, value, callback) => {
-        if (!value) {
-          callback(new Error('Không được để trống'))
-        } else if (value.split("\n").length > 1000) {
+        if (!value || !value.trim()) {
+          callback(new Error('Danh sách email không được để trống'))
+        } else if (value.trim().split('\n').length > 1000) {
           callback(new Error('Giới hạn tối đa 1000 thành viên / lần'))
         } else {
           callback()
         }
-      }, trigger: 'blur'
-    }
+      },
+      trigger: 'blur',
+    },
   ],
 })
 
 const openBulkAdd = () => {
+  bulkFormData.value = { list: '', groupIds: [] }
   bulkAddVisible.value = true
 }
 
 const bulkAddParticipantsFunc = async () => {
   bulkFormRef.value?.validate(async (valid) => {
     if (!valid) return
-    var list = bulkFormData.value.list.split("\n")
-    var res = await bulkParticipants({ list, attendanceId: Number(props.acId), groupId: Number(bulkFormData.value.groupId) })
+    const list = bulkFormData.value.list.trim().split('\n').map(e => e.trim()).filter(Boolean)
+    const groupIds = bulkFormData.value.groupIds?.map(Number) ?? []
+    const res = await bulkParticipants({
+      list,
+      attendanceId: Number(props.acId),
+      groupIds,
+      groupId: groupIds[0] ?? undefined,
+    })
     if (res.code === 0) {
-      ElMessage({
-        type: 'success',
-        message: 'Thêm thành công'
-      })
+      ElMessage({ type: 'success', message: 'Thêm thành công' })
       bulkAddVisible.value = false
       getTableData()
     }
-
   })
 }
-
 </script>
 
 <style scoped>

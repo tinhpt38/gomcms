@@ -8,6 +8,15 @@
         <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
       </div>
     </div>
+    <div class="px-2 pb-2">
+      <el-steps :active="setupStep" finish-status="success" simple>
+        <el-step title="Thành viên" />
+        <el-step title="Nhóm" />
+        <el-step title="Khu vực" />
+        <el-step title="Điều kiện" />
+        <el-step title="Đồng bộ" />
+      </el-steps>
+    </div>
     <el-tabs v-model="tabsActiveTab" type="border-card" @tab-click="tabHandleClick">
       <el-tab-pane name="attendanceInfoTab" label="Chi tiết">
         <div class="card-container">
@@ -138,9 +147,9 @@
         </div>
         <el-divider />
       </el-tab-pane>
-      <el-tab-pane name="partticipantsTab" label="Thành viên">
+      <el-tab-pane name="participantsTab" label="Thành viên">
         <div class="table-container">
-          <Partticipant :ac-id="currentId" :group-options="groupOptions" />
+          <Participant :ac-id="currentId" :group-options="groupOptions" />
         </div>
       </el-tab-pane>
       <el-tab-pane name="groupTab" label="Nhóm">
@@ -155,7 +164,12 @@
       </el-tab-pane>
       <el-tab-pane name="conditionTab" label="Điều kiện">
         <div class="table-container">
-          <Condition :ref="conditionTabRef" :ac-id="currentId" />
+          <Condition
+            ref="conditionTabRef"
+            :ac-id="currentId"
+            :area-options="areaOptions"
+            :group-options="groupOptions"
+          />
         </div>
       </el-tab-pane>
       <el-tab-pane name="histories" label="Lịch sử">
@@ -298,7 +312,7 @@ import {
 import { useRoute } from 'vue-router';
 import { ElForm, ElMessage } from 'element-plus'
 import { ref, reactive } from 'vue'
-import Partticipant from '@/view/checkins/components/participant/index.vue'
+import Participant from '@/view/checkins/components/participant/index.vue'
 import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
@@ -324,7 +338,7 @@ defineOptions({
 
 const $route = useRoute()
 const tabsActiveTab = ref('attendanceInfoTab')
-const currentId = ref($route.params.id)
+const currentId = ref(Number($route.params.id))
 
 const clientURL = ref(import.meta.env.VITE_CLIENT_URL)
 
@@ -352,6 +366,20 @@ const agencyOptions = ref([])
 
 const showAllOptionConfig = ref(false)
 const conditionTabRef = ref()
+
+const setupStepMap = {
+  participantsTab: 0,
+  groupTab: 1,
+  areaTab: 2,
+  conditionTab: 3,
+  histories: 4,
+}
+const setupStep = ref(0)
+const tabHandleClickUpdateStep = (tabName) => {
+  if (tabName in setupStepMap) {
+    setupStep.value = setupStepMap[tabName]
+  }
+}
 
 const searchRules = reactive({
   createdAt: [
@@ -582,16 +610,17 @@ const convertToTree = (data) => {
 }
 
 const tabHandleClick = async (tab, event) => {
-
+  tabHandleClickUpdateStep(tab.props.name)
   if (tab.props.name === 'conditionTab') {
-    await conditionTabRef.value?.getAgencyOptions()
-    await conditionTabRef.value?.getGroupOptions()
+    await reGetOptions()
+    await conditionTabRef.value?.getTableData()
+    await conditionTabRef.value?.checkSyncStatus()
   }
 }
 
 const areaOptions = ref([])
 const getAreaListData = async () => {
-  const table = await findAttendanceArea({ id: searchInfo.value.attendanceId })
+  const table = await findAttendanceArea({ id: currentId.value })
   if (table.code === 0) {
     areaOptions.value = table.data.map(item => {
       return {
@@ -600,17 +629,15 @@ const getAreaListData = async () => {
       }
     })
   }
-
 }
 getAreaListData();
 
 const groupOptions = ref([])
 const getGroupOptions = async () => {
-  const table = await getGroupList({ page: 1, pageSize: -1, ...searchInfo.value })
+  const table = await getGroupList({ page: 1, pageSize: -1, attendanceId: currentId.value })
   if (table.code === 0) {
     groupOptions.value = table.data.list
   }
-  //console.log('groupOptions', groupOptions.value)
 }
 getGroupOptions();
 

@@ -1,6 +1,8 @@
 package checkins
 
 import (
+	"fmt"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
@@ -179,6 +181,30 @@ func (conditionApi *ConditionApi) GetConditionPublic(c *gin.Context) {
 	response.OkWithDetailed(gin.H{
 		"info": "不需要鉴权的Điều kiện để checkins接口信息",
 	}, "Thành công", c)
+}
+
+func (conditionApi *ConditionApi) GetSyncStatus(c *gin.Context) {
+	attendanceIdStr := c.Query("attendanceId")
+	if attendanceIdStr == "" {
+		response.FailWithMessage("Thiếu attendanceId", c)
+		return
+	}
+	var attendanceId int
+	if _, err := fmt.Sscanf(attendanceIdStr, "%d", &attendanceId); err != nil || attendanceId <= 0 {
+		response.FailWithMessage("attendanceId không hợp lệ", c)
+		return
+	}
+	conditionCount, agpConditionCount, needsSync, err := conditionService.GetSyncStatus(attendanceId)
+	if err != nil {
+		global.GVA_LOG.Error("thất bại!", zap.Error(err))
+		response.FailWithMessage("thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithData(gin.H{
+		"conditionCount":    conditionCount,
+		"agpConditionCount": agpConditionCount,
+		"needsSync":         needsSync,
+	}, c)
 }
 
 func (conditionApi *ConditionApi) SyncCondition(c *gin.Context) {

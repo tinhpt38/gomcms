@@ -154,6 +154,19 @@ func (conditionService *ConditionService) GetConditionsByAttendanceId(attId uint
 	return conditions, err
 }
 
+func (conditionService *ConditionService) GetSyncStatus(attId int) (conditionCount, agpConditionCount int64, needsSync bool, err error) {
+	err = global.GVA_DB.Model(&checkins.Condition{}).Where("attendance_id = ? AND deleted_at IS NULL", attId).Count(&conditionCount).Error
+	if err != nil {
+		return
+	}
+	err = global.GVA_DB.Model(&checkins.AGPCondition{}).Where("attendance_id = ? AND deleted_at IS NULL", attId).Count(&agpConditionCount).Error
+	if err != nil {
+		return
+	}
+	needsSync = conditionCount > 0 && agpConditionCount == 0
+	return
+}
+
 func (conditionService *ConditionService) SyncCondtionForAllMember(attId int) (err error) {
 	conditions, err := conditionService.GetConditionsByAttendanceId(uint(attId))
 	if err != nil {

@@ -144,7 +144,8 @@ const onDeleteArea = async (id) => {
         type: 'success',
         message: 'Xoá thành công'
       })
-      getAreaListData();
+      getAreaListData()
+      emits('onSuccess')
     }
   }).catch(() => {
     ElMessage({
@@ -152,7 +153,6 @@ const onDeleteArea = async (id) => {
       message: 'Đã hủy'
     })
   })
-  emits('onSuccess')
 }
 
 const addNewArea = () => {
@@ -192,11 +192,11 @@ const enterDialog = () => {
         type: 'success',
         message: 'Tạo/cập nhật thành công'
       })
-      dialogFormVisible.value = false;
-      getAreaListData();
+      dialogFormVisible.value = false
+      getAreaListData()
+      emits('onSuccess')
     }
   })
-  emits('onSuccess')
 }
 
 const onSelectChange = (val) => {

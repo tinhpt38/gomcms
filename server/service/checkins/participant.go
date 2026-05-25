@@ -34,9 +34,13 @@ func (participantService *ParticipantService) CreateParticipant(participant *che
 }
 
 func (participantService *ParticipantService) BulkCreateParticipants(req checkinsReq.ListEmailParticipantRequest) (err error) {
-	// Use transaction for ACID compliance
+	// Merge GroupId (legacy) into GroupIds for backward compatibility
+	targetGroupIds := req.GroupIds
+	if len(targetGroupIds) == 0 && req.GroupId != nil {
+		targetGroupIds = []uint{*req.GroupId}
+	}
+
 	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
-		// Process in batches of 100 for better performance
 		batchSize := 100
 		totalEmails := len(req.List)
 
@@ -45,22 +49,19 @@ func (participantService *ParticipantService) BulkCreateParticipants(req checkin
 			if end > totalEmails {
 				end = totalEmails
 			}
-
 			currentBatch := req.List[i:end]
 
-			// Step 1: Find existing participants to avoid unnecessary inserts
+			// Step 1: Find or create participants by email
 			var existingParticipants []checkins.Participant
 			if err := tx.Model(&checkins.Participant{}).Where("email IN ?", currentBatch).Find(&existingParticipants).Error; err != nil {
 				return err
 			}
 
-			// Create map for quick lookup of existing participants
 			existingMap := make(map[string]checkins.Participant)
 			for _, p := range existingParticipants {
 				existingMap[p.Email] = p
 			}
 
-			// Step 2: Prepare new participants that don't exist yet
 			var newParticipants []checkins.Participant
 			for _, email := range currentBatch {
 				if _, exists := existingMap[email]; !exists {
@@ -68,72 +69,111 @@ func (participantService *ParticipantService) BulkCreateParticipants(req checkin
 				}
 			}
 
-			// Step 3: Bulk insert new participants if any
 			if len(newParticipants) > 0 {
 				if err := tx.Model(&checkins.Participant{}).Create(&newParticipants).Error; err != nil {
 					return err
 				}
-
-				// Add newly created participants to the existing map
 				for _, p := range newParticipants {
 					existingMap[p.Email] = p
 				}
 			}
 
-			// Step 4: Prepare attendance-group-participant records
-			var newAGPs []checkins.AttendanceGroupParticipant
-			var existingAGPEmails []string
-			var existingParticipantIDs []uint
+			// Step 2: For each target group, create missing AGP records
+			for _, groupId := range targetGroupIds {
+				gid := groupId
 
-			// Get all participant IDs for the current batch
-			for _, email := range currentBatch {
-				if p, exists := existingMap[email]; exists {
-					existingParticipantIDs = append(existingParticipantIDs, p.ID)
-					existingAGPEmails = append(existingAGPEmails, email)
+				var participantIDs []uint
+				for _, email := range currentBatch {
+					if p, exists := existingMap[email]; exists {
+						participantIDs = append(participantIDs, p.ID)
+					}
 				}
-			}
 
-			// Step 5: Find existing AGP records to avoid duplicates
-			var existingAGPs []checkins.AttendanceGroupParticipant
-			if len(existingParticipantIDs) > 0 {
-				if err := tx.Model(&checkins.AttendanceGroupParticipant{}).
-					Where("participant_id IN ? AND attendance_id = ? AND group_id = ?",
-						existingParticipantIDs, req.AttendanceId, req.GroupId).
-					Find(&existingAGPs).Error; err != nil {
-					return err
+				var existingAGPs []checkins.AttendanceGroupParticipant
+				if len(participantIDs) > 0 {
+					if err := tx.Model(&checkins.AttendanceGroupParticipant{}).
+						Where("participant_id IN ? AND attendance_id = ? AND group_id = ?",
+							participantIDs, req.AttendanceId, gid).
+						Find(&existingAGPs).Error; err != nil {
+						return err
+					}
 				}
-			}
 
-			// Create map of existing AGPs
-			existingAGPMap := make(map[uint]bool)
-			for _, agp := range existingAGPs {
-				if agp.ParticipantId != nil {
-					existingAGPMap[*agp.ParticipantId] = true
+				existingAGPMap := make(map[uint]bool)
+				for _, agp := range existingAGPs {
+					if agp.ParticipantId != nil {
+						existingAGPMap[*agp.ParticipantId] = true
+					}
 				}
-			}
 
-			// Step 6: Create new AGP records for participants that don't have one
-			for _, email := range currentBatch {
-				if p, exists := existingMap[email]; exists {
-					if !existingAGPMap[p.ID] {
-						participantID := p.ID
-						newAGPs = append(newAGPs, checkins.AttendanceGroupParticipant{
-							ParticipantId: &participantID,
-							AttendanceId:  req.AttendanceId,
-							GroupId:       req.GroupId,
-						})
+				var newAGPs []checkins.AttendanceGroupParticipant
+				for _, email := range currentBatch {
+					if p, exists := existingMap[email]; exists {
+						if !existingAGPMap[p.ID] {
+							pid := p.ID
+							newAGPs = append(newAGPs, checkins.AttendanceGroupParticipant{
+								ParticipantId: &pid,
+								AttendanceId:  req.AttendanceId,
+								GroupId:       &gid,
+							})
+						}
+					}
+				}
+
+				if len(newAGPs) > 0 {
+					if err := tx.Model(&checkins.AttendanceGroupParticipant{}).Create(&newAGPs).Error; err != nil {
+						return err
 					}
 				}
 			}
 
-			// Step 7: Bulk insert new AGP records if any
-			if len(newAGPs) > 0 {
-				if err := tx.Model(&checkins.AttendanceGroupParticipant{}).Create(&newAGPs).Error; err != nil {
-					return err
+			// If no groups specified, create AGP records with nil group_id
+			if len(targetGroupIds) == 0 {
+				var participantIDs []uint
+				for _, email := range currentBatch {
+					if p, exists := existingMap[email]; exists {
+						participantIDs = append(participantIDs, p.ID)
+					}
+				}
+
+				var existingAGPs []checkins.AttendanceGroupParticipant
+				if len(participantIDs) > 0 {
+					if err := tx.Model(&checkins.AttendanceGroupParticipant{}).
+						Where("participant_id IN ? AND attendance_id = ? AND group_id IS NULL",
+							participantIDs, req.AttendanceId).
+						Find(&existingAGPs).Error; err != nil {
+						return err
+					}
+				}
+
+				existingAGPMap := make(map[uint]bool)
+				for _, agp := range existingAGPs {
+					if agp.ParticipantId != nil {
+						existingAGPMap[*agp.ParticipantId] = true
+					}
+				}
+
+				var newAGPs []checkins.AttendanceGroupParticipant
+				for _, email := range currentBatch {
+					if p, exists := existingMap[email]; exists {
+						if !existingAGPMap[p.ID] {
+							pid := p.ID
+							newAGPs = append(newAGPs, checkins.AttendanceGroupParticipant{
+								ParticipantId: &pid,
+								AttendanceId:  req.AttendanceId,
+								GroupId:       nil,
+							})
+						}
+					}
+				}
+
+				if len(newAGPs) > 0 {
+					if err := tx.Model(&checkins.AttendanceGroupParticipant{}).Create(&newAGPs).Error; err != nil {
+						return err
+					}
 				}
 			}
 		}
-
 		return nil
 	})
 }

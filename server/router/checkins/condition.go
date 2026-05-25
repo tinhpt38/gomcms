@@ -20,8 +20,9 @@ func (s *ConditionRouter) InitConditionRouter(Router *gin.RouterGroup, PublicRou
 		conditionRouter.PUT("updateCondition", conditionApi.UpdateCondition)              // 更新Điều kiện để checkins
 	}
 	{
-		conditionRouterWithoutRecord.GET("findCondition", conditionApi.FindCondition)       // 根据ID获取Điều kiện để checkins
-		conditionRouterWithoutRecord.GET("getConditionList", conditionApi.GetConditionList) // 获取Điều kiện để checkins列表
+		conditionRouterWithoutRecord.GET("findCondition", conditionApi.FindCondition)         // 根据ID获取Điều kiện để checkins
+		conditionRouterWithoutRecord.GET("getConditionList", conditionApi.GetConditionList)   // 获取Điều kiện để checkins列表
+		conditionRouterWithoutRecord.GET("getSyncStatus", conditionApi.GetSyncStatus)         // Lấy trạng thái đồng bộ điều kiện
 	}
 	{
 		conditionRouterWithoutAuth.GET("getConditionPublic", conditionApi.GetConditionPublic) // 获取Điều kiện để checkins列表

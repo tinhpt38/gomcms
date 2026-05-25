@@ -18,10 +18,12 @@ func (s *GroupRouter) InitGroupRouter(Router *gin.RouterGroup, PublicRouter *gin
 		groupRouter.DELETE("deleteGroupByIds", groupApi.DeleteGroupByIds)                       // 批量删除Nhóm
 		groupRouter.PUT("updateGroup", groupApi.UpdateGroup)                                    // 更新Nhóm
 		groupRouter.POST("assignParticipantToGroupAuto", groupApi.AssignParticipantToGroupAuto) // Tạo nhóm và gắn nhóm tự động cho người tham gia
+		groupRouter.POST("reassignParticipantsOnly", groupApi.ReassignParticipantsOnly)         // Chia lại thành viên vào nhóm hiện có (không xóa nhóm)
 	}
 	{
-		groupRouterWithoutRecord.GET("findGroup", groupApi.FindGroup)       // 根据ID获取Nhóm
-		groupRouterWithoutRecord.GET("getGroupList", groupApi.GetGroupList) // 获取Nhóm列表
+		groupRouterWithoutRecord.GET("findGroup", groupApi.FindGroup)                         // 根据ID获取Nhóm
+		groupRouterWithoutRecord.GET("getGroupList", groupApi.GetGroupList)                   // 获取Nhóm列表
+		groupRouterWithoutRecord.GET("getGroupDependencyCount", groupApi.GetGroupDependencyCount) // Lấy số lượng thành viên và điều kiện của nhóm
 	}
 	{
 		groupRouterWithoutAuth.GET("getGroupDataSource", groupApi.GetGroupDataSource) // 获取Nhóm数据源

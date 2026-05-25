@@ -111,21 +111,51 @@ func (groupApi *GroupApi) GetGroupDataSource(c *gin.Context) {
 func (groupApi *GroupApi) AssignParticipantToGroupAuto(c *gin.Context) {
 	var info checkinsReq.GroupAuto
 	err := c.ShouldBindJSON(&info)
-
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-
 	err = groupService.AssignParticipantToGroupAuto(info)
-
 	if err != nil {
 		global.GVA_LOG.Error("lấy thất bại!", zap.Error(err))
 		response.FailWithMessage("lấy thất bại:"+err.Error(), c)
 		return
 	}
-
 	response.OkWithMessage("Gắn nhóm tự động cho sinh viên thành công", c)
+}
+
+func (groupApi *GroupApi) ReassignParticipantsOnly(c *gin.Context) {
+	var body struct {
+		AttendanceId int `json:"attendanceId" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if err := groupService.ReassignParticipantsOnly(body.AttendanceId); err != nil {
+		global.GVA_LOG.Error("thất bại!", zap.Error(err))
+		response.FailWithMessage("thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithMessage("Chia lại thành viên thành công", c)
+}
+
+func (groupApi *GroupApi) GetGroupDependencyCount(c *gin.Context) {
+	groupId := c.Query("ID")
+	if groupId == "" {
+		response.FailWithMessage("Thiếu ID nhóm", c)
+		return
+	}
+	agpCount, conditionCount, err := groupService.GetGroupDependencyCount(groupId)
+	if err != nil {
+		global.GVA_LOG.Error("thất bại!", zap.Error(err))
+		response.FailWithMessage("thất bại:"+err.Error(), c)
+		return
+	}
+	response.OkWithData(gin.H{
+		"memberCount":    agpCount,
+		"conditionCount": conditionCount,
+	}, c)
 }
 
 func (groupApi *GroupApi) GetGroupPublic(c *gin.Context) {

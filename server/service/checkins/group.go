@@ -193,6 +193,60 @@ func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.
 	return nil
 }
 
+// ReassignParticipantsOnly phân phối lại thành viên vào các nhóm hiện có mà không xóa nhóm.
+func (groupService *GroupService) ReassignParticipantsOnly(attendanceId int) (err error) {
+	var groups []checkins.Group
+	err = global.GVA_DB.Where("attendance_id = ?", attendanceId).Find(&groups).Error
+	if err != nil || len(groups) == 0 {
+		return
+	}
+
+	var agps []checkins.AttendanceGroupParticipant
+	err = global.GVA_DB.Table(checkins.AttendanceGroupParticipant{}.TableName()).
+		Where("attendance_id = ?", attendanceId).Find(&agps).Error
+	if err != nil {
+		return
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(agps), func(i, j int) { agps[i], agps[j] = agps[j], agps[i] })
+
+	groupCount := len(groups)
+	base := len(agps) / groupCount
+	remainder := len(agps) % groupCount
+	currentIndex := 0
+
+	for i, group := range groups {
+		num := base
+		if i < remainder {
+			num++
+		}
+		for j := 0; j < num; j++ {
+			if currentIndex >= len(agps) {
+				break
+			}
+			agp := agps[currentIndex]
+			agp.GroupId = &group.ID
+			err = global.GVA_DB.Save(&agp).Error
+			if err != nil {
+				return
+			}
+			currentIndex++
+		}
+	}
+	return nil
+}
+
+// GetGroupMemberCount trả về số lượng AGP của một nhóm kèm số conditions liên kết.
+func (groupService *GroupService) GetGroupDependencyCount(groupId string) (agpCount, conditionCount int64, err error) {
+	err = global.GVA_DB.Model(&checkins.AttendanceGroupParticipant{}).Where("group_id = ?", groupId).Count(&agpCount).Error
+	if err != nil {
+		return
+	}
+	err = global.GVA_DB.Model(&checkins.Condition{}).Where("group_id = ? AND deleted_at IS NULL", groupId).Count(&conditionCount).Error
+	return
+}
+
 // func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.GroupAuto) (err error) {
 // 	// Xem thử hiện tại có bao nhiêu nhóm trong DB rồi từ đó tính toán số nhóm cần tạo
 // 	var count int64

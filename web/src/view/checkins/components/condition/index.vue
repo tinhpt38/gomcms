@@ -1,5 +1,11 @@
 <template>
   <div>
+    <el-alert v-if="needsSync" type="warning" :closable="false" show-icon class="mb-2">
+      <template #title>
+        Chưa đồng bộ điều kiện — thành viên chưa được gán điều kiện tương ứng.
+        <el-button type="warning" link @click="syncConditionFun">Đồng bộ ngay</el-button>
+      </template>
+    </el-alert>
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button type="primary" icon="plus" @click="openDialog">
@@ -98,16 +104,22 @@
     <el-drawer v-model="detailShow" destroy-on-close size="800" :show-close="true" :before-close="closeDetailShow">
       <el-descriptions column="1" border>
         <el-descriptions-item label="Nhóm">
-          {{ detailFrom.groupId }}
+          {{ detailFrom.group?.name ?? '(Tất cả nhóm)' }}
         </el-descriptions-item>
         <el-descriptions-item label="Khu vực">
-          {{ detailFrom.areaId }}
+          {{ detailFrom.area?.area?.name ?? '/' }}
+          <span v-if="detailFrom.area?.radius">(Bán kính {{ detailFrom.area.radius }}m)</span>
         </el-descriptions-item>
         <el-descriptions-item label="Bắt đầu">
-          {{ detailFrom.startAt }}
+          {{ formatDateTime(detailFrom.startAt) }}
         </el-descriptions-item>
         <el-descriptions-item label="Kết thúc">
-          {{ detailFrom.endAt }}
+          {{ formatDateTime(detailFrom.endAt) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="Hiển thị số may mắn">
+          <el-tag :type="detailFrom.showLuckyNumber ? 'success' : 'danger'">
+            {{ detailFrom.showLuckyNumber ? 'Có' : 'Không' }}
+          </el-tag>
         </el-descriptions-item>
       </el-descriptions>
     </el-drawer>
@@ -123,18 +135,9 @@ import {
   updateCondition,
   findCondition,
   getConditionList,
-  syncCondition
-
+  syncCondition,
+  getSyncStatus,
 } from '@/api/checkins/condition'
-
-import {
-  findAttendanceArea
-} from '@/api/checkins/attendance'
-
-import {
-  getGroupList
-} from '@/api/checkins/group'
-
 
 import { formatDate, formatDateTime, } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -146,7 +149,15 @@ const props = defineProps({
   acId: {
     type: Number,
     required: true
-  }
+  },
+  areaOptions: {
+    type: Array,
+    default: () => []
+  },
+  groupOptions: {
+    type: Array,
+    default: () => []
+  },
 })
 const formData = ref({
   attendanceId: props.acId,
@@ -165,37 +176,30 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
+const needsSync = ref(false)
 
-
-
-const areaOptions = ref([])
-const getAreaListData = async () => {
-  const table = await findAttendanceArea({ id: props.acId })
-  if (table.code === 0) {
-    areaOptions.value = table.data.map(item => {
-      return {
-        ID: item.ID,
-        name: item.area?.name
-      }
-    })
+const checkSyncStatus = async () => {
+  const res = await getSyncStatus({ attendanceId: props.acId })
+  if (res.code === 0) {
+    needsSync.value = res.data.needsSync
   }
-
 }
-getAreaListData();
+checkSyncStatus()
 
-const groupOptions = ref([])
-const getGroupOptions = async () => {
-  searchInfo.value.attendanceId = props.acId
-  const table = await getGroupList({ page: 1, pageSize: -1, ...searchInfo.value })
-  if (table.code === 0) {
-    groupOptions.value = table.data.list
-  }
-  //console.log('groupOptions', groupOptions.value)
-}
-getGroupOptions();
 
 
 const searchRule = reactive({
+  areaId: [
+    {
+      validator: (rule, value, callback) => {
+        if (!formData.value.areaId) {
+          callback(new Error('Vui lòng chọn khu vực'))
+        } else {
+          callback()
+        }
+      }, trigger: 'change'
+    }
+  ],
   startAt: [
     {
       validator: (rule, value, callback) => {
@@ -231,7 +235,7 @@ const searchRule = reactive({
 
 // Đặt lại
 const onReset = () => {
-  searchInfo.value = {}
+  searchInfo.value = { attendanceId: props.acId }
   getTableData()
 }
 
@@ -259,6 +263,7 @@ const handleCurrentChange = (val) => {
 
 // Tìm kiếm
 const getTableData = async () => {
+  searchInfo.value.attendanceId = props.acId
   const table = await getConditionList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
     tableData.value = table.data.list
@@ -266,7 +271,6 @@ const getTableData = async () => {
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
-  //console.log("condition data", tableData.value)
 }
 
 getTableData()
@@ -356,6 +360,7 @@ const deleteConditionFunc = async (row) => {
       page.value--
     }
     getTableData()
+    checkSyncStatus()
   }
 }
 
@@ -402,6 +407,7 @@ const enterDialog = async () => {
       })
       closeDialog()
       getTableData()
+      checkSyncStatus()
     }
   })
 }
@@ -434,18 +440,21 @@ const closeDetailShow = () => {
   detailFrom.value = {}
 }
 
-const syncConditionFun = async() =>{
+defineExpose({ getTableData, checkSyncStatus })
+
+const syncConditionFun = async () => {
   ElMessageBox.confirm('Thao tác này sẽ đồng bộ tất cả điều kiện cho các thành viên', 'Cảnh báo', {
     confirmButtonText: 'Đồng ý',
     cancelButtonText: 'Hủy',
     type: 'warning'
   }).then(async () => {
-    const res = await syncCondition({attendanceId: Number(props.acId)})
+    const res = await syncCondition({ attendanceId: Number(props.acId) })
     if (res.code === 0) {
       ElMessage({
         type: 'success',
         message: 'Đồng bộ thành công'
       })
+      needsSync.value = false
       getTableData()
     }
   })

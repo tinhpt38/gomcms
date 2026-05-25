@@ -103,3 +103,11 @@ export const syncCondition = (data) => {
     data
   })
 }
+
+export const getSyncStatus = (params) => {
+  return service({
+    url: '/condition/getSyncStatus',
+    method: 'get',
+    params
+  })
+}
