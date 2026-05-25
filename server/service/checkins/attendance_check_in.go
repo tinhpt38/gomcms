@@ -489,32 +489,33 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			conditions []checkins.Condition
 		}
 
-		// Nhóm các điều kiện theo từng agp để xử lý song song hiệu quả hơn
-		agpConditions := make(map[uint]groupCondition)
+		// Build a fast AGP lookup so condition → AGP join is O(1) per row.
+		agpByID := make(map[uint]checkins.AttendanceGroupParticipant, len(listAgps))
+		for _, agp := range listAgps {
+			agpByID[agp.ID] = agp
+		}
 
-		for _, condition := range rConditions {
-			for _, agp := range listAgps {
-				if condition.AttendanceGroupParticipantId == int(agp.ID) {
-					// // Nếu điều kiện đã được điểm danh trước đó, đánh dấu là đã qua
-					// // nhưng KHÔNG tạo bản ghi mới - chỉ cập nhật counter ở cuối hàm
-					if arrayContains(conditionCheckedIn, condition.Condition.ID) {
-						tempCon := *condition.Condition
-						tempCon.IsPass = true
-						coreConditions = append(coreConditions, tempCon)
-					}
-
-					// Thêm vào danh sách kiểm tra
-					gc, exists := agpConditions[agp.ID]
-					if !exists {
-						gc = groupCondition{
-							agp:        agp,
-							conditions: make([]checkins.Condition, 0),
-						}
-					}
-					gc.conditions = append(gc.conditions, *condition.Condition)
-					agpConditions[agp.ID] = gc
-				}
+		// Build groupCondition map directly from agp_conditions — O(n) instead of O(n×m).
+		agpConditions := make(map[uint]groupCondition, len(listAgpIDs))
+		for _, agpCond := range rConditions {
+			agpID := uint(agpCond.AttendanceGroupParticipantId)
+			agp, ok := agpByID[agpID]
+			if !ok || agpCond.Condition == nil {
+				continue
 			}
+
+			if arrayContains(conditionCheckedIn, agpCond.Condition.ID) {
+				tempCon := *agpCond.Condition
+				tempCon.IsPass = true
+				coreConditions = append(coreConditions, tempCon)
+			}
+
+			gc, exists := agpConditions[agpID]
+			if !exists {
+				gc = groupCondition{agp: agp, conditions: make([]checkins.Condition, 0)}
+			}
+			gc.conditions = append(gc.conditions, *agpCond.Condition)
+			agpConditions[agpID] = gc
 		}
 
 		// Kiểm tra các điều kiện song song cho từng nhóm

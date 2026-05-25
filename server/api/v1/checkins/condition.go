@@ -37,6 +37,9 @@ func (conditionApi *ConditionApi) CreateCondition(c *gin.Context) {
 		response.FailWithMessage("thất bại:"+err.Error(), c)
 		return
 	}
+	if condition.AttendanceId != nil {
+		go conditionService.SyncAttendanceConditions(int(*condition.AttendanceId))
+	}
 	response.OkWithMessage("thành công", c)
 }
 
@@ -52,11 +55,16 @@ func (conditionApi *ConditionApi) CreateCondition(c *gin.Context) {
 func (conditionApi *ConditionApi) DeleteCondition(c *gin.Context) {
 	ID := c.Query("ID")
 	userID := utils.GetUserID(c)
+	// Fetch attendance ID before deletion for auto-sync
+	existing, fetchErr := conditionService.GetCondition(ID)
 	err := conditionService.DeleteCondition(ID, userID)
 	if err != nil {
 		global.GVA_LOG.Error("thất bại!", zap.Error(err))
 		response.FailWithMessage("thất bại:"+err.Error(), c)
 		return
+	}
+	if fetchErr == nil && existing.AttendanceId != nil {
+		go conditionService.SyncAttendanceConditions(int(*existing.AttendanceId))
 	}
 	response.OkWithMessage("thành công", c)
 }
@@ -103,6 +111,9 @@ func (conditionApi *ConditionApi) UpdateCondition(c *gin.Context) {
 		global.GVA_LOG.Error("Thất bại!", zap.Error(err))
 		response.FailWithMessage("Thất bại:"+err.Error(), c)
 		return
+	}
+	if condition.AttendanceId != nil {
+		go conditionService.SyncAttendanceConditions(int(*condition.AttendanceId))
 	}
 	response.OkWithMessage("Thành công", c)
 }
@@ -194,17 +205,13 @@ func (conditionApi *ConditionApi) GetSyncStatus(c *gin.Context) {
 		response.FailWithMessage("attendanceId không hợp lệ", c)
 		return
 	}
-	conditionCount, agpConditionCount, needsSync, err := conditionService.GetSyncStatus(attendanceId)
+	status, err := conditionService.GetSyncStatusFull(attendanceId)
 	if err != nil {
 		global.GVA_LOG.Error("thất bại!", zap.Error(err))
 		response.FailWithMessage("thất bại:"+err.Error(), c)
 		return
 	}
-	response.OkWithData(gin.H{
-		"conditionCount":    conditionCount,
-		"agpConditionCount": agpConditionCount,
-		"needsSync":         needsSync,
-	}, c)
+	response.OkWithData(status, c)
 }
 
 func (conditionApi *ConditionApi) SyncCondition(c *gin.Context) {

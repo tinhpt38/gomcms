@@ -4,6 +4,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -154,48 +155,237 @@ func (conditionService *ConditionService) GetConditionsByAttendanceId(attId uint
 	return conditions, err
 }
 
+// SyncState represents the sync health of agp_conditions for an attendance.
+type SyncState string
+
+const (
+	SyncStateNoRules    SyncState = "no_rules"
+	SyncStateNeverSynced SyncState = "never_synced"
+	SyncStateStale      SyncState = "stale"
+	SyncStateSynced     SyncState = "synced"
+)
+
+// SyncStatus holds the full sync health report for an attendance session.
+type SyncStatus struct {
+	// Legacy fields — kept for backward compatibility
+	ConditionCount    int64 `json:"conditionCount"`
+	AgpConditionCount int64 `json:"agpConditionCount"`
+	NeedsSync         bool  `json:"needsSync"`
+
+	// Extended fields
+	SyncState                 SyncState `json:"syncState"`
+	ExpectedAgpConditionCount int64     `json:"expectedAgpConditionCount"`
+	AgpCount                  int64     `json:"agpCount"`
+	ParticipantCount          int64     `json:"participantCount"`
+	AgpWithoutMappingCount    int64     `json:"agpWithoutMappingCount"`
+}
+
+// countExpectedAgpConditions returns the number of (agp, condition) pairs that should
+// exist after a correct sync.
+func countExpectedAgpConditions(attId int) (int64, error) {
+	var count int64
+	err := global.GVA_DB.Raw(`
+		SELECT COUNT(*)
+		FROM attendance_group_participants agp
+		INNER JOIN conditions c
+		  ON c.attendance_id = ?
+		  AND c.deleted_at IS NULL
+		  AND (c.group_id = agp.group_id OR c.group_id IS NULL)
+		WHERE agp.attendance_id = ?
+		  AND agp.deleted_at IS NULL`,
+		attId, attId).Scan(&count).Error
+	return count, err
+}
+
 func (conditionService *ConditionService) GetSyncStatus(attId int) (conditionCount, agpConditionCount int64, needsSync bool, err error) {
-	err = global.GVA_DB.Model(&checkins.Condition{}).Where("attendance_id = ? AND deleted_at IS NULL", attId).Count(&conditionCount).Error
+	status, e := conditionService.GetSyncStatusFull(attId)
+	if e != nil {
+		err = e
+		return
+	}
+	conditionCount = status.ConditionCount
+	agpConditionCount = status.AgpConditionCount
+	needsSync = status.NeedsSync
+	return
+}
+
+func (conditionService *ConditionService) GetSyncStatusFull(attId int) (status SyncStatus, err error) {
+	err = global.GVA_DB.Model(&checkins.Condition{}).
+		Where("attendance_id = ? AND deleted_at IS NULL", attId).
+		Count(&status.ConditionCount).Error
 	if err != nil {
 		return
 	}
-	err = global.GVA_DB.Model(&checkins.AGPCondition{}).Where("attendance_id = ? AND deleted_at IS NULL", attId).Count(&agpConditionCount).Error
+
+	err = global.GVA_DB.Model(&checkins.AGPCondition{}).
+		Where("attendance_id = ? AND deleted_at IS NULL", attId).
+		Count(&status.AgpConditionCount).Error
 	if err != nil {
 		return
 	}
-	needsSync = conditionCount > 0 && agpConditionCount == 0
+
+	err = global.GVA_DB.Model(&checkins.AttendanceGroupParticipant{}).
+		Where("attendance_id = ? AND deleted_at IS NULL", attId).
+		Count(&status.AgpCount).Error
+	if err != nil {
+		return
+	}
+
+	err = global.GVA_DB.Raw(
+		`SELECT COUNT(DISTINCT participant_id)
+		 FROM attendance_group_participants
+		 WHERE attendance_id = ? AND deleted_at IS NULL`, attId).
+		Scan(&status.ParticipantCount).Error
+	if err != nil {
+		return
+	}
+
+	status.ExpectedAgpConditionCount, err = countExpectedAgpConditions(attId)
+	if err != nil {
+		return
+	}
+
+	// AGP that have no agp_condition row despite conditions existing
+	if status.ConditionCount > 0 && status.AgpCount > 0 {
+		err = global.GVA_DB.Raw(`
+			SELECT COUNT(*)
+			FROM attendance_group_participants agp
+			WHERE agp.attendance_id = ?
+			  AND agp.deleted_at IS NULL
+			  AND NOT EXISTS (
+			    SELECT 1 FROM agp_conditions ac
+			    WHERE ac.agp_id = agp.id AND ac.deleted_at IS NULL
+			  )`, attId).Scan(&status.AgpWithoutMappingCount).Error
+		if err != nil {
+			return
+		}
+	}
+
+	switch {
+	case status.ConditionCount == 0:
+		status.SyncState = SyncStateNoRules
+	case status.AgpConditionCount == 0:
+		status.SyncState = SyncStateNeverSynced
+	case status.ExpectedAgpConditionCount != status.AgpConditionCount:
+		status.SyncState = SyncStateStale
+	default:
+		status.SyncState = SyncStateSynced
+	}
+
+	status.NeedsSync = status.SyncState == SyncStateNeverSynced || status.SyncState == SyncStateStale
+	return
+}
+
+// SyncAttendanceConditions is the single entry-point for syncing agp_conditions after any
+// config change (conditions, AGP, groups). It runs a delta sync when data already exists,
+// falling back to a full rebuild when the table is empty for this attendance.
+// Sync errors are logged but do NOT fail the calling CRUD operation.
+func (conditionService *ConditionService) SyncAttendanceConditions(attId int) {
+	svc := conditionService
+	var actual int64
+	if err := global.GVA_DB.Model(&checkins.AGPCondition{}).
+		Where("attendance_id = ? AND deleted_at IS NULL", attId).
+		Count(&actual).Error; err != nil {
+		global.GVA_LOG.Warn("auto-sync: count failed", zap.Int("attId", attId), zap.Error(err))
+		return
+	}
+
+	var syncErr error
+	if actual == 0 {
+		syncErr = svc.SyncCondtionForAllMember(attId)
+	} else {
+		syncErr = svc.SyncDeltaForAttendance(attId)
+	}
+	if syncErr != nil {
+		global.GVA_LOG.Warn("auto-sync: sync failed", zap.Int("attId", attId), zap.Error(syncErr))
+	}
+}
+
+// SyncDeltaForAttendance performs an incremental sync:
+//  1. Deletes agp_conditions that are no longer in the expected set.
+//  2. Inserts missing (agp_id, condition_id) pairs (duplicate-safe via INSERT IGNORE).
+func (conditionService *ConditionService) SyncDeltaForAttendance(attId int) (err error) {
+	var conditionCount int64
+	if err = global.GVA_DB.Model(&checkins.Condition{}).
+		Where("attendance_id = ? AND deleted_at IS NULL", attId).
+		Count(&conditionCount).Error; err != nil {
+		return
+	}
+	if conditionCount == 0 {
+		// No rules → wipe any stale mappings
+		return global.GVA_DB.
+			Where("attendance_id = ?", attId).
+			Unscoped().
+			Delete(&checkins.AGPCondition{}).Error
+	}
+
+	// Step 1: delete orphaned mappings (agp or condition no longer in expected set)
+	deleteOrphans := `
+		DELETE ac FROM agp_conditions ac
+		WHERE ac.attendance_id = ?
+		  AND NOT EXISTS (
+		    SELECT 1
+		    FROM attendance_group_participants agp
+		    INNER JOIN conditions c
+		      ON c.attendance_id = ?
+		      AND c.deleted_at IS NULL
+		      AND (c.group_id = agp.group_id OR c.group_id IS NULL)
+		    WHERE agp.id = ac.agp_id
+		      AND agp.deleted_at IS NULL
+		      AND c.id = ac.condition_id
+		  )`
+	if err = global.GVA_DB.Exec(deleteOrphans, attId, attId).Error; err != nil {
+		return
+	}
+
+	// Step 2: insert missing pairs
+	insertMissing := `
+		INSERT IGNORE INTO agp_conditions (agp_id, condition_id, attendance_id)
+		SELECT agp.id, c.id, agp.attendance_id
+		FROM attendance_group_participants agp
+		INNER JOIN conditions c
+		  ON c.attendance_id = ?
+		  AND c.deleted_at IS NULL
+		  AND (c.group_id = agp.group_id OR c.group_id IS NULL)
+		WHERE agp.attendance_id = ?
+		  AND agp.deleted_at IS NULL`
+	err = global.GVA_DB.Exec(insertMissing, attId, attId).Error
 	return
 }
 
 func (conditionService *ConditionService) SyncCondtionForAllMember(attId int) (err error) {
-	conditions, err := conditionService.GetConditionsByAttendanceId(uint(attId))
+	var conditionCount int64
+	err = global.GVA_DB.Model(&checkins.Condition{}).
+		Where("attendance_id = ? AND deleted_at IS NULL", attId).
+		Count(&conditionCount).Error
 	if err != nil {
-		return err
+		return
 	}
-	if len(conditions) == 0 {
+	if conditionCount == 0 {
 		return nil
 	}
 
-	// err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
-	// Xoá hết các đồng bộ trước đó
-	err = global.GVA_DB.Model(checkins.AGPCondition{}).Where("attendance_id = ?", attId).Unscoped().Delete(&checkins.AGPCondition{}).Error
+	// Full rebuild: delete existing mappings then re-insert from expected pairs.
+	err = global.GVA_DB.
+		Where("attendance_id = ?", attId).
+		Unscoped().
+		Delete(&checkins.AGPCondition{}).Error
 	if err != nil {
 		return err
 	}
 
+	// INNER JOIN ensures only valid (agp, condition) pairs are inserted — no NULL condition_id rows.
+	// Operator precedence: bind c.attendance_id explicitly so the OR covers only group_id matching.
 	rawQuery := `
 		INSERT INTO agp_conditions (agp_id, condition_id, attendance_id)
 		SELECT agp.id, c.id, agp.attendance_id
 		FROM attendance_group_participants agp
-		LEFT JOIN conditions c 
-		ON (c.group_id = agp.group_id OR c.group_id IS NULL AND c.attendance_id = ?)
-		WHERE agp.attendance_id = ?`
+		INNER JOIN conditions c
+		  ON c.attendance_id = ?
+		  AND c.deleted_at IS NULL
+		  AND (c.group_id = agp.group_id OR c.group_id IS NULL)
+		WHERE agp.attendance_id = ?
+		  AND agp.deleted_at IS NULL`
 	err = global.GVA_DB.Exec(rawQuery, attId, attId).Error
-	if err != nil {
-		return err
-	}
-	return nil
-
-	// })
-
+	return
 }

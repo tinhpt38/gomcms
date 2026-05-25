@@ -106,25 +106,129 @@ func TestSyncConditionGlobal(t *testing.T) {
 	assert.Equal(t, int64(1), count, "Điều kiện toàn phiên phải được gán cho mọi AGP")
 }
 
-// TestGetSyncStatus kiểm tra trạng thái needsSync.
-func TestGetSyncStatus(t *testing.T) {
+// TestGetSyncStatusNoRules: phiên không có điều kiện nào.
+func TestGetSyncStatusNoRules(t *testing.T) {
 	cleanupSyncTestData(t)
-
 	svc := ConditionService{}
 
 	attId := uint(2003)
-	att := checkins.Attendance{Title: "Sync Status Test"}
+	att := checkins.Attendance{Title: "No Rules Test"}
+	att.ID = attId
+	global.GVA_DB.Create(&att)
+
+	status, err := svc.GetSyncStatusFull(int(attId))
+	assert.NoError(t, err)
+	assert.Equal(t, SyncStateNoRules, status.SyncState)
+	assert.False(t, status.NeedsSync)
+}
+
+// TestGetSyncStatusNeverSynced: có điều kiện nhưng chưa sync lần nào.
+func TestGetSyncStatusNeverSynced(t *testing.T) {
+	cleanupSyncTestData(t)
+	svc := ConditionService{}
+
+	attId := uint(2003)
+	att := checkins.Attendance{Title: "Never Synced Test"}
 	att.ID = attId
 	global.GVA_DB.Create(&att)
 
 	cond := checkins.Condition{AttendanceId: &attId}
 	global.GVA_DB.Create(&cond)
 
-	condCount, agpCount, needsSync, err := svc.GetSyncStatus(int(attId))
+	status, err := svc.GetSyncStatusFull(int(attId))
 	assert.NoError(t, err)
-	assert.Equal(t, int64(1), condCount)
-	assert.Equal(t, int64(0), agpCount)
-	assert.True(t, needsSync, "Phải cần sync khi có condition nhưng chưa có agp_condition")
+	assert.Equal(t, int64(1), status.ConditionCount)
+	assert.Equal(t, int64(0), status.AgpConditionCount)
+	assert.Equal(t, SyncStateNeverSynced, status.SyncState)
+	assert.True(t, status.NeedsSync)
+}
+
+// TestGetSyncStatusStale: đã sync, sau đó thêm AGP → stale.
+func TestGetSyncStatusStale(t *testing.T) {
+	cleanupSyncTestData(t)
+	svc := ConditionService{}
+
+	attId := uint(2006)
+	att := checkins.Attendance{Title: "Stale Test"}
+	att.ID = attId
+	global.GVA_DB.Create(&att)
+
+	group := checkins.Group{Name: "Nhóm X", AttendanceId: attId}
+	global.GVA_DB.Create(&group)
+
+	p := checkins.Participant{Email: "stale@test.com"}
+	global.GVA_DB.Create(&p)
+
+	agp := checkins.AttendanceGroupParticipant{
+		ParticipantId: &p.ID,
+		AttendanceId:  &attId,
+		GroupId:       &group.ID,
+	}
+	global.GVA_DB.Create(&agp)
+
+	cond := checkins.Condition{AttendanceId: &attId, GroupId: &group.ID}
+	global.GVA_DB.Create(&cond)
+
+	// Sync lần đầu → synced
+	err := svc.SyncCondtionForAllMember(int(attId))
+	assert.NoError(t, err)
+	status, err := svc.GetSyncStatusFull(int(attId))
+	assert.NoError(t, err)
+	assert.Equal(t, SyncStateSynced, status.SyncState, "Sau sync phải là synced")
+
+	// Thêm thành viên mới chưa sync → stale
+	p2 := checkins.Participant{Email: "stale2@test.com"}
+	global.GVA_DB.Create(&p2)
+	agp2 := checkins.AttendanceGroupParticipant{
+		ParticipantId: &p2.ID,
+		AttendanceId:  &attId,
+		GroupId:       &group.ID,
+	}
+	global.GVA_DB.Create(&agp2)
+
+	status, err = svc.GetSyncStatusFull(int(attId))
+	assert.NoError(t, err)
+	assert.Equal(t, SyncStateStale, status.SyncState, "Sau thêm AGP mới phải là stale")
+	assert.True(t, status.NeedsSync)
+	assert.Greater(t, status.AgpWithoutMappingCount, int64(0))
+}
+
+// TestSyncNoNullConditions: sau sync không có dòng condition_id NULL.
+func TestSyncNoNullConditions(t *testing.T) {
+	cleanupSyncTestData(t)
+	svc := ConditionService{}
+
+	attId := uint(2007)
+	att := checkins.Attendance{Title: "No Null Test"}
+	att.ID = attId
+	global.GVA_DB.Create(&att)
+
+	group := checkins.Group{Name: "Nhóm Y", AttendanceId: attId}
+	global.GVA_DB.Create(&group)
+
+	p := checkins.Participant{Email: "nonull@test.com"}
+	global.GVA_DB.Create(&p)
+	agp := checkins.AttendanceGroupParticipant{
+		ParticipantId: &p.ID,
+		AttendanceId:  &attId,
+		GroupId:       &group.ID,
+	}
+	global.GVA_DB.Create(&agp)
+
+	// Điều kiện cho nhóm khác — AGP này sẽ không match → không được insert NULL
+	otherGroup := checkins.Group{Name: "Nhóm Z", AttendanceId: attId}
+	global.GVA_DB.Create(&otherGroup)
+	cond := checkins.Condition{AttendanceId: &attId, GroupId: &otherGroup.ID}
+	global.GVA_DB.Create(&cond)
+
+	err := svc.SyncCondtionForAllMember(int(attId))
+	assert.NoError(t, err)
+
+	var nullCount int64
+	global.GVA_DB.Raw(
+		"SELECT COUNT(*) FROM agp_conditions WHERE attendance_id = ? AND condition_id IS NULL", attId,
+	).Scan(&nullCount)
+	assert.Equal(t, int64(0), nullCount, "Không được có dòng condition_id NULL sau sync")
 }
 
 // TestBulkCreateParticipantsMultiGroup kiểm tra bulk add với nhiều nhóm.

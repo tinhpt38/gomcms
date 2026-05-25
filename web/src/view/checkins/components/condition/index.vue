@@ -1,9 +1,15 @@
 <template>
   <div>
-    <el-alert v-if="needsSync" type="warning" :closable="false" show-icon class="mb-2">
+    <el-alert v-if="syncState === 'never_synced'" type="warning" :closable="false" show-icon class="mb-2">
       <template #title>
-        Chưa đồng bộ điều kiện — thành viên chưa được gán điều kiện tương ứng.
+        Chưa đồng bộ lần nào — thành viên chưa được gán điều kiện.
         <el-button type="warning" link @click="syncConditionFun">Đồng bộ ngay</el-button>
+      </template>
+    </el-alert>
+    <el-alert v-else-if="syncState === 'stale'" type="warning" :closable="false" show-icon class="mb-2">
+      <template #title>
+        Cấu hình đã thay đổi — mapping điều kiện chưa cập nhật.
+        <el-button type="warning" link @click="syncConditionFun">Đồng bộ lại</el-button>
       </template>
     </el-alert>
     <div class="gva-table-box">
@@ -136,7 +142,6 @@ import {
   findCondition,
   getConditionList,
   syncCondition,
-  getSyncStatus,
 } from '@/api/checkins/condition'
 
 import { formatDate, formatDateTime, } from '@/utils/format'
@@ -160,6 +165,14 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  syncState: {
+    type: String,
+    default: 'no_rules',
+  },
+  needsSync: {
+    type: Boolean,
+    default: false,
+  },
 })
 const formData = ref({
   attendanceId: props.acId,
@@ -178,16 +191,9 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
-const needsSync = ref(false)
-
-const checkSyncStatus = async () => {
-  const res = await getSyncStatus({ attendanceId: props.acId })
-  if (res.code === 0) {
-    needsSync.value = res.data.needsSync
-    emit('syncStatusChange', res.data.needsSync)
-  }
+const notifySyncStatusChange = () => {
+  emit('syncStatusChange')
 }
-checkSyncStatus()
 
 
 
@@ -276,8 +282,6 @@ const getTableData = async () => {
   }
 }
 
-getTableData()
-
 // ============== Kết thúc bảng điều khiển ===============
 
 // Lấy các từ điển cần thiết có thể trống, tùy theo nhu cầu
@@ -363,7 +367,7 @@ const deleteConditionFunc = async (row) => {
       page.value--
     }
     getTableData()
-    checkSyncStatus()
+    notifySyncStatusChange()
   }
 }
 
@@ -406,11 +410,11 @@ const enterDialog = async () => {
     if (res.code === 0) {
       ElMessage({
         type: 'success',
-        message: 'Tạo/cập nhật thành công'
+        message: 'Đã lưu và đồng bộ'
       })
       closeDialog()
       getTableData()
-      checkSyncStatus()
+      notifySyncStatusChange()
     }
   })
 }
@@ -443,7 +447,7 @@ const closeDetailShow = () => {
   detailFrom.value = {}
 }
 
-defineExpose({ getTableData, checkSyncStatus })
+defineExpose({ getTableData })
 
 const syncConditionFun = async () => {
   ElMessageBox.confirm('Thao tác này sẽ đồng bộ tất cả điều kiện cho các thành viên', 'Cảnh báo', {
@@ -457,8 +461,7 @@ const syncConditionFun = async () => {
         type: 'success',
         message: 'Đồng bộ thành công'
       })
-      needsSync.value = false
-      emit('syncStatusChange', false)
+      notifySyncStatusChange()
       getTableData()
     }
   })

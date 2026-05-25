@@ -19,5 +19,6 @@ func bizModel() error {
 	if err != nil {
 		return err
 	}
+	ensureCheckinsIndexes()
 	return nil
 }

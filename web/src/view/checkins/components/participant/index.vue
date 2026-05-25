@@ -22,6 +22,12 @@
             <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
+        <el-form-item label="Điều kiện:">
+          <el-select v-model="searchInfo.fullyMapped" placeholder="Tất cả" clearable style="width: 170px">
+            <el-option label="Đủ điều kiện" :value="true" />
+            <el-option label="Chưa đủ điều kiện" :value="false" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="search" @click="onSubmit">
             Tìm kiếm
@@ -39,9 +45,27 @@
         </template>
       </el-table-column>
       <el-table-column prop="email" label="Email" width="300" />
-      <el-table-column label="Nhóm" min-width="300">
+      <el-table-column label="Nhóm" min-width="200">
         <template #default="scope">
           <span>{{ scope.row.groups.map((e) => e.name).join(", ") }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Điều kiện" width="120" align="center">
+        <template #default="scope">
+          <template v-if="scope.row.agpCount > 0">
+            <el-tooltip
+              :content="`${scope.row.mappedConditionCount} mapping / ${scope.row.agpCount} AGP`"
+              placement="top"
+            >
+              <el-tag
+                :type="scope.row.mappedConditionCount > 0 ? 'success' : 'warning'"
+                size="small"
+              >
+                {{ scope.row.mappedConditionCount }}/{{ scope.row.agpCount }}
+              </el-tag>
+            </el-tooltip>
+          </template>
+          <span v-else class="text-gray-400">—</span>
         </template>
       </el-table-column>
       <el-table-column align="right" label="Hành động" fixed="right" min-width="240">
@@ -111,6 +135,17 @@
             <el-option v-for="item in groupOptions" :key="item.ID" :label="item.name" :value="item.ID" />
           </el-select>
         </el-form-item>
+        <el-alert
+          v-if="bulkFormData.groupIds && bulkFormData.groupIds.length > 1"
+          type="info"
+          :closable="false"
+          show-icon
+          class="mt-1"
+        >
+          <template #title>
+            Mỗi thành viên sẽ tạo <strong>{{ bulkFormData.groupIds.length }} AGP</strong> (1 AGP / nhóm), dẫn đến số điều kiện tương ứng được nhân lên.
+          </template>
+        </el-alert>
       </el-form>
     </el-drawer>
   </div>

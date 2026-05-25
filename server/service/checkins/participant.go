@@ -40,7 +40,7 @@ func (participantService *ParticipantService) BulkCreateParticipants(req checkin
 		targetGroupIds = []uint{*req.GroupId}
 	}
 
-	return global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		batchSize := 100
 		totalEmails := len(req.List)
 
@@ -176,6 +176,11 @@ func (participantService *ParticipantService) BulkCreateParticipants(req checkin
 		}
 		return nil
 	})
+	if err == nil && req.AttendanceId != nil {
+		aId := int(*req.AttendanceId)
+		go func() { svc := ConditionService{}; svc.SyncAttendanceConditions(aId) }()
+	}
+	return
 }
 
 // DeleteParticipant 删除Sinh viên (Người tham dự phiên điểm danh)记录
@@ -187,6 +192,10 @@ func (participantService *ParticipantService) DeleteParticipant(ID string) (err 
 
 func (participantService *ParticipantService) DeleteParticipantInAttendance(ID string, attId uint) (err error) {
 	err = global.GVA_DB.Delete(&checkins.AttendanceGroupParticipant{}, "participant_id = ? AND attendance_id = ?", ID, attId).Debug().Error
+	if err == nil {
+		aId := int(attId)
+		go func() { svc := ConditionService{}; svc.SyncAttendanceConditions(aId) }()
+	}
 	return err
 }
 
@@ -237,6 +246,10 @@ func (participantService *ParticipantService) UpdateParticipant(participant chec
 		}
 	}
 
+	if err == nil && participant.AttendanceId != nil {
+		aId := int(*participant.AttendanceId)
+		go func() { svc := ConditionService{}; svc.SyncAttendanceConditions(aId) }()
+	}
 	return err
 }
 
@@ -570,6 +583,36 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 		db = db.Limit(limit).Offset(offset)
 	}
 
+	// Coverage filter: participants whose AGPs are fully (or not fully) mapped
+	if info.FullyMapped != nil && info.AttendanceId != nil && *info.AttendanceId != 0 {
+		attId := *info.AttendanceId
+		if *info.FullyMapped {
+			// All AGPs have at least one agp_condition
+			db = db.Where(`NOT EXISTS (
+				SELECT 1 FROM attendance_group_participants agp
+				WHERE agp.participant_id = participants.id
+				  AND agp.attendance_id = ?
+				  AND agp.deleted_at IS NULL
+				  AND NOT EXISTS (
+				    SELECT 1 FROM agp_conditions ac
+				    WHERE ac.agp_id = agp.id AND ac.deleted_at IS NULL
+				  )
+			)`, attId)
+		} else {
+			// At least one AGP has no agp_condition
+			db = db.Where(`EXISTS (
+				SELECT 1 FROM attendance_group_participants agp
+				WHERE agp.participant_id = participants.id
+				  AND agp.attendance_id = ?
+				  AND agp.deleted_at IS NULL
+				  AND NOT EXISTS (
+				    SELECT 1 FROM agp_conditions ac
+				    WHERE ac.agp_id = agp.id AND ac.deleted_at IS NULL
+				  )
+			)`, attId)
+		}
+	}
+
 	// Sử dụng preload ngay trong truy vấn chính để tránh truy vấn thứ hai
 	if info.AttendanceId != nil && *info.AttendanceId != 0 {
 		db = db.Preload("Groups", "attendance_id = ?", *info.AttendanceId)
@@ -579,6 +622,42 @@ func (participantService *ParticipantService) GetParticipantInfoListByAttendance
 	err = db.Debug().Find(&participants).Error
 	if err != nil {
 		return nil, 0, err
+	}
+
+	// Populate AGP and coverage counts for this attendance in a single batch query
+	if info.AttendanceId != nil && *info.AttendanceId != 0 && len(participants) > 0 {
+		type coverageRow struct {
+			ParticipantId        uint  `gorm:"column:participant_id"`
+			AgpCount             int   `gorm:"column:agp_count"`
+			MappedConditionCount int64 `gorm:"column:mapped_condition_count"`
+		}
+		var rows []coverageRow
+		pids := make([]uint, len(participants))
+		for i, p := range participants {
+			pids[i] = p.ID
+		}
+		global.GVA_DB.Raw(`
+			SELECT agp.participant_id,
+			       COUNT(DISTINCT agp.id)  AS agp_count,
+			       COUNT(ac.id)            AS mapped_condition_count
+			FROM attendance_group_participants agp
+			LEFT JOIN agp_conditions ac
+			  ON ac.agp_id = agp.id AND ac.deleted_at IS NULL
+			WHERE agp.attendance_id = ?
+			  AND agp.participant_id IN (?)
+			  AND agp.deleted_at IS NULL
+			GROUP BY agp.participant_id`, *info.AttendanceId, pids).Scan(&rows)
+
+		countMap := make(map[uint]coverageRow, len(rows))
+		for _, r := range rows {
+			countMap[r.ParticipantId] = r
+		}
+		for i := range participants {
+			if r, ok := countMap[participants[i].ID]; ok {
+				participants[i].AgpCount = r.AgpCount
+				participants[i].MappedConditionCount = int(r.MappedConditionCount)
+			}
+		}
 	}
 
 	return participants, total, nil

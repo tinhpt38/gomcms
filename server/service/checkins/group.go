@@ -190,6 +190,8 @@ func (groupService *GroupService) AssignParticipantToGroupAuto(info checkinsReq.
 		}
 	}
 
+	attId := info.AttendanceId
+	go func() { svc := ConditionService{}; svc.SyncAttendanceConditions(attId) }()
 	return nil
 }
 
@@ -234,6 +236,8 @@ func (groupService *GroupService) ReassignParticipantsOnly(attendanceId int) (er
 			currentIndex++
 		}
 	}
+	aId := attendanceId
+	go func() { svc := ConditionService{}; svc.SyncAttendanceConditions(aId) }()
 	return nil
 }
 

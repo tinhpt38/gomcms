@@ -13,6 +13,9 @@ type ParticipantSearch struct {
 	Email          string     `json:"email" form:"email" `
 	AttendanceId   *uint      `json:"attendanceId" form:"attendanceId"`
 	GroupId        *uint      `json:"groupId" form:"groupId"`
+	// FullyMapped: when true, return only participants whose every AGP has ≥1 agp_condition.
+	// When false (pointer is set to false), return participants with at least one unmapped AGP.
+	FullyMapped *bool `json:"fullyMapped" form:"fullyMapped"`
 	request.PageInfo
 }
 

@@ -13,6 +13,10 @@ type Participant struct {
 	GroupId      *[]uint `json:"groupId" form:"groupId" gorm:"-"`
 	AttendanceId *uint   `json:"attendanceId" form:"attendanceId" gorm:"-"`
 	Groups       []Group `json:"groups" gorm:"many2many:attendance_group_participants;"`
+
+	// Coverage fields — populated post-query, not stored in DB
+	AgpCount             int `json:"agpCount" gorm:"-"`
+	MappedConditionCount int `json:"mappedConditionCount" gorm:"-"`
 }
 
 // TableName Sinh viên (Người tham dự phiên điểm danh) Participant自定义表名 participant

@@ -3,12 +3,32 @@
     <div class="p-1 my-1 flex w-full justify-between">
       <div class="flex items-center gap-2 flex-wrap">
         <span class="text-xl font-bold text-gray-500">{{ formData.title }}</span>
-        <el-tag :type="needsConditionSync ? 'warning' : 'success'" size="small">
-          {{ needsConditionSync ? 'Chưa đồng bộ điều kiện' : 'Đã đồng bộ điều kiện' }}
-        </el-tag>
+        <el-tooltip :content="tooltipContent" placement="bottom">
+          <el-tag :type="tagType" size="small" class="cursor-default">{{ tagLabel }}</el-tag>
+        </el-tooltip>
       </div>
       <div class="flex mb-2">
         <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
+      </div>
+    </div>
+    <div class="flex flex-row gap-3 px-1 pb-3">
+      <div class="bg-white shadow-sm text-sm px-4 py-3 rounded flex flex-col items-center min-w-[100px]">
+        <span class="text-2xl font-bold text-gray-700">{{ syncData.participantCount }}</span>
+        <span class="text-gray-500 mt-1">Thành viên</span>
+      </div>
+      <div class="bg-white shadow-sm text-sm px-4 py-3 rounded flex flex-col items-center min-w-[100px]">
+        <span class="text-2xl font-bold text-gray-700">{{ syncData.agpCount }}</span>
+        <span class="text-gray-500 mt-1">AGP</span>
+      </div>
+      <div class="bg-white shadow-sm text-sm px-4 py-3 rounded flex flex-col items-center min-w-[100px]">
+        <span class="text-2xl font-bold text-gray-700">{{ syncData.conditionCount }}</span>
+        <span class="text-gray-500 mt-1">Điều kiện</span>
+      </div>
+      <div class="bg-white shadow-sm text-sm px-4 py-3 rounded flex flex-col items-center min-w-[100px]">
+        <span class="text-2xl font-bold" :class="syncData.agpWithoutMappingCount > 0 ? 'text-orange-500' : 'text-gray-700'">
+          {{ syncData.agpConditionCount }}<span class="text-sm text-gray-400">/{{ syncData.expectedAgpConditionCount }}</span>
+        </span>
+        <span class="text-gray-500 mt-1">Mapping</span>
       </div>
     </div>
     <el-tabs v-model="tabsActiveTab" type="border-card" @tab-click="tabHandleClick">
@@ -156,13 +176,15 @@
           <Area :ac-id="currentId" @on-success="reGetOptions" />
         </div>
       </el-tab-pane>
-      <el-tab-pane name="conditionTab" label="Điều kiện">
+      <el-tab-pane name="conditionTab" label="Điều kiện" lazy>
         <div class="table-container">
           <Condition
             ref="conditionTabRef"
             :ac-id="currentId"
             :area-options="areaOptions"
             :group-options="groupOptions"
+            :sync-state="syncData.syncState"
+            :needs-sync="syncData.needsSync"
             @sync-status-change="onConditionSyncStatusChange"
           />
         </div>
@@ -304,11 +326,11 @@ import {
   getGroupList
 } from '@/api/checkins/group'
 
-import { getSyncStatus } from '@/api/checkins/condition'
+import { useAttendanceSyncStatus } from '@/view/checkins/composables/useAttendanceSyncStatus'
 
 import { useRoute } from 'vue-router';
 import { ElForm, ElMessage } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import Participant from '@/view/checkins/components/participant/index.vue'
 import Group from '@/view/checkins/components/group/index.vue'
 import Area from '@/view/checkins/components/area/index.vue'
@@ -363,20 +385,17 @@ const agencyOptions = ref([])
 
 const showAllOptionConfig = ref(false)
 const conditionTabRef = ref()
-const needsConditionSync = ref(false)
 
-const checkConditionSyncStatus = async () => {
-  const res = await getSyncStatus({ attendanceId: currentId.value })
-  if (res.code === 0) {
-    needsConditionSync.value = res.data.needsSync
-  }
+const { syncData, tagType, tagLabel, tooltipContent, fetchSyncStatus } = useAttendanceSyncStatus(currentId)
+const needsConditionSync = computed(() => syncData.value.needsSync)
+
+const checkConditionSyncStatus = fetchSyncStatus
+
+const onConditionSyncStatusChange = () => {
+  fetchSyncStatus()
 }
 
-const onConditionSyncStatusChange = (needsSync) => {
-  needsConditionSync.value = needsSync
-}
-
-checkConditionSyncStatus()
+fetchSyncStatus()
 
 const searchRules = reactive({
   createdAt: [
@@ -607,12 +626,13 @@ const convertToTree = (data) => {
   return roots
 }
 
-const tabHandleClick = async (tab, event) => {
-  await checkConditionSyncStatus()
-  if (tab.props.name === 'conditionTab') {
-    await reGetOptions()
-    await conditionTabRef.value?.getTableData()
-  }
+const tabHandleClick = async (tab) => {
+  if (tab.props.name !== 'conditionTab') return
+  // Một lần sync status + danh sách điều kiện; không reload area/group (đã có ở parent + reGetOptions khi sửa khu vực/nhóm).
+  await Promise.all([
+    fetchSyncStatus(),
+    conditionTabRef.value?.getTableData(),
+  ])
 }
 
 const areaOptions = ref([])

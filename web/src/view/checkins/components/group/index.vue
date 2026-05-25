@@ -117,7 +117,6 @@ import {
   getGroupDependencyCount,
 } from '@/api/checkins/group'
 
-import { syncCondition } from '@/api/checkins/condition'
 
 const props = defineProps({
   acId: {
@@ -252,8 +251,7 @@ const enterGroupDialog = async () => {
       })
     }
     if (res.code === 0) {
-      await syncCondition({ attendanceId: +props.acId })
-      ElMessage({ type: 'success', message: 'Phân nhóm thành công và đã đồng bộ điều kiện' })
+      ElMessage({ type: 'success', message: 'Phân nhóm thành công' })
       closeAutoGroup()
       getTableData()
       emits('onSuccess')
