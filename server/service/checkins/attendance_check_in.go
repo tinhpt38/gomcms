@@ -395,7 +395,7 @@ func (attendanceCheckInService *AttendanceCheckInService) CheckinAttendance(req 
 			msg := " Điểm danh này cần truy cập vị trí. Bạn chưa cho phép truy cập vị trí trên thiết bị"
 			checkinLog.MessageList += msg + "$$"
 			global.GVA_DB.Where(checkins.CheckinLog{}).Where("id = ?", checkinLog.ID).Save(&checkinLog)
-			return nil, errors.New(msg + ". Hệ thống đã ghi nhận lịch sử điểm danh của bạn.")
+			return nil, errors.New(msg + ". Hệ thống đã ghi nhận nhật ký điểm danh của bạn.")
 		}
 	}
 
