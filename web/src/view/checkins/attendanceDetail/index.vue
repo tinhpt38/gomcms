@@ -1,21 +1,15 @@
 <template>
   <div class="p-2">
     <div class="p-1 my-1 flex w-full justify-between">
-      <div>
+      <div class="flex items-center gap-2 flex-wrap">
         <span class="text-xl font-bold text-gray-500">{{ formData.title }}</span>
+        <el-tag :type="needsConditionSync ? 'warning' : 'success'" size="small">
+          {{ needsConditionSync ? 'Chưa đồng bộ điều kiện' : 'Đã đồng bộ điều kiện' }}
+        </el-tag>
       </div>
       <div class="flex mb-2">
         <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
       </div>
-    </div>
-    <div class="px-2 pb-2">
-      <el-steps :active="setupStep" finish-status="success" simple>
-        <el-step title="Thành viên" />
-        <el-step title="Nhóm" />
-        <el-step title="Khu vực" />
-        <el-step title="Điều kiện" />
-        <el-step title="Đồng bộ" />
-      </el-steps>
     </div>
     <el-tabs v-model="tabsActiveTab" type="border-card" @tab-click="tabHandleClick">
       <el-tab-pane name="attendanceInfoTab" label="Chi tiết">
@@ -169,6 +163,7 @@
             :ac-id="currentId"
             :area-options="areaOptions"
             :group-options="groupOptions"
+            @sync-status-change="onConditionSyncStatusChange"
           />
         </div>
       </el-tab-pane>
@@ -309,6 +304,8 @@ import {
   getGroupList
 } from '@/api/checkins/group'
 
+import { getSyncStatus } from '@/api/checkins/condition'
+
 import { useRoute } from 'vue-router';
 import { ElForm, ElMessage } from 'element-plus'
 import { ref, reactive } from 'vue'
@@ -366,20 +363,20 @@ const agencyOptions = ref([])
 
 const showAllOptionConfig = ref(false)
 const conditionTabRef = ref()
+const needsConditionSync = ref(false)
 
-const setupStepMap = {
-  participantsTab: 0,
-  groupTab: 1,
-  areaTab: 2,
-  conditionTab: 3,
-  histories: 4,
-}
-const setupStep = ref(0)
-const tabHandleClickUpdateStep = (tabName) => {
-  if (tabName in setupStepMap) {
-    setupStep.value = setupStepMap[tabName]
+const checkConditionSyncStatus = async () => {
+  const res = await getSyncStatus({ attendanceId: currentId.value })
+  if (res.code === 0) {
+    needsConditionSync.value = res.data.needsSync
   }
 }
+
+const onConditionSyncStatusChange = (needsSync) => {
+  needsConditionSync.value = needsSync
+}
+
+checkConditionSyncStatus()
 
 const searchRules = reactive({
   createdAt: [
@@ -470,6 +467,7 @@ const generateQRCode = async () => {
 const reGetOptions = async () => {
   await getAreaListData()
   await getGroupOptions()
+  await checkConditionSyncStatus()
 }
 
 const rule = reactive({
@@ -610,11 +608,10 @@ const convertToTree = (data) => {
 }
 
 const tabHandleClick = async (tab, event) => {
-  tabHandleClickUpdateStep(tab.props.name)
+  await checkConditionSyncStatus()
   if (tab.props.name === 'conditionTab') {
     await reGetOptions()
     await conditionTabRef.value?.getTableData()
-    await conditionTabRef.value?.checkSyncStatus()
   }
 }
 

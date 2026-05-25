@@ -145,6 +145,8 @@ import { ref, reactive } from 'vue'
 import moment from 'moment'
 
 
+const emit = defineEmits(['syncStatusChange'])
+
 const props = defineProps({
   acId: {
     type: Number,
@@ -182,6 +184,7 @@ const checkSyncStatus = async () => {
   const res = await getSyncStatus({ attendanceId: props.acId })
   if (res.code === 0) {
     needsSync.value = res.data.needsSync
+    emit('syncStatusChange', res.data.needsSync)
   }
 }
 checkSyncStatus()
@@ -455,6 +458,7 @@ const syncConditionFun = async () => {
         message: 'Đồng bộ thành công'
       })
       needsSync.value = false
+      emit('syncStatusChange', false)
       getTableData()
     }
   })
