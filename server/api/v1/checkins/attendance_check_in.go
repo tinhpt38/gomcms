@@ -3,6 +3,7 @@ package checkins
 import (
 	"encoding/base64"
 	"encoding/json"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -127,6 +128,50 @@ func (attendanceCheckInApi *AttendanceCheckInApi) GetAttendanceCheckInLogList(c 
 		Page:     pageInfo.Page,
 		PageSize: pageInfo.PageSize,
 	}, "Thành công", c)
+}
+
+func (attendanceCheckInApi *AttendanceCheckInApi) ExportAttendanceCheckInExcel(c *gin.Context) {
+	var pageInfo checkinsReq.AttendanceCheckInSearch
+	if err := c.ShouldBindQuery(&pageInfo); err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if pageInfo.AttendanceId == nil {
+		response.FailWithMessage("attendanceId là bắt buộc", c)
+		return
+	}
+
+	file, _, err := attendanceCheckInService.ExportAttendanceCheckInExcel(pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("Xuất Excel thất bại!", zap.Error(err))
+		response.FailWithMessage("Xuất Excel thất bại: "+err.Error(), c)
+		return
+	}
+
+	c.Header("success", "true")
+	c.Data(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", file.Bytes())
+}
+
+func (attendanceCheckInApi *AttendanceCheckInApi) ExportAttendanceCheckInLogExcel(c *gin.Context) {
+	var pageInfo checkinsReq.AttendanceCheckInSearch
+	if err := c.ShouldBindQuery(&pageInfo); err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if pageInfo.AttendanceId == nil {
+		response.FailWithMessage("attendanceId là bắt buộc", c)
+		return
+	}
+
+	file, _, err := attendanceCheckInService.ExportAttendanceCheckInLogExcel(pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("Xuất Excel thất bại!", zap.Error(err))
+		response.FailWithMessage("Xuất Excel thất bại: "+err.Error(), c)
+		return
+	}
+
+	c.Header("success", "true")
+	c.Data(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", file.Bytes())
 }
 
 func (attendanceCheckInApi *AttendanceCheckInApi) GetAttendanceCheckInPublic(c *gin.Context) {

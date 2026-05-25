@@ -6,11 +6,7 @@
       </div>
       <div class="flex mb-2">
         <ImportExcel :form-data="{ action: 'IMPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" />
-        <!-- <ExportExcel :form-data="{ action: 'EXPORT_PARTICIPANT', attendanceId: currentId }" class="px-1" /> -->
       </div>
-      <el-button class="mx-4 hidden" type="danger" icon="download">
-        Xuất Excel
-      </el-button>
     </div>
     <el-tabs v-model="tabsActiveTab" type="border-card" @tab-click="tabHandleClick">
       <el-tab-pane name="attendanceInfoTab" label="Chi tiết">
@@ -209,6 +205,9 @@
                 <el-button icon="refresh" @click="onReset">
                   Đặt lại
                 </el-button>
+                <el-button type="success" icon="download" :loading="exportHistoryLoading" @click="exportHistory">
+                  Xuất Excel
+                </el-button>
               </el-form-item>
             </el-form>
           </div>
@@ -265,7 +264,7 @@
       </el-tab-pane>
       <el-tab-pane name="logs" label="Nhật ký">
         <div class="table-container">
-          <CheckinLogs :ac-id="currentId" />
+          <CheckinLogs :ac-id="currentId" :title="formData.title" />
         </div>
       </el-tab-pane>
       <el-tab-pane name="random" label="Tìm số may mắn">
@@ -284,7 +283,8 @@ import {
   findAttendance,
 } from '@/api/checkins/attendance'
 import {
-  getAttendanceCheckInList
+  getAttendanceCheckInList,
+  exportAttendanceCheckInExcel,
 } from '@/api/checkins/attendanceCheckIn'
 
 import {
@@ -305,7 +305,6 @@ import Condition from '@/view/checkins/components/condition/index.vue'
 import RandomWheel from '@/view/checkins/components/randomWheel/index.vue'
 import CheckinLogs from '@/view/checkins/components/logs/index.vue'
 import ImportExcel from '@/components/importExcel/index.vue'
-import ExportExcel from '@/components/exportExcel/exportExcel.vue'
 import { formatDateTime, formatDate } from '@/utils/format'
 import { formatUserAgent } from '@/utils/userAgent'
 import base32 from 'hi-base32'
@@ -347,6 +346,7 @@ const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
 const elSearchFormRef = ref()
+const exportHistoryLoading = ref(false)
 const categoryOptions = ref([])
 const agencyOptions = ref([])
 
@@ -525,6 +525,18 @@ const onSubmit = () => {
 const onReset = () => {
   searchInfo.value = {}
   getTableData()
+}
+
+const exportHistory = async () => {
+  exportHistoryLoading.value = true
+  try {
+    await exportAttendanceCheckInExcel({
+      attendanceId: currentId.value,
+      ...searchInfo.value,
+    }, formData.value.title)
+  } finally {
+    exportHistoryLoading.value = false
+  }
 }
 
 const getCategoryOptions = async () => {

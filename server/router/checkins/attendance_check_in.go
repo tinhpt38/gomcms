@@ -20,9 +20,10 @@ func (s *AttendanceCheckInRouter) InitAttendanceCheckInRouter(Router *gin.Router
 	}
 	{
 		attendanceCheckInRouterWithoutRecord.GET("findAttendanceCheckIn", attendanceCheckInApi.FindAttendanceCheckIn)             // 根据ID获取Thành viên checkins
-		attendanceCheckInRouterWithoutRecord.GET("getAttendanceCheckInList", attendanceCheckInApi.GetAttendanceCheckInList)       // 获取Thành viên checkins列表
-		attendanceCheckInRouterWithoutRecord.GET("getAttendanceCheckInLogList", attendanceCheckInApi.GetAttendanceCheckInLogList) // 获取Thành viên checkins列表
-
+		attendanceCheckInRouterWithoutRecord.GET("getAttendanceCheckInList", attendanceCheckInApi.GetAttendanceCheckInList)             // 获取Thành viên checkins列表
+		attendanceCheckInRouterWithoutRecord.GET("getAttendanceCheckInLogList", attendanceCheckInApi.GetAttendanceCheckInLogList)       // 获取Thành viên checkins列表
+		attendanceCheckInRouterWithoutRecord.GET("exportAttendanceCheckInExcel", attendanceCheckInApi.ExportAttendanceCheckInExcel)       // Xuất lịch sử điểm danh
+		attendanceCheckInRouterWithoutRecord.GET("exportAttendanceCheckInLogExcel", attendanceCheckInApi.ExportAttendanceCheckInLogExcel) // Xuất nhật ký điểm danh
 	}
 	{
 		attendanceCheckInRouterWithoutAuth.GET("getAttendanceCheckInPublic", attendanceCheckInApi.GetAttendanceCheckInPublic)

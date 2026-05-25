@@ -13,6 +13,9 @@
                     <el-button icon="refresh" @click="onReset">
                         Đặt lại
                     </el-button>
+                    <el-button type="success" icon="download" :loading="exportLoading" @click="exportLogs">
+                        Xuất Excel
+                    </el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -60,7 +63,8 @@
 
 <script setup>
 import {
-    getAttendanceCheckInLogList
+    getAttendanceCheckInLogList,
+    exportAttendanceCheckInLogExcel,
 } from '@/api/checkins/attendanceCheckIn'
 import { formatDateTime } from '@/utils/format'
 import { formatUserAgent } from '@/utils/userAgent'
@@ -71,12 +75,17 @@ const props = defineProps({
         type: Number,
         required: true
     },
+    title: {
+        type: String,
+        default: '',
+    },
 })
 
 const page = ref(0)
 const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
+const exportLoading = ref(false)
 
 const formData = ref({
 })
@@ -121,5 +130,17 @@ const onReset = () => {
         attendanceId: props.acId
     }
     getTableData()
+}
+
+const exportLogs = async () => {
+    exportLoading.value = true
+    try {
+        await exportAttendanceCheckInLogExcel({
+            attendanceId: props.acId,
+            email: searchInfo.value.email || undefined,
+        }, props.title)
+    } finally {
+        exportLoading.value = false
+    }
 }
 </script>

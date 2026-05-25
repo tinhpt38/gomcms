@@ -1,4 +1,5 @@
 import service from '@/utils/request'
+import { buildExportFileName, downloadExcelFile } from '@/utils/downloadExcel'
 
 // @Tags AttendanceCheckIn
 // @Summary 创建Thành viên checkins
@@ -111,4 +112,20 @@ export const getAttendanceCheckInLogList = (params) => {
     method: 'get',
     params
   })
+}
+
+export const exportAttendanceCheckInExcel = (params, title) => {
+  return downloadExcelFile(
+    '/attendanceCheckIn/exportAttendanceCheckInExcel',
+    params,
+    buildExportFileName('lich-su-diem-danh', title, params.attendanceId),
+  )
+}
+
+export const exportAttendanceCheckInLogExcel = (params, title) => {
+  return downloadExcelFile(
+    '/attendanceCheckIn/exportAttendanceCheckInLogExcel',
+    params,
+    buildExportFileName('nhat-ky-diem-danh', title, params.attendanceId),
+  )
 }
