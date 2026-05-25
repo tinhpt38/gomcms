@@ -30,6 +30,7 @@ func (s *AttendanceRouter) InitAttendanceRouter(Router *gin.RouterGroup, PublicR
 		attendanceRouterWithoutRecord.GET("findAttendance", attendanceApi.FindAttendance)
 		attendanceRouterWithoutRecord.GET("findAttendanceArea", attendanceApi.FindAttendanceArea)
 		attendanceRouterWithoutRecord.GET("getAttendanceList", attendanceApi.GetAttendanceList)
+		attendanceRouterWithoutRecord.GET("getAttendanceOverview", attendanceApi.GetAttendanceOverview)
 	}
 	{
 		attendanceRouterWithoutAuth.GET("getAttendancePublic", attendanceApi.GetPublicAttendanceList)

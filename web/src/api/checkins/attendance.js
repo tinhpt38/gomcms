@@ -130,3 +130,11 @@ export const getAttendanceHistory = (params) => {
     params
   })
 }
+
+export const getAttendanceOverview = (params) => {
+  return service({
+    url: '/attendance/getAttendanceOverview',
+    method: 'get',
+    params
+  })
+}

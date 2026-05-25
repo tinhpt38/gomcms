@@ -1,6 +1,8 @@
 package checkins
 
 import (
+	"fmt"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/checkins"
 	checkinsReq "github.com/flipped-aurora/gin-vue-admin/server/model/checkins/request"
@@ -273,6 +275,22 @@ func (attendanceApi *AttendanceApi) StatsScatterPlot(c *gin.Context) {
 	}
 	response.OkWithData(res, c)
 }
+func (attendanceApi *AttendanceApi) GetAttendanceOverview(c *gin.Context) {
+	idStr := c.Query("attendanceId")
+	var attendanceId uint
+	if _, err := fmt.Sscanf(idStr, "%d", &attendanceId); err != nil || attendanceId == 0 {
+		response.FailWithMessage("attendanceId không hợp lệ", c)
+		return
+	}
+	overview, err := attendanceService.GetAttendanceOverview(attendanceId)
+	if err != nil {
+		global.GVA_LOG.Error("GetAttendanceOverview thất bại", zap.Error(err))
+		response.FailWithMessage("Không lấy được dữ liệu: "+err.Error(), c)
+		return
+	}
+	response.OkWithData(overview, c)
+}
+
 func (attendanceApi *AttendanceApi) StatsTrendLine(c *gin.Context) {
 	var stats checkinsReq.StatsByInfoRequest
 	err := c.ShouldBindJSON(&stats)

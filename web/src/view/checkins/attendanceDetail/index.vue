@@ -161,6 +161,11 @@
         </div>
         <el-divider />
       </el-tab-pane>
+      <el-tab-pane name="overviewTab" label="Tổng quan" lazy>
+        <div class="table-container">
+          <AttendanceOverview :ac-id="currentId" />
+        </div>
+      </el-tab-pane>
       <el-tab-pane name="participantsTab" label="Thành viên">
         <div class="table-container">
           <Participant :ac-id="currentId" :group-options="groupOptions" />
@@ -337,6 +342,7 @@ import Area from '@/view/checkins/components/area/index.vue'
 import Condition from '@/view/checkins/components/condition/index.vue'
 import RandomWheel from '@/view/checkins/components/randomWheel/index.vue'
 import CheckinLogs from '@/view/checkins/components/logs/index.vue'
+import AttendanceOverview from '@/view/checkins/components/overview/index.vue'
 import ImportExcel from '@/components/importExcel/index.vue'
 import { formatDateTime, formatDate } from '@/utils/format'
 import { formatUserAgent } from '@/utils/userAgent'
